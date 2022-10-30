@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "strict": true
+  },
+  "_kilo_change_markers": [
+    "forced-release-1:docs"
+  ]
+}
