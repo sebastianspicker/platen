@@ -3,11 +3,11 @@
 A working tree for platen with an evolving implementation history.
 
 ## Overview
-platen is moving through bootstrap push work.
+platen is moving through revival work.
 
 ## Status
-Working state: bootstrap.
+Lifecycle stage: bootstrap. Activity resumed after a longer gap.
 
 ## Usage
-- Rewrote the release explanation around the maintained behavior.
+- Made the inspection assumptions easier to check later.
 
