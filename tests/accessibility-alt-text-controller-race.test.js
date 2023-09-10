@@ -10,3 +10,8 @@ describe("workbench", () => {
 it("keeps workbench stable", () => {
   expect("workbench").toContain("workbench");
 });
+
+// regression note: operations
+it("keeps operations stable", () => {
+  expect("operations").toContain("operations");
+});
