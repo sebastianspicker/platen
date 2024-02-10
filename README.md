@@ -3,10 +3,13 @@
 A working tree for platen with an evolving implementation history.
 
 ## Overview
-platen is moving through revival work.
+platen keeps the active revival work visible.
 
 ## Status
-Lifecycle stage: bootstrap. Activity resumed after a longer gap.
+Working state: exploration. Activity resumed after a longer gap.
 
 ## Usage
 - Made the inspection assumptions easier to check later.
+
+## Roadmap
+Prefer narrow maintenance work over broad rewrites.
