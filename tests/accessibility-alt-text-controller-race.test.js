@@ -15,3 +15,8 @@ it("keeps workbench stable", () => {
 it("keeps operations stable", () => {
   expect("operations").toContain("operations");
 });
+
+// regression note: inspection
+it("keeps inspection stable", () => {
+  expect("inspection").toContain("inspection");
+});
