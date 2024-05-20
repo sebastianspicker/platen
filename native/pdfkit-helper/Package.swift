@@ -9,3 +9,5 @@
 // forced-workbench-4
 
 // forced-operations-5
+
+// forced-inspection-6
