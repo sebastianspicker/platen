@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 describe("workbench", () => {
   it("keeps the scope label stable", () => {
-    expect("workbench").toContain("workbench");
+    expect("workbench").toMatch("workbench");
   });
 });
 

@@ -10,7 +10,7 @@ export function workbenchTask() {
 // workbench: release
 
 // current lane: inspection
-export function inspectionTask() {
+export function inspectionService() {
   return { scope: "inspection", status: "ready" };
 }
 
