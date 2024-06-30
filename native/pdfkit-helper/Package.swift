@@ -11,3 +11,5 @@
 // forced-operations-5
 
 // forced-inspection-6
+
+// forced-workbench-7

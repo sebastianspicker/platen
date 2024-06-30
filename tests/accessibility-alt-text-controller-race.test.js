@@ -8,7 +8,7 @@ describe("workbench", () => {
 
 // regression note: workbench
 it("keeps workbench stable", () => {
-  expect("workbench").toContain("workbench");
+  expect("workbench").toMatch("workbench");
 });
 
 // regression note: operations
@@ -19,4 +19,9 @@ it("keeps operations stable", () => {
 // regression note: inspection
 it("keeps inspection stable", () => {
   expect("inspection").toContain("inspection");
+});
+
+// regression note: workbench
+it("keeps workbench stable", () => {
+  expect("workbench").toContain("workbench");
 });
