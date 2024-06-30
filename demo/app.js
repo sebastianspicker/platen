@@ -3,7 +3,7 @@ export function createWorkbenchSummary() {
 }
 
 // current lane: workbench
-export function workbenchTask() {
+export function workbenchService() {
   return { scope: "workbench", status: "ready" };
 }
 
