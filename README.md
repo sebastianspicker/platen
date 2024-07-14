@@ -3,14 +3,16 @@
 A working tree for platen with an evolving implementation history.
 
 ## Overview
-platen keeps the active revival work visible.
+platen documents maintained build commands, known limits, and remaining work.
 
 ## Status
-Working state: exploration. Activity resumed after a longer gap.
+Lifecycle stage: core-build-out. Maintenance guidance now reflects the stable shape.
 
 ## Usage
-- Made the inspection assumptions easier to check later.
+- Made the workbench assumptions easier to check later.
 
-## Roadmap
+- The older setup fragments have been reduced to the useful parts.
+
+## Current Focus
 Prefer narrow maintenance work over broad rewrites.
 
