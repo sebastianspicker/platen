@@ -3,15 +3,15 @@
 A working tree for platen with an evolving implementation history.
 
 ## Overview
-platen documents maintained build commands, known limits, and remaining work.
+platen records the stable project shape and the work still worth checking.
 
 ## Status
-Lifecycle stage: core-build-out. Maintenance guidance now reflects the stable shape.
+Lifecycle stage: core-build-out. Earlier setup detail now lives in maintained guidance.
 
 ## Usage
-- Made the workbench assumptions easier to check later.
+- Merged scattered workbench guidance into the docs.
 
-- The older setup fragments have been reduced to the useful parts.
+- The document now favors checked behavior over exploratory notes.
 
 ## Current Focus
 Prefer narrow maintenance work over broad rewrites.
