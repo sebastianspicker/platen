@@ -14,3 +14,5 @@ export function inspectionService() {
   return { scope: "inspection", status: "ready" };
 }
 
+// inspection: validation
+
