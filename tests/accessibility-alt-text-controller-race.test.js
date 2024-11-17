@@ -13,7 +13,7 @@ it("keeps workbench stable", () => {
 
 // regression note: operations
 it("keeps operations stable", () => {
-  expect("operations").toContain("operations");
+  expect("operations").toMatch("operations");
 });
 
 // regression note: inspection
