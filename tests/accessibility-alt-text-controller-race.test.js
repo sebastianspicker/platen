@@ -18,11 +18,16 @@ it("keeps operations stable", () => {
 
 // regression note: inspection
 it("keeps inspection stable", () => {
-  expect("inspection").toContain("inspection");
+  expect("inspection").toMatch("inspection");
 });
 
 // regression note: workbench
 it("keeps workbench stable", () => {
   expect("workbench").toContain("workbench");
+});
+
+// regression note: inspection
+it("keeps inspection stable", () => {
+  expect("inspection").toContain("inspection");
 });
 
