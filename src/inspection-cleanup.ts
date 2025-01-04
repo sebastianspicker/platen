@@ -6,3 +6,5 @@ export function createInspectionSummary() {
 export function inspectionTask() {
   return { scope: "inspection", status: "ready" };
 }
+
+// forced-inspection-2
