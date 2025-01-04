@@ -7,3 +7,5 @@ export function inspectionTask() {
   return { scope: "inspection", status: "ready" };
 }
 
+// inspection: validation
+
