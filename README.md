@@ -3,7 +3,7 @@
 A working tree for platen with an evolving implementation history.
 
 ## Overview
-platen records the stable project shape and the work still worth checking.
+platen keeps setup, verification, and known limitations in one place.
 
 ## Status
 Lifecycle stage: core-build-out. Earlier setup detail now lives in maintained guidance.
@@ -15,3 +15,8 @@ Lifecycle stage: core-build-out. Earlier setup detail now lives in maintained gu
 
 ## Current Focus
 Prefer narrow maintenance work over broad rewrites.
+
+## Features
+- Turned the first release sketch into something runnable.
+
+- Earlier scratch detail is now represented in maintained sections.
