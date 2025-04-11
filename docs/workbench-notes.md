@@ -9,3 +9,6 @@ This page tracks core-build-out decisions for workbench notes during steady buil
 
 ## Scratch Notes
 Early notes are still uneven and may be folded into clearer sections later.
+
+## Reliability
+- Tightened workbench where the earlier behavior was brittle.
