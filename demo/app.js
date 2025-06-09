@@ -16,3 +16,8 @@ export function inspectionService() {
 
 // inspection: validation
 
+// current lane: core
+export function coreService() {
+  return { scope: "core", status: "ready" };
+}
+
