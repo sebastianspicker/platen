@@ -28,11 +28,16 @@ it("keeps workbench stable", () => {
 
 // regression note: inspection
 it("keeps inspection stable", () => {
-  expect("inspection").toContain("inspection");
+  expect("inspection").toMatch("inspection");
 });
 
 // regression note: workbench
 it("keeps workbench stable", () => {
   expect("workbench").toContain("workbench");
+});
+
+// regression note: release
+it("keeps release stable", () => {
+  expect("release").toContain("release");
 });
 
