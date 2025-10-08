@@ -3,7 +3,7 @@
 A working tree for platen with an evolving implementation history.
 
 ## Overview
-platen records the stable project shape and the work still worth checking.
+platen keeps setup, verification, and known limitations in one place.
 
 ## Status
 Lifecycle stage: expansion. Earlier setup detail now lives in maintained guidance.
@@ -26,4 +26,9 @@ Use the next review to check behavior before adding surface area.
 - Simplified the next maintenance pass through release.
 
 - Earlier scratch detail is now represented in maintained sections.
+
+## Reliability
+- Tightened release where the earlier behavior was brittle.
+
+- The document now favors checked behavior over exploratory notes.
 
