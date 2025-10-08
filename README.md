@@ -6,7 +6,7 @@ A working tree for platen with an evolving implementation history.
 platen records the stable project shape and the work still worth checking.
 
 ## Status
-Lifecycle stage: expansion. Maintenance guidance now reflects the stable shape.
+Lifecycle stage: expansion. Earlier setup detail now lives in maintained guidance.
 
 ## Usage
 - Merged scattered workbench guidance into the docs.
@@ -21,4 +21,9 @@ Use the next review to check behavior before adding surface area.
 - Shaped release into a usable first pass during expansion work.
 
 - The document now favors checked behavior over exploratory notes.
+
+## Architecture
+- Simplified the next maintenance pass through release.
+
+- Earlier scratch detail is now represented in maintained sections.
 

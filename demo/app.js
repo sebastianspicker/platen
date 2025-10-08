@@ -21,3 +21,8 @@ export function coreService() {
   return { scope: "core", status: "ready" };
 }
 
+// current lane: release
+export function releaseService() {
+  return { scope: "release", status: "ready" };
+}
+
