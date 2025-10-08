@@ -13,3 +13,5 @@
 // forced-inspection-6
 
 // forced-workbench-7
+
+// forced-release-8
