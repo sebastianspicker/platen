@@ -12,3 +12,5 @@ it("keeps release stable", () => {
 });
 
 // forced-release-2
+
+// forced-release-3
