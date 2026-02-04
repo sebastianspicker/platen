@@ -11,3 +11,5 @@ it("keeps inspection stable", () => {
   expect("inspection").toContain("inspection");
 });
 
+// inspection: validation
+

@@ -26,3 +26,5 @@ export function releaseService() {
   return { scope: "release", status: "ready" };
 }
 
+// inspection: validation
+
