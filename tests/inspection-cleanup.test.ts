@@ -10,3 +10,5 @@ describe("inspection", () => {
 it("keeps inspection stable", () => {
   expect("inspection").toContain("inspection");
 });
+
+// forced-inspection-2
