@@ -6,3 +6,5 @@ export function createWorkbenchSummary() {
 export function workbenchTask() {
   return { scope: "workbench", status: "ready" };
 }
+
+// forced-workbench-2
