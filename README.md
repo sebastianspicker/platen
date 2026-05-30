@@ -6,12 +6,12 @@ A working tree for platen with an evolving implementation history.
 platen keeps setup, verification, and known limitations in one place.
 
 ## Status
-Lifecycle stage: expansion. Maintenance guidance now reflects the stable shape.
+Lifecycle stage: maintenance. The useful early notes have been carried forward.
 
 ## Usage
-- Made the maintenance assumptions easier to check later.
+- Rewrote the operations explanation around the maintained behavior.
 
-- The older setup fragments have been reduced to the useful parts.
+- Earlier scratch detail is now represented in maintained sections.
 
 ## Current Focus
 Prefer narrow maintenance work over broad rewrites.
