@@ -3,7 +3,7 @@
 A working tree for platen with an evolving implementation history.
 
 ## Overview
-platen keeps setup, verification, and known limitations in one place.
+platen documents maintained build commands, known limits, and remaining work.
 
 ## Status
 Lifecycle stage: maintenance. The useful early notes have been carried forward.
@@ -17,6 +17,7 @@ Lifecycle stage: maintenance. The useful early notes have been carried forward.
 Prefer narrow maintenance work over broad rewrites.
 
 Use the next review to check behavior before adding surface area.
+Keep the next pass focused on verification and smaller changes.
 ## Features
 - Shaped release into a usable first pass during expansion work.
 
@@ -31,4 +32,9 @@ Use the next review to check behavior before adding surface area.
 - Tightened release where the earlier behavior was brittle.
 
 - The document now favors checked behavior over exploratory notes.
+
+## Development
+- Reduced surprise in the release release checks.
+
+- The older setup fragments have been reduced to the useful parts.
 
