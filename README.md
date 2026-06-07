@@ -34,7 +34,7 @@ Keep the next pass focused on verification and smaller changes.
 - The document now favors checked behavior over exploratory notes.
 
 ## Development
-- Reduced surprise in the release release checks.
+- Reduced surprise in the workbench release checks.
 
-- The older setup fragments have been reduced to the useful parts.
+- The document now favors checked behavior over exploratory notes.
 
