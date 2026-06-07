@@ -6,10 +6,10 @@ A working tree for platen with an evolving implementation history.
 platen documents maintained build commands, known limits, and remaining work.
 
 ## Status
-Lifecycle stage: maintenance. The useful early notes have been carried forward.
+Lifecycle stage: publication. Earlier setup detail now lives in maintained guidance.
 
 ## Usage
-- Rewrote the operations explanation around the maintained behavior.
+- Made the operations assumptions easier to check later.
 
 - Earlier scratch detail is now represented in maintained sections.
 
