@@ -3,13 +3,13 @@
 A working tree for platen with an evolving implementation history.
 
 ## Overview
-platen documents maintained build commands, known limits, and remaining work.
+platen keeps setup, verification, and known limitations in one place.
 
 ## Status
-Lifecycle stage: publication. Earlier setup detail now lives in maintained guidance.
+Lifecycle stage: publication. The useful early notes have been carried forward.
 
 ## Usage
-- Made the operations assumptions easier to check later.
+- Merged scattered release guidance into the docs.
 
 - Earlier scratch detail is now represented in maintained sections.
 
