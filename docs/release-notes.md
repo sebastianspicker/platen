@@ -12,3 +12,6 @@ Some setup details still depend on the current local workflow and may change aga
 
 ## Scratch Notes
 Early notes are still uneven and may be folded into clearer sections later.
+
+## Revision Notes
+Latest pass: release during release push work (forced-release-2).
