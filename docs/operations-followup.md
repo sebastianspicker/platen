@@ -5,7 +5,7 @@
 This page tracks publication decisions for operations followup during release push work.
 
 ## Usage
-- Made the operations assumptions easier to check later.
+- Rewrote the operations explanation around the maintained behavior.
 
 ## Caveats
 Some setup details still depend on the current local workflow and may change again.
