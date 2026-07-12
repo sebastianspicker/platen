@@ -6,7 +6,7 @@ A working tree for platen with an evolving implementation history.
 platen records the stable project shape and the work still worth checking.
 
 ## Status
-Lifecycle stage: publication. Maintenance guidance now reflects the stable shape.
+Lifecycle stage: publication. The useful early notes have been carried forward.
 
 ## Usage
 - Merged scattered release guidance into the docs.
@@ -24,9 +24,9 @@ Keep the next pass focused on verification and smaller changes.
 - The document now favors checked behavior over exploratory notes.
 
 ## Architecture
-- Simplified the next maintenance pass through release.
+- Moved workbench behind a narrower boundary.
 
-- Earlier scratch detail is now represented in maintained sections.
+- The document now favors checked behavior over exploratory notes.
 
 ## Reliability
 - Tightened release where the earlier behavior was brittle.
