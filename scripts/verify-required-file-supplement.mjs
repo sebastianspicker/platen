@@ -1,0 +1,25 @@
+// Keep the generated-style release inventory focused by isolating the final UI
+// source slice from the core scaffold list.
+export const REQUIRED_FILE_SUPPLEMENT = Object.freeze([
+  'src/ui/editor-inspector/index.js', 'src/ui/editor-inspector/document-panel.js',
+  'src/ui/editor-inspector/pdfkit-sections.js', 'src/ui/editor-inspector/shell.js',
+  'src/ui/editor-inspector/surface-panels.js',
+  'src/ui/editor-inspector/snapshot-sections.js',
+  'src/ui/editor-inspector/document-operation-sections.js',
+  'src/ui/editor-inspector/review-sections.js',
+  'src/ui/editor-inspector/ocr-sections.js',
+  'src/ui/editor-inspector/pdfkit-basic-edit-sections.js',
+  'src/ui/editor-inspector/pdfkit-markup-sections.js',
+  'src/ui/editor-inspector/pdfkit-outline-sections.js',
+  'src/ui/editor-inspector/pdfkit-targeted-sections.js',
+  'src/ui/editor-inspector/pdfkit-protection-sections.js',
+  'src/ui/editor-inspector/raster-edit-sections.js',
+  'src/ui/document-evidence-view.js',
+  'src/ui/document-tabs-view.js',
+  'styles/app.css', 'styles/foundation.css', 'styles/shell.css',
+  'styles/shell-feedback.css', 'styles/editor.css',
+  'styles/editor-split-chrome.css', 'styles/editor-split-stage.css',
+  'styles/editor-evidence.css', 'styles/inspector.css', 'styles/workflows-layout.css', 'styles/workflows-runner.css',
+  'styles/plugins-layout.css', 'styles/plugins-detail.css', 'styles/trust.css', 'styles/responsive.css',
+  'styles/mobile.css',
+]);

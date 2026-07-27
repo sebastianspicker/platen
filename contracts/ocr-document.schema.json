@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/ocr-document.schema.json",
+  "title": "Source-bound local searchable OCR document result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "schemaVersion", "sourceDigest", "artifact", "result", "evidence", "limitations"],
+  "properties": {
+    "kind": {"const": "searchable-ocr-document"},
+    "schemaVersion": {"const": 1},
+    "sourceDigest": {"$ref": "#/$defs/sha256"},
+    "artifact": {"$ref": "#/$defs/artifact"},
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["language", "pageCount", "recognizedWordCount", "rasterized", "cleanupPreset", "segmentation", "suspects"],
+      "properties": {
+        "language": {"$ref": "#/$defs/languages"},
+        "pageCount": {"type": "integer", "minimum": 1, "maximum": 50},
+        "recognizedWordCount": {"type": "integer", "minimum": 1},
+        "rasterized": {"const": true},
+        "cleanupPreset": {"enum": ["none", "document", "bilevel"]},
+        "segmentation": {"enum": ["auto", "single-column", "block", "sparse"]},
+        "suspects": {
+          "type": "array",
+          "maxItems": 500,
+          "items": {"$ref": "#/$defs/suspect"}
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["localOnly", "sourceBound", "rasterized", "reviewRequired", "engines", "cleanupReceipts"],
+      "properties": {
+        "localOnly": {"const": true},
+        "sourceBound": {"const": true},
+        "rasterized": {"const": true},
+        "reviewRequired": {"const": true},
+        "engines": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {"enum": ["Poppler", "ImageMagick", "Tesseract"]}
+        },
+        "cleanupReceipts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": {"$ref": "#/$defs/cleanupReceipt"}
+        }
+      }
+    },
+    "limitations": {"$ref": "#/$defs/limitations"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "opaqueId": {"type": "string", "pattern": "^[A-Za-z0-9._-]{1,128}$"},
+    "languages": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}(\\+[a-z][a-z0-9_]{0,31})*$", "maxLength": 128},
+    "limitations": {"type": "array", "minItems": 1, "maxItems": 64, "items": {"type": "string", "minLength": 1, "maxLength": 240}},
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "width", "height"],
+      "properties": {
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "width": {"type": "integer", "minimum": 1, "maximum": 1000000},
+        "height": {"type": "integer", "minimum": 1, "maximum": 1000000}
+      }
+    },
+    "cleanupReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["page", "preset", "applied", "canvasPreserved", "pre", "post"],
+      "properties": {
+        "page": {"type": "integer", "minimum": 1, "maximum": 50},
+        "preset": {"enum": ["none", "document", "bilevel"]},
+        "applied": {"type": "boolean"},
+        "canvasPreserved": {"const": true},
+        "pre": {"$ref": "#/$defs/dimensions"},
+        "post": {"$ref": "#/$defs/dimensions"}
+      }
+    },
+    "suspect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["page", "text", "confidence", "left", "top", "width", "height"],
+      "properties": {
+        "page": {"type": "integer", "minimum": 1, "maximum": 50},
+        "text": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "confidence": {"type": "number", "minimum": -1, "maximum": 100},
+        "left": {"type": "integer", "minimum": 0},
+        "top": {"type": "integer", "minimum": 0},
+        "width": {"type": "integer", "minimum": 0},
+        "height": {"type": "integer", "minimum": 0}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "documentId", "displayName", "mediaType", "size", "sha256", "operation", "createdAt"],
+      "properties": {
+        "id": {"$ref": "#/$defs/opaqueId"},
+        "documentId": {"$ref": "#/$defs/opaqueId"},
+        "displayName": {"type": "string", "minLength": 1, "maxLength": 240},
+        "mediaType": {"const": "application/pdf"},
+        "size": {"type": "integer", "minimum": 1, "maximum": 536870912},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "operation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schemaVersion", "id", "type", "inputs", "parameters", "expected", "validation", "completedAt"],
+          "properties": {
+            "schemaVersion": {"const": 1},
+            "id": {"$ref": "#/$defs/opaqueId"},
+            "type": {"const": "searchable-ocr"},
+            "inputs": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"type": "object"}},
+            "parameters": {"type": "object"},
+            "expected": {"type": "object"},
+            "validation": {"type": "object"},
+            "completedAt": {"type": "string", "format": "date-time"}
+          }
+        },
+        "createdAt": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

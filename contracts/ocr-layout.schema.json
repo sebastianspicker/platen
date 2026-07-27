@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/ocr-layout.schema.json",
+  "title": "Source-bound local OCR layout evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "schemaVersion", "sourceDigest", "language", "cleanupPreset", "segmentation", "detectTables", "records", "evidence", "limitations"],
+  "properties": {
+    "kind": {"const": "ocr-layout-evidence"},
+    "schemaVersion": {"const": 1},
+    "sourceDigest": {"$ref": "#/$defs/sha256"},
+    "language": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}(\\+[a-z][a-z0-9_]{0,31})*$", "maxLength": 128},
+    "cleanupPreset": {"enum": ["none", "document", "bilevel"]},
+    "segmentation": {"enum": ["auto", "single-column", "block", "sparse"]},
+    "detectTables": {"type": "boolean"},
+    "records": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"oneOf": [{"$ref": "#/$defs/recognizedRecord"}, {"$ref": "#/$defs/classificationRecord"}]}},
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["localOnly", "sourceBound", "engines", "tableMethod", "reviewRequired"],
+      "properties": {
+        "localOnly": {"const": true},
+        "sourceBound": {"const": true},
+        "engines": {"type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": {"enum": ["Poppler", "ImageMagick", "Tesseract"]}},
+        "tableMethod": {"enum": ["tesseract-tsv-geometry-heuristic", null]},
+        "reviewRequired": {"type": "boolean"}
+      }
+    },
+    "limitations": {"type": "array", "minItems": 2, "maxItems": 64, "items": {"type": "string", "minLength": 1, "maxLength": 240}}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "zoneId": {"type": "string", "pattern": "^[A-Za-z0-9._-]{1,64}$"},
+    "bounds": {
+      "type": "object", "additionalProperties": false,
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": {"type": "number", "minimum": 0, "maximum": 1},
+        "y": {"type": "number", "minimum": 0, "maximum": 1},
+        "width": {"type": "number", "minimum": 0, "maximum": 1},
+        "height": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "pageSize": {
+      "type": "object", "additionalProperties": false,
+      "required": ["page", "widthPoints", "heightPoints"],
+      "properties": {
+        "page": {"type": "integer", "minimum": 1},
+        "widthPoints": {"type": "number", "exclusiveMinimum": 0, "maximum": 14400},
+        "heightPoints": {"type": "number", "exclusiveMinimum": 0, "maximum": 14400}
+      }
+    },
+    "alto": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mediaType", "encoding", "byteLength", "sha256", "data"],
+      "properties": {
+        "mediaType": {"const": "application/alto+xml"},
+        "encoding": {"const": "base64"},
+        "byteLength": {"type": "integer", "minimum": 1, "maximum": 2097152},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "data": {"type": "string", "minLength": 4, "maxLength": 2796208, "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"}
+      }
+    },
+    "node": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "level", "page", "block", "paragraph", "line", "word", "confidence", "text", "bounds"],
+      "properties": {
+        "id": {"type": "string", "minLength": 9, "maxLength": 128},
+        "level": {"type": "integer", "minimum": 1, "maximum": 5},
+        "page": {"type": "integer", "minimum": 1},
+        "block": {"type": "integer", "minimum": 0},
+        "paragraph": {"type": "integer", "minimum": 0},
+        "line": {"type": "integer", "minimum": 0},
+        "word": {"type": "integer", "minimum": 0},
+        "confidence": {"type": "number", "minimum": -1, "maximum": 100},
+        "text": {"type": "string", "maxLength": 4000},
+        "bounds": {"$ref": "#/$defs/bounds"}
+      }
+    },
+    "cell": {
+      "type": "object", "additionalProperties": false,
+      "required": ["text", "wordIds", "bounds", "truncated"],
+      "properties": {
+        "text": {"type": "string", "maxLength": 4000},
+        "wordIds": {"type": "array", "maxItems": 100000, "items": {"type": "string", "minLength": 9, "maxLength": 128}},
+        "bounds": {"oneOf": [{"$ref": "#/$defs/bounds"}, {"type": "null"}]},
+        "truncated": {"type": "boolean"}
+      }
+    },
+    "tableCandidate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["method", "reviewRequired", "alignmentScore", "rows", "columns", "truncated", "bounds", "wordIds", "grid"],
+      "properties": {
+        "method": {"const": "tesseract-tsv-geometry-heuristic"},
+        "reviewRequired": {"const": true},
+        "alignmentScore": {"type": "number", "minimum": 0.6, "maximum": 1},
+        "rows": {"type": "integer", "minimum": 2, "maximum": 200},
+        "columns": {"type": "integer", "minimum": 2, "maximum": 32},
+        "truncated": {"type": "boolean"},
+        "bounds": {"$ref": "#/$defs/bounds"},
+        "wordIds": {"type": "array", "minItems": 4, "maxItems": 100000, "items": {"type": "string", "minLength": 9, "maxLength": 128}},
+        "grid": {"type": "array", "minItems": 2, "maxItems": 200, "items": {"type": "array", "minItems": 2, "maxItems": 32, "items": {"$ref": "#/$defs/cell"}}}
+      }
+    },
+    "layout": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schemaVersion", "image", "nodes", "words", "tableCandidates"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "image": {
+          "type": "object", "additionalProperties": false,
+          "required": ["width", "height", "zone"],
+          "properties": {
+            "width": {"type": "integer", "minimum": 1, "maximum": 16384},
+            "height": {"type": "integer", "minimum": 1, "maximum": 16384},
+            "zone": {"$ref": "#/$defs/bounds"}
+          }
+        },
+        "nodes": {"type": "array", "maxItems": 100000, "items": {"$ref": "#/$defs/node"}},
+        "words": {"type": "array", "maxItems": 100000, "items": {"$ref": "#/$defs/node"}},
+        "tableCandidates": {"type": "array", "maxItems": 1, "items": {"$ref": "#/$defs/tableCandidate"}}
+      }
+    },
+    "recordBase": {
+      "type": "object",
+      "required": ["page", "pageSize", "zoneId", "zoneType", "region", "dpi", "classificationOnly", "recognizedWordCount", "layout", "tableCandidates", "alto"]
+    },
+    "recognizedRecord": {
+      "allOf": [
+        {"$ref": "#/$defs/recordBase"},
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["page", "pageSize", "zoneId", "zoneType", "region", "dpi", "classificationOnly", "recognizedWordCount", "layout", "tableCandidates", "alto"],
+          "properties": {
+            "page": {"type": "integer", "minimum": 1}, "pageSize": {"$ref": "#/$defs/pageSize"}, "zoneId": {"$ref": "#/$defs/zoneId"},
+            "zoneType": {"enum": ["text", "table"]}, "region": {"$ref": "#/$defs/bounds"}, "dpi": {"type": "integer", "minimum": 72, "maximum": 600},
+            "classificationOnly": {"const": false}, "recognizedWordCount": {"type": "integer", "minimum": 0}, "layout": {"$ref": "#/$defs/layout"},
+            "tableCandidates": {"type": "array", "maxItems": 1, "items": {"$ref": "#/$defs/tableCandidate"}}, "alto": {"$ref": "#/$defs/alto"}
+          }
+        }
+      ]
+    },
+    "classificationRecord": {
+      "allOf": [
+        {"$ref": "#/$defs/recordBase"},
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["page", "pageSize", "zoneId", "zoneType", "region", "dpi", "classificationOnly", "recognizedWordCount", "layout", "tableCandidates", "alto"],
+          "properties": {
+            "page": {"type": "integer", "minimum": 1}, "pageSize": {"$ref": "#/$defs/pageSize"}, "zoneId": {"$ref": "#/$defs/zoneId"},
+            "zoneType": {"enum": ["image", "exclude"]}, "region": {"$ref": "#/$defs/bounds"}, "dpi": {"type": "integer", "minimum": 72, "maximum": 600},
+            "classificationOnly": {"const": true}, "recognizedWordCount": {"const": 0}, "layout": {"type": "null"},
+            "tableCandidates": {"type": "array", "maxItems": 0}, "alto": {"type": "null"}
+          }
+        }
+      ]
+    }
+  }
+}

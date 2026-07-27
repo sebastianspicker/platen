@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/research-scope.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "snapshotDate",
+    "methodology",
+    "implementationPolicy",
+    "products",
+    "requiredCapabilityIds"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "snapshotDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "methodology": {
+      "type": "string",
+      "minLength": 20
+    },
+    "implementationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "localOnly",
+        "aiImplementation"
+      ],
+      "properties": {
+        "localOnly": {
+          "const": true
+        },
+        "aiImplementation": {
+          "enum": [
+            "excluded",
+            "local-deterministic"
+          ]
+        }
+      }
+    },
+    "products": {
+      "type": "array",
+      "minItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "source"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2
+          },
+          "source": {
+            "type": "string",
+            "pattern": "^https://"
+          }
+        }
+      }
+    },
+    "requiredCapabilityIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]*(?:[.][a-z][a-z0-9-]*)+$"
+      }
+    }
+  }
+}

@@ -1,0 +1,4510 @@
+{
+  "schemaVersion": 5,
+  "generated": false,
+  "forbiddenEquals": [
+    "ok",
+    "localOnly",
+    "kind",
+    "schemaVersion",
+    "capabilityId",
+    "familyId"
+  ],
+  "banEqualsTrue": [
+    "proposedNotApplied"
+  ],
+  "nestedPaths": true,
+  "stringLengthPaths": true,
+  "contracts": {
+    "accessibility.alt-text": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "applied": true,
+        "proposedNotApplied": false
+      },
+      "method": "local-alt-text-annotation-apply",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Subtype /Text",
+        "/Annots"
+      ]
+    },
+    "accessibility.artifact-management": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "count",
+        "applied",
+        "structureLinked"
+      ],
+      "equals": {
+        "artifacts.length": 2,
+        "count": 2,
+        "applied": true,
+        "structureLinked": true
+      },
+      "method": "local-a11y-artifact-structure-apply",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/StructTreeRoot",
+        "Artifact"
+      ]
+    },
+    "accessibility.auto-tag": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "applied": true,
+        "structureLinked": true,
+        "proposedNotApplied": false
+      },
+      "method": "local-auto-tag-applied-structure",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/StructTreeRoot"
+      ]
+    },
+    "accessibility.check": {
+      "requiredKeys": [
+        "method",
+        "report",
+        "status"
+      ],
+      "equals": {
+        "report.status": "fail",
+        "report.checks.length": 3,
+        "report.pageCount": 1,
+        "status": "fail"
+      },
+      "method": "local-a11y-heuristic-review"
+    },
+    "accessibility.color-contrast": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "ratio": 18.88,
+        "passAA": true,
+        "passAAA": true
+      },
+      "method": "local-a11y-wcag-contrast-ratio"
+    },
+    "accessibility.document-language-title": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "lang": "en",
+        "bytes": 757
+      },
+      "method": "local-lang-title-pdf",
+      "requirePdf": true
+    },
+    "accessibility.font-unicode-mapping": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "fonts.length": 2,
+        "issues.length": 1,
+        "issueCount": 1,
+        "fontCount": 2,
+        "bytes": 889
+      },
+      "method": "local-a11y-font-unicode-review",
+      "requirePdf": true
+    },
+    "accessibility.form-semantics": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied",
+        "count"
+      ],
+      "equals": {
+        "fields.length": 2,
+        "count": 2,
+        "requiredCount": 1,
+        "bytes": 838,
+        "applied": false
+      },
+      "method": "local-a11y-form-field-semantics",
+      "requirePdf": true
+    },
+    "accessibility.heading-list-structure": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "headings.length": 2,
+        "lists.length": 1,
+        "tree.level": 0,
+        "tree.children.length": 1,
+        "headingCount": 2,
+        "listCount": 1,
+        "listItemCount": 2,
+        "byLevel.length": 6,
+        "bytes": 893
+      },
+      "method": "local-a11y-heading-list-map",
+      "requirePdf": true
+    },
+    "accessibility.links-bookmarks": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "links.length": 1,
+        "bookmarks.length": 1,
+        "linkCount": 1,
+        "bookmarkCount": 1,
+        "bytes": 803,
+        "applied": false
+      },
+      "method": "local-a11y-links-bookmarks-map",
+      "requirePdf": true
+    },
+    "accessibility.reading-order": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "count"
+      ],
+      "equals": {
+        "order.length": 1,
+        "count": 1,
+        "bytes": 837
+      },
+      "method": "local-a11y-reading-order-sequence",
+      "requirePdf": true
+    },
+    "accessibility.remediate-tags": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "applied": true,
+        "structureLinked": true
+      },
+      "method": "local-tagged-pdf-remediation-writer",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/StructTreeRoot"
+      ]
+    },
+    "accessibility.report-export": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "format": "json",
+        "bytes": 433
+      },
+      "method": "local-a11y-report-export"
+    },
+    "accessibility.screen-reader-permissions": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "permissions.extractText": true,
+        "permissions.accessibility": true,
+        "permissions.copy": false,
+        "permissions.print": false,
+        "permissions.encrypted": false,
+        "screenReaderFriendly": true,
+        "bytes": 908
+      },
+      "method": "local-a11y-screen-reader-permission-map",
+      "requirePdf": true
+    },
+    "accessibility.table-semantics": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied",
+        "structureLinked"
+      ],
+      "equals": {
+        "table.headers.length": 2,
+        "table.rows.length": 2,
+        "table.rowCount": 3,
+        "table.columnCount": 2,
+        "table.cellCount": 6,
+        "table.cells.length": 6,
+        "rowCount": 3,
+        "columnCount": 2,
+        "cellCount": 6,
+        "bytes": 800,
+        "applied": false,
+        "structureLinked": false
+      },
+      "method": "local-a11y-table-semantics-map",
+      "requirePdf": true
+    },
+    "admin.audit-telemetry": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "chain.length": 1,
+        "count": 1
+      },
+      "method": "local-admin-audit-hash-chain"
+    },
+    "admin.data-residency": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "residency": "local-device-only",
+        "regions.length": 0,
+        "crossBorder": false
+      },
+      "method": "local-admin-data-residency"
+    },
+    "admin.deployment-packaging": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "format": "directory-tree",
+        "manifest.format": "directory-tree",
+        "manifest.includes.length": 3
+      },
+      "method": "local-admin-deployment-manifest"
+    },
+    "admin.identity-roles": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "roles.length": 3,
+        "principal.roles.length": 3
+      },
+      "method": "local-admin-identity-roles"
+    },
+    "admin.licensing": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "license": "MIT",
+        "offline": true,
+        "entitlement.commercial": false,
+        "entitlement.sourceAvailable": true
+      },
+      "method": "local-admin-license-mit"
+    },
+    "admin.plugin-allowlist": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "allow.length": 0,
+        "count": 0,
+        "defaultDeny": true,
+        "policy.defaultDeny": true,
+        "policy.allowCount": 0
+      },
+      "method": "local-admin-plugin-allowlist"
+    },
+    "admin.policy-configuration": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "policy.pluginExecution": false,
+        "policy.maxUploadBytes": 67108864,
+        "policy.network": false
+      },
+      "method": "local-admin-policy-config"
+    },
+    "admin.sso-scim": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "sso.enabled": false,
+        "sso.providers.length": 0,
+        "scim.enabled": false,
+        "scim.provisioning": false,
+        "config.sso.enabled": false,
+        "config.scim.enabled": false,
+        "config.scim.provisioning": false,
+        "config.localIdentityOnly": true
+      },
+      "method": "local-sso-scim-disabled-configuration"
+    },
+    "admin.update-management": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "channel": "alpha",
+        "autoUpdate": false
+      },
+      "method": "local-admin-update-channel"
+    },
+    "admin.usage-reporting": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "counters.opens": 0,
+        "counters.exports": 0,
+        "counters.redactions": 0,
+        "counters.total": 0
+      },
+      "method": "local-admin-usage-counters"
+    },
+    "aec.batch-link": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "count",
+        "applied"
+      ],
+      "equals": {
+        "count": 2,
+        "applied": true
+      },
+      "method": "local-aec-batch-goto-links",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Subtype /Link",
+        "/Annots"
+      ]
+    },
+    "aec.batch-slip-sheet": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "count"
+      ],
+      "equals": {
+        "slips.length": 1,
+        "count": 1,
+        "bytes": 768
+      },
+      "method": "local-batch-slip-sheet",
+      "requirePdf": true
+    },
+    "aec.collaborative-review-sessions": {
+      "requiredKeys": [
+        "method",
+        "session"
+      ],
+      "equals": {
+        "session.participants.length": 2,
+        "session.participantCount": 2
+      },
+      "method": "local-collab-review-session"
+    },
+    "aec.custom-columns-formulas": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "values.length": 3,
+        "result": 6,
+        "valueCount": 3
+      },
+      "method": "local-safe-column-formula"
+    },
+    "aec.geospatial-documents": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "calibration.origin.lon": -122.4,
+        "calibration.origin.lat": 37.8,
+        "calibration.scale": 1,
+        "bounds.minLon": -122.40100000000001,
+        "bounds.maxLon": -122.399,
+        "bounds.minLat": 37.799,
+        "bounds.maxLat": 37.800999999999995
+      },
+      "method": "local-geospatial-calibration"
+    },
+    "aec.legends": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "counts.cloud": 2,
+        "counts.arrow": 1,
+        "typeCount": 2,
+        "totalMarkups": 3
+      },
+      "method": "local-markup-legend-counts",
+      "requirePdf": true
+    },
+    "aec.markup-toolsets": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "toolsets.length": 1,
+        "setCount": 1,
+        "totalTools": 3
+      },
+      "method": "local-markup-toolset-registry"
+    },
+    "aec.markups-list": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "markups.length": 1,
+        "count": 1,
+        "byType.cloud": 1
+      },
+      "method": "local-markup-list-digest"
+    },
+    "aec.measurement": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1711,
+        "siValue": 0.3048,
+        "proof.sourceBytes": 729,
+        "proof.outputBytes": 1711,
+        "proof.appendedBytes": 982,
+        "proof.sourcePrefixPreserved": true,
+        "proof.sourceRevisionCount": 1,
+        "proof.revisionCount": 2,
+        "proof.previousXrefOffset": 450,
+        "proof.appendedXrefOffset": 1445,
+        "proof.effectiveSize": 9,
+        "proof.page": 1,
+        "proof.pageObjectNumber": 1,
+        "proof.annotationObjectNumber": 5,
+        "proof.measurementDictionaryObjectNumber": 7
+      },
+      "method": "local-aec-measure-dictionary",
+      "requirePdf": true
+    },
+    "aec.measurement-toolset": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "tools.length": 4,
+        "toolCount": 4,
+        "siUnits.length": 4
+      },
+      "method": "local-measurement-toolset-catalog"
+    },
+    "aec.offline-projects": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "project.localOnly": true,
+        "project.sheets": 1,
+        "project.status": "offline-ready"
+      },
+      "method": "local-offline-project",
+      "requirePdf": true
+    },
+    "aec.revision-overlay": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "overlay.pages.length": 1,
+        "overlay.pageCount": 1
+      },
+      "method": "local-revision-overlay-plan"
+    },
+    "aec.revision-status-workflows": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "allowed": true,
+        "allowedTargets.length": 3
+      },
+      "method": "local-revision-status-transition"
+    },
+    "aec.scale-calibration": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "knownLength.value": 1,
+        "pdfPoints": 72,
+        "metersPerPdfPoint": 0.004233333333333334
+      },
+      "method": "local-scale-calibration",
+      "requirePdf": true
+    },
+    "aec.sets-drawing-log": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "sets.length": 1,
+        "log.length": 1,
+        "setCount": 1,
+        "logCount": 1,
+        "sheetTotal": 3
+      },
+      "method": "local-drawing-set-log"
+    },
+    "aec.sheet-metadata-tags": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "sheet.tags.length": 1,
+        "sheet.tagCount": 1
+      },
+      "method": "local-sheet-metadata-tags",
+      "requirePdf": true
+    },
+    "aec.spaces-regions": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "spaces.length": 1,
+        "count": 1,
+        "totalAreaM2": 12.5,
+        "siValue": 12.5
+      },
+      "method": "local-spaces-regions-takeoff"
+    },
+    "aec.takeoff": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "siValue": 0.3048,
+        "quantity": 0.3048,
+        "totalSi": 0.3048,
+        "lineItems.length": 1,
+        "lineItemCount": 1,
+        "proof.sourceBytes": 729,
+        "proof.outputBytes": 1711,
+        "proof.appendedBytes": 982,
+        "proof.sourcePrefixPreserved": true,
+        "proof.sourceRevisionCount": 1,
+        "proof.revisionCount": 2,
+        "proof.previousXrefOffset": 450,
+        "proof.appendedXrefOffset": 1445,
+        "proof.effectiveSize": 9,
+        "proof.page": 1
+      },
+      "method": "local-aec-takeoff-from-measurement",
+      "requirePdf": true
+    },
+    "ai.accessibility-suggestions": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "result.suggestions.length": 2,
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false,
+        "suggestionCount": 2
+      },
+      "method": "local-deterministic"
+    },
+    "ai.annotation-assist": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false
+      },
+      "method": "local-deterministic"
+    },
+    "ai.ask-document": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "result.confidence": 0.6666666666666666,
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false,
+        "answerChars": 26
+      },
+      "method": "local-deterministic"
+    },
+    "ai.explain": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false,
+        "explanationChars": 78
+      },
+      "method": "local-deterministic"
+    },
+    "ai.extract-structured-data": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "result.emails.length": 1,
+        "result.dates.length": 1,
+        "result.amounts.length": 1,
+        "result.keywords.length": 12,
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false
+      },
+      "method": "local-deterministic"
+    },
+    "ai.form-extraction": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "result.fields.length": 0,
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false,
+        "fieldCount": 0
+      },
+      "method": "local-deterministic"
+    },
+    "ai.generate-bookmarks": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "result.bookmarks.length": 1,
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false,
+        "bookmarkCount": 1
+      },
+      "method": "local-deterministic"
+    },
+    "ai.generate-images": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false
+      },
+      "method": "local-deterministic"
+    },
+    "ai.multi-document-analysis": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "result.documents.length": 2,
+        "result.commonTerms.length": 2,
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false,
+        "multiDocument": true,
+        "documentCount": 2
+      },
+      "method": "local-deterministic"
+    },
+    "ai.provider-policy-controls": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "result.policy.allowNetwork": false,
+        "result.policy.allowExternalProviders": false,
+        "result.policy.maxInputChars": 2000000,
+        "result.policy.maxDocuments": 32,
+        "result.defaults.allowNetwork": false,
+        "result.defaults.allowExternalProviders": false,
+        "result.defaults.maxInputChars": 2000000,
+        "result.defaults.maxDocuments": 32,
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false,
+        "remoteProvidersDenied": true,
+        "localDeterministicOnly": true
+      },
+      "method": "local-deterministic"
+    },
+    "ai.rewrite-proofread": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false,
+        "rewrittenChars": 98
+      },
+      "method": "local-deterministic"
+    },
+    "ai.smart-redaction": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "result.findings.length": 1,
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false
+      },
+      "method": "local-deterministic"
+    },
+    "ai.source-citations": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "result.citations.length": 1,
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false,
+        "citationCount": 1
+      },
+      "method": "local-deterministic"
+    },
+    "ai.summarize": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "result.sentenceCount": 4,
+        "result.keyTerms.length": 12,
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false,
+        "summaryChars": 71,
+        "sentenceCount": 4,
+        "keyTermCount": 12
+      },
+      "method": "local-deterministic"
+    },
+    "ai.translate": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery": "implemented",
+        "limitations.length": 3,
+        "localAi": true,
+        "remoteNetwork": false,
+        "translatedChars": 97
+      },
+      "method": "local-deterministic"
+    },
+    "automation.action-sequences": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "sequence.steps.length": 3,
+        "sequence.status": "validated",
+        "sequence.stepCount": 3,
+        "stepCount": 3
+      },
+      "method": "local-automation-action-sequence"
+    },
+    "automation.api": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "request.accepted": true,
+        "request.localOnly": true,
+        "request.bodyBytes": 13
+      },
+      "method": "local-automation-api-accept"
+    },
+    "automation.batch-print": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "copies": 1,
+        "documents.length": 2,
+        "documentCount": 2,
+        "plannedSheets": 2
+      },
+      "method": "local-automation-batch-print-plan"
+    },
+    "automation.cli-batch": {
+      "requiredKeys": [
+        "method",
+        "job"
+      ],
+      "equals": {
+        "job.status": "completed-local",
+        "job.inputs.length": 2,
+        "job.outputs.length": 2,
+        "job.outputCount": 2
+      },
+      "method": "local-automation-cli-batch-run"
+    },
+    "automation.conditional-workflows": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "pageCount": 2,
+        "matched": true,
+        "evaluation.matched": true,
+        "evaluation.rhs": 1
+      },
+      "method": "local-automation-conditional-eval"
+    },
+    "automation.javascript": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "validated": true,
+        "executed": false,
+        "bytes": 29
+      },
+      "method": "local-automation-js-validate"
+    },
+    "automation.job-queue-retry": {
+      "requiredKeys": [
+        "method",
+        "status"
+      ],
+      "equals": {
+        "attempts": 1,
+        "maxAttempts": 3,
+        "status": "queued-retry-local",
+        "backoffMs": 1000,
+        "baseMs": 1000,
+        "exponent": 0
+      },
+      "method": "local-automation-queue-retry-policy"
+    },
+    "automation.preflight-server": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "profile": "print-review",
+        "accepted": true,
+        "localService": true
+      },
+      "method": "local-automation-preflight-service"
+    },
+    "automation.processing-reports": {
+      "requiredKeys": [
+        "method",
+        "report"
+      ],
+      "equals": {
+        "report.total": 2,
+        "report.ok": 2,
+        "report.failed": 0,
+        "report.successRate": 1
+      },
+      "method": "local-automation-processing-report"
+    },
+    "automation.scheduled-jobs": {
+      "requiredKeys": [
+        "method",
+        "job"
+      ],
+      "equals": {
+        "job.fields.length": 5,
+        "job.enabled": true,
+        "job.fieldCount": 5
+      },
+      "method": "local-automation-schedule-entry"
+    },
+    "automation.variables-presets": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "presets.length": 2,
+        "count": 2
+      },
+      "method": "local-automation-presets-table"
+    },
+    "automation.watch-folders": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "records.length": 1,
+        "count": 1
+      },
+      "method": "local-watch-folder-snapshot"
+    },
+    "automation.webhooks": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "delivery.transport": "local-outbox",
+        "delivery.delivered": true
+      },
+      "method": "local-automation-webhook-outbox"
+    },
+    "collaboration.access-expiration": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "active": true,
+        "revoked": false
+      },
+      "method": "local-access-expiration"
+    },
+    "collaboration.activity-notifications": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "notifications.length": 1,
+        "count": 1
+      },
+      "method": "local-activity-notifications"
+    },
+    "collaboration.projects-workspaces": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "project.offline": true
+      },
+      "method": "local-project-workspace"
+    },
+    "collaboration.real-time-review": {
+      "requiredKeys": [
+        "synchronized",
+        "observedEvents",
+        "session"
+      ],
+      "equals": {
+        "session.participants.length": 2,
+        "session.annotationCount": 1,
+        "session.revision": 1,
+        "annotation.page": 1,
+        "observedEvents": 1,
+        "synchronized": true,
+        "realTimeLocal": true
+      },
+      "method": "local-multi-session-review-sync",
+      "min": {
+        "observedEvents": 1
+      }
+    },
+    "collaboration.share-links": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "token.length": 64
+      },
+      "method": "local-share-package-token"
+    },
+    "collaboration.version-history": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "chain.length": 2,
+        "count": 2
+      },
+      "method": "local-version-hash-chain"
+    },
+    "color.convert": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "bytes": 783
+      },
+      "method": "local-color-convert-intent",
+      "requirePdf": true
+    },
+    "color.output-intents": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "intent",
+        "applied"
+      ],
+      "equals": {
+        "intent": "FOGRA39",
+        "applied": true
+      },
+      "method": "local-color-output-intent-assign",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/OutputIntent",
+        "/OutputIntents",
+        "/GTS_PDFX"
+      ]
+    },
+    "color.spot-colors": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "count",
+        "applied"
+      ],
+      "equals": {
+        "spots.length": 1,
+        "count": 1,
+        "applied": true
+      },
+      "method": "local-color-spot-separation-apply",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Separation"
+      ]
+    },
+    "compare.annotations": {
+      "requiredKeys": [
+        "method",
+        "changed"
+      ],
+      "equals": {
+        "onlyLeft.length": 0,
+        "onlyRight.length": 1,
+        "changed": true
+      },
+      "method": "local-annotation-set-compare"
+    },
+    "compare.batch": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "results.length": 2,
+        "count": 2
+      },
+      "method": "local-batch-content-compare"
+    },
+    "compare.content": {
+      "requiredKeys": [
+        "method",
+        "stats",
+        "changed"
+      ],
+      "equals": {
+        "runs.length": 4,
+        "stats.added": 1,
+        "stats.deleted": 1,
+        "stats.unchanged": 2,
+        "changed": true
+      },
+      "method": "local-comparison-algorithms-diffTokens"
+    },
+    "compare.cross-format": {
+      "requiredKeys": [
+        "method",
+        "stats",
+        "changed"
+      ],
+      "equals": {
+        "stats.added": 1,
+        "stats.deleted": 1,
+        "stats.unchanged": 2,
+        "changed": true
+      },
+      "method": "local-cross-format-text-compare"
+    },
+    "compare.overlay": {
+      "requiredKeys": [
+        "method",
+        "stats",
+        "contentChanged"
+      ],
+      "equals": {
+        "contentChanged": true,
+        "stats.added": 1,
+        "stats.deleted": 1,
+        "stats.unchanged": 2
+      },
+      "method": "local-overlay-compare-binding"
+    },
+    "compare.package": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "stats"
+      ],
+      "equals": {
+        "bytes": 811,
+        "stats.added": 1,
+        "stats.deleted": 1,
+        "stats.unchanged": 2
+      },
+      "method": "local-comparison-package-pdf",
+      "requirePdf": true
+    },
+    "compare.pixel": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "equal": false,
+        "differingBytes": 16
+      },
+      "method": "local-pixel-buffer-compare"
+    },
+    "compare.report-export": {
+      "requiredKeys": [
+        "method",
+        "stats"
+      ],
+      "equals": {
+        "stats.added": 1,
+        "stats.deleted": 1,
+        "stats.unchanged": 2,
+        "json.length": 275
+      },
+      "method": "local-comparison-report-json"
+    },
+    "compare.side-by-side": {
+      "requiredKeys": [
+        "method",
+        "stats"
+      ],
+      "equals": {
+        "stats.added": 1,
+        "stats.deleted": 1,
+        "stats.unchanged": 2
+      },
+      "method": "local-side-by-side-compare-binding"
+    },
+    "convert.html-to-pdf": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "pageCount": 1,
+        "size": 1343,
+        "extractedTextLength": 334
+      },
+      "path": "local-text-fallback",
+      "requireBytes": true
+    },
+    "convert.images-to-pdf": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "pageCount": 1,
+        "size": 806,
+        "width": 4,
+        "height": 4
+      },
+      "path": "local-png-xobject",
+      "requireBytes": true
+    },
+    "convert.office-to-pdf": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "pageCount": 1,
+        "size": 1708,
+        "extractedTextLength": 686
+      },
+      "path": "local-text-fallback",
+      "requireBytes": true
+    },
+    "create.blank-pdf": {
+      "requiredKeys": [
+        "bytes"
+      ],
+      "equals": {
+        "pageCount": 1,
+        "size": 686
+      },
+      "requireBytes": true
+    },
+    "create.cad-to-pdf": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "pageCount": 1,
+        "size": 757,
+        "entityCount": 1,
+        "width": 612,
+        "height": 792
+      },
+      "path": "local-cad-subset",
+      "requireBytes": true
+    },
+    "create.clipboard-to-pdf": {
+      "requiredKeys": [
+        "bytes"
+      ],
+      "equals": {
+        "pageCount": 1,
+        "size": 826,
+        "consent": true
+      },
+      "requireBytes": true
+    },
+    "create.multiformat-combine": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "pageCount": 2,
+        "size": 997,
+        "sourceCount": 2
+      },
+      "path": "local-multiformat-pages",
+      "requireBytes": true
+    },
+    "create.postscript-to-pdf": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "pageCount": 1,
+        "size": 732
+      },
+      "path": "local-ps-show-subset",
+      "requireBytes": true
+    },
+    "create.print-to-pdf": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "pageCount": 1,
+        "size": 826
+      },
+      "path": "local-print-payload",
+      "requireBytes": true
+    },
+    "dms.checkin-checkout": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "lock.status": "checked-out",
+        "released.status": "checked-in",
+        "enforced": true
+      },
+      "method": "local-dms-lock-enforcement"
+    },
+    "dms.conflict-resolution": {
+      "requiredKeys": [
+        "method",
+        "applied",
+        "persisted",
+        "journalSha256"
+      ],
+      "equals": {
+        "resolution": "keep-local",
+        "applied": true,
+        "persisted": true,
+        "listed": true
+      },
+      "method": "local-dms-conflict-journal"
+    },
+    "dms.document-locking": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "lock.status": "checked-out",
+        "released.status": "checked-in",
+        "enforced": true
+      },
+      "method": "local-dms-lock-enforcement"
+    },
+    "dms.offline-sync": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "entry.conflict": false,
+        "entry.localOnly": true
+      },
+      "method": "local-offline-sync-journal"
+    },
+    "dms.repository-connectors": {
+      "requiredKeys": [
+        "connected",
+        "put",
+        "getSha256",
+        "listCount"
+      ],
+      "equals": {
+        "put.size": 17,
+        "listCount": 1,
+        "connected": true,
+        "network": false
+      },
+      "method": "local-filesystem-dms-repository",
+      "min": {
+        "listCount": 1
+      }
+    },
+    "dms.retention-records": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "rule.days": 30
+      },
+      "method": "local-retention-rule"
+    },
+    "document.actions-javascript": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "allowExecution": false,
+        "allowAuthoring": false
+      },
+      "method": "local-document-js-policy"
+    },
+    "document.article-threads": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "threads.length": 1,
+        "count": 1
+      },
+      "method": "local-article-thread-map"
+    },
+    "document.attachments-manage": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "embeddedFiles"
+      ],
+      "equals": {
+        "embeddedFiles": true,
+        "applied": true
+      },
+      "method": "local-portfolio-attachment-manage",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/EmbeddedFiles",
+        "/Filespec"
+      ]
+    },
+    "document.backgrounds": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "applied": true
+      },
+      "method": "local-classic-page-background",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "BACKGROUND_FILL"
+      ]
+    },
+    "document.bates-numbering": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "applied": true
+      },
+      "method": "local-classic-bates-numbering",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "BATES:"
+      ]
+    },
+    "document.bookmarks-author": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "applied": true
+      },
+      "method": "local-classic-outline-author",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Outlines",
+        "/PageMode /UseOutlines"
+      ]
+    },
+    "document.close": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "closed": true,
+        "remainingSessions": 0
+      },
+      "method": "local-document-close"
+    },
+    "document.destinations-author": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "applied": true,
+        "count": 2
+      },
+      "method": "local-classic-named-destinations",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Dests",
+        "/Names"
+      ]
+    },
+    "document.download.original": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "bytes": 686
+      },
+      "method": "local-document-download-original",
+      "requirePdf": true
+    },
+    "document.embedded-files": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "count"
+      ],
+      "equals": {
+        "bytes": 1528,
+        "count": 2
+      },
+      "method": "local-embedded-file-collection",
+      "requirePdf": true
+    },
+    "document.flatten-content": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "flattened"
+      ],
+      "equals": {
+        "flattened": true
+      },
+      "method": "local-flatten-content-no-annots",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "FLATTENED_CONTENT"
+      ],
+      "pdfMustNotContain": [
+        "/Annots"
+      ]
+    },
+    "document.layers-manage": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "applied": true
+      },
+      "method": "local-classic-ocg-layers",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/OCProperties",
+        "/OCG"
+      ]
+    },
+    "document.metadata-edit": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "title",
+        "applied"
+      ],
+      "equals": {
+        "applied": true
+      },
+      "method": "local-classic-metadata-info",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Title",
+        "/Author"
+      ]
+    },
+    "document.open.drag-drop": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "open": true,
+        "bytes": 686
+      },
+      "method": "local-document-open-drag-drop"
+    },
+    "document.open.local": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "open": true,
+        "bytes": 686
+      },
+      "method": "local-document-open-path"
+    },
+    "document.optional-content-groups": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "applied": true,
+        "count": 2
+      },
+      "method": "local-classic-ocg-structure",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/OCProperties",
+        "/OCG"
+      ]
+    },
+    "document.watermarks": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "applied": true,
+        "watermark": "CONFIDENTIAL"
+      },
+      "method": "local-classic-watermark-content",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "WATERMARK:"
+      ]
+    },
+    "edit.add-text": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "method": "local-add-text-content-stream",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "ADD_TEXT"
+      ]
+    },
+    "edit.find-replace": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "method": "local-pdf-text-edit-writer",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "HELLO WORLD"
+      ]
+    },
+    "edit.headers-footers": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "method": "local-headers-footers-content-stream",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "HEADER:",
+        "FOOTER:"
+      ]
+    },
+    "edit.images": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "method": "local-image-xobject-embed",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Subtype /Image",
+        "IMAGE_XOBJECT"
+      ]
+    },
+    "edit.links": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "linkApplied"
+      ],
+      "equals": {
+        "linkApplied": true
+      },
+      "method": "local-incremental-goto-link",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Subtype /Link",
+        "/Annots"
+      ]
+    },
+    "edit.object-properties": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "props"
+      ],
+      "method": "local-object-properties-content",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "OBJECT_PROPS"
+      ]
+    },
+    "edit.spellcheck": {
+      "requiredKeys": [
+        "method",
+        "report",
+        "totalFindings",
+        "contentChanged"
+      ],
+      "equals": {
+        "report.pages.length": 1,
+        "report.totalTokens": 19,
+        "report.totalFindings": 18,
+        "report.truncated": false,
+        "report.linguisticCorrectnessClaim": false,
+        "report.contentChanged": false,
+        "totalFindings": 18,
+        "totalTokens": 19,
+        "truncated": false,
+        "contentChanged": false
+      },
+      "method": "local-pdf-spellcheck-report"
+    },
+    "edit.text": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "replacementCount"
+      ],
+      "equals": {
+        "replacementCount": 1
+      },
+      "method": "local-pdf-text-edit-writer",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "HELLO WORLD"
+      ]
+    },
+    "edit.text-reflow": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "reflowed"
+      ],
+      "equals": {
+        "reflowed": true
+      },
+      "method": "local-text-reflow-content-stream",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "TEXT_REFLOW"
+      ]
+    },
+    "edit.vector-objects": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "opCount"
+      ],
+      "equals": {
+        "opCount": 3
+      },
+      "method": "local-vector-path-content-stream",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "VECTOR_PATH_OPS"
+      ]
+    },
+    "export.excel": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "format": "excel",
+        "size": 2599,
+        "pageCount": 1
+      },
+      "path": "local-buildOoxml",
+      "requireBytes": true
+    },
+    "export.html-xml": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "format": "html",
+        "size": 270,
+        "pageCount": 1
+      },
+      "path": "structuredTextExport",
+      "requireBytes": true
+    },
+    "export.images": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "size": 72,
+        "page": 1
+      },
+      "path": "local-png-page-export",
+      "requireBytes": true
+    },
+    "export.powerpoint": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "format": "powerpoint",
+        "size": 5971,
+        "pageCount": 1
+      },
+      "path": "local-buildOoxml",
+      "requireBytes": true
+    },
+    "export.selected-region": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "width": 1,
+        "height": 1,
+        "size": 68,
+        "region.x": 0,
+        "region.y": 0,
+        "region.width": 1,
+        "region.height": 1
+      },
+      "path": "local-png-region-crop",
+      "requireBytes": true
+    },
+    "export.text-rtf": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "format": "rtf",
+        "size": 136,
+        "pageCount": 1
+      },
+      "path": "structuredTextExport",
+      "requireBytes": true
+    },
+    "export.word": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "format": "word",
+        "size": 1491,
+        "pageCount": 1
+      },
+      "path": "local-buildOoxml",
+      "requireBytes": true
+    },
+    "forms.author": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1642,
+        "proof.page": 1,
+        "proof.rect.x": 72,
+        "proof.rect.y": 700,
+        "proof.rect.width": 180,
+        "proof.rect.height": 24,
+        "proof.sourcePrefixPreserved": true,
+        "proof.defaultEmpty": true,
+        "proof.objectCount": 4,
+        "proof.otherPagesContentResourcesPreserved": true
+      },
+      "method": "local-pdf-acroform-text-field",
+      "requirePdf": true
+    },
+    "forms.barcode-fields": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "fieldName"
+      ],
+      "equals": {
+        "fieldName": "Barcode.Field"
+      },
+      "method": "local-barcode-field-acroform",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/AcroForm",
+        "/Subtype /Widget",
+        "/FT /Tx"
+      ]
+    },
+    "forms.calculate": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "a": 2,
+        "b": 3,
+        "result": 5
+      },
+      "method": "local-safe-arithmetic-calculate"
+    },
+    "forms.detect-fields": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "fields.length": 0,
+        "count": 0
+      },
+      "method": "local-label-field-detection"
+    },
+    "forms.distribute-collect": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "responses.length": 1,
+        "count": 1
+      },
+      "method": "local-form-response-collection"
+    },
+    "forms.fill-save": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "fieldName"
+      ],
+      "equals": {},
+      "method": "local-acroform-prepare-and-set-V",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/AcroForm"
+      ]
+    },
+    "forms.flatten": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "bytes": 2013,
+        "interactiveFields": 0
+      },
+      "method": "local-form-flatten-export",
+      "requirePdf": true
+    },
+    "forms.import-export-data": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "json.length": 22,
+        "csv.length": 16
+      },
+      "method": "local-form-data-interchange"
+    },
+    "forms.javascript-actions": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "allowed": false,
+        "actions.length": 0
+      },
+      "method": "local-form-js-policy-table"
+    },
+    "forms.signature-fields": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1654,
+        "proof.page": 1,
+        "proof.rect.x": 72,
+        "proof.rect.y": 700,
+        "proof.rect.width": 180,
+        "proof.rect.height": 24,
+        "proof.sourcePrefixPreserved": true,
+        "proof.defaultEmpty": true,
+        "proof.objectCount": 4,
+        "proof.otherPagesContentResourcesPreserved": true
+      },
+      "method": "local-pdf-acroform-text-field",
+      "requirePdf": true
+    },
+    "forms.source-bound-acroform-fill-save": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 2013,
+        "widgetReference.object": 9,
+        "widgetReference.generation": 0,
+        "proof.page": 1,
+        "proof.rect.x": 72,
+        "proof.rect.y": 700,
+        "proof.rect.width": 180,
+        "proof.rect.height": 24,
+        "proof.sourcePrefixPreserved": true,
+        "proof.defaultEmpty": true,
+        "proof.objectCount": 4,
+        "proof.filled": true,
+        "proof.valueUtf16BeBytes": 26,
+        "proof.emptyDefaultProven": true,
+        "sourceBound": true
+      },
+      "method": "local-source-bound-acroform-fill-save",
+      "requirePdf": true
+    },
+    "forms.static-to-fillable": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1642,
+        "proof.page": 1,
+        "proof.rect.x": 72,
+        "proof.rect.y": 700,
+        "proof.rect.width": 180,
+        "proof.rect.height": 24,
+        "proof.sourcePrefixPreserved": true,
+        "proof.defaultEmpty": true,
+        "proof.objectCount": 4,
+        "proof.otherPagesContentResourcesPreserved": true
+      },
+      "method": "local-pdf-acroform-text-field",
+      "requirePdf": true
+    },
+    "forms.submit-reset": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "action": "submit",
+        "submitted": true
+      },
+      "method": "local-form-submit-reset"
+    },
+    "forms.tab-order-tooltips": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "order.length": 2
+      },
+      "method": "local-tab-order-tooltips"
+    },
+    "forms.validate": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "valid": true,
+        "errors.length": 0,
+        "fieldCount": 1
+      },
+      "method": "local-form-value-validation"
+    },
+    "forms.xfa-compatibility": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "xfaPresent": false,
+        "supported": false
+      },
+      "method": "local-xfa-detection"
+    },
+    "geospatial.inspect-measure-markup": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "measure",
+        "applied"
+      ],
+      "equals": {
+        "measure.kind": "geodesic-distance",
+        "measure.from.lon": 0,
+        "measure.from.lat": 0,
+        "measure.to.lon": 1,
+        "measure.to.lat": 1,
+        "applied": true
+      },
+      "method": "local-geospatial-measure-markup-pdf",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Measure",
+        "/GEO",
+        "/GEOGCS"
+      ]
+    },
+    "integrations.browser-capture": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "bytes": 21,
+        "captureReady": true
+      },
+      "method": "local-browser-html-capture-token"
+    },
+    "integrations.cad-bim": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "count",
+        "applied"
+      ],
+      "equals": {
+        "entities.length": 1,
+        "count": 1,
+        "byType.line": 1,
+        "applied": true
+      },
+      "method": "local-cad-bim-pdf-export",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "CAD_BIM_EXPORT",
+        "/PieceInfo"
+      ]
+    },
+    "integrations.cloud-storage": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "bytes": 18,
+        "network": false,
+        "put": true,
+        "get": true
+      },
+      "method": "local-cloud-storage-filesystem"
+    },
+    "integrations.email": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "draft.attachmentCount": 1,
+        "draft.sent": false
+      },
+      "method": "local-email-draft"
+    },
+    "integrations.esign-providers": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "providers.length": 1,
+        "count": 1
+      },
+      "method": "local-esign-provider-registry"
+    },
+    "integrations.events-webhooks": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "events.length": 1,
+        "outbox": true,
+        "outboxEntries.length": 1,
+        "count": 1
+      },
+      "method": "local-integration-event-bus"
+    },
+    "integrations.office-addins": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "manifest.hosts.length": 3,
+        "manifest.localOnly": true,
+        "manifest.permissions.length": 2
+      },
+      "method": "local-office-addin-manifest"
+    },
+    "integrations.sensitivity-labels": {
+      "requiredKeys": [
+        "method",
+        "applied",
+        "pdf",
+        "label"
+      ],
+      "equals": {
+        "applied": true,
+        "annotationSubtype": "Text"
+      },
+      "method": "local-sensitivity-label-annotation",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Annots",
+        "/Subtype /Text"
+      ]
+    },
+    "ocr.batch-recognition": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "results.length": 2,
+        "count": 2
+      },
+      "method": "local-ocr-batch-results"
+    },
+    "ocr.cleanup": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "originalLength": 98,
+        "cleanedLength": 98,
+        "bytes": 829
+      },
+      "method": "local-ocr-cleanup-presets",
+      "requirePdf": true
+    },
+    "ocr.editable-output": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "bytes": 830,
+        "editable": true
+      },
+      "method": "local-ocr-editable-text-pdf",
+      "requirePdf": true
+    },
+    "ocr.export-layout-preserving": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "blockCount": 1
+      },
+      "method": "local-ocr-layout-export"
+    },
+    "ocr.language-detection-selection": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "lang": "eng",
+        "detectedHint": "eng"
+      },
+      "method": "local-ocr-language-select"
+    },
+    "ocr.recognize-text": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "bytes": 832,
+        "searchable": true
+      },
+      "method": "local-ocr-searchable-pdf",
+      "requirePdf": true
+    },
+    "ocr.screenshot-capture": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "region.x": 0,
+        "region.y": 0,
+        "region.width": 1,
+        "region.height": 1
+      },
+      "method": "local-ocr-screenshot-region"
+    },
+    "ocr.suspect-review": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "suspects.length": 6,
+        "count": 6
+      },
+      "method": "local-ocr-suspect-list"
+    },
+    "ocr.table-recognition": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "grid.length": 2,
+        "rowCount": 2,
+        "colCount": 2
+      },
+      "method": "local-ocr-table-grid"
+    },
+    "ocr.user-dictionaries-training": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "words.length": 3,
+        "count": 3
+      },
+      "method": "local-ocr-user-dictionary"
+    },
+    "ocr.zones-layout": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "zones.length": 2,
+        "count": 2
+      },
+      "method": "local-ocr-typed-zones"
+    },
+    "optimize.compress": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "size": 722,
+        "pageCount": 1,
+        "reachableObjectCount": 6
+      },
+      "path": "buildPdfCompactRewrite",
+      "requireBytes": true
+    },
+    "optimize.fast-web-view": {
+      "requiredKeys": [
+        "path"
+      ],
+      "equals": {
+        "pageCount": 1,
+        "size": 830,
+        "linearized": true,
+        "compactReachableObjects": 6
+      },
+      "path": "local-linearize",
+      "requireBytes": true
+    },
+    "pages.copy-between-documents": {
+      "method": "local-pages-copy-between-tree",
+      "pdfMustContain": [
+        "COPY_PRIMARY",
+        "COPY_SECONDARY"
+      ],
+      "claimClass": "mutation",
+      "requirePdf": true,
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ]
+    },
+    "pages.crop": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "box.left": 36
+      },
+      "method": "local-pages-crop-box-tree",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/CropBox",
+        "CROP_BOX_APPLIED"
+      ]
+    },
+    "pages.delete": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "keepPages"
+      ],
+      "equals": {
+        "keepPages": 1,
+        "pageCount": 1
+      },
+      "method": "local-pages-delete-tree",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "AFTER_DELETE:1",
+        "/Count 1"
+      ]
+    },
+    "pages.duplicate": {
+      "method": "local-pages-duplicate-tree",
+      "pdfMustContain": [
+        "DUP:1:1",
+        "/Count 2"
+      ],
+      "claimClass": "mutation",
+      "requirePdf": true,
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "copies": 2
+      }
+    },
+    "pages.extract": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "pageCount"
+      ],
+      "equals": {
+        "pageCount": 1,
+        "structuralPageCount": 1
+      },
+      "method": "local-pages-extract-tree",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "EXTRACT:1",
+        "/Type /Page",
+        "/Count 1"
+      ]
+    },
+    "pages.insert": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "pageCount": 3
+      },
+      "method": "local-pages-insert-tree",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "INSERT_PAGE",
+        "/Count 3"
+      ]
+    },
+    "pages.insert-blank": {
+      "method": "local-pages-insert-blank-tree",
+      "pdfMustContain": [
+        "BLANK_INSERT:1"
+      ],
+      "claimClass": "mutation",
+      "requirePdf": true,
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ]
+    },
+    "pages.labels-numbering": {
+      "method": "local-pages-labels-tree",
+      "pdfMustContain": [
+        "LABEL:"
+      ],
+      "claimClass": "mutation",
+      "requirePdf": true,
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ]
+    },
+    "pages.merge": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "pageCount"
+      ],
+      "equals": {
+        "pageCount": 2,
+        "structuralPageCount": 2
+      },
+      "method": "local-pages-merge-tree",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Count 2",
+        "MERGE_PRIMARY",
+        "MERGE_SECONDARY",
+        "/Type /Page"
+      ]
+    },
+    "pages.page-boxes": {
+      "method": "local-pages-boxes-tree",
+      "pdfMustContain": [
+        "PAGE_BOXES",
+        "/CropBox"
+      ],
+      "claimClass": "mutation",
+      "requirePdf": true,
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ]
+    },
+    "pages.reorder": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "order"
+      ],
+      "equals": {
+        "pageCount": 3
+      },
+      "method": "local-pages-reorder-tree",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "REORDER:2",
+        "/Count 3"
+      ]
+    },
+    "pages.replace": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "page": 1
+      },
+      "method": "local-pages-replace-tree",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "REPLACE_PAGE:1"
+      ]
+    },
+    "pages.resize": {
+      "method": "local-pages-resize-tree",
+      "pdfMustContain": [
+        "RESIZE:"
+      ],
+      "claimClass": "mutation",
+      "requirePdf": true,
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ]
+    },
+    "pages.reverse-interleave": {
+      "method": "local-pages-interleave-tree",
+      "pdfMustContain": [
+        "INTERLEAVE_A1",
+        "/Count 4"
+      ],
+      "claimClass": "mutation",
+      "requirePdf": true,
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ]
+    },
+    "pages.rotate": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "rotation"
+      ],
+      "equals": {
+        "rotation": 90
+      },
+      "method": "local-pages-rotate-tree",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Rotate 90",
+        "ROTATE:90"
+      ]
+    },
+    "pages.split": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "artifacts",
+        "count"
+      ],
+      "equals": {
+        "count": 2,
+        "leftPageCount": 1,
+        "rightPageCount": 1
+      },
+      "method": "local-pages-split-tree-parts",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "min": {
+        "artifacts.length": 2
+      },
+      "pdfMustContain": [
+        "SPLIT_LEFT:1",
+        "/Count 1",
+        "/Type /Page"
+      ]
+    },
+    "pages.split-by-rule": {
+      "method": "local-pages-split-by-rule-tree",
+      "requiredKeys": [
+        "method",
+        "parts"
+      ],
+      "equals": {
+        "everyN": 2
+      },
+      "min": {
+        "parts": 1
+      }
+    },
+    "pages.transitions": {
+      "method": "local-pages-transition-tree",
+      "pdfMustContain": [
+        "TRANS:"
+      ],
+      "claimClass": "mutation",
+      "requirePdf": true,
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ]
+    },
+    "platform.plugins.capability-conflicts": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "conflicts.length": 1,
+        "hasConflicts": true
+      },
+      "method": "local-capability-conflict-detect"
+    },
+    "platform.plugins.catalog": {
+      "requiredKeys": [
+        "method",
+        "ready",
+        "privateWorkspace",
+        "packages",
+        "count"
+      ],
+      "equals": {
+        "ready": true,
+        "catalogOnlyExecution": true,
+        "privateWorkspace": true
+      },
+      "min": {
+        "count": 7,
+        "packages.length": 7
+      },
+      "method": "local-plugin-catalog-packages"
+    },
+    "platform.plugins.dependency-resolution": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "graph.length": 0,
+        "cycles": false,
+        "resolved": true,
+        "executable": false
+      },
+      "method": "local-plugin-dependency-graph"
+    },
+    "platform.plugins.install": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "record.installed": true,
+        "record.executable": false,
+        "executable": false
+      },
+      "method": "local-plugin-install-stage"
+    },
+    "platform.plugins.lifecycle": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "transition.applied": false,
+        "executable": false
+      },
+      "method": "local-plugin-lifecycle-transition-plan"
+    },
+    "platform.plugins.package-verification": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "verified": true,
+        "executable": false
+      },
+      "method": "local-plugin-package-sha256-verify"
+    },
+    "platform.plugins.permissions": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "grants.length": 1,
+        "executable": false
+      },
+      "method": "local-plugin-permission-grant-table"
+    },
+    "platform.plugins.registry": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "registry.length": 1,
+        "count": 1,
+        "executable": false
+      },
+      "method": "local-plugin-registry-list"
+    },
+    "platform.plugins.rpc": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "envelope.admitted": false,
+        "executable": false
+      },
+      "method": "local-plugin-rpc-envelope-validate"
+    },
+    "platform.plugins.runtime-sandbox": {
+      "requiredKeys": [
+        "ready",
+        "privateWorkspace",
+        "networkPolicyDeny"
+      ],
+      "equals": {
+        "ready": true,
+        "isolation.ready": true,
+        "isolation.privateWorkspace": true,
+        "isolation.processBoundary": true,
+        "isolation.networkOsIsolated": false,
+        "isolation.networkPolicyDeny": true,
+        "isolation.networkProbe.status": "reachable",
+        "isolation.networkProbe.osIsolated": false,
+        "isolation.networkDenied": false,
+        "isolation.policy.allowNetwork": false,
+        "privateWorkspace": true,
+        "networkOsIsolated": false,
+        "networkPolicyDeny": true
+      },
+      "method": "local-enforced-operation-sandbox"
+    },
+    "platform.plugins.sandbox-probe": {
+      "requiredKeys": [
+        "method",
+        "ready"
+      ],
+      "equals": {
+        "ready": true,
+        "networkOsIsolated": false,
+        "networkPolicyDeny": true,
+        "catalogOnlyExecution": true
+      },
+      "method": "local-plugin-sandbox-declaration"
+    },
+    "platform.plugins.upgrade-rollback": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "plan.applied": false,
+        "executable": false
+      },
+      "method": "local-plugin-upgrade-rollback-plan"
+    },
+    "platform.plugins.version-compatibility": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "compatible": true,
+        "executable": false
+      },
+      "method": "local-plugin-version-compat-check"
+    },
+    "portfolios.create": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "bytes": 1528,
+        "files.length": 2
+      },
+      "method": "local-pdf-portfolio-create",
+      "requirePdf": true
+    },
+    "portfolios.custom-layout": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "layout": "tile",
+        "bytes": 1528
+      },
+      "method": "local-pdf-portfolio-custom-layout",
+      "requirePdf": true
+    },
+    "portfolios.metadata-search": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "hits.length": 1,
+        "count": 1
+      },
+      "method": "local-pdf-portfolio-metadata-search"
+    },
+    "portfolios.view-extract": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "count"
+      ],
+      "equals": {
+        "extracted.length": 2,
+        "count": 2
+      },
+      "method": "local-pdf-portfolio-extract",
+      "requirePdf": true
+    },
+    "preflight.certified-pdf": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "history.length": 1,
+        "certified": false
+      },
+      "method": "local-preflight-certified-history"
+    },
+    "preflight.fixups": {
+      "requiredKeys": [
+        "method",
+        "report"
+      ],
+      "equals": {
+        "report.issues.length": 0,
+        "report.fixups.length": 1,
+        "report.passed": true
+      },
+      "method": "local-preflight-fixup-review"
+    },
+    "preflight.profiles": {
+      "requiredKeys": [
+        "method",
+        "report"
+      ],
+      "equals": {
+        "profile": "print-review",
+        "report.profile": "print-review",
+        "report.issues.length": 0,
+        "report.passed": true
+      },
+      "method": "local-preflight-profile-run"
+    },
+    "preflight.reports": {
+      "requiredKeys": [
+        "method",
+        "report"
+      ],
+      "equals": {
+        "report.profile": "print-review",
+        "report.issues.length": 0,
+        "report.passed": true
+      },
+      "method": "local-preflight-report-export"
+    },
+    "print.barcode-decoration": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "barcodeId",
+        "applied"
+      ],
+      "equals": {
+        "symbology": "code128",
+        "barcodeId.length": 16,
+        "applied": true
+      },
+      "method": "local-print-barcode-decoration-pdf",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "BARCODE_ID:",
+        "CUT_CONTOUR",
+        "VARNISH_MARK"
+      ]
+    },
+    "print.bleed-marks": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "bleedPoints": 9,
+        "bytes": 689
+      },
+      "method": "local-print-bleed-marks-geometry",
+      "requirePdf": true
+    },
+    "print.font-inspection-embedding": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "fonts.length": 2,
+        "missingEmbedCount": 1
+      },
+      "method": "local-print-font-embed-review"
+    },
+    "print.image-resolution-compression": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "dpi": 150,
+        "belowThreshold": false
+      },
+      "method": "local-print-image-dpi-review"
+    },
+    "print.imposition": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "nUp": 2,
+        "bytes": 692
+      },
+      "method": "local-print-imposition-nup",
+      "requirePdf": true
+    },
+    "print.ink-coverage": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "coverage.C": 12,
+        "coverage.M": 8,
+        "coverage.Y": 10,
+        "coverage.K": 20,
+        "total": 50,
+        "overLimit": false
+      },
+      "method": "local-print-ink-coverage-estimate"
+    },
+    "print.output-preview": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "profile": "screen-preview",
+        "previewId.length": 16
+      },
+      "method": "local-print-output-preview-token"
+    },
+    "print.overprint-preview": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "overprintFill": true,
+        "overprintStroke": false,
+        "simulate": true
+      },
+      "method": "local-print-overprint-flags"
+    },
+    "print.separations": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "plates.length": 4,
+        "count": 4
+      },
+      "method": "local-print-separation-plates"
+    },
+    "print.soft-proof": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "profile": "sRGB",
+        "intent": "relative-colorimetric"
+      },
+      "method": "local-print-soft-proof-profile"
+    },
+    "print.transparency-flattening": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "quality": "medium",
+        "bytes": 765
+      },
+      "method": "local-print-transparency-flatten",
+      "requirePdf": true
+    },
+    "print.trapping": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "widthPoints": 0.25,
+        "enabled": true
+      },
+      "method": "local-print-trap-width"
+    },
+    "print.variable-data": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "records.length": 2,
+        "count": 2
+      },
+      "method": "local-print-variable-data-records"
+    },
+    "redaction.apply": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "secretRemoved"
+      ],
+      "equals": {
+        "secretRemoved": true
+      },
+      "method": "local-object-full-page-redaction",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustNotContain": [
+        "secret"
+      ]
+    },
+    "redaction.batch": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "secretRemoved"
+      ],
+      "equals": {
+        "secretRemoved": true
+      },
+      "method": "local-full-page-redaction-batch-subset",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustNotContain": [
+        "secret"
+      ]
+    },
+    "redaction.find-patterns": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "hits.length": 1,
+        "count": 1
+      },
+      "method": "local-sensitive-pattern-scan"
+    },
+    "redaction.full-page": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "secretRemoved"
+      ],
+      "equals": {
+        "secretRemoved": true
+      },
+      "method": "local-object-full-page-redaction",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustNotContain": [
+        "secret"
+      ]
+    },
+    "redaction.mark": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "applied": true,
+        "proposedNotApplied": false
+      },
+      "method": "local-redaction-mark-annotation",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Subtype /Square",
+        "/Annots"
+      ]
+    },
+    "redaction.overlay-labels": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "label"
+      ],
+      "equals": {
+        "label": "REDACTED",
+        "secretRemoved": true
+      },
+      "methodIncludes": "overlay",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustNotContain": [
+        "secret"
+      ]
+    },
+    "redaction.preview": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "mark.page": 1,
+        "mark.region.x": 0,
+        "mark.region.y": 0,
+        "mark.region.width": 1,
+        "mark.region.height": 1,
+        "mark.fullPage": false,
+        "preview.overlays": 1,
+        "preview.page": 1,
+        "preview.status": "preview-from-marked-pdf",
+        "applied": true,
+        "bytes": 1533,
+        "overlayCount": 1
+      },
+      "method": "local-redaction-preview-from-mark",
+      "requirePdf": true
+    },
+    "redaction.report": {
+      "requiredKeys": [
+        "method",
+        "report"
+      ],
+      "equals": {
+        "applied": true,
+        "secretRemoved": true
+      },
+      "method": "local-redaction-report"
+    },
+    "review.annotation-flatten": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1116,
+        "proof.page": 1,
+        "proof.sourcePrefixPreserved": true,
+        "proof.annotationReference.object": 7,
+        "proof.annotationReference.generation": 0,
+        "flattened": true,
+        "annotationCount": 1
+      },
+      "method": "local-annotation-flatten-marker",
+      "requirePdf": true
+    },
+    "review.annotation-import-export": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1116,
+        "proof.page": 1,
+        "proof.sourcePrefixPreserved": true,
+        "proof.annotationReference.object": 7,
+        "proof.annotationReference.generation": 0,
+        "format": "xfdf-local"
+      },
+      "method": "local-annotation-interchange-payload",
+      "requirePdf": true
+    },
+    "review.annotation-properties": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1116,
+        "proof.page": 1,
+        "proof.sourcePrefixPreserved": true,
+        "proof.annotationReference.object": 7,
+        "proof.annotationReference.generation": 0,
+        "properties.page": 1
+      },
+      "method": "local-annotation-properties-map",
+      "requirePdf": true
+    },
+    "review.comment-summary": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "summary.count": 2,
+        "summary.authors.length": 2,
+        "count": 2
+      },
+      "method": "local-comment-summary-rollup"
+    },
+    "review.comments": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1116,
+        "proof.page": 1,
+        "proof.sourcePrefixPreserved": true,
+        "proof.annotationReference.object": 7,
+        "proof.annotationReference.generation": 0,
+        "open": true
+      },
+      "method": "local-inert-annotation-text",
+      "requirePdf": true
+    },
+    "review.comments-to-office": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "document.rows.length": 1,
+        "document.rowCount": 1,
+        "rowCount": 1
+      },
+      "method": "local-comments-to-office-table"
+    },
+    "review.custom-stamps": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1130,
+        "proof.page": 1,
+        "proof.sourcePrefixPreserved": true,
+        "proof.annotationReference.object": 7,
+        "proof.annotationReference.generation": 0,
+        "stampApplied": true
+      },
+      "method": "local-custom-stamp-annotation",
+      "requirePdf": true
+    },
+    "review.drawing-markup": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1119,
+        "proof.page": 1,
+        "proof.sourcePrefixPreserved": true,
+        "proof.annotationReference.object": 7,
+        "proof.annotationReference.generation": 0
+      },
+      "method": "local-inert-annotation-drawing",
+      "requirePdf": true
+    },
+    "review.file-audio-attachments": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1116,
+        "proof.page": 1,
+        "proof.sourcePrefixPreserved": true,
+        "proof.annotationReference.object": 7,
+        "proof.annotationReference.generation": 0
+      },
+      "method": "local-file-audio-attachment-marker",
+      "requirePdf": true
+    },
+    "review.filter-sort": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "items.length": 2,
+        "count": 2
+      },
+      "method": "local-review-filter-sort"
+    },
+    "review.markup-tools": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1121,
+        "proof.page": 1,
+        "proof.sourcePrefixPreserved": true,
+        "proof.annotationReference.object": 7,
+        "proof.annotationReference.generation": 0,
+        "color.length": 3
+      },
+      "method": "local-inert-annotation-highlight",
+      "requirePdf": true
+    },
+    "review.measurements": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1119,
+        "proof.page": 1,
+        "proof.sourcePrefixPreserved": true,
+        "proof.annotationReference.object": 7,
+        "proof.annotationReference.generation": 0,
+        "measure.value": 12.5,
+        "measure.unit": "pt"
+      },
+      "method": "local-review-measurement-annotation",
+      "requirePdf": true
+    },
+    "review.notifications-mentions": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "notification.deliveredLocal": true
+      },
+      "method": "local-review-mention-notification"
+    },
+    "review.review-tracking": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "tracking.events.length": 2,
+        "tracking.count": 2,
+        "count": 2
+      },
+      "method": "local-review-tracking-log"
+    },
+    "review.shared-review": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1117,
+        "proof.page": 1,
+        "proof.sourcePrefixPreserved": true,
+        "proof.annotationReference.object": 7,
+        "proof.annotationReference.generation": 0,
+        "participants.length": 2
+      },
+      "method": "local-shared-review-annotation",
+      "requirePdf": true
+    },
+    "review.statuses": {
+      "requiredKeys": [
+        "method",
+        "applied",
+        "status",
+        "pdf"
+      ],
+      "equals": {
+        "status": "accepted",
+        "applied": true,
+        "annotationSubtype": "Text"
+      },
+      "method": "local-review-status-annotation",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Annots",
+        "/Subtype /Text"
+      ]
+    },
+    "review.text-markup": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1121,
+        "proof.page": 1,
+        "proof.sourcePrefixPreserved": true,
+        "proof.annotationReference.object": 7,
+        "proof.annotationReference.generation": 0
+      },
+      "method": "local-inert-annotation-text-markup",
+      "requirePdf": true
+    },
+    "review.text-notes-callouts": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "bytes": 1121,
+        "proof.page": 1,
+        "proof.sourcePrefixPreserved": true,
+        "proof.annotationReference.object": 7,
+        "proof.annotationReference.generation": 0,
+        "callout": true
+      },
+      "method": "local-inert-annotation-freetext",
+      "requirePdf": true
+    },
+    "rich-media.audio-video": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "embedded",
+        "inventory"
+      ],
+      "equals": {
+        "embedded": true,
+        "hasRichMediaHint": true,
+        "inventory.markers.richMedia": true
+      },
+      "method": "local-rich-media-av-embed",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/RichMedia",
+        "/Subtype /RichMedia"
+      ]
+    },
+    "rich-media.playback-controls": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "controls"
+      ],
+      "equals": {
+        "controls.play": true,
+        "controls.pause": true
+      },
+      "method": "local-rich-media-playback-on-embed",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/RichMedia",
+        "/Subtype /RichMedia"
+      ]
+    },
+    "sanitize.hidden-data": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "proof.closedClassicRevision": true,
+        "proof.orphanResidueAbsent": true
+      },
+      "method": "local-pdf-hidden-data-sanitizer",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "%PDF-"
+      ]
+    },
+    "sanitize.metadata": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "titleRemoved"
+      ],
+      "equals": {
+        "titleRemoved": true
+      },
+      "method": "local-metadata-sanitize-info-cleared",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "METADATA_SANITIZED"
+      ],
+      "pdfMustNotContain": [
+        "Confidential Title"
+      ]
+    },
+    "sanitize.selective-content": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "secretRemoved"
+      ],
+      "equals": {
+        "secretRemoved": true
+      },
+      "method": "local-selective-full-page-content-wipe",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustNotContain": [
+        "secret"
+      ]
+    },
+    "scan.acquire": {
+      "requiredKeys": [
+        "acquired",
+        "ready",
+        "pdf",
+        "pageCount",
+        "structuralPageCount"
+      ],
+      "equals": {
+        "devices.length": 1,
+        "count": 1,
+        "ready": true,
+        "pageCount": 1,
+        "structuralPageCount": 1,
+        "acquired": true
+      },
+      "method": "local-scanner-acquire-pages",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Type /Page",
+        "/Count 1",
+        "/MediaBox",
+        "SCAN_ACQUIRE:"
+      ]
+    },
+    "scan.append-to-document": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "bytes": 1027,
+        "appendedPages": 1
+      },
+      "method": "local-scan-append-pages",
+      "requirePdf": true
+    },
+    "scan.duplex-feeder": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "sheets": 2,
+        "pageCount": 4,
+        "bytes": 1358
+      },
+      "method": "local-scanner-duplex-feeder",
+      "requirePdf": true
+    },
+    "security.certificate-encryption": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "plaintextAbsent"
+      ],
+      "equals": {
+        "profile": "platen-aes128-v1",
+        "bytes": 793,
+        "keyBits": 128,
+        "plaintextAbsent": true,
+        "roundTripOk": true
+      },
+      "method": "local-recipient-bound-aes-package",
+      "requirePdf": true
+    },
+    "security.encryption-aes": {
+      "requiredKeys": [
+        "pdf",
+        "plaintextAbsent"
+      ],
+      "equals": {
+        "profile": "platen-aes128-v1",
+        "bytes": 793,
+        "keyBits": 128,
+        "plaintextAbsent": true,
+        "roundTripOk": true
+      },
+      "method": "local-aes128-cbc-sealed-package",
+      "requirePdf": true
+    },
+    "security.information-protection-labels": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "applied": true,
+        "label": "INTERNAL"
+      },
+      "method": "local-protection-label-annotation",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Annots"
+      ]
+    },
+    "security.javascript-controls": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "failedClosed": true
+      },
+      "method": "local-javascript-controls"
+    },
+    "security.open-password": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "plaintextAbsent"
+      ],
+      "equals": {
+        "profile": "platen-aes128-v1",
+        "bytes": 793,
+        "keyBits": 128,
+        "plaintextAbsent": true,
+        "roundTripOk": true
+      },
+      "method": "local-aes128-cbc-sealed-package",
+      "requirePdf": true
+    },
+    "security.permission-controls": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "profile": "deny-all",
+        "permissions.print": false,
+        "permissions.copy": false,
+        "permissions.accessibility": false,
+        "permissions.modify": false,
+        "advisory": true
+      },
+      "method": "local-closed-permission-presets"
+    },
+    "security.policy-controls": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "policy.allowJavaScript": false,
+        "policy.allowExternalLinks": false,
+        "policy.allowHighPrivilegePrinting": false,
+        "policy.requireOpenPassword": false
+      },
+      "method": "local-security-policy-document"
+    },
+    "security.protected-view": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "activeContentSuppressed"
+      ],
+      "equals": {
+        "activeContentSuppressed": true
+      },
+      "method": "local-protected-view-suppressed",
+      "requirePdf": true,
+      "pdfMustNotContain": [
+        "/JavaScript"
+      ]
+    },
+    "security.remove-protection": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "equals": {
+        "bytes": 686,
+        "opened": true
+      },
+      "method": "local-aes-package-open",
+      "requirePdf": true
+    },
+    "security.security-envelopes": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "plaintextAbsent"
+      ],
+      "equals": {
+        "profile": "platen-aes128-v1",
+        "bytes": 793,
+        "keyBits": 128,
+        "plaintextAbsent": true,
+        "roundTripOk": true
+      },
+      "method": "local-aes-security-envelope",
+      "requirePdf": true
+    },
+    "sign.audit-trail": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "embedded",
+        "count"
+      ],
+      "equals": {
+        "embedded": true,
+        "count": 2
+      },
+      "method": "local-audit-chain-embedded-file",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/EmbeddedFiles",
+        "/Filespec"
+      ]
+    },
+    "sign.batch-sign-seal": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "count"
+      ],
+      "equals": {
+        "count": 2,
+        "seals.length": 2
+      },
+      "method": "local-batch-signature-containers",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/ByteRange"
+      ]
+    },
+    "sign.certificate": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "cmsSha256"
+      ],
+      "equals": {},
+      "method": "local-pdf-signature-container",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/ByteRange"
+      ]
+    },
+    "sign.certify-document": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "docMdp"
+      ],
+      "equals": {
+        "docMdp": true,
+        "certification": "no-changes-allowed",
+        "permP": 1
+      },
+      "method": "local-certify-docmdp-package",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/DocMDP",
+        "/TransformMethod /DocMDP",
+        "CERTIFY:DocMDP",
+        "/EmbeddedFiles"
+      ]
+    },
+    "sign.digital-id-management": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "count",
+        "embedded"
+      ],
+      "equals": {
+        "embedded": true,
+        "count": 1,
+        "identities.length": 1
+      },
+      "method": "local-digital-id-embedded-store",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/EmbeddedFiles",
+        "/Filespec"
+      ]
+    },
+    "sign.electronic": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "applied"
+      ],
+      "equals": {
+        "applied": true
+      },
+      "method": "local-electronic-stamp-annotation",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Annots",
+        "/Subtype /FreeText"
+      ]
+    },
+    "sign.identity-verification": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "match",
+        "fingerprint",
+        "expectedFingerprint"
+      ],
+      "equals": {
+        "match": true,
+        "embedded": true,
+        "claimedSubject": "CN=Local Signer",
+        "expectedFingerprint": "61ad3bf441ace9d1dd7174dd5c97b98436b8fe2947408c150a973d32779c29fb"
+      },
+      "method": "local-identity-fingerprint-verify-embedded",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/EmbeddedFiles",
+        "/Filespec"
+      ]
+    },
+    "sign.revocation-ltv": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "dss"
+      ],
+      "equals": {
+        "dss": true,
+        "ltv.dss": true
+      },
+      "method": "local-ltv-dss-evidence-package",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/DSS",
+        "/OCSPs",
+        "/CRLs",
+        "LTV_EVIDENCE",
+        "/EmbeddedFiles"
+      ]
+    },
+    "sign.routed-workflow": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "steps"
+      ],
+      "equals": {
+        "steps.length": 3
+      },
+      "method": "local-routed-signature-container",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/ByteRange"
+      ]
+    },
+    "sign.timestamp": {
+      "requiredKeys": [
+        "method",
+        "pdf"
+      ],
+      "method": "local-timestamp-bound-signature-container",
+      "requirePdf": true
+    },
+    "sign.trust-store": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "count",
+        "embedded"
+      ],
+      "equals": {
+        "embedded": true,
+        "count": 1,
+        "certificates.length": 1
+      },
+      "method": "local-trust-store-embedded-certs",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/EmbeddedFiles",
+        "/Filespec"
+      ]
+    },
+    "sign.validate-certificate": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "proof"
+      ],
+      "equals": {
+        "valid": true,
+        "proof.page": 1,
+        "proof.placeholderBytes": 4096,
+        "proof.byteRange.length": 4,
+        "proof.sourcePrefixPreserved": true,
+        "proof.cmsBytes": 20,
+        "proof.contentsPaddingBytes": 4076
+      },
+      "method": "local-signature-container-inspect",
+      "requirePdf": true
+    },
+    "sign.visible-appearance": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "visible"
+      ],
+      "equals": {
+        "visible": true
+      },
+      "method": "local-visible-sig-appearance-container",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/ByteRange"
+      ]
+    },
+    "standards.pdf-a": {
+      "requiredKeys": [
+        "method",
+        "report"
+      ],
+      "equals": {
+        "report.findings.length": 4,
+        "report.conforming": true,
+        "report.certified": false,
+        "certified": false
+      },
+      "method": "local-standards-pdfa-structural"
+    },
+    "standards.pdf-e": {
+      "requiredKeys": [
+        "method",
+        "report"
+      ],
+      "equals": {
+        "report.findings.length": 3,
+        "report.conforming": true,
+        "report.certified": false,
+        "certified": false
+      },
+      "method": "local-standards-pdfe-structural"
+    },
+    "standards.pdf-two": {
+      "requiredKeys": [
+        "method",
+        "report"
+      ],
+      "equals": {
+        "report.findings.length": 4,
+        "report.conforming": true,
+        "report.certified": false,
+        "certified": false
+      },
+      "method": "local-standards-pdf20-structural"
+    },
+    "standards.pdf-ua": {
+      "requiredKeys": [
+        "method",
+        "report"
+      ],
+      "equals": {
+        "report.findings.length": 4,
+        "report.conforming": true,
+        "report.certified": false,
+        "certified": false
+      },
+      "method": "local-standards-pdfua-structural"
+    },
+    "standards.pdf-vt": {
+      "requiredKeys": [
+        "method",
+        "report"
+      ],
+      "equals": {
+        "report.findings.length": 3,
+        "report.conforming": true,
+        "report.certified": false,
+        "certified": false
+      },
+      "method": "local-standards-pdfvt-structural"
+    },
+    "standards.pdf-x": {
+      "requiredKeys": [
+        "method",
+        "report"
+      ],
+      "equals": {
+        "report.findings.length": 4,
+        "report.conforming": true,
+        "report.certified": false,
+        "certified": false
+      },
+      "method": "local-standards-pdfx-structural"
+    },
+    "three-d.import": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "admitted",
+        "embedded"
+      ],
+      "equals": {
+        "format": "u3d",
+        "admitted": true,
+        "embedded": true
+      },
+      "method": "local-3d-import-embed",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Subtype /3D",
+        "/3DD",
+        "/U3D"
+      ]
+    },
+    "three-d.measure-comment": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "measure.kind": "distance"
+      },
+      "method": "local-3d-measure-comment"
+    },
+    "three-d.saved-views-sections": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "views.length": 2,
+        "count": 2
+      },
+      "method": "local-3d-saved-views"
+    },
+    "viewer.advanced-search": {
+      "requiredKeys": [
+        "method",
+        "totalMatches"
+      ],
+      "equals": {
+        "totalMatches": 1,
+        "matches.length": 1,
+        "search.caseSensitive": false,
+        "search.wholeWord": false,
+        "search.context": 20,
+        "search.maxResults": 100,
+        "search.totalMatches": 1,
+        "search.truncated": false,
+        "search.matches.length": 1
+      },
+      "method": "local-viewer-advanced-search-core"
+    },
+    "viewer.attachments": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "count",
+        "attachments",
+        "embeddedFiles"
+      ],
+      "equals": {
+        "attachments.length": 2,
+        "count": 2,
+        "embeddedFiles": true
+      },
+      "method": "local-pdf-embedded-file-collection",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/EmbeddedFiles",
+        "/Filespec",
+        "/EF"
+      ]
+    },
+    "viewer.bookmarks": {
+      "requiredKeys": [
+        "method",
+        "pdf",
+        "count"
+      ],
+      "equals": {
+        "hasOutlines": true
+      },
+      "method": "local-classic-pdf-outlines",
+      "requirePdf": true,
+      "claimClass": "mutation",
+      "pdfMustContain": [
+        "/Outlines",
+        "/Title"
+      ]
+    },
+    "viewer.destinations": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "destinations.length": 2,
+        "count": 2
+      },
+      "method": "local-viewer-named-destinations"
+    },
+    "viewer.document-properties": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "properties.bytes": 686,
+        "properties.encrypted": false
+      },
+      "method": "local-viewer-document-properties"
+    },
+    "viewer.fullscreen": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "fullscreen": true,
+        "viewState.fullscreen": true
+      },
+      "method": "local-viewer-fullscreen-request"
+    },
+    "viewer.layers": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "layers.length": 2,
+        "visibleCount": 2
+      },
+      "method": "local-viewer-layer-visibility"
+    },
+    "viewer.loupe": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "region.x": 100,
+        "region.y": 100,
+        "region.magnify": 2,
+        "region.width": 120,
+        "region.height": 120
+      },
+      "method": "local-viewer-loupe-region"
+    },
+    "viewer.multidocument-tabs": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "tabs.length": 2,
+        "count": 2
+      },
+      "method": "local-viewer-document-tabs"
+    },
+    "viewer.native.render": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "page": 1,
+        "widthPoints": 612,
+        "heightPoints": 792
+      },
+      "method": "local-viewer-page-render-fingerprint"
+    },
+    "viewer.navigation-history": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "history.length": 3,
+        "index": 2,
+        "current.page": 2,
+        "canBack": true,
+        "canForward": false
+      },
+      "method": "local-viewer-nav-history-stack"
+    },
+    "viewer.page-labels": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "labels.length": 4,
+        "count": 4
+      },
+      "method": "local-viewer-logical-page-labels"
+    },
+    "viewer.page-layouts": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "layout": "continuous",
+        "viewState.layout": "continuous"
+      },
+      "method": "local-viewer-page-layout-mode"
+    },
+    "viewer.presentation-mode": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "presentation": true,
+        "chromeHidden": true,
+        "page": 1
+      },
+      "method": "local-viewer-presentation-mode"
+    },
+    "viewer.read-aloud": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "rate": 1,
+        "utterances.length": 4,
+        "totalChars": 98
+      },
+      "method": "local-viewer-read-aloud-plan"
+    },
+    "viewer.reflow": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "columns": 1,
+        "blocks.length": 4,
+        "count": 4
+      },
+      "method": "local-viewer-reflow-blocks"
+    },
+    "viewer.rotate.preview": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "rotation": 90,
+        "viewState.rotation": 90
+      },
+      "method": "local-viewer-rotate-state"
+    },
+    "viewer.rulers-grid": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "unit": "pt",
+        "gridSpacing": 36,
+        "rulersVisible": true,
+        "gridVisible": true
+      },
+      "method": "local-viewer-rulers-and-grid"
+    },
+    "viewer.search": {
+      "requiredKeys": [
+        "method",
+        "totalMatches"
+      ],
+      "equals": {
+        "totalMatches": 1,
+        "matches.length": 1,
+        "search.caseSensitive": false,
+        "search.wholeWord": false,
+        "search.context": 12,
+        "search.maxResults": 50,
+        "search.totalMatches": 1,
+        "search.truncated": false,
+        "search.matches.length": 1
+      },
+      "method": "local-viewer-extracted-text-search"
+    },
+    "viewer.select-copy": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "selection.page": 1,
+        "selection.charCount": 98,
+        "clipboardReady": true
+      },
+      "method": "local-viewer-selection-clipboard"
+    },
+    "viewer.snapshot": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "page": 1,
+        "snapshotId.length": 24
+      },
+      "method": "local-viewer-page-snapshot-token"
+    },
+    "viewer.split-view": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "ratio": 0.5,
+        "panes": 2
+      },
+      "method": "local-viewer-split-panes"
+    },
+    "viewer.thumbnails": {
+      "requiredKeys": [
+        "method",
+        "count"
+      ],
+      "equals": {
+        "thumbnails.length": 3,
+        "count": 3
+      },
+      "method": "local-viewer-thumbnail-index"
+    },
+    "viewer.zoom.preview": {
+      "requiredKeys": [
+        "method"
+      ],
+      "equals": {
+        "zoom": 1.25,
+        "zoomPercent": 125,
+        "viewState.zoom": 1.25
+      },
+      "method": "local-viewer-zoom-state"
+    }
+  },
+  "mutationBytePredicates": true,
+  "handAuthoredMutationIds": [
+    "viewer.bookmarks",
+    "edit.links",
+    "accessibility.auto-tag",
+    "accessibility.remediate-tags",
+    "accessibility.alt-text",
+    "redaction.mark",
+    "redaction.apply",
+    "forms.fill-save",
+    "sign.certificate",
+    "edit.text",
+    "integrations.sensitivity-labels",
+    "review.statuses",
+    "viewer.attachments",
+    "accessibility.artifact-management",
+    "print.barcode-decoration",
+    "three-d.import",
+    "rich-media.audio-video",
+    "color.output-intents",
+    "color.spot-colors",
+    "integrations.cad-bim",
+    "geospatial.inspect-measure-markup",
+    "forms.barcode-fields",
+    "rich-media.playback-controls",
+    "scan.acquire",
+    "pages.merge",
+    "pages.extract",
+    "pages.crop",
+    "pages.rotate",
+    "pages.reorder",
+    "pages.delete",
+    "pages.insert",
+    "pages.replace",
+    "document.bookmarks-author",
+    "document.destinations-author",
+    "document.layers-manage",
+    "document.optional-content-groups",
+    "document.watermarks",
+    "document.backgrounds",
+    "document.bates-numbering",
+    "document.attachments-manage",
+    "document.flatten-content",
+    "document.metadata-edit",
+    "edit.add-text",
+    "edit.headers-footers",
+    "edit.images",
+    "edit.vector-objects",
+    "edit.object-properties",
+    "edit.text-reflow",
+    "aec.batch-link",
+    "sign.electronic",
+    "sign.visible-appearance",
+    "sign.audit-trail",
+    "security.information-protection-labels",
+    "redaction.overlay-labels",
+    "redaction.full-page",
+    "redaction.batch",
+    "pages.duplicate",
+    "pages.copy-between-documents",
+    "pages.resize",
+    "pages.page-boxes",
+    "pages.labels-numbering",
+    "pages.reverse-interleave",
+    "pages.insert-blank",
+    "pages.transitions",
+    "edit.find-replace",
+    "sign.routed-workflow",
+    "sign.revocation-ltv",
+    "sign.certify-document",
+    "sign.identity-verification",
+    "sign.trust-store",
+    "sign.digital-id-management",
+    "sign.batch-sign-seal",
+    "sanitize.hidden-data",
+    "sanitize.metadata",
+    "sanitize.selective-content",
+    "pages.split"
+  ]
+}

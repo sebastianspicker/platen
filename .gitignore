@@ -1,0 +1,70 @@
+# Dependencies and package-manager state
+node_modules/
+.npm/
+
+# Node test, coverage, and build output
+coverage/
+.nyc_output/
+dist/
+build/
+.cache/
+*.tsbuildinfo
+*.lcov
+
+# SwiftPM and Xcode output
+.build/
+.swiftpm/
+DerivedData/
+*.xcresult
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.mobileprovision
+*.pem
+!**/fixtures/**/*.pem
+
+# Local runtime state
+*.log
+*.pid
+*.local.db
+*.local.sqlite
+*.local.sqlite3
+tmp/
+temp/
+/var/
+
+# Editor, operating-system, and local tool state
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Local assistant, agent, and code-index caches (not part of the product)
+.serena/
+.agents/
+.codex/
+.codegraph/
+.grok/
+.claude/
+.cursor/
+.continue/
+.windsurf/
+.aider*
+AGENTS.md
+CLAUDE.md
+.cursorignore
+.cursorrules
+
+# Ad hoc captures. Curated release images belong in docs/screenshots/.
+/.screenshots/
+/screenshots-local/
+/recordings/

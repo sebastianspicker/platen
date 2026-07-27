@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/accessibility-remediation-proposal.schema.json",
+  "title": "Source-bound non-applying accessibility remediation proposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "type", "status", "sourceSha256", "reviewSha256", "expectedWorkspaceRevision", "pdfWriterRequired", "conformanceClaim", "operations"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "type": {"const": "accessibility-remediation-proposal"},
+    "status": {"const": "proposed-not-applied"},
+    "sourceSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "reviewSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "expectedWorkspaceRevision": {"type": "integer", "minimum": 0},
+    "pdfWriterRequired": {"const": true},
+    "conformanceClaim": {"const": false},
+    "operations": {
+      "type": "array", "minItems": 1, "maxItems": 128,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "action", "target", "status", "pdfWriterRequired", "conformanceClaim"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^operation-[1-9][0-9]{0,2}$"},
+          "action": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$"},
+          "authoredText": {"type": "string", "minLength": 1, "maxLength": 1000, "pattern": "^(?!.*[\\u0000-\\u001F\\u007F-\\u009F\\u200C-\\u200F\\u202A-\\u202E\\u2060\\u2066-\\u206F\\uFEFF]).+$", "$comment": "Structural checks only. Runtime validation additionally normalizes NFC and enforces the UTF-16-unit bound, all Unicode Cf rejection, unpaired-surrogate rejection, and leading path-like rejection."},
+          "target": {
+            "type": ["null", "object"],
+            "additionalProperties": false,
+            "required": ["locator"],
+            "properties": {"locator": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}
+          },
+          "status": {"const": "proposed-not-applied"},
+          "pdfWriterRequired": {"const": true},
+          "conformanceClaim": {"const": false}
+        },
+        "allOf": [
+          {
+            "if": {"required": ["authoredText"]},
+            "then": {
+              "properties": {
+                "action": {"const": "author-image-alt-text"},
+                "target": {"type": "object", "additionalProperties": false, "required": ["locator"], "properties": {"locator": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}}
+              }
+            }
+          },
+          {
+            "if": {"required": ["action"], "properties": {"action": {"const": "author-image-alt-text"}}},
+            "then": {
+              "required": ["authoredText"],
+              "properties": {
+                "target": {"type": "object", "additionalProperties": false, "required": ["locator"], "properties": {"locator": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}}
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

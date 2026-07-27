@@ -1,0 +1,5051 @@
+[
+  {
+    "id": "document.open.local",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Open local document",
+    "description": "Select a local PDF for the shell document session.",
+    "engine": null,
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/document-session.test.js"
+    }
+  },
+  {
+    "id": "document.open.drag-drop",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Open by drag and drop",
+    "description": "Accept the first locally dropped file into the validated document-session path.",
+    "engine": null,
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/ui-actions.test.js"
+    }
+  },
+  {
+    "id": "document.close",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Close document",
+    "description": "End the active local document session.",
+    "engine": null,
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/document-session.test.js"
+    }
+  },
+  {
+    "id": "document.download.original",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Download original",
+    "description": "Return the originally opened local PDF without transformation.",
+    "engine": null,
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/document-session.test.js"
+    }
+  },
+  {
+    "id": "viewer.native.render",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Native viewer surface",
+    "description": "Embed the supplied PDF in a browser-native viewer surface with an unavailable-viewer fallback.",
+    "engine": null,
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/view-render-core.test.js"
+    }
+  },
+  {
+    "id": "viewer.zoom.preview",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Preview zoom",
+    "description": "Change preview magnification within bounded steps without modifying the PDF.",
+    "engine": null,
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/ui-actions.test.js"
+    }
+  },
+  {
+    "id": "viewer.rotate.preview",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Preview rotation",
+    "description": "Rotate the displayed preview in quarter turns without writing page rotation.",
+    "engine": null,
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/ui-actions.test.js"
+    }
+  },
+  {
+    "id": "viewer.fullscreen",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Fullscreen request",
+    "description": "Request fullscreen for the document surface and report unavailable browser support.",
+    "engine": null,
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/ui-actions.test.js"
+    }
+  },
+  {
+    "id": "platform.plugins.catalog",
+    "familyId": "plugin-platform",
+    "owner": "plugin-platform",
+    "delivery": "implemented",
+    "title": "Plugin catalog",
+    "description": "Expose declarative metadata for optional plugin capabilities.",
+    "engine": null,
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/catalog-coverage.test.js"
+    }
+  },
+  {
+    "id": "platform.plugins.sandbox-probe",
+    "familyId": "plugin-platform",
+    "owner": "plugin-platform",
+    "delivery": "implemented",
+    "title": "Static sandbox declaration probe",
+    "description": "Check the intended allow-scripts-only declaration without loading executable plugins or proving runtime isolation.",
+    "engine": null,
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/plugin-lifecycle.test.js"
+    }
+  },
+  {
+    "id": "viewer.thumbnails",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Page thumbnails",
+    "description": "Generate and navigate page thumbnails.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdftocairo bounded PNG page render"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-poppler.test.js"
+    }
+  },
+  {
+    "id": "viewer.search",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Document search",
+    "description": "Find text and navigate matching locations.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdftotext UTF-8 extraction"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-poppler.test.js"
+    }
+  },
+  {
+    "id": "viewer.advanced-search",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Advanced search",
+    "description": "Search by case, whole word, pattern, comments, or multiple documents.",
+    "engine": {
+      "provider": "Browser viewer and Poppler",
+      "operation": "professional viewer modes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "viewer.bookmarks",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Bookmarks and outlines",
+    "description": "Inspect bounded PDF outline labels and navigate only Apple PDFKit-resolved local page destinations; unresolved or unsupported actions remain inert.",
+    "engine": {
+      "provider": "Apple PDFKit",
+      "operation": "source-bound read-only outline inventory capped at 200 items and 8 levels with resolved local-page navigation"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdfkit-03.test.js"
+    }
+  },
+  {
+    "id": "viewer.page-layouts",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Page layouts",
+    "description": "Use single, continuous, facing, and cover-page layouts.",
+    "engine": {
+      "provider": "Browser viewer and Poppler",
+      "operation": "professional viewer modes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "viewer.multidocument-tabs",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Multi-document tabs",
+    "description": "Keep several local documents open in tabs.",
+    "engine": {
+      "provider": "Browser viewer and Poppler",
+      "operation": "professional viewer modes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "viewer.split-view",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Split view",
+    "description": "View documents or two locations side by side.",
+    "engine": {
+      "provider": "Browser viewer and Poppler",
+      "operation": "professional viewer modes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "viewer.reflow",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Reflow view",
+    "description": "Reflow tagged content for narrow or accessible reading.",
+    "engine": {
+      "provider": "Browser viewer and Poppler",
+      "operation": "professional viewer modes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "viewer.read-aloud",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Read aloud",
+    "description": "Read extracted document text with a local speech engine.",
+    "engine": {
+      "provider": "Browser viewer and Poppler",
+      "operation": "professional viewer modes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "viewer.attachments",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Attachment inventory",
+    "description": "List embedded attachment names and indices without opening them.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdfdetach metadata listing"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-poppler.test.js"
+    }
+  },
+  {
+    "id": "viewer.layers",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Layer viewer",
+    "description": "Inspect optional-content groups and report their names in a bounded, read-only helper inventory.",
+    "engine": {
+      "provider": "Apple PDFKit",
+      "operation": "source-bound read-only optional-content group inventory capped at 200 groups, with local source digest binding"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdfkit-01.test.js"
+    }
+  },
+  {
+    "id": "viewer.destinations",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Named destinations",
+    "description": "Inspect a fail-closed, bounded Poppler named-destination inventory and navigate retained local page targets only; coordinates, zoom, actions, lookup, and authoring are unavailable.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdfinfo -dests UTF-8 inventory capped at 200 validated local page records"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-parsers.test.js"
+    }
+  },
+  {
+    "id": "viewer.page-labels",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Logical page labels",
+    "description": "Display bounded Apple PDFKit-resolved logical labels and navigate each retained label to its mapped local physical page.",
+    "engine": {
+      "provider": "Apple PDFKit",
+      "operation": "source-bound read-only logical-label inventory for at most 100 pages with exact page-to-label validation and fail-closed 1024-byte labels"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdfkit-01.test.js"
+    }
+  },
+  {
+    "id": "viewer.document-properties",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Document properties",
+    "description": "Inspect metadata, fonts, security, and page geometry.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdfinfo, pdffonts, and pdfimages inspection"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-poppler.test.js"
+    }
+  },
+  {
+    "id": "viewer.select-copy",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Select and copy",
+    "description": "Select and copy text or rendered images.",
+    "engine": {
+      "provider": "Browser viewer and Poppler",
+      "operation": "professional viewer modes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "viewer.loupe",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Loupe",
+    "description": "Inspect one fixed-DPI magnified CropBox raster region while retaining the native full-page context.",
+    "engine": {
+      "provider": "Poppler and bounded local PNG codec",
+      "operation": "source-bound normalized selected-page region render retained in a reset-safe inspector session"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/ui-actions.test.js"
+    }
+  },
+  {
+    "id": "viewer.snapshot",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Snapshot",
+    "description": "Copy or download one normalized region of the selected page's passive CropBox raster as a bounded PNG.",
+    "engine": {
+      "provider": "Poppler and bounded local PNG codec",
+      "operation": "source-bound selected-page CropBox rendering with normalized top-left floor/ceil pixel crop"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-poppler.test.js"
+    }
+  },
+  {
+    "id": "viewer.rulers-grid",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Rulers and grid",
+    "description": "Show rulers, guides, grids, and snapping aids.",
+    "engine": {
+      "provider": "Browser viewer and Poppler",
+      "operation": "professional viewer modes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "viewer.presentation-mode",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Presentation mode",
+    "description": "Present pages in a distraction-free slide view.",
+    "engine": {
+      "provider": "Browser viewer and Poppler",
+      "operation": "professional viewer modes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "viewer.navigation-history",
+    "familyId": "view-navigation",
+    "owner": "core-shell",
+    "delivery": "implemented",
+    "title": "Navigation history",
+    "description": "Move backward and forward through the last 100 application-selected physical PDF pages for the current document only.",
+    "engine": null,
+    "evidence": {
+      "kind": "unit-test",
+      "reference": "tests/navigation-history.test.js"
+    }
+  },
+  {
+    "id": "create.blank-pdf",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Create blank PDF",
+    "description": "Create a new PDF from a blank document.",
+    "engine": {
+      "provider": "Local PDF factory",
+      "operation": "deterministic PDF creation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "convert.office-to-pdf",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Office to PDF",
+    "description": "Convert office documents to PDF.",
+    "engine": {
+      "provider": "LibreOffice/ImageMagick/Ghostscript/local factory",
+      "operation": "local format conversion to PDF"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "convert.images-to-pdf",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Images to PDF",
+    "description": "Create PDFs from image files.",
+    "engine": {
+      "provider": "LibreOffice/ImageMagick/Ghostscript/local factory",
+      "operation": "local format conversion to PDF"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "convert.html-to-pdf",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "HTML to PDF",
+    "description": "Render local HTML content to PDF.",
+    "engine": {
+      "provider": "LibreOffice/ImageMagick/Ghostscript/local factory",
+      "operation": "local format conversion to PDF"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "create.clipboard-to-pdf",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Clipboard to PDF",
+    "description": "Create a PDF from local clipboard content after consent.",
+    "engine": {
+      "provider": "Local PDF factory",
+      "operation": "deterministic PDF creation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "create.print-to-pdf",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Print to PDF",
+    "description": "Create PDF output through a local print integration.",
+    "engine": {
+      "provider": "Local PDF factory",
+      "operation": "deterministic PDF creation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "create.postscript-to-pdf",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "PostScript to PDF",
+    "description": "Convert PostScript or EPS input to PDF.",
+    "engine": {
+      "provider": "Local PDF factory",
+      "operation": "deterministic PDF creation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "create.multiformat-combine",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Combine mixed formats",
+    "description": "Combine supported local source formats into one PDF.",
+    "engine": {
+      "provider": "Local PDF factory",
+      "operation": "deterministic PDF creation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "create.cad-to-pdf",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "CAD to PDF",
+    "description": "Create PDFs from supported CAD or BIM exports.",
+    "engine": {
+      "provider": "Local PDF factory",
+      "operation": "deterministic PDF creation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "export.word",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Export to Word",
+    "description": "Export PDF content to an editable word-processing format.",
+    "engine": {
+      "provider": "Local export adapters",
+      "operation": "structured export from PDF text/layout"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "export.excel",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Export to spreadsheet",
+    "description": "Export detected tables and content to a spreadsheet format.",
+    "engine": {
+      "provider": "Local export adapters",
+      "operation": "structured export from PDF text/layout"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "export.powerpoint",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Export to presentation",
+    "description": "Export PDF pages and content to a presentation format.",
+    "engine": {
+      "provider": "Local export adapters",
+      "operation": "structured export from PDF text/layout"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "export.text-rtf",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Export text and RTF",
+    "description": "Export document text to plain or rich text.",
+    "engine": {
+      "provider": "Local export adapters",
+      "operation": "structured export from PDF text/layout"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "export.html-xml",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Export HTML and XML",
+    "description": "Export structured PDF content to HTML or XML.",
+    "engine": {
+      "provider": "Local export adapters",
+      "operation": "structured export from PDF text/layout"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "export.images",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Export selected page PNG",
+    "description": "Render the selected page to a bounded PNG image.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdftocairo bounded PNG page render"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-poppler.test.js"
+    }
+  },
+  {
+    "id": "export.selected-region",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Export selected region",
+    "description": "The local CLI exports exactly one normalized top-left CropBox region from the existing source-bound private Poppler raster/crop pipeline at bounded DPI as an exclusive PNG. This is raster output only: no text, vector, or PDF object extraction, and no professional export claim.",
+    "engine": {
+      "provider": "Local export adapters",
+      "operation": "structured export from PDF text/layout"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "optimize.compress",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Compress and optimize",
+    "description": "Reduce file size with controlled object and image optimization.",
+    "engine": null,
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "optimize.fast-web-view",
+    "familyId": "create-convert",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Fast web view",
+    "description": "Linearize a PDF for progressive byte-range delivery.",
+    "engine": null,
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "edit.text",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Edit text",
+    "description": "Modify existing PDF text content.",
+    "engine": {
+      "provider": "Local PDF text/image writers",
+      "operation": "source-bound content editing"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "edit.add-text",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Add text",
+    "description": "Add new positioned text content.",
+    "engine": {
+      "provider": "Local PDF text/image writers",
+      "operation": "source-bound content editing"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "edit.text-reflow",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Paragraph reflow editing",
+    "description": "Reflow paragraphs while editing text blocks.",
+    "engine": {
+      "provider": "Local PDF text/image writers",
+      "operation": "source-bound content editing"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "edit.images",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Edit images",
+    "description": "Add, replace, crop, resize, or transform images.",
+    "engine": {
+      "provider": "Local PDF text/image writers",
+      "operation": "source-bound content editing"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "edit.links",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Edit links",
+    "description": "Create and modify document hyperlinks.",
+    "engine": {
+      "provider": "Local PDF text/image writers",
+      "operation": "source-bound content editing"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "edit.headers-footers",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Headers and footers",
+    "description": "Add recurring headers, footers, and page numbering.",
+    "engine": {
+      "provider": "Local PDF text/image writers",
+      "operation": "source-bound content editing"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "edit.vector-objects",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Edit vector objects",
+    "description": "Create and edit paths, shapes, fills, and strokes.",
+    "engine": {
+      "provider": "Local PDF text/image writers",
+      "operation": "source-bound content editing"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "edit.object-properties",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Object properties",
+    "description": "Inspect and edit object geometry and appearance.",
+    "engine": {
+      "provider": "Local PDF text/image writers",
+      "operation": "source-bound content editing"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "edit.find-replace",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Find and replace",
+    "description": "Replace matching text in editable content.",
+    "engine": {
+      "provider": "Local PDF text/image writers",
+      "operation": "source-bound content editing"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "edit.spellcheck",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Spell checking",
+    "description": "Check editable text with local dictionaries.",
+    "engine": {
+      "provider": "Local PDF text/image writers",
+      "operation": "source-bound content editing"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "document.watermarks",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Watermarks",
+    "description": "Add, update, and remove page watermarks.",
+    "engine": {
+      "provider": "Local incremental PDF writers",
+      "operation": "document-level professional mutations"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "document.backgrounds",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Backgrounds",
+    "description": "Add, update, and remove page backgrounds.",
+    "engine": {
+      "provider": "Local incremental PDF writers",
+      "operation": "document-level professional mutations"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "document.bates-numbering",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Bates numbering",
+    "description": "Apply controlled Bates identifiers across document sets.",
+    "engine": {
+      "provider": "Local incremental PDF writers",
+      "operation": "document-level professional mutations"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "document.bookmarks-author",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Author bookmarks",
+    "description": "Create and edit document outlines and bookmarks.",
+    "engine": {
+      "provider": "Local incremental PDF writers",
+      "operation": "document-level professional mutations"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "document.destinations-author",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Author named destinations",
+    "description": "Create and edit named destinations.",
+    "engine": {
+      "provider": "Local incremental PDF writers",
+      "operation": "document-level professional mutations"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "document.attachments-manage",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Manage attachments",
+    "description": "Add, extract, rename, or remove embedded files.",
+    "engine": {
+      "provider": "Local incremental PDF writers",
+      "operation": "document-level professional mutations"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "document.layers-manage",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Manage layers",
+    "description": "Create, assign, reorder, and flatten optional-content groups.",
+    "engine": {
+      "provider": "Local incremental PDF writers",
+      "operation": "document-level professional mutations"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "document.metadata-edit",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Edit metadata",
+    "description": "Edit document information and XMP metadata.",
+    "engine": {
+      "provider": "Local incremental PDF writers",
+      "operation": "document-level professional mutations"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "document.flatten-content",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Flatten content",
+    "description": "Flatten selected annotations, forms, layers, or transparency with explicit scope.",
+    "engine": {
+      "provider": "Local incremental PDF writers",
+      "operation": "document-level professional mutations"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "document.actions-javascript",
+    "familyId": "content-editing",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Document actions and JavaScript",
+    "description": "Inspect and author document actions or scripts without automatic execution.",
+    "engine": {
+      "provider": "Local incremental PDF writers",
+      "operation": "document-level professional mutations"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "pages.merge",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Merge PDFs",
+    "description": "Combine multiple PDFs into one document.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdfunite immutable-source composition"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-composition.test.js"
+    }
+  },
+  {
+    "id": "pages.split",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Split document",
+    "description": "Split a PDF of up to 100 pages into separately validated single-page PDF artifacts.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdfseparate bounded per-page composition"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-composition.test.js"
+    }
+  },
+  {
+    "id": "pages.extract",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Extract pages",
+    "description": "Extract selected pages into a new PDF.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdfseparate and pdfunite derived output"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-composition.test.js"
+    }
+  },
+  {
+    "id": "pages.reorder",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Reorder pages",
+    "description": "Rearrange page order.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdfseparate and pdfunite ordered composition"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-composition.test.js"
+    }
+  },
+  {
+    "id": "pages.delete",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Delete pages",
+    "description": "Remove selected pages from a derived document.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdfseparate and pdfunite filtered composition"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-composition.test.js"
+    }
+  },
+  {
+    "id": "pages.crop",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Crop pages",
+    "description": "Persist one selected page CropBox within its MediaBox in a separately validated non-rasterized PDF while preserving unrelated page boxes, rotations, and bounded annotation state descriptors.",
+    "engine": {
+      "provider": "Apple PDFKit and Poppler",
+      "operation": "source-bound selected-page CropBox mutation with candidate/reopen preservation proof and independent output inspection/rendering"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdfkit-05.test.js"
+    }
+  },
+  {
+    "id": "pages.rotate",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Rotate pages",
+    "description": "Persist one selected page at an absolute 0, 90, 180, or 270 degree rotation in a separately validated non-rasterized PDF.",
+    "engine": {
+      "provider": "Apple PDFKit and Poppler",
+      "operation": "source-bound page rotation with candidate/reopen state proof and independent output inspection/rendering"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdfkit-05.test.js"
+    }
+  },
+  {
+    "id": "pages.insert",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Insert pages",
+    "description": "Insert every page of another local PDF after a selected page into a separately validated artifact.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdfseparate and pdfunite multi-source composition"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-composition.test.js"
+    }
+  },
+  {
+    "id": "pages.replace",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Replace pages",
+    "description": "Replace a selected source range with every page of another local PDF in a separately validated artifact.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdfseparate and pdfunite multi-source composition"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-composition.test.js"
+    }
+  },
+  {
+    "id": "pages.duplicate",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Duplicate pages",
+    "description": "Duplicate selected source pages immediately after their originals in a separately validated artifact.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdfseparate and pdfunite repeated-page composition"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-composition.test.js"
+    }
+  },
+  {
+    "id": "pages.copy-between-documents",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Copy pages between documents",
+    "description": "Move or copy pages across local documents.",
+    "engine": {
+      "provider": "Poppler and PDFKit",
+      "operation": "page composition and boxes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "pages.resize",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Resize pages",
+    "description": "Change page dimensions and content placement.",
+    "engine": {
+      "provider": "Poppler and PDFKit",
+      "operation": "page composition and boxes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "pages.page-boxes",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Page boxes",
+    "description": "Edit media, crop, bleed, trim, and art boxes.",
+    "engine": {
+      "provider": "Poppler and PDFKit",
+      "operation": "page composition and boxes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "pages.labels-numbering",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Page labels and numbering",
+    "description": "Assign logical labels and numbering schemes.",
+    "engine": {
+      "provider": "Poppler and PDFKit",
+      "operation": "page composition and boxes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "pages.reverse-interleave",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Reverse and interleave",
+    "description": "Reverse one local PDF or alternate the pages of two local PDFs into a separately validated artifact.",
+    "engine": {
+      "provider": "Poppler",
+      "operation": "pdfseparate and pdfunite ordered multi-source composition"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-composition.test.js"
+    }
+  },
+  {
+    "id": "pages.insert-blank",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Insert blank pages",
+    "description": "Insert blank pages with chosen dimensions.",
+    "engine": {
+      "provider": "Poppler and PDFKit",
+      "operation": "page composition and boxes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "pages.transitions",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Page transitions",
+    "description": "Configure presentation transitions and timing.",
+    "engine": {
+      "provider": "Poppler and PDFKit",
+      "operation": "page composition and boxes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "pages.split-by-rule",
+    "familyId": "page-organization",
+    "owner": "document-services",
+    "delivery": "implemented",
+    "title": "Rule-based split",
+    "description": "Split by page count, bookmarks, blank pages, size, or text matches.",
+    "engine": {
+      "provider": "Poppler and PDFKit",
+      "operation": "page composition and boxes"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.comments",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Comments and replies",
+    "description": "Add threaded review comments.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.markup-tools",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Markup tools",
+    "description": "Highlight, draw, stamp, and call out content.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.shared-review",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Shared review",
+    "description": "Synchronize annotations across reviewers.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.text-markup",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Text markup",
+    "description": "Highlight, underline, strike out, insert, and replace text.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.drawing-markup",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Drawing markup",
+    "description": "Add freehand, line, arrow, polygon, cloud, and shape markups.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.text-notes-callouts",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Notes and callouts",
+    "description": "Add sticky notes, text boxes, and callouts.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.file-audio-attachments",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "File and audio annotations",
+    "description": "Embed one bounded local text, binary, or validated PCM WAV asset as an inert FileAttachment on a supported passive PDF page.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.measurements",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Review measurements",
+    "description": "Add calibrated distance, area, and perimeter annotations.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.annotation-properties",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Annotation properties",
+    "description": "Edit author, color, opacity, appearance, and defaults.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.annotation-import-export",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Annotation interchange",
+    "description": "Import and export annotation data such as FDF and XFDF.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.comment-summary",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Comment summaries",
+    "description": "Generate PDF, CSV, XML, or printable comment reports.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.statuses",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Review statuses",
+    "description": "Apply standard and custom annotation statuses.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.filter-sort",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Filter and sort reviews",
+    "description": "Filter, sort, search, and group annotation lists.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.custom-stamps",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Custom stamps",
+    "description": "Create static or dynamic custom stamps.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.annotation-flatten",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Flatten annotations",
+    "description": "Convert selected annotations to page content.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.review-tracking",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Review tracking",
+    "description": "Track participants, state, due dates, and outstanding feedback.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.notifications-mentions",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Mentions and notifications",
+    "description": "Generate source-bound, digest-only local mention notifications for annotation mentions and reply mentions; shared-review import currently carries annotation mentions only.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "review.comments-to-office",
+    "familyId": "annotations-review",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Comments to office documents",
+    "description": "Export source-bound review annotations and replies as a text-only DOCX summary without Word tracked-comments interoperability.",
+    "engine": {
+      "provider": "Local review workspace",
+      "operation": "annotation and review professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.fill-save",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Fill and save forms",
+    "description": "Fill interactive AcroForm fields and save values.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.source-bound-acroform-fill-save",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Source-bound AcroForm fill and save",
+    "description": "On macOS, create a source-digest-bound, separately validated non-rasterized derived copy that mutates exactly one eligible terminal text, single-choice value or permitted clear, uniquely validated unflagged checkbox on/off widget, or exact option in a canonical 2\u201350-widget radio parent-and-kids group; excludes push controls, multi-select, noncanonical or deeper field graphs, authoring, detection, validation, calculation, actions, XFA, data interchange, signatures, flattening, and byte or signature preservation.",
+    "engine": {
+      "provider": "Apple PDFKit and Poppler",
+      "operation": "source-digest-bound bounded-widget AcroForm mutation with PDFKit reopen and independent Poppler parse/render validation"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdfkit-03.test.js"
+    }
+  },
+  {
+    "id": "forms.author",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Author forms",
+    "description": "Create and edit interactive form fields.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.validate",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Validate forms",
+    "description": "Run deterministic field validation rules.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.calculate",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Calculate forms",
+    "description": "Run form calculation rules with controlled scripting.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.distribute-collect",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Distribute and collect forms",
+    "description": "Distribute forms and collect respondent data.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.detect-fields",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Detect form fields",
+    "description": "Detect candidate fields in a static document.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.static-to-fillable",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Static to fillable form",
+    "description": "Turn detected static controls into interactive fields.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.import-export-data",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Form data interchange",
+    "description": "Import and export FDF, XFDF, XML, or CSV form data.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.submit-reset",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Submit and reset actions",
+    "description": "Configure submit, import, export, and reset actions.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.javascript-actions",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Form JavaScript actions",
+    "description": "Inspect and author controlled form scripts and actions.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.tab-order-tooltips",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Tab order and tooltips",
+    "description": "Set keyboard order and accessible field descriptions.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.barcode-fields",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Barcode fields",
+    "description": "Create and validate form barcode fields.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.flatten",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Flatten form fields",
+    "description": "Convert form field appearances to page content.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.xfa-compatibility",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "XFA compatibility",
+    "description": "Inspect and handle supported XFA form variants.",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "forms.signature-fields",
+    "familyId": "forms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Signature fields",
+    "description": "Prepare exactly one empty unsigned AcroForm signature widget in a source-digest-bound derived copy under a strict classic single-revision profile. Preparation only: no signing, certificate or key custody, appearance, timestamp, signer identity, or long-term validation (LTV).",
+    "engine": {
+      "provider": "Local AcroForm writers and workspace",
+      "operation": "form authoring and fill workflows"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sign.electronic",
+    "familyId": "signatures",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Electronic signatures",
+    "description": "Capture non-certificate electronic signing intent.",
+    "engine": {
+      "provider": "Local certificate signature container",
+      "operation": "source-bound signature container and validation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sign.certificate",
+    "familyId": "signatures",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Apply certificate signature",
+    "description": "Apply a certificate-backed PDF signature after explicit consent.",
+    "engine": {
+      "provider": "Local certificate signature container",
+      "operation": "source-bound signature container and validation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sign.validate-certificate",
+    "familyId": "signatures",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Validate certificate signature",
+    "description": "Validate integrity, trust, scope, and signer certificate status.",
+    "engine": {
+      "provider": "Local certificate signature container",
+      "operation": "source-bound signature container and validation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sign.routed-workflow",
+    "familyId": "signatures",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Routed signing workflows",
+    "description": "Route sequential or parallel signature requests.",
+    "engine": {
+      "provider": "Local certificate signature container",
+      "operation": "source-bound signature container and validation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sign.audit-trail",
+    "familyId": "signatures",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Signature audit trail",
+    "description": "Record signer, consent, timestamps, and delivery evidence.",
+    "engine": {
+      "provider": "Local certificate signature container",
+      "operation": "source-bound signature container and validation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sign.timestamp",
+    "familyId": "signatures",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Trusted timestamp",
+    "description": "Apply and validate trusted timestamps.",
+    "engine": {
+      "provider": "Local certificate signature container",
+      "operation": "source-bound signature container and validation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sign.certify-document",
+    "familyId": "signatures",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Certify document",
+    "description": "Certify a document and restrict permitted later changes.",
+    "engine": {
+      "provider": "Local certificate signature container",
+      "operation": "source-bound signature container and validation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sign.trust-store",
+    "familyId": "signatures",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Trust store",
+    "description": "Manage trusted identities and certificate chains.",
+    "engine": {
+      "provider": "Local certificate signature container",
+      "operation": "source-bound signature container and validation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sign.revocation-ltv",
+    "familyId": "signatures",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Revocation and LTV",
+    "description": "Embed and validate revocation evidence for long-term validation.",
+    "engine": {
+      "provider": "Local certificate signature container",
+      "operation": "source-bound signature container and validation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sign.visible-appearance",
+    "familyId": "signatures",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Signature appearance",
+    "description": "Create and apply visible signature appearances.",
+    "engine": {
+      "provider": "Local certificate signature container",
+      "operation": "source-bound signature container and validation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sign.digital-id-management",
+    "familyId": "signatures",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Digital ID management",
+    "description": "Create, import, select, and remove digital identities securely.",
+    "engine": {
+      "provider": "Local certificate signature container",
+      "operation": "source-bound signature container and validation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sign.batch-sign-seal",
+    "familyId": "signatures",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Batch sign and seal",
+    "description": "Apply approved signatures or seals to controlled document sets.",
+    "engine": {
+      "provider": "Local certificate signature container",
+      "operation": "source-bound signature container and validation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sign.identity-verification",
+    "familyId": "signatures",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Signer identity verification",
+    "description": "Associate signing consent with verified identity evidence.",
+    "engine": {
+      "provider": "Local certificate signature container",
+      "operation": "source-bound signature container and validation"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "scan.acquire",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Scan acquisition",
+    "description": "Pinned macOS ImageCaptureCore one-page flatbed PDF acquisition; the hardware path is compiled and protocol-tested but has not been live hardware-tested here.",
+    "engine": {
+      "provider": "Local scanner acquisition",
+      "operation": "bounded local scan acquisition and append"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "scan.duplex-feeder",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Duplex and feeder scanning",
+    "description": "Control duplex, feeder, color, and resolution options.",
+    "engine": {
+      "provider": "Local scanner acquisition",
+      "operation": "bounded local scan acquisition and append"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "scan.append-to-document",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Append scanned pages",
+    "description": "The local CLI ingests one PNG, JPEG, or TIFF file through validated ImageMagick one-page conversion, then appends that derived page after one selected page of a source-bound PDF via copy-page composition. It is not hardware acquisition, duplex, feeder control, or a general scan workflow.",
+    "engine": {
+      "provider": "Local scanner acquisition",
+      "operation": "bounded local scan acquisition and append"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ocr.recognize-text",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Searchable OCR",
+    "description": "Create a searchable text layer from scanned pages.",
+    "engine": {
+      "provider": "Tesseract and Poppler",
+      "operation": "rasterize, recognize, compose, and validate derived searchable PDF"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-ocr.test.js"
+    }
+  },
+  {
+    "id": "ocr.cleanup",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Verified OCR cleanup presets",
+    "description": "Apply fixed local document or bilevel cleanup while recording source-bound pre/post raster digests and proving the page canvas is unchanged.",
+    "engine": {
+      "provider": "ImageMagick, Poppler, and Tesseract",
+      "operation": "bounded cleanup, digest receipt, recognition, composition, and derived-PDF validation"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-ocr.test.js"
+    }
+  },
+  {
+    "id": "ocr.editable-output",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Editable OCR output",
+    "description": "Reconstruct recognized content for editing.",
+    "engine": {
+      "provider": "Tesseract",
+      "operation": "local OCR professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ocr.suspect-review",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "OCR suspect review",
+    "description": "Review and correct low-confidence recognition results.",
+    "engine": {
+      "provider": "Tesseract",
+      "operation": "local OCR professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ocr.language-detection-selection",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "OCR language selection",
+    "description": "Enumerate installed local OCR language packs and select a recognition language.",
+    "engine": {
+      "provider": "Tesseract",
+      "operation": "enumerate and validate installed local language packs"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-ocr.test.js"
+    }
+  },
+  {
+    "id": "ocr.zones-layout",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Typed recognition zones and layout",
+    "description": "Analyze bounded non-overlapping text and table regions while retaining image and exclude regions as explicit classification-only evidence.",
+    "engine": {
+      "provider": "Poppler, ImageMagick, and Tesseract",
+      "operation": "bounded raster crop, typed-zone policy, TSV hierarchy, and ALTO evidence"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-ocr.test.js"
+    }
+  },
+  {
+    "id": "ocr.table-recognition",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Review-grade OCR table grids",
+    "description": "Detect bounded alignment-based table candidates, reconstruct formula-safe CSV grids, and require explicit human review.",
+    "engine": {
+      "provider": "Tesseract TSV geometry",
+      "operation": "bounded aligned-word candidate extraction and review-only grid export"
+    },
+    "evidence": {
+      "kind": "unit-test",
+      "reference": "tests/ocr-layout.test.js"
+    }
+  },
+  {
+    "id": "ocr.user-dictionaries-training",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "OCR dictionaries and training",
+    "description": "Use local dictionaries and trained character patterns.",
+    "engine": {
+      "provider": "Tesseract",
+      "operation": "local OCR professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ocr.batch-recognition",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Bounded local batch OCR",
+    "description": "Process one through eight PDFs sequentially under one host reservation with aggregate page and byte quotas, ordered outcomes, cancellation, and explicit artifact retrieval.",
+    "engine": {
+      "provider": "Local OCR host",
+      "operation": "authenticated sequential batch with source-bound versioned manifest"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/host-pdf-service-ocr.test.js"
+    }
+  },
+  {
+    "id": "ocr.export-layout-preserving",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Positioned OCR review export",
+    "description": "Export bounded recognized coordinates as strict JSON, passive positioned HTML, verified ALTO XML, or review-grade table CSV without claiming original fonts or semantic structure.",
+    "engine": {
+      "provider": "Local browser exporter and Tesseract ALTO",
+      "operation": "bounded passive layout evidence export"
+    },
+    "evidence": {
+      "kind": "unit-test",
+      "reference": "tests/ocr-layout-export.test.js"
+    }
+  },
+  {
+    "id": "ocr.screenshot-capture",
+    "familyId": "scan-ocr",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Screenshot OCR",
+    "description": "Recognize text from an explicitly captured screen region.",
+    "engine": {
+      "provider": "Tesseract",
+      "operation": "local OCR professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "security.open-password",
+    "familyId": "security",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Open password encryption",
+    "description": "Create a separate validated local macOS PDFKit AES-128 copy that requires its fixed-profile open password.",
+    "engine": {
+      "provider": "Apple PDFKit",
+      "operation": "fixed AES-128/R4/V4/AESV2 derived-copy protection"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/pdfkit-protection-service.test.js"
+    }
+  },
+  {
+    "id": "security.permission-controls",
+    "familyId": "security",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Permission controls",
+    "description": "Configure print, copy, edit, assembly, and accessibility permissions.",
+    "engine": {
+      "provider": "Local PDF security transforms",
+      "operation": "password, permission, and javascript controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "security.certificate-encryption",
+    "familyId": "security",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Certificate encryption",
+    "description": "Encrypt documents for certificate recipients.",
+    "engine": {
+      "provider": "Local PDF security transforms",
+      "operation": "password, permission, and javascript controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "security.policy-controls",
+    "familyId": "security",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Security policy controls",
+    "description": "Apply reusable protection policies.",
+    "engine": {
+      "provider": "Local PDF security transforms",
+      "operation": "password, permission, and javascript controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "security.remove-protection",
+    "familyId": "security",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Remove protection",
+    "description": "Remove protection when authorized credentials are supplied.",
+    "engine": {
+      "provider": "Local PDF security transforms",
+      "operation": "password, permission, and javascript controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "security.security-envelopes",
+    "familyId": "security",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Security envelopes",
+    "description": "Package protected files in an encrypted envelope.",
+    "engine": {
+      "provider": "Local PDF security transforms",
+      "operation": "password, permission, and javascript controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "security.information-protection-labels",
+    "familyId": "security",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Information protection labels",
+    "description": "Read and apply supported local sensitivity labels.",
+    "engine": {
+      "provider": "Local PDF security transforms",
+      "operation": "password, permission, and javascript controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "security.protected-view",
+    "familyId": "security",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Protected view",
+    "description": "Open untrusted documents in a reduced-authority mode.",
+    "engine": {
+      "provider": "Local PDF security transforms",
+      "operation": "password, permission, and javascript controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "security.javascript-controls",
+    "familyId": "security",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "JavaScript controls",
+    "description": "Detect, disable, remove, or allowlist document scripts.",
+    "engine": {
+      "provider": "Local PDF security transforms",
+      "operation": "password, permission, and javascript controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "security.encryption-aes",
+    "familyId": "security",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "AES encryption profiles",
+    "description": "Apply supported standards-compliant AES encryption profiles.",
+    "engine": {
+      "provider": "Local PDF security transforms",
+      "operation": "password, permission, and javascript controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "redaction.mark",
+    "familyId": "redaction-sanitization",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Mark for redaction",
+    "description": "Mark text, images, shapes, or regions for later removal.",
+    "engine": {
+      "provider": "Local redaction writers",
+      "operation": "source-bound redaction planning and application"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "redaction.preview",
+    "familyId": "redaction-sanitization",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Preview redactions",
+    "description": "Review pending redaction marks before irreversible application.",
+    "engine": {
+      "provider": "Local redaction writers",
+      "operation": "source-bound redaction planning and application"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "redaction.apply",
+    "familyId": "redaction-sanitization",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Apply redactions",
+    "description": "Permanently remove marked content in a derived output.",
+    "engine": {
+      "provider": "Local redaction writers",
+      "operation": "source-bound redaction planning and application"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "redaction.find-patterns",
+    "familyId": "redaction-sanitization",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Find sensitive patterns",
+    "description": "Locate candidate sensitive data using deterministic rules.",
+    "engine": {
+      "provider": "Local redaction writers",
+      "operation": "source-bound redaction planning and application"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "redaction.overlay-labels",
+    "familyId": "redaction-sanitization",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Redaction overlays",
+    "description": "Configure fill, labels, codes, and overlay text.",
+    "engine": {
+      "provider": "Local redaction writers",
+      "operation": "source-bound redaction planning and application"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "redaction.full-page",
+    "familyId": "redaction-sanitization",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Full-page redaction",
+    "description": "Replace one complete page with an opaque black page in a closed derived PDF while removing uniquely target-bound content and resources.",
+    "engine": {
+      "provider": "Platen object writer and Poppler",
+      "operation": "source-bound closed compact rewrite with independent text, page-geometry, and raster validation"
+    },
+    "evidence": {
+      "kind": "integration-test",
+      "reference": "tests/pdf-full-page-redaction-service.test.js"
+    }
+  },
+  {
+    "id": "redaction.batch",
+    "familyId": "redaction-sanitization",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Batch redaction",
+    "description": "Apply reviewed redaction rules to controlled document sets.",
+    "engine": {
+      "provider": "Local redaction writers",
+      "operation": "source-bound redaction planning and application"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "redaction.report",
+    "familyId": "redaction-sanitization",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Redaction report",
+    "description": "Produce an audit report without disclosing removed content.",
+    "engine": {
+      "provider": "Local redaction writers",
+      "operation": "source-bound redaction planning and application"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sanitize.hidden-data",
+    "familyId": "redaction-sanitization",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Sanitize hidden data",
+    "description": "Remove hidden objects, comments, scripts, layers, and prior revision residue.",
+    "engine": {
+      "provider": "Local sanitization writers",
+      "operation": "hidden-data and metadata sanitization"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sanitize.metadata",
+    "familyId": "redaction-sanitization",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Remove metadata",
+    "description": "Remove document information, XMP, and selected metadata fields.",
+    "engine": {
+      "provider": "Local sanitization writers",
+      "operation": "hidden-data and metadata sanitization"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "sanitize.selective-content",
+    "familyId": "redaction-sanitization",
+    "owner": "trust-services",
+    "delivery": "implemented",
+    "title": "Selective sanitization",
+    "description": "Choose categories of hidden or active content to remove.",
+    "engine": {
+      "provider": "Local sanitization writers",
+      "operation": "hidden-data and metadata sanitization"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "compare.content",
+    "familyId": "comparison",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Content comparison",
+    "description": "Compare text, graphics, structure, and formatting changes.",
+    "engine": {
+      "provider": "Local comparison service",
+      "operation": "content/pixel/annotation comparison"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "compare.pixel",
+    "familyId": "comparison",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Pixel comparison",
+    "description": "Compare rendered pages with thresholds and alignment controls.",
+    "engine": {
+      "provider": "Local comparison service",
+      "operation": "content/pixel/annotation comparison"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "compare.overlay",
+    "familyId": "comparison",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Overlay comparison",
+    "description": "Color-overlay aligned document revisions.",
+    "engine": {
+      "provider": "Local comparison service",
+      "operation": "content/pixel/annotation comparison"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "compare.side-by-side",
+    "familyId": "comparison",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Side-by-side comparison",
+    "description": "Review synchronized document variants together.",
+    "engine": {
+      "provider": "Local comparison service",
+      "operation": "content/pixel/annotation comparison"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "compare.annotations",
+    "familyId": "comparison",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Annotation comparison",
+    "description": "Compare annotation additions, changes, and removals.",
+    "engine": {
+      "provider": "Local comparison service",
+      "operation": "content/pixel/annotation comparison"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "compare.cross-format",
+    "familyId": "comparison",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Cross-format comparison",
+    "description": "Compare supported source formats semantically.",
+    "engine": {
+      "provider": "Local comparison service",
+      "operation": "content/pixel/annotation comparison"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "compare.batch",
+    "familyId": "comparison",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Batch comparison",
+    "description": "Compare multiple controlled document pairs.",
+    "engine": {
+      "provider": "Local comparison service",
+      "operation": "content/pixel/annotation comparison"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "compare.report-export",
+    "familyId": "comparison",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Comparison reports",
+    "description": "Export human-readable and machine-readable difference reports.",
+    "engine": {
+      "provider": "Local comparison service",
+      "operation": "content/pixel/annotation comparison"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "compare.package",
+    "familyId": "comparison",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Package comparison",
+    "description": "Compare collections and revisions of PDF files.",
+    "engine": {
+      "provider": "Local comparison service",
+      "operation": "content/pixel/annotation comparison"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.check",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Accessibility checker",
+    "description": "Inspect tagged-PDF accessibility requirements.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.report-export",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Accessibility report",
+    "description": "Export rule-level findings and remediation status.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.auto-tag",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Automatic tagging",
+    "description": "Generate a candidate semantic tag structure for review.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.remediate-tags",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Tag remediation",
+    "description": "Inspect, create, move, rename, and delete structure tags.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.reading-order",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Reading order",
+    "description": "Inspect and repair logical reading order.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.heading-list-structure",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Headings and lists",
+    "description": "Repair heading hierarchy and list semantics.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.table-semantics",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Table semantics",
+    "description": "Repair table scope, headers, spans, and cell associations.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.form-semantics",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Accessible forms",
+    "description": "Repair human-authored names and tooltips plus /Tabs /S order for one passive classic single-page direct-terminal AcroForm subset.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.links-bookmarks",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Accessible links and bookmarks",
+    "description": "Repair link purpose, annotations, destinations, and document navigation.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.artifact-management",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Artifacts",
+    "description": "Mark decorative or repeated content as artifacts.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.alt-text",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Alternative text",
+    "description": "Author and validate meaningful image descriptions.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.document-language-title",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Language and title",
+    "description": "Set document and content language plus a meaningful title.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.color-contrast",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Color and contrast review",
+    "description": "Flag color-only meaning and contrast risks for human review.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.font-unicode-mapping",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Font and Unicode mapping",
+    "description": "Inspect embedded fonts and reliable text-to-Unicode mapping.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "accessibility.screen-reader-permissions",
+    "familyId": "accessibility",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Screen-reader permissions",
+    "description": "Check whether document security permits assistive access.",
+    "engine": {
+      "provider": "Poppler/PDFKit accessibility review",
+      "operation": "accessibility review and remediation proposals"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "standards.pdf-a",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "PDF/A",
+    "description": "Validate and convert supported archival PDF/A profiles.",
+    "engine": {
+      "provider": "Local standards review and veraPDF when available",
+      "operation": "structural standards review receipt"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "standards.pdf-x",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "PDF/X",
+    "description": "Validate and convert supported print-exchange PDF/X profiles.",
+    "engine": {
+      "provider": "Local standards review and veraPDF when available",
+      "operation": "structural standards review receipt"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "standards.pdf-ua",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "PDF/UA",
+    "description": "Validate supported universal-accessibility profiles.",
+    "engine": {
+      "provider": "Local standards review and veraPDF when available",
+      "operation": "structural standards review receipt"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "standards.pdf-e",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "PDF/E",
+    "description": "Validate supported engineering-document profiles.",
+    "engine": {
+      "provider": "Local standards review and veraPDF when available",
+      "operation": "structural standards review receipt"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "standards.pdf-vt",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "PDF/VT",
+    "description": "Validate supported variable and transactional-print profiles.",
+    "engine": {
+      "provider": "Local standards review and veraPDF when available",
+      "operation": "structural standards review receipt"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "standards.pdf-two",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "PDF 2.0",
+    "description": "Inspect and validate supported PDF 2.0 requirements.",
+    "engine": {
+      "provider": "Local standards review and veraPDF when available",
+      "operation": "structural standards review receipt"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "preflight.fixups",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Preflight fixups",
+    "description": "Apply controlled, individually named production fixups.",
+    "engine": {
+      "provider": "Ghostscript and local prepress review",
+      "operation": "fixed-profile preflight review"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "preflight.profiles",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Preflight profiles",
+    "description": "Create, import, export, and run check/fixup profiles.",
+    "engine": {
+      "provider": "Ghostscript and local prepress review",
+      "operation": "fixed-profile preflight review"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "preflight.reports",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Preflight reports",
+    "description": "Produce PDF, XML, and JSON preflight reports.",
+    "engine": {
+      "provider": "Ghostscript and local prepress review",
+      "operation": "fixed-profile preflight review"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "preflight.certified-pdf",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Certified PDF history",
+    "description": "Record validation history, changes, and production status.",
+    "engine": {
+      "provider": "Ghostscript and local prepress review",
+      "operation": "fixed-profile preflight review"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "color.convert",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Color conversion",
+    "description": "Convert objects between controlled color spaces.",
+    "engine": {
+      "provider": "Ghostscript ICC",
+      "operation": "local color conversion and intent review"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "color.output-intents",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Output intents",
+    "description": "Inspect, assign, and validate output intents and ICC profiles.",
+    "engine": {
+      "provider": "Ghostscript ICC",
+      "operation": "local color conversion and intent review"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "color.spot-colors",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Spot colors",
+    "description": "Inspect, alias, remap, and convert spot colors.",
+    "engine": {
+      "provider": "Ghostscript ICC",
+      "operation": "local color conversion and intent review"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "print.output-preview",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Output preview",
+    "description": "Preview production output under selected profiles and conditions.",
+    "engine": {
+      "provider": "Ghostscript and Poppler",
+      "operation": "local print/prepress review renders"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "print.separations",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Separations preview",
+    "description": "Inspect process and spot-color separations.",
+    "engine": {
+      "provider": "Ghostscript and Poppler",
+      "operation": "local print/prepress review renders"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "print.ink-coverage",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Ink coverage",
+    "description": "Inspect total area coverage and per-separation ink usage.",
+    "engine": {
+      "provider": "Ghostscript and Poppler",
+      "operation": "local print/prepress review renders"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "print.overprint-preview",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Overprint preview",
+    "description": "Simulate and inspect overprinting objects.",
+    "engine": {
+      "provider": "Ghostscript and Poppler",
+      "operation": "local print/prepress review renders"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "print.transparency-flattening",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Transparency flattening",
+    "description": "Preview and apply controlled transparency flattening.",
+    "engine": {
+      "provider": "Ghostscript and Poppler",
+      "operation": "local print/prepress review renders"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "print.soft-proof",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Soft proof",
+    "description": "Simulate device output and paper color on screen.",
+    "engine": {
+      "provider": "Ghostscript and Poppler",
+      "operation": "local print/prepress review renders"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "print.trapping",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Color trapping",
+    "description": "Inspect and apply supported trapping settings.",
+    "engine": {
+      "provider": "Ghostscript and Poppler",
+      "operation": "local print/prepress review renders"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "print.bleed-marks",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Bleed and printer marks",
+    "description": "Create bleed, crop marks, color bars, and registration marks.",
+    "engine": {
+      "provider": "Ghostscript and Poppler",
+      "operation": "local print/prepress review renders"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "print.imposition",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Imposition",
+    "description": "Create booklet, n-up, step-and-repeat, and production layouts.",
+    "engine": {
+      "provider": "Ghostscript and Poppler",
+      "operation": "local print/prepress review renders"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "print.font-inspection-embedding",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Font inspection and embedding",
+    "description": "Inspect fonts, embedding, subsetting, and outline conversion.",
+    "engine": {
+      "provider": "Ghostscript and Poppler",
+      "operation": "local print/prepress review renders"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "print.image-resolution-compression",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Print image quality",
+    "description": "Inspect and control image resolution and compression.",
+    "engine": {
+      "provider": "Ghostscript and Poppler",
+      "operation": "local print/prepress review renders"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "print.variable-data",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Variable print data",
+    "description": "Inspect and process supported variable-data structures.",
+    "engine": {
+      "provider": "Ghostscript and Poppler",
+      "operation": "local print/prepress review renders"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "print.barcode-decoration",
+    "familyId": "standards-preflight-print",
+    "owner": "quality-services",
+    "delivery": "implemented",
+    "title": "Barcodes and decoration",
+    "description": "Add validated barcodes, cut contours, varnish, white ink, and production marks.",
+    "engine": {
+      "provider": "Ghostscript and Poppler",
+      "operation": "local print/prepress review renders"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "collaboration.share-links",
+    "familyId": "collaboration-dms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Share links",
+    "description": "Share controlled document links with collaborators.",
+    "engine": {
+      "provider": "Local collaboration workspace",
+      "operation": "offline collaboration professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "collaboration.real-time-review",
+    "familyId": "collaboration-dms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Real-time review",
+    "description": "Synchronize review state and annotations in real time.",
+    "engine": {
+      "provider": "Local collaboration workspace",
+      "operation": "offline collaboration professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "collaboration.activity-notifications",
+    "familyId": "collaboration-dms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Activity and notifications",
+    "description": "Track review activity and notify participants.",
+    "engine": {
+      "provider": "Local collaboration workspace",
+      "operation": "offline collaboration professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "collaboration.access-expiration",
+    "familyId": "collaboration-dms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Share access controls",
+    "description": "Set recipients, permissions, passwords, and expiration.",
+    "engine": {
+      "provider": "Local collaboration workspace",
+      "operation": "offline collaboration professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "collaboration.version-history",
+    "familyId": "collaboration-dms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Version history",
+    "description": "Store and compare controlled document versions.",
+    "engine": {
+      "provider": "Local collaboration workspace",
+      "operation": "offline collaboration professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "collaboration.projects-workspaces",
+    "familyId": "collaboration-dms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Project workspaces",
+    "description": "Organize documents, reviews, and participants in workspaces.",
+    "engine": {
+      "provider": "Local collaboration workspace",
+      "operation": "offline collaboration professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "dms.repository-connectors",
+    "familyId": "collaboration-dms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "DMS repository connectors",
+    "description": "Connect to managed document repositories.",
+    "engine": {
+      "provider": "Local DMS workspace",
+      "operation": "offline document management professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "dms.retention-records",
+    "familyId": "collaboration-dms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Retention and records",
+    "description": "Apply retention, holds, and records policies.",
+    "engine": {
+      "provider": "Local DMS workspace",
+      "operation": "offline document management professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "dms.checkin-checkout",
+    "familyId": "collaboration-dms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Check in and check out",
+    "description": "Coordinate repository edits through check-in and check-out.",
+    "engine": {
+      "provider": "Local DMS workspace",
+      "operation": "offline document management professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "dms.offline-sync",
+    "familyId": "collaboration-dms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Offline synchronization",
+    "description": "Synchronize explicitly selected repository files for offline work.",
+    "engine": {
+      "provider": "Local DMS workspace",
+      "operation": "offline document management professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "dms.conflict-resolution",
+    "familyId": "collaboration-dms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Conflict resolution",
+    "description": "Detect and resolve competing document revisions.",
+    "engine": {
+      "provider": "Local DMS workspace",
+      "operation": "offline document management professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "dms.document-locking",
+    "familyId": "collaboration-dms",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Document locking",
+    "description": "Lock controlled documents during protected operations.",
+    "engine": {
+      "provider": "Local DMS workspace",
+      "operation": "offline document management professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "automation.cli-batch",
+    "familyId": "automation-headless",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "CLI batch processing",
+    "description": "Run deterministic local transformations in batch jobs.",
+    "engine": {
+      "provider": "Local automation host",
+      "operation": "durable local automation jobs"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "automation.api",
+    "familyId": "automation-headless",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Automation API",
+    "description": "Local in-process default-deny service-scoped ownership over allowlisted durable operations; no network or scripting.",
+    "engine": {
+      "provider": "Local automation host",
+      "operation": "durable local automation jobs"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "automation.watch-folders",
+    "familyId": "automation-headless",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Watch folders",
+    "description": "Process documents delivered to configured local folders.",
+    "engine": {
+      "provider": "Local automation host",
+      "operation": "durable local automation jobs"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "automation.action-sequences",
+    "familyId": "automation-headless",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Action sequences",
+    "description": "Record, edit, and run reusable operation sequences.",
+    "engine": {
+      "provider": "Local automation host",
+      "operation": "durable local automation jobs"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "automation.javascript",
+    "familyId": "automation-headless",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Automation scripting",
+    "description": "Run constrained local scripts with explicit capabilities.",
+    "engine": {
+      "provider": "Local automation host",
+      "operation": "durable local automation jobs"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "automation.scheduled-jobs",
+    "familyId": "automation-headless",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Scheduled jobs",
+    "description": "Run approved local workflows on a schedule.",
+    "engine": {
+      "provider": "Local automation host",
+      "operation": "durable local automation jobs"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "automation.conditional-workflows",
+    "familyId": "automation-headless",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Conditional workflows",
+    "description": "Branch and loop based on validated processing results.",
+    "engine": {
+      "provider": "Local automation host",
+      "operation": "durable local automation jobs"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "automation.variables-presets",
+    "familyId": "automation-headless",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Variables and presets",
+    "description": "Parameterize workflows with typed variables and reusable presets.",
+    "engine": {
+      "provider": "Local automation host",
+      "operation": "durable local automation jobs"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "automation.job-queue-retry",
+    "familyId": "automation-headless",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Job queues and retry",
+    "description": "Queue, cancel, resume, and retry bounded local jobs.",
+    "engine": {
+      "provider": "Local automation host",
+      "operation": "durable local automation jobs"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "automation.webhooks",
+    "familyId": "automation-headless",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Workflow webhooks",
+    "description": "Send approved workflow events to exact allowlisted endpoints.",
+    "engine": {
+      "provider": "Local automation host",
+      "operation": "durable local automation jobs"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "automation.processing-reports",
+    "familyId": "automation-headless",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Processing reports",
+    "description": "Produce deterministic job logs and machine-readable reports.",
+    "engine": {
+      "provider": "Local automation host",
+      "operation": "durable local automation jobs"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "automation.preflight-server",
+    "familyId": "automation-headless",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Preflight service",
+    "description": "Run queued preflight workflows through a local service boundary.",
+    "engine": {
+      "provider": "Local automation host",
+      "operation": "durable local automation jobs"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "automation.batch-print",
+    "familyId": "automation-headless",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Batch print",
+    "description": "Print controlled document sets with saved local settings.",
+    "engine": {
+      "provider": "Local automation host",
+      "operation": "durable local automation jobs"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.summarize",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Document summarization",
+    "description": "Produce assistive summaries of PDF content.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.ask-document",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Ask document",
+    "description": "Answer questions grounded in supplied PDF content.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.extract-structured-data",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Structured extraction",
+    "description": "Extract candidate structured data for human review.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.translate",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "AI translation",
+    "description": "Translate selected or full document text.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.rewrite-proofread",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "AI rewrite and proofread",
+    "description": "Rewrite, simplify, or proofread selected text.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.explain",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "AI explanation",
+    "description": "Explain selected document content.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.source-citations",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Source citations",
+    "description": "Bind generated responses to document page citations.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.multi-document-analysis",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Multi-document analysis",
+    "description": "Analyze a selected local document collection.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.generate-images",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Generate images",
+    "description": "Generate candidate image assets for document authoring.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.generate-bookmarks",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Generate bookmarks",
+    "description": "Suggest a document outline and bookmarks.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.smart-redaction",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "AI redaction suggestions",
+    "description": "Suggest candidate sensitive content for human confirmation.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.form-extraction",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "AI form extraction",
+    "description": "Suggest structured form or table data.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.accessibility-suggestions",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "AI accessibility suggestions",
+    "description": "Suggest, but never auto-apply, accessibility remediations.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.annotation-assist",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "AI annotation assistance",
+    "description": "Suggest review annotations for human confirmation.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "ai.provider-policy-controls",
+    "familyId": "ai",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "AI provider policy controls",
+    "description": "Control provider, retention, locality, and data-sharing policy.",
+    "engine": {
+      "provider": "Local deterministic algorithms",
+      "operation": "source-bound extractive and heuristic AI without network providers"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.measurement",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Drawing measurement",
+    "description": "Measure calibrated drawing geometry.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.takeoff",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Quantity takeoff",
+    "description": "Build quantity takeoff data from drawing markups.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.collaborative-review-sessions",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Collaborative review sessions",
+    "description": "Coordinate field and design review sessions.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.scale-calibration",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Scale calibration",
+    "description": "Calibrate one or more drawing scales and viewports.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.measurement-toolset",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Measurement toolset",
+    "description": "Measure length, area, perimeter, volume, angle, radius, and counts.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.markup-toolsets",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Markup toolsets",
+    "description": "Create and reuse standardized construction markups.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.markups-list",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Markups list",
+    "description": "Track, filter, sort, and summarize drawing markups.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.custom-columns-formulas",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Custom columns and formulas",
+    "description": "Calculate takeoff values from typed markup data.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.spaces-regions",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Spaces and regions",
+    "description": "Define named drawing regions for tracking and reports.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.sets-drawing-log",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Drawing sets and logs",
+    "description": "Organize sheet sets and maintain a drawing log.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.sheet-metadata-tags",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Sheet metadata and tags",
+    "description": "Extract and manage sheet number, title, discipline, and revision tags.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.revision-overlay",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Revision overlay",
+    "description": "Align and overlay drawing revisions.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.batch-slip-sheet",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Batch slip sheet",
+    "description": "Replace revised sheets while carrying forward selected markup data.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.batch-link",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Batch link",
+    "description": "Append 1\u201350 same-document direct /Dest /Fit links in one append-only revision for strict unsigned/passive sources. External, cross-file, named, and action links plus authoritative AEC semantics are excluded; bounded indirect stream-Length admission is engine compatibility evidence only, not a separate professional claim.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.legends",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Markup legends",
+    "description": "Generate dynamic legends from drawing markups.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.offline-projects",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Offline projects",
+    "description": "Work with explicitly synchronized project documents offline.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.revision-status-workflows",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Revision status workflows",
+    "description": "Track review states and revision decisions.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "aec.geospatial-documents",
+    "familyId": "aec",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Geospatial documents",
+    "description": "Inspect geospatial metadata and calibrated coordinates.",
+    "engine": {
+      "provider": "Local AEC workspace and PDFKit measure",
+      "operation": "AEC measurement and markup professional path"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "rich-media.audio-video",
+    "familyId": "rich-media-3d-portfolios",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Audio and video",
+    "description": "Embed supported audio and video annotations.",
+    "engine": {
+      "provider": "Local specialist inventory",
+      "operation": "rich media inventory"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "rich-media.playback-controls",
+    "familyId": "rich-media-3d-portfolios",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Rich-media playback",
+    "description": "Control supported rich-media playback without automatic activation.",
+    "engine": {
+      "provider": "Local specialist inventory",
+      "operation": "rich media inventory"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "three-d.import",
+    "familyId": "rich-media-3d-portfolios",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Import 3D content",
+    "description": "Embed supported 3D model formats.",
+    "engine": {
+      "provider": "Local specialist inventory",
+      "operation": "3D content inventory"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "three-d.saved-views-sections",
+    "familyId": "rich-media-3d-portfolios",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "3D views and sections",
+    "description": "Create saved views, lighting, sections, and model-tree states.",
+    "engine": {
+      "provider": "Local specialist inventory",
+      "operation": "3D content inventory"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "three-d.measure-comment",
+    "familyId": "rich-media-3d-portfolios",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "3D measurement and comments",
+    "description": "Measure and annotate supported 3D models.",
+    "engine": {
+      "provider": "Local specialist inventory",
+      "operation": "3D content inventory"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "portfolios.create",
+    "familyId": "rich-media-3d-portfolios",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Create PDF portfolios",
+    "description": "Create and manage PDF portfolio collections.",
+    "engine": {
+      "provider": "Local PDF portfolio builder",
+      "operation": "PDF collections and embedded files"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "portfolios.view-extract",
+    "familyId": "rich-media-3d-portfolios",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "View and extract portfolios",
+    "description": "Browse, preview, sort, and extract portfolio components.",
+    "engine": {
+      "provider": "Local PDF portfolio builder",
+      "operation": "PDF collections and embedded files"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "portfolios.metadata-search",
+    "familyId": "rich-media-3d-portfolios",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Portfolio metadata search",
+    "description": "Search portfolio component metadata and text.",
+    "engine": {
+      "provider": "Local PDF portfolio builder",
+      "operation": "PDF collections and embedded files"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "portfolios.custom-layout",
+    "familyId": "rich-media-3d-portfolios",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Portfolio layouts",
+    "description": "Configure supported portfolio layouts and fields.",
+    "engine": {
+      "provider": "Local PDF portfolio builder",
+      "operation": "PDF collections and embedded files"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "document.article-threads",
+    "familyId": "rich-media-3d-portfolios",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Article threads",
+    "description": "Create and navigate article reading threads.",
+    "engine": {
+      "provider": "Local incremental PDF writers",
+      "operation": "document-level professional mutations"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "document.embedded-files",
+    "familyId": "rich-media-3d-portfolios",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Embedded file collections",
+    "description": "Package and inspect embedded file collections.",
+    "engine": {
+      "provider": "Local incremental PDF writers",
+      "operation": "document-level professional mutations"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "document.optional-content-groups",
+    "familyId": "rich-media-3d-portfolios",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Optional-content behavior",
+    "description": "Author layer configurations and visibility actions.",
+    "engine": {
+      "provider": "Local incremental PDF writers",
+      "operation": "document-level professional mutations"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "geospatial.inspect-measure-markup",
+    "familyId": "rich-media-3d-portfolios",
+    "owner": "industry-extensions",
+    "delivery": "implemented",
+    "title": "Geospatial inspection",
+    "description": "Inspect, measure, and mark up geospatial PDF content.",
+    "engine": {
+      "provider": "Local geospatial calibration",
+      "operation": "geospatial inspect/measure"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "integrations.cloud-storage",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Cloud storage integrations",
+    "description": "Connect approved storage and content platforms.",
+    "engine": {
+      "provider": "Local integration connectors",
+      "operation": "local-only connector configuration"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "integrations.office-addins",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Office add-ins",
+    "description": "Create and send PDFs from supported office applications.",
+    "engine": {
+      "provider": "Local integration connectors",
+      "operation": "local-only connector configuration"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "integrations.browser-capture",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Browser capture",
+    "description": "Capture approved web content to PDF.",
+    "engine": {
+      "provider": "Local integration connectors",
+      "operation": "local-only connector configuration"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "integrations.email",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Email integration",
+    "description": "Create, attach, and route PDFs through approved mail clients.",
+    "engine": {
+      "provider": "Local integration connectors",
+      "operation": "local-only connector configuration"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "integrations.cad-bim",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "CAD and BIM integrations",
+    "description": "Create PDFs through supported CAD and BIM application plugins.",
+    "engine": {
+      "provider": "Local integration connectors",
+      "operation": "local-only connector configuration"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "integrations.esign-providers",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "E-signature providers",
+    "description": "Connect approved external signing providers.",
+    "engine": {
+      "provider": "Local integration connectors",
+      "operation": "local-only connector configuration"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "integrations.sensitivity-labels",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Sensitivity label integrations",
+    "description": "Exchange supported information-protection labels.",
+    "engine": {
+      "provider": "Local integration connectors",
+      "operation": "local-only connector configuration"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "integrations.events-webhooks",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Integration events",
+    "description": "Publish allowlisted document-workflow events.",
+    "engine": {
+      "provider": "Local integration connectors",
+      "operation": "local-only connector configuration"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "admin.identity-roles",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Identity and roles",
+    "description": "Manage enterprise identity and role-based access.",
+    "engine": {
+      "provider": "Local admin policy store",
+      "operation": "local administration controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "admin.audit-telemetry",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Audit and telemetry",
+    "description": "Record administrative and document-operation events.",
+    "engine": {
+      "provider": "Local admin policy store",
+      "operation": "local administration controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "admin.sso-scim",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "SSO and SCIM",
+    "description": "Integrate enterprise authentication and account provisioning.",
+    "engine": {
+      "provider": "Local admin policy store",
+      "operation": "local administration controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "admin.deployment-packaging",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Deployment packaging",
+    "description": "Create managed installers and deployment configurations.",
+    "engine": {
+      "provider": "Local admin policy store",
+      "operation": "local administration controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "admin.update-management",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Update management",
+    "description": "Control update channels, cadence, and rollback.",
+    "engine": {
+      "provider": "Local admin policy store",
+      "operation": "local administration controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "admin.licensing",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "License management",
+    "description": "Assign and audit product or plugin entitlements.",
+    "engine": {
+      "provider": "Local admin policy store",
+      "operation": "local administration controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "admin.policy-configuration",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Policy configuration",
+    "description": "Manage feature, security, and integration policy.",
+    "engine": {
+      "provider": "Local admin policy store",
+      "operation": "local administration controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "admin.data-residency",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Data residency controls",
+    "description": "Control permitted processing and storage locations.",
+    "engine": {
+      "provider": "Local admin policy store",
+      "operation": "local administration controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "admin.usage-reporting",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Usage reporting",
+    "description": "Report local or enterprise feature usage under policy.",
+    "engine": {
+      "provider": "Local admin policy store",
+      "operation": "local administration controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "admin.plugin-allowlist",
+    "familyId": "integrations-admin",
+    "owner": "workflow-services",
+    "delivery": "implemented",
+    "title": "Plugin allowlist",
+    "description": "Control permitted plugin publishers, IDs, and versions.",
+    "engine": {
+      "provider": "Local admin policy store",
+      "operation": "local administration controls"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "platform.plugins.install",
+    "familyId": "plugin-platform",
+    "owner": "plugin-platform",
+    "delivery": "implemented",
+    "title": "Plugin installation",
+    "description": "Validate and install signed local plugin packages.",
+    "engine": {
+      "provider": "Local plugin package host",
+      "operation": "plugin install lifecycle and registry"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "platform.plugins.rpc",
+    "familyId": "plugin-platform",
+    "owner": "plugin-platform",
+    "delivery": "implemented",
+    "title": "Plugin RPC",
+    "description": "Route versioned, permission-checked plugin RPC requests.",
+    "engine": {
+      "provider": "Local plugin package host",
+      "operation": "plugin install lifecycle and registry"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "platform.plugins.lifecycle",
+    "familyId": "plugin-platform",
+    "owner": "plugin-platform",
+    "delivery": "implemented",
+    "title": "Plugin lifecycle",
+    "description": "Manage activation, disablement, cleanup, and failure states.",
+    "engine": {
+      "provider": "Local plugin package host",
+      "operation": "plugin install lifecycle and registry"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "platform.plugins.permissions",
+    "familyId": "plugin-platform",
+    "owner": "plugin-platform",
+    "delivery": "implemented",
+    "title": "Plugin permissions",
+    "description": "Request, grant, deny, scope, and revoke plugin permissions.",
+    "engine": {
+      "provider": "Local plugin package host",
+      "operation": "plugin install lifecycle and registry"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "platform.plugins.dependency-resolution",
+    "familyId": "plugin-platform",
+    "owner": "plugin-platform",
+    "delivery": "implemented",
+    "title": "Dependency resolution",
+    "description": "Resolve exact local plugin dependencies and detect cycles.",
+    "engine": {
+      "provider": "Local plugin package host",
+      "operation": "plugin install lifecycle and registry"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "platform.plugins.version-compatibility",
+    "familyId": "plugin-platform",
+    "owner": "plugin-platform",
+    "delivery": "implemented",
+    "title": "Version compatibility",
+    "description": "Check manifest, protocol, host, and dependency compatibility.",
+    "engine": {
+      "provider": "Local plugin package host",
+      "operation": "plugin install lifecycle and registry"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "platform.plugins.package-verification",
+    "familyId": "plugin-platform",
+    "owner": "plugin-platform",
+    "delivery": "implemented",
+    "title": "Package verification",
+    "description": "Verify package integrity, origin, signature, and immutable contents.",
+    "engine": {
+      "provider": "Local plugin package host",
+      "operation": "plugin install lifecycle and registry"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "platform.plugins.runtime-sandbox",
+    "familyId": "plugin-platform",
+    "owner": "plugin-platform",
+    "delivery": "implemented",
+    "title": "Runtime sandbox",
+    "description": "Enforce process and network isolation for executable plugins.",
+    "engine": {
+      "provider": "Local plugin package host",
+      "operation": "plugin install lifecycle and registry"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "platform.plugins.capability-conflicts",
+    "familyId": "plugin-platform",
+    "owner": "plugin-platform",
+    "delivery": "implemented",
+    "title": "Capability conflicts",
+    "description": "Detect and resolve conflicting capability providers.",
+    "engine": {
+      "provider": "Local plugin package host",
+      "operation": "plugin install lifecycle and registry"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "platform.plugins.upgrade-rollback",
+    "familyId": "plugin-platform",
+    "owner": "plugin-platform",
+    "delivery": "implemented",
+    "title": "Upgrade and rollback",
+    "description": "Upgrade plugins transactionally and restore prior versions.",
+    "engine": {
+      "provider": "Local plugin package host",
+      "operation": "plugin install lifecycle and registry"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  },
+  {
+    "id": "platform.plugins.registry",
+    "familyId": "plugin-platform",
+    "owner": "plugin-platform",
+    "delivery": "implemented",
+    "title": "Local plugin registry",
+    "description": "Inventory installed, disabled, blocked, and available local packages.",
+    "engine": {
+      "provider": "Local plugin package host",
+      "operation": "plugin install lifecycle and registry"
+    },
+    "evidence": {
+      "kind": "test",
+      "reference": "tests/professional-capability-delivery.test.js"
+    }
+  }
+]

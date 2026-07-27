@@ -1,31 +1,44 @@
-// platen file
+// swift-tools-version: 5.9
+import PackageDescription
 
-// forced-inspection-1
-
-// forced-operations-2
-
-// forced-workbench-3
-
-// forced-workbench-4
-
-// forced-operations-5
-
-// forced-inspection-6
-
-// forced-workbench-7
-
-// forced-release-8
-
-// forced-verification-9
-
-// forced-inspection-10
-
-// forced-operations-11
-
-// forced-release-12
-
-// forced-workbench-13
-
-// forced-workbench-14
-
-// forced-release-15
+let package = Package(
+    name: "PDFKitInspector",
+    platforms: [.macOS(.v13)],
+    products: [
+        .executable(name: "pdfkit-inspect", targets: ["PDFKitInspector"]),
+        .executable(name: "pdf-signature-trust", targets: ["PDFSignatureTrust"]),
+        .executable(name: "pdf-signing-identity", targets: ["PDFSigningIdentity"]),
+        .executable(name: "pdf-scanner-acquisition", targets: ["PDFScannerAcquisition"]),
+    ],
+    targets: [
+        .target(name: "PDFScannerAcquisitionCore"),
+        .executableTarget(
+            name: "PDFScannerAcquisition",
+            dependencies: ["PDFScannerAcquisitionCore"],
+            linkerSettings: [
+                .linkedFramework("ImageCaptureCore"),
+                .linkedFramework("ImageIO"),
+                .linkedFramework("CoreGraphics"),
+            ]
+        ),
+        .executableTarget(
+            name: "PDFKitInspector",
+            linkerSettings: [.linkedFramework("PDFKit")]
+        ),
+        .executableTarget(
+            name: "PDFSignatureTrust",
+            linkerSettings: [.linkedFramework("Security")]
+        ),
+        .executableTarget(
+            name: "PDFSigningIdentity",
+            linkerSettings: [
+                .linkedFramework("Foundation"),
+                .linkedFramework("Security"),
+            ]
+        ),
+        .testTarget(
+            name: "PDFScannerAcquisitionCoreTests",
+            dependencies: ["PDFScannerAcquisitionCore"]
+        ),
+    ]
+)

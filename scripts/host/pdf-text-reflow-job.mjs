@@ -1,0 +1,35 @@
+import { createHash } from 'node:crypto';
+import { chmod, lstat, open, readdir, readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { HostError } from './host-error.mjs';
+import { createOperationProvenance } from './operation-provenance.mjs';
+import { assertPrivateSourceCopy, stagePrivateSourceCopy } from './private-source-copy.mjs';
+import { inspectPdfTextReflow, writePdfTextReflow } from './pdf-text-reflow-writer.mjs';
+import { PDF_TEXT_REFLOW_PROFILE } from './pdf-text-reflow-contract.mjs';
+
+export const MAX_PDF_TEXT_REFLOW_JOB_MS = 120_000;
+export const MAX_PDF_TEXT_REFLOW_SOURCE_BYTES = 64 * 1024 * 1024;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
+function host(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
+function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
+function abort(signal) { if (signal?.aborted) host('JOB_CANCELLED', 'PDF text reflow was cancelled.', 499); }
+async function shape(path, expected) { const names = (await readdir(path)).sort(); if (names.join('\0') !== [...expected].sort().join('\0')) host('PDF_TEXT_REFLOW_WORKSPACE_INVALID', 'The private text-reflow workspace contains unexpected files.'); for (const name of names) { const stat = await lstat(join(path, name)); if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink !== 1 || (stat.mode & 0o077) !== 0) host('PDF_TEXT_REFLOW_WORKSPACE_INVALID', 'The private text-reflow workspace is unsafe.'); } }
+async function write(path, bytes) { if (!Buffer.isBuffer(bytes) || bytes.length < 64 || bytes.length > MAX_PDF_TEXT_REFLOW_SOURCE_BYTES + 1024 * 1024) host('PDF_TEXT_REFLOW_OUTPUT_INVALID', 'The raw text-reflow output is outside its fixed byte bound.'); const handle = await open(path, 'wx', 0o600); try { await handle.writeFile(bytes); await handle.sync(); } finally { await handle.close(); } await chmod(path, 0o400); }
+function validArtifact(artifact, expected) { return artifact && typeof artifact === 'object' && UUID.test(String(artifact.id ?? '')) && artifact.id !== expected.sourceId && artifact.documentId === expected.documentId && artifact.displayName === 'text-reflow.pdf' && artifact.mediaType === 'application/pdf' && artifact.size === expected.size && artifact.sha256 === expected.sha256 && JSON.stringify(artifact.operation) === JSON.stringify(expected.operation); }
+
+export async function runPdfTextReflowJob({ store, documentId, source, request, deadline, lifecycle }) {
+  let sourceBytes; let outputBytes; let built;
+  try {
+    abort(deadline.signal); await store.verifySource(documentId); const workspace = await store.createJobWorkspace(documentId); lifecycle.workspace = workspace;
+    const inputPath = join(workspace, 'input.pdf'); const outputPath = join(workspace, 'output.pdf'); const identity = await stagePrivateSourceCopy({ sourcePath: store.getSourcePath(documentId), targetPath: inputPath, expectedSha256: source.sha256, expectedSize: source.size, maximumBytes: MAX_PDF_TEXT_REFLOW_SOURCE_BYTES, signal: deadline.signal });
+    await shape(workspace, ['input.pdf']); sourceBytes = await readFile(inputPath); if (digest(sourceBytes) !== source.sha256) host('SOURCE_INTEGRITY_FAILED', 'The private text-reflow source changed.', 500);
+    built = writePdfTextReflow(sourceBytes, request); await write(outputPath, built.bytes); await shape(workspace, ['input.pdf', 'output.pdf']); outputBytes = await readFile(outputPath); const proof = inspectPdfTextReflow(sourceBytes, outputBytes, request); if (JSON.stringify(proof) !== JSON.stringify(built.proof)) host('PDF_TEXT_REFLOW_OUTPUT_INVALID', 'Independent text-reflow inspection disagreed with the writer proof.');
+    await assertPrivateSourceCopy({ path: inputPath, identity, expectedSha256: source.sha256, expectedSize: source.size, maximumBytes: MAX_PDF_TEXT_REFLOW_SOURCE_BYTES }); await store.verifySource(documentId); abort(deadline.signal);
+    const outputSha256 = digest(outputBytes); const operation = createOperationProvenance({ type: 'pdf-text-reflow', inputs: [{ documentId, sha256: source.sha256, role: 'source' }], parameters: { profile: PDF_TEXT_REFLOW_PROFILE, page: proof.page, streamReference: proof.streamReference, lineCount: proof.lineCount, lineWidth: proof.lineWidth, originalTextSha256: proof.originalTextSha256, replacementTextSha256: proof.replacementTextSha256 }, expected: { outputSha256, sourcePrefixPreserved: true, streamByteLengthPreserved: true, changedObjectCount: 1 }, validation: { passed: true, validators: ['source-sha256', 'private-source-copy', 'raw-fixed-slot-reflow', 'independent-text-reflow-reinspection', 'output-sha256'], outputSha256 } });
+    const artifact = await store.promotePdfArtifact(documentId, outputPath, { displayName: 'text-reflow.pdf', operation, expectedSha256: outputSha256, signal: deadline.signal }); const expected = { sourceId: source.id, documentId, size: outputBytes.length, sha256: outputSha256, operation }; if (!validArtifact(artifact, expected)) host('PDF_TEXT_REFLOW_OUTPUT_INVALID', 'The promoted text-reflow artifact identity is invalid.'); lifecycle.promotedArtifact = artifact;
+    let retained; try { retained = await store.getArtifact(artifact.id); } catch (error) { host('PDF_TEXT_REFLOW_OUTPUT_INVALID', 'The promoted text-reflow artifact could not be re-read.', 502, error); } if (!validArtifact(retained, expected) || retained.id !== artifact.id) host('PDF_TEXT_REFLOW_OUTPUT_INVALID', 'The retained text-reflow artifact identity is invalid.');
+    await store.verifySource(documentId); abort(deadline.signal); lifecycle.completed = true;
+    return Object.freeze({ kind: 'pdf-text-reflow', artifact, proof, limitations: Object.freeze(['Only one source-bound paragraph represented by 2 to 32 contiguous, unescaped, fixed-character-width ASCII Tj slots separated by T* is reflowed.', 'Wrapping uses character counts within existing line slots; font metrics, text-box geometry, kerning, shaping, hyphenation, page expansion, general layout reflow, and typography changes are not supported.', 'The source must be a passive unsigned, unencrypted, untagged, form-free, layer-free single-revision classic PDF with unfiltered, unshared content streams.']) });
+  } finally { sourceBytes?.fill(0); outputBytes?.fill(0); built?.bytes?.fill(0); }
+}
+export async function cleanupPdfTextReflowJob({ store, lifecycle }) { let workspaceError = null; let artifactError = null; if (lifecycle.workspace) try { await store.cleanupJob(lifecycle.workspace); } catch (error) { workspaceError = error; } if ((!lifecycle.completed || workspaceError) && lifecycle.promotedArtifact?.id) try { await store.deleteArtifact(lifecycle.promotedArtifact.id); } catch (error) { artifactError = error; } if (workspaceError || artifactError) host('PDF_TEXT_REFLOW_CLEANUP_FAILED', 'PDF text reflow cleanup failed.', 500, workspaceError && artifactError ? new AggregateError([workspaceError, artifactError]) : workspaceError ?? artifactError); }

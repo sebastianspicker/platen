@@ -1,0 +1,813 @@
+# Generated feature-gap report
+
+> Generated from the machine-readable catalog by `npm run report`. Do not edit counts by hand.
+
+- Normalized capability records: 318
+- Professional delivery: 318 implemented, 0 planned
+- Prototype coverage records: 318
+- Planned records assigned to the seven requested skeletons: 0
+- Planned records assigned to core or other future packs: 0
+
+Professional delivery is the catalog claim. Prototype tier is a separate, deliberately narrower statement of what the local prototype can presently do.
+
+## Professional delivery implemented now
+
+- `document.open.local`: Open local document
+- `document.open.drag-drop`: Open by drag and drop
+- `document.close`: Close document
+- `document.download.original`: Download original
+- `viewer.native.render`: Native viewer surface
+- `viewer.zoom.preview`: Preview zoom
+- `viewer.rotate.preview`: Preview rotation
+- `viewer.fullscreen`: Fullscreen request
+- `platform.plugins.catalog`: Plugin catalog
+- `platform.plugins.sandbox-probe`: Static sandbox declaration probe
+- `viewer.thumbnails`: Page thumbnails
+- `viewer.search`: Document search
+- `viewer.advanced-search`: Advanced search
+- `viewer.bookmarks`: Bookmarks and outlines
+- `viewer.page-layouts`: Page layouts
+- `viewer.multidocument-tabs`: Multi-document tabs
+- `viewer.split-view`: Split view
+- `viewer.reflow`: Reflow view
+- `viewer.read-aloud`: Read aloud
+- `viewer.attachments`: Attachment inventory
+- `viewer.layers`: Layer viewer
+- `viewer.destinations`: Named destinations
+- `viewer.page-labels`: Logical page labels
+- `viewer.document-properties`: Document properties
+- `viewer.select-copy`: Select and copy
+- `viewer.loupe`: Loupe
+- `viewer.snapshot`: Snapshot
+- `viewer.rulers-grid`: Rulers and grid
+- `viewer.presentation-mode`: Presentation mode
+- `viewer.navigation-history`: Navigation history
+- `create.blank-pdf`: Create blank PDF
+- `convert.office-to-pdf`: Office to PDF
+- `convert.images-to-pdf`: Images to PDF
+- `convert.html-to-pdf`: HTML to PDF
+- `create.clipboard-to-pdf`: Clipboard to PDF
+- `create.print-to-pdf`: Print to PDF
+- `create.postscript-to-pdf`: PostScript to PDF
+- `create.multiformat-combine`: Combine mixed formats
+- `create.cad-to-pdf`: CAD to PDF
+- `export.word`: Export to Word
+- `export.excel`: Export to spreadsheet
+- `export.powerpoint`: Export to presentation
+- `export.text-rtf`: Export text and RTF
+- `export.html-xml`: Export HTML and XML
+- `export.images`: Export selected page PNG
+- `export.selected-region`: Export selected region
+- `optimize.compress`: Compress and optimize
+- `optimize.fast-web-view`: Fast web view
+- `edit.text`: Edit text
+- `edit.add-text`: Add text
+- `edit.text-reflow`: Paragraph reflow editing
+- `edit.images`: Edit images
+- `edit.links`: Edit links
+- `edit.headers-footers`: Headers and footers
+- `edit.vector-objects`: Edit vector objects
+- `edit.object-properties`: Object properties
+- `edit.find-replace`: Find and replace
+- `edit.spellcheck`: Spell checking
+- `document.watermarks`: Watermarks
+- `document.backgrounds`: Backgrounds
+- `document.bates-numbering`: Bates numbering
+- `document.bookmarks-author`: Author bookmarks
+- `document.destinations-author`: Author named destinations
+- `document.attachments-manage`: Manage attachments
+- `document.layers-manage`: Manage layers
+- `document.metadata-edit`: Edit metadata
+- `document.flatten-content`: Flatten content
+- `document.actions-javascript`: Document actions and JavaScript
+- `pages.merge`: Merge PDFs
+- `pages.split`: Split document
+- `pages.extract`: Extract pages
+- `pages.reorder`: Reorder pages
+- `pages.delete`: Delete pages
+- `pages.crop`: Crop pages
+- `pages.rotate`: Rotate pages
+- `pages.insert`: Insert pages
+- `pages.replace`: Replace pages
+- `pages.duplicate`: Duplicate pages
+- `pages.copy-between-documents`: Copy pages between documents
+- `pages.resize`: Resize pages
+- `pages.page-boxes`: Page boxes
+- `pages.labels-numbering`: Page labels and numbering
+- `pages.reverse-interleave`: Reverse and interleave
+- `pages.insert-blank`: Insert blank pages
+- `pages.transitions`: Page transitions
+- `pages.split-by-rule`: Rule-based split
+- `review.comments`: Comments and replies
+- `review.markup-tools`: Markup tools
+- `review.shared-review`: Shared review
+- `review.text-markup`: Text markup
+- `review.drawing-markup`: Drawing markup
+- `review.text-notes-callouts`: Notes and callouts
+- `review.file-audio-attachments`: File and audio annotations
+- `review.measurements`: Review measurements
+- `review.annotation-properties`: Annotation properties
+- `review.annotation-import-export`: Annotation interchange
+- `review.comment-summary`: Comment summaries
+- `review.statuses`: Review statuses
+- `review.filter-sort`: Filter and sort reviews
+- `review.custom-stamps`: Custom stamps
+- `review.annotation-flatten`: Flatten annotations
+- `review.review-tracking`: Review tracking
+- `review.notifications-mentions`: Mentions and notifications
+- `review.comments-to-office`: Comments to office documents
+- `forms.fill-save`: Fill and save forms
+- `forms.source-bound-acroform-fill-save`: Source-bound AcroForm fill and save
+- `forms.author`: Author forms
+- `forms.validate`: Validate forms
+- `forms.calculate`: Calculate forms
+- `forms.distribute-collect`: Distribute and collect forms
+- `forms.detect-fields`: Detect form fields
+- `forms.static-to-fillable`: Static to fillable form
+- `forms.import-export-data`: Form data interchange
+- `forms.submit-reset`: Submit and reset actions
+- `forms.javascript-actions`: Form JavaScript actions
+- `forms.tab-order-tooltips`: Tab order and tooltips
+- `forms.barcode-fields`: Barcode fields
+- `forms.flatten`: Flatten form fields
+- `forms.xfa-compatibility`: XFA compatibility
+- `forms.signature-fields`: Signature fields
+- `sign.electronic`: Electronic signatures
+- `sign.certificate`: Apply certificate signature
+- `sign.validate-certificate`: Validate certificate signature
+- `sign.routed-workflow`: Routed signing workflows
+- `sign.audit-trail`: Signature audit trail
+- `sign.timestamp`: Trusted timestamp
+- `sign.certify-document`: Certify document
+- `sign.trust-store`: Trust store
+- `sign.revocation-ltv`: Revocation and LTV
+- `sign.visible-appearance`: Signature appearance
+- `sign.digital-id-management`: Digital ID management
+- `sign.batch-sign-seal`: Batch sign and seal
+- `sign.identity-verification`: Signer identity verification
+- `scan.acquire`: Scan acquisition
+- `scan.duplex-feeder`: Duplex and feeder scanning
+- `scan.append-to-document`: Append scanned pages
+- `ocr.recognize-text`: Searchable OCR
+- `ocr.cleanup`: Verified OCR cleanup presets
+- `ocr.editable-output`: Editable OCR output
+- `ocr.suspect-review`: OCR suspect review
+- `ocr.language-detection-selection`: OCR language selection
+- `ocr.zones-layout`: Typed recognition zones and layout
+- `ocr.table-recognition`: Review-grade OCR table grids
+- `ocr.user-dictionaries-training`: OCR dictionaries and training
+- `ocr.batch-recognition`: Bounded local batch OCR
+- `ocr.export-layout-preserving`: Positioned OCR review export
+- `ocr.screenshot-capture`: Screenshot OCR
+- `security.open-password`: Open password encryption
+- `security.permission-controls`: Permission controls
+- `security.certificate-encryption`: Certificate encryption
+- `security.policy-controls`: Security policy controls
+- `security.remove-protection`: Remove protection
+- `security.security-envelopes`: Security envelopes
+- `security.information-protection-labels`: Information protection labels
+- `security.protected-view`: Protected view
+- `security.javascript-controls`: JavaScript controls
+- `security.encryption-aes`: AES encryption profiles
+- `redaction.mark`: Mark for redaction
+- `redaction.preview`: Preview redactions
+- `redaction.apply`: Apply redactions
+- `redaction.find-patterns`: Find sensitive patterns
+- `redaction.overlay-labels`: Redaction overlays
+- `redaction.full-page`: Full-page redaction
+- `redaction.batch`: Batch redaction
+- `redaction.report`: Redaction report
+- `sanitize.hidden-data`: Sanitize hidden data
+- `sanitize.metadata`: Remove metadata
+- `sanitize.selective-content`: Selective sanitization
+- `compare.content`: Content comparison
+- `compare.pixel`: Pixel comparison
+- `compare.overlay`: Overlay comparison
+- `compare.side-by-side`: Side-by-side comparison
+- `compare.annotations`: Annotation comparison
+- `compare.cross-format`: Cross-format comparison
+- `compare.batch`: Batch comparison
+- `compare.report-export`: Comparison reports
+- `compare.package`: Package comparison
+- `accessibility.check`: Accessibility checker
+- `accessibility.report-export`: Accessibility report
+- `accessibility.auto-tag`: Automatic tagging
+- `accessibility.remediate-tags`: Tag remediation
+- `accessibility.reading-order`: Reading order
+- `accessibility.heading-list-structure`: Headings and lists
+- `accessibility.table-semantics`: Table semantics
+- `accessibility.form-semantics`: Accessible forms
+- `accessibility.links-bookmarks`: Accessible links and bookmarks
+- `accessibility.artifact-management`: Artifacts
+- `accessibility.alt-text`: Alternative text
+- `accessibility.document-language-title`: Language and title
+- `accessibility.color-contrast`: Color and contrast review
+- `accessibility.font-unicode-mapping`: Font and Unicode mapping
+- `accessibility.screen-reader-permissions`: Screen-reader permissions
+- `standards.pdf-a`: PDF/A
+- `standards.pdf-x`: PDF/X
+- `standards.pdf-ua`: PDF/UA
+- `standards.pdf-e`: PDF/E
+- `standards.pdf-vt`: PDF/VT
+- `standards.pdf-two`: PDF 2.0
+- `preflight.fixups`: Preflight fixups
+- `preflight.profiles`: Preflight profiles
+- `preflight.reports`: Preflight reports
+- `preflight.certified-pdf`: Certified PDF history
+- `color.convert`: Color conversion
+- `color.output-intents`: Output intents
+- `color.spot-colors`: Spot colors
+- `print.output-preview`: Output preview
+- `print.separations`: Separations preview
+- `print.ink-coverage`: Ink coverage
+- `print.overprint-preview`: Overprint preview
+- `print.transparency-flattening`: Transparency flattening
+- `print.soft-proof`: Soft proof
+- `print.trapping`: Color trapping
+- `print.bleed-marks`: Bleed and printer marks
+- `print.imposition`: Imposition
+- `print.font-inspection-embedding`: Font inspection and embedding
+- `print.image-resolution-compression`: Print image quality
+- `print.variable-data`: Variable print data
+- `print.barcode-decoration`: Barcodes and decoration
+- `collaboration.share-links`: Share links
+- `collaboration.real-time-review`: Real-time review
+- `collaboration.activity-notifications`: Activity and notifications
+- `collaboration.access-expiration`: Share access controls
+- `collaboration.version-history`: Version history
+- `collaboration.projects-workspaces`: Project workspaces
+- `dms.repository-connectors`: DMS repository connectors
+- `dms.retention-records`: Retention and records
+- `dms.checkin-checkout`: Check in and check out
+- `dms.offline-sync`: Offline synchronization
+- `dms.conflict-resolution`: Conflict resolution
+- `dms.document-locking`: Document locking
+- `automation.cli-batch`: CLI batch processing
+- `automation.api`: Automation API
+- `automation.watch-folders`: Watch folders
+- `automation.action-sequences`: Action sequences
+- `automation.javascript`: Automation scripting
+- `automation.scheduled-jobs`: Scheduled jobs
+- `automation.conditional-workflows`: Conditional workflows
+- `automation.variables-presets`: Variables and presets
+- `automation.job-queue-retry`: Job queues and retry
+- `automation.webhooks`: Workflow webhooks
+- `automation.processing-reports`: Processing reports
+- `automation.preflight-server`: Preflight service
+- `automation.batch-print`: Batch print
+- `ai.summarize`: Document summarization
+- `ai.ask-document`: Ask document
+- `ai.extract-structured-data`: Structured extraction
+- `ai.translate`: AI translation
+- `ai.rewrite-proofread`: AI rewrite and proofread
+- `ai.explain`: AI explanation
+- `ai.source-citations`: Source citations
+- `ai.multi-document-analysis`: Multi-document analysis
+- `ai.generate-images`: Generate images
+- `ai.generate-bookmarks`: Generate bookmarks
+- `ai.smart-redaction`: AI redaction suggestions
+- `ai.form-extraction`: AI form extraction
+- `ai.accessibility-suggestions`: AI accessibility suggestions
+- `ai.annotation-assist`: AI annotation assistance
+- `ai.provider-policy-controls`: AI provider policy controls
+- `aec.measurement`: Drawing measurement
+- `aec.takeoff`: Quantity takeoff
+- `aec.collaborative-review-sessions`: Collaborative review sessions
+- `aec.scale-calibration`: Scale calibration
+- `aec.measurement-toolset`: Measurement toolset
+- `aec.markup-toolsets`: Markup toolsets
+- `aec.markups-list`: Markups list
+- `aec.custom-columns-formulas`: Custom columns and formulas
+- `aec.spaces-regions`: Spaces and regions
+- `aec.sets-drawing-log`: Drawing sets and logs
+- `aec.sheet-metadata-tags`: Sheet metadata and tags
+- `aec.revision-overlay`: Revision overlay
+- `aec.batch-slip-sheet`: Batch slip sheet
+- `aec.batch-link`: Batch link
+- `aec.legends`: Markup legends
+- `aec.offline-projects`: Offline projects
+- `aec.revision-status-workflows`: Revision status workflows
+- `aec.geospatial-documents`: Geospatial documents
+- `rich-media.audio-video`: Audio and video
+- `rich-media.playback-controls`: Rich-media playback
+- `three-d.import`: Import 3D content
+- `three-d.saved-views-sections`: 3D views and sections
+- `three-d.measure-comment`: 3D measurement and comments
+- `portfolios.create`: Create PDF portfolios
+- `portfolios.view-extract`: View and extract portfolios
+- `portfolios.metadata-search`: Portfolio metadata search
+- `portfolios.custom-layout`: Portfolio layouts
+- `document.article-threads`: Article threads
+- `document.embedded-files`: Embedded file collections
+- `document.optional-content-groups`: Optional-content behavior
+- `geospatial.inspect-measure-markup`: Geospatial inspection
+- `integrations.cloud-storage`: Cloud storage integrations
+- `integrations.office-addins`: Office add-ins
+- `integrations.browser-capture`: Browser capture
+- `integrations.email`: Email integration
+- `integrations.cad-bim`: CAD and BIM integrations
+- `integrations.esign-providers`: E-signature providers
+- `integrations.sensitivity-labels`: Sensitivity label integrations
+- `integrations.events-webhooks`: Integration events
+- `admin.identity-roles`: Identity and roles
+- `admin.audit-telemetry`: Audit and telemetry
+- `admin.sso-scim`: SSO and SCIM
+- `admin.deployment-packaging`: Deployment packaging
+- `admin.update-management`: Update management
+- `admin.licensing`: License management
+- `admin.policy-configuration`: Policy configuration
+- `admin.data-residency`: Data residency controls
+- `admin.usage-reporting`: Usage reporting
+- `admin.plugin-allowlist`: Plugin allowlist
+- `platform.plugins.install`: Plugin installation
+- `platform.plugins.rpc`: Plugin RPC
+- `platform.plugins.lifecycle`: Plugin lifecycle
+- `platform.plugins.permissions`: Plugin permissions
+- `platform.plugins.dependency-resolution`: Dependency resolution
+- `platform.plugins.version-compatibility`: Version compatibility
+- `platform.plugins.package-verification`: Package verification
+- `platform.plugins.runtime-sandbox`: Runtime sandbox
+- `platform.plugins.capability-conflicts`: Capability conflicts
+- `platform.plugins.upgrade-rollback`: Upgrade and rollback
+- `platform.plugins.registry`: Local plugin registry
+
+## Prototype coverage by tier
+
+### Exact alpha behavior (318)
+
+- `document.open.local`: Open local document (professional delivery: implemented)
+- `document.open.drag-drop`: Open by drag and drop (professional delivery: implemented)
+- `document.close`: Close document (professional delivery: implemented)
+- `document.download.original`: Download original (professional delivery: implemented)
+- `viewer.native.render`: Native viewer surface (professional delivery: implemented)
+- `viewer.zoom.preview`: Preview zoom (professional delivery: implemented)
+- `viewer.rotate.preview`: Preview rotation (professional delivery: implemented)
+- `viewer.fullscreen`: Fullscreen request (professional delivery: implemented)
+- `platform.plugins.catalog`: Plugin catalog (professional delivery: implemented)
+- `platform.plugins.sandbox-probe`: Static sandbox declaration probe (professional delivery: implemented)
+- `viewer.thumbnails`: Page thumbnails (professional delivery: implemented)
+- `viewer.search`: Document search (professional delivery: implemented)
+- `viewer.advanced-search`: Advanced search (professional delivery: implemented)
+- `viewer.bookmarks`: Bookmarks and outlines (professional delivery: implemented)
+- `viewer.page-layouts`: Page layouts (professional delivery: implemented)
+- `viewer.multidocument-tabs`: Multi-document tabs (professional delivery: implemented)
+- `viewer.split-view`: Split view (professional delivery: implemented)
+- `viewer.reflow`: Reflow view (professional delivery: implemented)
+- `viewer.read-aloud`: Read aloud (professional delivery: implemented)
+- `viewer.attachments`: Attachment inventory (professional delivery: implemented)
+- `viewer.layers`: Layer viewer (professional delivery: implemented)
+- `viewer.destinations`: Named destinations (professional delivery: implemented)
+- `viewer.page-labels`: Logical page labels (professional delivery: implemented)
+- `viewer.document-properties`: Document properties (professional delivery: implemented)
+- `viewer.select-copy`: Select and copy (professional delivery: implemented)
+- `viewer.loupe`: Loupe (professional delivery: implemented)
+- `viewer.snapshot`: Snapshot (professional delivery: implemented)
+- `viewer.rulers-grid`: Rulers and grid (professional delivery: implemented)
+- `viewer.presentation-mode`: Presentation mode (professional delivery: implemented)
+- `viewer.navigation-history`: Navigation history (professional delivery: implemented)
+- `create.blank-pdf`: Create blank PDF (professional delivery: implemented)
+- `convert.office-to-pdf`: Office to PDF (professional delivery: implemented)
+- `convert.images-to-pdf`: Images to PDF (professional delivery: implemented)
+- `convert.html-to-pdf`: HTML to PDF (professional delivery: implemented)
+- `create.clipboard-to-pdf`: Clipboard to PDF (professional delivery: implemented)
+- `create.print-to-pdf`: Print to PDF (professional delivery: implemented)
+- `create.postscript-to-pdf`: PostScript to PDF (professional delivery: implemented)
+- `create.multiformat-combine`: Combine mixed formats (professional delivery: implemented)
+- `create.cad-to-pdf`: CAD to PDF (professional delivery: implemented)
+- `export.word`: Export to Word (professional delivery: implemented)
+- `export.excel`: Export to spreadsheet (professional delivery: implemented)
+- `export.powerpoint`: Export to presentation (professional delivery: implemented)
+- `export.text-rtf`: Export text and RTF (professional delivery: implemented)
+- `export.html-xml`: Export HTML and XML (professional delivery: implemented)
+- `export.images`: Export selected page PNG (professional delivery: implemented)
+- `export.selected-region`: Export selected region (professional delivery: implemented)
+- `optimize.compress`: Compress and optimize (professional delivery: implemented)
+- `optimize.fast-web-view`: Fast web view (professional delivery: implemented)
+- `edit.text`: Edit text (professional delivery: implemented)
+- `edit.add-text`: Add text (professional delivery: implemented)
+- `edit.text-reflow`: Paragraph reflow editing (professional delivery: implemented)
+- `edit.images`: Edit images (professional delivery: implemented)
+- `edit.links`: Edit links (professional delivery: implemented)
+- `edit.headers-footers`: Headers and footers (professional delivery: implemented)
+- `edit.vector-objects`: Edit vector objects (professional delivery: implemented)
+- `edit.object-properties`: Object properties (professional delivery: implemented)
+- `edit.find-replace`: Find and replace (professional delivery: implemented)
+- `edit.spellcheck`: Spell checking (professional delivery: implemented)
+- `document.watermarks`: Watermarks (professional delivery: implemented)
+- `document.backgrounds`: Backgrounds (professional delivery: implemented)
+- `document.bates-numbering`: Bates numbering (professional delivery: implemented)
+- `document.bookmarks-author`: Author bookmarks (professional delivery: implemented)
+- `document.destinations-author`: Author named destinations (professional delivery: implemented)
+- `document.attachments-manage`: Manage attachments (professional delivery: implemented)
+- `document.layers-manage`: Manage layers (professional delivery: implemented)
+- `document.metadata-edit`: Edit metadata (professional delivery: implemented)
+- `document.flatten-content`: Flatten content (professional delivery: implemented)
+- `document.actions-javascript`: Document actions and JavaScript (professional delivery: implemented)
+- `pages.merge`: Merge PDFs (professional delivery: implemented)
+- `pages.split`: Split document (professional delivery: implemented)
+- `pages.extract`: Extract pages (professional delivery: implemented)
+- `pages.reorder`: Reorder pages (professional delivery: implemented)
+- `pages.delete`: Delete pages (professional delivery: implemented)
+- `pages.crop`: Crop pages (professional delivery: implemented)
+- `pages.rotate`: Rotate pages (professional delivery: implemented)
+- `pages.insert`: Insert pages (professional delivery: implemented)
+- `pages.replace`: Replace pages (professional delivery: implemented)
+- `pages.duplicate`: Duplicate pages (professional delivery: implemented)
+- `pages.copy-between-documents`: Copy pages between documents (professional delivery: implemented)
+- `pages.resize`: Resize pages (professional delivery: implemented)
+- `pages.page-boxes`: Page boxes (professional delivery: implemented)
+- `pages.labels-numbering`: Page labels and numbering (professional delivery: implemented)
+- `pages.reverse-interleave`: Reverse and interleave (professional delivery: implemented)
+- `pages.insert-blank`: Insert blank pages (professional delivery: implemented)
+- `pages.transitions`: Page transitions (professional delivery: implemented)
+- `pages.split-by-rule`: Rule-based split (professional delivery: implemented)
+- `review.comments`: Comments and replies (professional delivery: implemented)
+- `review.markup-tools`: Markup tools (professional delivery: implemented)
+- `review.shared-review`: Shared review (professional delivery: implemented)
+- `review.text-markup`: Text markup (professional delivery: implemented)
+- `review.drawing-markup`: Drawing markup (professional delivery: implemented)
+- `review.text-notes-callouts`: Notes and callouts (professional delivery: implemented)
+- `review.file-audio-attachments`: File and audio annotations (professional delivery: implemented)
+- `review.measurements`: Review measurements (professional delivery: implemented)
+- `review.annotation-properties`: Annotation properties (professional delivery: implemented)
+- `review.annotation-import-export`: Annotation interchange (professional delivery: implemented)
+- `review.comment-summary`: Comment summaries (professional delivery: implemented)
+- `review.statuses`: Review statuses (professional delivery: implemented)
+- `review.filter-sort`: Filter and sort reviews (professional delivery: implemented)
+- `review.custom-stamps`: Custom stamps (professional delivery: implemented)
+- `review.annotation-flatten`: Flatten annotations (professional delivery: implemented)
+- `review.review-tracking`: Review tracking (professional delivery: implemented)
+- `review.notifications-mentions`: Mentions and notifications (professional delivery: implemented)
+- `review.comments-to-office`: Comments to office documents (professional delivery: implemented)
+- `forms.fill-save`: Fill and save forms (professional delivery: implemented)
+- `forms.source-bound-acroform-fill-save`: Source-bound AcroForm fill and save (professional delivery: implemented)
+- `forms.author`: Author forms (professional delivery: implemented)
+- `forms.validate`: Validate forms (professional delivery: implemented)
+- `forms.calculate`: Calculate forms (professional delivery: implemented)
+- `forms.distribute-collect`: Distribute and collect forms (professional delivery: implemented)
+- `forms.detect-fields`: Detect form fields (professional delivery: implemented)
+- `forms.static-to-fillable`: Static to fillable form (professional delivery: implemented)
+- `forms.import-export-data`: Form data interchange (professional delivery: implemented)
+- `forms.submit-reset`: Submit and reset actions (professional delivery: implemented)
+- `forms.javascript-actions`: Form JavaScript actions (professional delivery: implemented)
+- `forms.tab-order-tooltips`: Tab order and tooltips (professional delivery: implemented)
+- `forms.barcode-fields`: Barcode fields (professional delivery: implemented)
+- `forms.flatten`: Flatten form fields (professional delivery: implemented)
+- `forms.xfa-compatibility`: XFA compatibility (professional delivery: implemented)
+- `forms.signature-fields`: Signature fields (professional delivery: implemented)
+- `sign.electronic`: Electronic signatures (professional delivery: implemented)
+- `sign.certificate`: Apply certificate signature (professional delivery: implemented)
+- `sign.validate-certificate`: Validate certificate signature (professional delivery: implemented)
+- `sign.routed-workflow`: Routed signing workflows (professional delivery: implemented)
+- `sign.audit-trail`: Signature audit trail (professional delivery: implemented)
+- `sign.timestamp`: Trusted timestamp (professional delivery: implemented)
+- `sign.certify-document`: Certify document (professional delivery: implemented)
+- `sign.trust-store`: Trust store (professional delivery: implemented)
+- `sign.revocation-ltv`: Revocation and LTV (professional delivery: implemented)
+- `sign.visible-appearance`: Signature appearance (professional delivery: implemented)
+- `sign.digital-id-management`: Digital ID management (professional delivery: implemented)
+- `sign.batch-sign-seal`: Batch sign and seal (professional delivery: implemented)
+- `sign.identity-verification`: Signer identity verification (professional delivery: implemented)
+- `scan.acquire`: Scan acquisition (professional delivery: implemented)
+- `scan.duplex-feeder`: Duplex and feeder scanning (professional delivery: implemented)
+- `scan.append-to-document`: Append scanned pages (professional delivery: implemented)
+- `ocr.recognize-text`: Searchable OCR (professional delivery: implemented)
+- `ocr.cleanup`: Verified OCR cleanup presets (professional delivery: implemented)
+- `ocr.editable-output`: Editable OCR output (professional delivery: implemented)
+- `ocr.suspect-review`: OCR suspect review (professional delivery: implemented)
+- `ocr.language-detection-selection`: OCR language selection (professional delivery: implemented)
+- `ocr.zones-layout`: Typed recognition zones and layout (professional delivery: implemented)
+- `ocr.table-recognition`: Review-grade OCR table grids (professional delivery: implemented)
+- `ocr.user-dictionaries-training`: OCR dictionaries and training (professional delivery: implemented)
+- `ocr.batch-recognition`: Bounded local batch OCR (professional delivery: implemented)
+- `ocr.export-layout-preserving`: Positioned OCR review export (professional delivery: implemented)
+- `ocr.screenshot-capture`: Screenshot OCR (professional delivery: implemented)
+- `security.open-password`: Open password encryption (professional delivery: implemented)
+- `security.permission-controls`: Permission controls (professional delivery: implemented)
+- `security.certificate-encryption`: Certificate encryption (professional delivery: implemented)
+- `security.policy-controls`: Security policy controls (professional delivery: implemented)
+- `security.remove-protection`: Remove protection (professional delivery: implemented)
+- `security.security-envelopes`: Security envelopes (professional delivery: implemented)
+- `security.information-protection-labels`: Information protection labels (professional delivery: implemented)
+- `security.protected-view`: Protected view (professional delivery: implemented)
+- `security.javascript-controls`: JavaScript controls (professional delivery: implemented)
+- `security.encryption-aes`: AES encryption profiles (professional delivery: implemented)
+- `redaction.mark`: Mark for redaction (professional delivery: implemented)
+- `redaction.preview`: Preview redactions (professional delivery: implemented)
+- `redaction.apply`: Apply redactions (professional delivery: implemented)
+- `redaction.find-patterns`: Find sensitive patterns (professional delivery: implemented)
+- `redaction.overlay-labels`: Redaction overlays (professional delivery: implemented)
+- `redaction.full-page`: Full-page redaction (professional delivery: implemented)
+- `redaction.batch`: Batch redaction (professional delivery: implemented)
+- `redaction.report`: Redaction report (professional delivery: implemented)
+- `sanitize.hidden-data`: Sanitize hidden data (professional delivery: implemented)
+- `sanitize.metadata`: Remove metadata (professional delivery: implemented)
+- `sanitize.selective-content`: Selective sanitization (professional delivery: implemented)
+- `compare.content`: Content comparison (professional delivery: implemented)
+- `compare.pixel`: Pixel comparison (professional delivery: implemented)
+- `compare.overlay`: Overlay comparison (professional delivery: implemented)
+- `compare.side-by-side`: Side-by-side comparison (professional delivery: implemented)
+- `compare.annotations`: Annotation comparison (professional delivery: implemented)
+- `compare.cross-format`: Cross-format comparison (professional delivery: implemented)
+- `compare.batch`: Batch comparison (professional delivery: implemented)
+- `compare.report-export`: Comparison reports (professional delivery: implemented)
+- `compare.package`: Package comparison (professional delivery: implemented)
+- `accessibility.check`: Accessibility checker (professional delivery: implemented)
+- `accessibility.report-export`: Accessibility report (professional delivery: implemented)
+- `accessibility.auto-tag`: Automatic tagging (professional delivery: implemented)
+- `accessibility.remediate-tags`: Tag remediation (professional delivery: implemented)
+- `accessibility.reading-order`: Reading order (professional delivery: implemented)
+- `accessibility.heading-list-structure`: Headings and lists (professional delivery: implemented)
+- `accessibility.table-semantics`: Table semantics (professional delivery: implemented)
+- `accessibility.form-semantics`: Accessible forms (professional delivery: implemented)
+- `accessibility.links-bookmarks`: Accessible links and bookmarks (professional delivery: implemented)
+- `accessibility.artifact-management`: Artifacts (professional delivery: implemented)
+- `accessibility.alt-text`: Alternative text (professional delivery: implemented)
+- `accessibility.document-language-title`: Language and title (professional delivery: implemented)
+- `accessibility.color-contrast`: Color and contrast review (professional delivery: implemented)
+- `accessibility.font-unicode-mapping`: Font and Unicode mapping (professional delivery: implemented)
+- `accessibility.screen-reader-permissions`: Screen-reader permissions (professional delivery: implemented)
+- `standards.pdf-a`: PDF/A (professional delivery: implemented)
+- `standards.pdf-x`: PDF/X (professional delivery: implemented)
+- `standards.pdf-ua`: PDF/UA (professional delivery: implemented)
+- `standards.pdf-e`: PDF/E (professional delivery: implemented)
+- `standards.pdf-vt`: PDF/VT (professional delivery: implemented)
+- `standards.pdf-two`: PDF 2.0 (professional delivery: implemented)
+- `preflight.fixups`: Preflight fixups (professional delivery: implemented)
+- `preflight.profiles`: Preflight profiles (professional delivery: implemented)
+- `preflight.reports`: Preflight reports (professional delivery: implemented)
+- `preflight.certified-pdf`: Certified PDF history (professional delivery: implemented)
+- `color.convert`: Color conversion (professional delivery: implemented)
+- `color.output-intents`: Output intents (professional delivery: implemented)
+- `color.spot-colors`: Spot colors (professional delivery: implemented)
+- `print.output-preview`: Output preview (professional delivery: implemented)
+- `print.separations`: Separations preview (professional delivery: implemented)
+- `print.ink-coverage`: Ink coverage (professional delivery: implemented)
+- `print.overprint-preview`: Overprint preview (professional delivery: implemented)
+- `print.transparency-flattening`: Transparency flattening (professional delivery: implemented)
+- `print.soft-proof`: Soft proof (professional delivery: implemented)
+- `print.trapping`: Color trapping (professional delivery: implemented)
+- `print.bleed-marks`: Bleed and printer marks (professional delivery: implemented)
+- `print.imposition`: Imposition (professional delivery: implemented)
+- `print.font-inspection-embedding`: Font inspection and embedding (professional delivery: implemented)
+- `print.image-resolution-compression`: Print image quality (professional delivery: implemented)
+- `print.variable-data`: Variable print data (professional delivery: implemented)
+- `print.barcode-decoration`: Barcodes and decoration (professional delivery: implemented)
+- `collaboration.share-links`: Share links (professional delivery: implemented)
+- `collaboration.real-time-review`: Real-time review (professional delivery: implemented)
+- `collaboration.activity-notifications`: Activity and notifications (professional delivery: implemented)
+- `collaboration.access-expiration`: Share access controls (professional delivery: implemented)
+- `collaboration.version-history`: Version history (professional delivery: implemented)
+- `collaboration.projects-workspaces`: Project workspaces (professional delivery: implemented)
+- `dms.repository-connectors`: DMS repository connectors (professional delivery: implemented)
+- `dms.retention-records`: Retention and records (professional delivery: implemented)
+- `dms.checkin-checkout`: Check in and check out (professional delivery: implemented)
+- `dms.offline-sync`: Offline synchronization (professional delivery: implemented)
+- `dms.conflict-resolution`: Conflict resolution (professional delivery: implemented)
+- `dms.document-locking`: Document locking (professional delivery: implemented)
+- `automation.cli-batch`: CLI batch processing (professional delivery: implemented)
+- `automation.api`: Automation API (professional delivery: implemented)
+- `automation.watch-folders`: Watch folders (professional delivery: implemented)
+- `automation.action-sequences`: Action sequences (professional delivery: implemented)
+- `automation.javascript`: Automation scripting (professional delivery: implemented)
+- `automation.scheduled-jobs`: Scheduled jobs (professional delivery: implemented)
+- `automation.conditional-workflows`: Conditional workflows (professional delivery: implemented)
+- `automation.variables-presets`: Variables and presets (professional delivery: implemented)
+- `automation.job-queue-retry`: Job queues and retry (professional delivery: implemented)
+- `automation.webhooks`: Workflow webhooks (professional delivery: implemented)
+- `automation.processing-reports`: Processing reports (professional delivery: implemented)
+- `automation.preflight-server`: Preflight service (professional delivery: implemented)
+- `automation.batch-print`: Batch print (professional delivery: implemented)
+- `ai.summarize`: Document summarization (professional delivery: implemented)
+- `ai.ask-document`: Ask document (professional delivery: implemented)
+- `ai.extract-structured-data`: Structured extraction (professional delivery: implemented)
+- `ai.translate`: AI translation (professional delivery: implemented)
+- `ai.rewrite-proofread`: AI rewrite and proofread (professional delivery: implemented)
+- `ai.explain`: AI explanation (professional delivery: implemented)
+- `ai.source-citations`: Source citations (professional delivery: implemented)
+- `ai.multi-document-analysis`: Multi-document analysis (professional delivery: implemented)
+- `ai.generate-images`: Generate images (professional delivery: implemented)
+- `ai.generate-bookmarks`: Generate bookmarks (professional delivery: implemented)
+- `ai.smart-redaction`: AI redaction suggestions (professional delivery: implemented)
+- `ai.form-extraction`: AI form extraction (professional delivery: implemented)
+- `ai.accessibility-suggestions`: AI accessibility suggestions (professional delivery: implemented)
+- `ai.annotation-assist`: AI annotation assistance (professional delivery: implemented)
+- `ai.provider-policy-controls`: AI provider policy controls (professional delivery: implemented)
+- `aec.measurement`: Drawing measurement (professional delivery: implemented)
+- `aec.takeoff`: Quantity takeoff (professional delivery: implemented)
+- `aec.collaborative-review-sessions`: Collaborative review sessions (professional delivery: implemented)
+- `aec.scale-calibration`: Scale calibration (professional delivery: implemented)
+- `aec.measurement-toolset`: Measurement toolset (professional delivery: implemented)
+- `aec.markup-toolsets`: Markup toolsets (professional delivery: implemented)
+- `aec.markups-list`: Markups list (professional delivery: implemented)
+- `aec.custom-columns-formulas`: Custom columns and formulas (professional delivery: implemented)
+- `aec.spaces-regions`: Spaces and regions (professional delivery: implemented)
+- `aec.sets-drawing-log`: Drawing sets and logs (professional delivery: implemented)
+- `aec.sheet-metadata-tags`: Sheet metadata and tags (professional delivery: implemented)
+- `aec.revision-overlay`: Revision overlay (professional delivery: implemented)
+- `aec.batch-slip-sheet`: Batch slip sheet (professional delivery: implemented)
+- `aec.batch-link`: Batch link (professional delivery: implemented)
+- `aec.legends`: Markup legends (professional delivery: implemented)
+- `aec.offline-projects`: Offline projects (professional delivery: implemented)
+- `aec.revision-status-workflows`: Revision status workflows (professional delivery: implemented)
+- `aec.geospatial-documents`: Geospatial documents (professional delivery: implemented)
+- `rich-media.audio-video`: Audio and video (professional delivery: implemented)
+- `rich-media.playback-controls`: Rich-media playback (professional delivery: implemented)
+- `three-d.import`: Import 3D content (professional delivery: implemented)
+- `three-d.saved-views-sections`: 3D views and sections (professional delivery: implemented)
+- `three-d.measure-comment`: 3D measurement and comments (professional delivery: implemented)
+- `portfolios.create`: Create PDF portfolios (professional delivery: implemented)
+- `portfolios.view-extract`: View and extract portfolios (professional delivery: implemented)
+- `portfolios.metadata-search`: Portfolio metadata search (professional delivery: implemented)
+- `portfolios.custom-layout`: Portfolio layouts (professional delivery: implemented)
+- `document.article-threads`: Article threads (professional delivery: implemented)
+- `document.embedded-files`: Embedded file collections (professional delivery: implemented)
+- `document.optional-content-groups`: Optional-content behavior (professional delivery: implemented)
+- `geospatial.inspect-measure-markup`: Geospatial inspection (professional delivery: implemented)
+- `integrations.cloud-storage`: Cloud storage integrations (professional delivery: implemented)
+- `integrations.office-addins`: Office add-ins (professional delivery: implemented)
+- `integrations.browser-capture`: Browser capture (professional delivery: implemented)
+- `integrations.email`: Email integration (professional delivery: implemented)
+- `integrations.cad-bim`: CAD and BIM integrations (professional delivery: implemented)
+- `integrations.esign-providers`: E-signature providers (professional delivery: implemented)
+- `integrations.sensitivity-labels`: Sensitivity label integrations (professional delivery: implemented)
+- `integrations.events-webhooks`: Integration events (professional delivery: implemented)
+- `admin.identity-roles`: Identity and roles (professional delivery: implemented)
+- `admin.audit-telemetry`: Audit and telemetry (professional delivery: implemented)
+- `admin.sso-scim`: SSO and SCIM (professional delivery: implemented)
+- `admin.deployment-packaging`: Deployment packaging (professional delivery: implemented)
+- `admin.update-management`: Update management (professional delivery: implemented)
+- `admin.licensing`: License management (professional delivery: implemented)
+- `admin.policy-configuration`: Policy configuration (professional delivery: implemented)
+- `admin.data-residency`: Data residency controls (professional delivery: implemented)
+- `admin.usage-reporting`: Usage reporting (professional delivery: implemented)
+- `admin.plugin-allowlist`: Plugin allowlist (professional delivery: implemented)
+- `platform.plugins.install`: Plugin installation (professional delivery: implemented)
+- `platform.plugins.rpc`: Plugin RPC (professional delivery: implemented)
+- `platform.plugins.lifecycle`: Plugin lifecycle (professional delivery: implemented)
+- `platform.plugins.permissions`: Plugin permissions (professional delivery: implemented)
+- `platform.plugins.dependency-resolution`: Dependency resolution (professional delivery: implemented)
+- `platform.plugins.version-compatibility`: Version compatibility (professional delivery: implemented)
+- `platform.plugins.package-verification`: Package verification (professional delivery: implemented)
+- `platform.plugins.runtime-sandbox`: Runtime sandbox (professional delivery: implemented)
+- `platform.plugins.capability-conflicts`: Capability conflicts (professional delivery: implemented)
+- `platform.plugins.upgrade-rollback`: Upgrade and rollback (professional delivery: implemented)
+- `platform.plugins.registry`: Local plugin registry (professional delivery: implemented)
+
+### Executable subset (0)
+
+
+### Local sidecar state (0)
+
+
+### Local service only (0)
+
+
+### Descriptor only (0)
+
+
+### Proposal only (0)
+
+
+### Blocked (0)
+
+
+### Excluded by policy (0)
+
+
+## Requested skeleton coverage
+
+### OCR extension (14)
+
+- `scan.acquire`: Scan acquisition (exact-alpha)
+- `scan.duplex-feeder`: Duplex and feeder scanning (exact-alpha)
+- `scan.append-to-document`: Append scanned pages (exact-alpha)
+- `ocr.recognize-text`: Searchable OCR (exact-alpha)
+- `ocr.cleanup`: Verified OCR cleanup presets (exact-alpha)
+- `ocr.editable-output`: Editable OCR output (exact-alpha)
+- `ocr.suspect-review`: OCR suspect review (exact-alpha)
+- `ocr.language-detection-selection`: OCR language selection (exact-alpha)
+- `ocr.zones-layout`: Typed recognition zones and layout (exact-alpha)
+- `ocr.table-recognition`: Review-grade OCR table grids (exact-alpha)
+- `ocr.user-dictionaries-training`: OCR dictionaries and training (exact-alpha)
+- `ocr.batch-recognition`: Bounded local batch OCR (exact-alpha)
+- `ocr.export-layout-preserving`: Positioned OCR review export (exact-alpha)
+- `ocr.screenshot-capture`: Screenshot OCR (exact-alpha)
+
+### Signing extension (13)
+
+- `sign.electronic`: Electronic signatures (exact-alpha)
+- `sign.certificate`: Apply certificate signature (exact-alpha)
+- `sign.validate-certificate`: Validate certificate signature (exact-alpha)
+- `sign.routed-workflow`: Routed signing workflows (exact-alpha)
+- `sign.audit-trail`: Signature audit trail (exact-alpha)
+- `sign.timestamp`: Trusted timestamp (exact-alpha)
+- `sign.certify-document`: Certify document (exact-alpha)
+- `sign.trust-store`: Trust store (exact-alpha)
+- `sign.revocation-ltv`: Revocation and LTV (exact-alpha)
+- `sign.visible-appearance`: Signature appearance (exact-alpha)
+- `sign.digital-id-management`: Digital ID management (exact-alpha)
+- `sign.batch-sign-seal`: Batch sign and seal (exact-alpha)
+- `sign.identity-verification`: Signer identity verification (exact-alpha)
+
+### Redaction extension (11)
+
+- `redaction.mark`: Mark for redaction (exact-alpha)
+- `redaction.preview`: Preview redactions (exact-alpha)
+- `redaction.apply`: Apply redactions (exact-alpha)
+- `redaction.find-patterns`: Find sensitive patterns (exact-alpha)
+- `redaction.overlay-labels`: Redaction overlays (exact-alpha)
+- `redaction.full-page`: Full-page redaction (exact-alpha)
+- `redaction.batch`: Batch redaction (exact-alpha)
+- `redaction.report`: Redaction report (exact-alpha)
+- `sanitize.hidden-data`: Sanitize hidden data (exact-alpha)
+- `sanitize.metadata`: Remove metadata (exact-alpha)
+- `sanitize.selective-content`: Selective sanitization (exact-alpha)
+
+### Accessibility remediation extension (15)
+
+- `accessibility.check`: Accessibility checker (exact-alpha)
+- `accessibility.report-export`: Accessibility report (exact-alpha)
+- `accessibility.auto-tag`: Automatic tagging (exact-alpha)
+- `accessibility.remediate-tags`: Tag remediation (exact-alpha)
+- `accessibility.reading-order`: Reading order (exact-alpha)
+- `accessibility.heading-list-structure`: Headings and lists (exact-alpha)
+- `accessibility.table-semantics`: Table semantics (exact-alpha)
+- `accessibility.form-semantics`: Accessible forms (exact-alpha)
+- `accessibility.links-bookmarks`: Accessible links and bookmarks (exact-alpha)
+- `accessibility.artifact-management`: Artifacts (exact-alpha)
+- `accessibility.alt-text`: Alternative text (exact-alpha)
+- `accessibility.document-language-title`: Language and title (exact-alpha)
+- `accessibility.color-contrast`: Color and contrast review (exact-alpha)
+- `accessibility.font-unicode-mapping`: Font and Unicode mapping (exact-alpha)
+- `accessibility.screen-reader-permissions`: Screen-reader permissions (exact-alpha)
+
+### AI extension (15)
+
+- `ai.summarize`: Document summarization (exact-alpha)
+- `ai.ask-document`: Ask document (exact-alpha)
+- `ai.extract-structured-data`: Structured extraction (exact-alpha)
+- `ai.translate`: AI translation (exact-alpha)
+- `ai.rewrite-proofread`: AI rewrite and proofread (exact-alpha)
+- `ai.explain`: AI explanation (exact-alpha)
+- `ai.source-citations`: Source citations (exact-alpha)
+- `ai.multi-document-analysis`: Multi-document analysis (exact-alpha)
+- `ai.generate-images`: Generate images (exact-alpha)
+- `ai.generate-bookmarks`: Generate bookmarks (exact-alpha)
+- `ai.smart-redaction`: AI redaction suggestions (exact-alpha)
+- `ai.form-extraction`: AI form extraction (exact-alpha)
+- `ai.accessibility-suggestions`: AI accessibility suggestions (exact-alpha)
+- `ai.annotation-assist`: AI annotation assistance (exact-alpha)
+- `ai.provider-policy-controls`: AI provider policy controls (exact-alpha)
+
+### AEC extension (18)
+
+- `aec.measurement`: Drawing measurement (exact-alpha)
+- `aec.takeoff`: Quantity takeoff (exact-alpha)
+- `aec.collaborative-review-sessions`: Collaborative review sessions (exact-alpha)
+- `aec.scale-calibration`: Scale calibration (exact-alpha)
+- `aec.measurement-toolset`: Measurement toolset (exact-alpha)
+- `aec.markup-toolsets`: Markup toolsets (exact-alpha)
+- `aec.markups-list`: Markups list (exact-alpha)
+- `aec.custom-columns-formulas`: Custom columns and formulas (exact-alpha)
+- `aec.spaces-regions`: Spaces and regions (exact-alpha)
+- `aec.sets-drawing-log`: Drawing sets and logs (exact-alpha)
+- `aec.sheet-metadata-tags`: Sheet metadata and tags (exact-alpha)
+- `aec.revision-overlay`: Revision overlay (exact-alpha)
+- `aec.batch-slip-sheet`: Batch slip sheet (exact-alpha)
+- `aec.batch-link`: Batch link (exact-alpha)
+- `aec.legends`: Markup legends (exact-alpha)
+- `aec.offline-projects`: Offline projects (exact-alpha)
+- `aec.revision-status-workflows`: Revision status workflows (exact-alpha)
+- `aec.geospatial-documents`: Geospatial documents (exact-alpha)
+
+### Prepress extension (26)
+
+- `standards.pdf-a`: PDF/A (exact-alpha)
+- `standards.pdf-x`: PDF/X (exact-alpha)
+- `standards.pdf-ua`: PDF/UA (exact-alpha)
+- `standards.pdf-e`: PDF/E (exact-alpha)
+- `standards.pdf-vt`: PDF/VT (exact-alpha)
+- `standards.pdf-two`: PDF 2.0 (exact-alpha)
+- `preflight.fixups`: Preflight fixups (exact-alpha)
+- `preflight.profiles`: Preflight profiles (exact-alpha)
+- `preflight.reports`: Preflight reports (exact-alpha)
+- `preflight.certified-pdf`: Certified PDF history (exact-alpha)
+- `color.convert`: Color conversion (exact-alpha)
+- `color.output-intents`: Output intents (exact-alpha)
+- `color.spot-colors`: Spot colors (exact-alpha)
+- `print.output-preview`: Output preview (exact-alpha)
+- `print.separations`: Separations preview (exact-alpha)
+- `print.ink-coverage`: Ink coverage (exact-alpha)
+- `print.overprint-preview`: Overprint preview (exact-alpha)
+- `print.transparency-flattening`: Transparency flattening (exact-alpha)
+- `print.soft-proof`: Soft proof (exact-alpha)
+- `print.trapping`: Color trapping (exact-alpha)
+- `print.bleed-marks`: Bleed and printer marks (exact-alpha)
+- `print.imposition`: Imposition (exact-alpha)
+- `print.font-inspection-embedding`: Font inspection and embedding (exact-alpha)
+- `print.image-resolution-compression`: Print image quality (exact-alpha)
+- `print.variable-data`: Variable print data (exact-alpha)
+- `print.barcode-decoration`: Barcodes and decoration (exact-alpha)
+
+## Planned outside the seven skeletons

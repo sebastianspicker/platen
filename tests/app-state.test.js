@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { createAppState, emptyAnalysis } from '../src/core/app-state.js';
+
+test('app state factory owns fresh workflow state outside the browser bootstrap monolith', () => {
+  const documentSnapshot = Object.freeze({ status: 'empty' });
+  const first = createAppState({ documentSnapshot, snapshotClipboardReady: true });
+  const second = createAppState({ documentSnapshot, snapshotClipboardReady: false });
+  assert.equal(first.document, documentSnapshot);
+  assert.equal(first.snapshotClipboardReady, true);
+  assert.equal(second.snapshotClipboardReady, false);
+  assert.deepEqual(first.analysis, emptyAnalysis());
+  first.analysis.textPages.push({ page: 1, text: 'local' });
+  first.pdfkitMetadata.title = 'First';
+  first.pdfkitLocalLinkRemovalIndex = '8';
+  first.pdfkitOutlineRemovalIndex = '3';
+  first.pdfkitOutlineRenameIndex = '2';
+  assert.deepEqual(second.analysis.textPages, []);
+  assert.equal(second.pdfkitMetadata.title, '');
+  assert.equal(second.pdfkitLocalLinkRemovalIndex, '');
+  assert.equal(second.pdfkitOutlineRemovalIndex, '');
+  assert.equal(second.pdfkitOutlineRenameIndex, '');
+  assert.equal(second.pdfkitOutlineRenameLabel, 'Renamed bookmark');
+  assert.equal(second.accessibilityDocumentLanguage, '');
+  assert.equal(second.accessibilityDocumentTitle, '');
+  assert.equal(second.accessibilityAltTextCandidateLocator, '');
+  assert.equal(second.accessibilityAltText, '');
+  assert.equal(second.accessibilityAltTextProposalResult, null);
+  assert.equal(second.incrementalAccessibilityMetadataResult, null);
+  assert.notEqual(first.navigationHistory, second.navigationHistory);
+  assert.throws(() => createAppState({ snapshotClipboardReady: 'yes' }), /must be a boolean/u);
+});
