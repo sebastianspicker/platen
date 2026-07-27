@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/portable-project-manifest.schema.json",
+  "title": "Self-contained local PDF project manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "kind", "source", "workspace", "payloadSha256"],
+  "properties": {
+    "schemaVersion": {"const": 1}, "kind": {"const": "portable-pdf-project"},
+    "source": {"type": "object", "additionalProperties": false, "required": ["displayName", "mediaType", "size", "sha256"], "properties": {"displayName": {"type": "string", "minLength": 1, "maxLength": 200}, "mediaType": {"const": "application/pdf"}, "size": {"type": "integer", "minimum": 1, "maximum": 536870912}, "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}},
+    "workspace": {"type": "object", "additionalProperties": false, "required": ["revision", "namespaces", "audit"], "properties": {"revision": {"type": "integer", "minimum": 0}, "namespaces": {"type": "object"}, "audit": {"type": "array", "maxItems": 200}}},
+    "payloadSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

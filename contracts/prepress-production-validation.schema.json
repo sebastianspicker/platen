@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/prepress-production-validation.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "schemaVersion", "profile", "sourceSha256", "pageCount", "status", "authoritative", "certification", "completeForFixedChecks", "counts", "checks", "preflight", "inkCoverage", "limitations", "reportSha256"],
+  "properties": {
+    "kind": { "const": "print-production-validation" },
+    "schemaVersion": { "const": 1 },
+    "profile": { "type": "object" },
+    "sourceSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "pageCount": { "type": "integer", "minimum": 1, "maximum": 200 },
+    "status": { "enum": ["review-required", "fail"] },
+    "authoritative": { "const": false },
+    "certification": { "const": false },
+    "completeForFixedChecks": { "const": true },
+    "counts": { "type": "object" },
+    "checks": { "type": "array", "minItems": 1, "items": { "type": "object" } },
+    "preflight": { "type": "object" },
+    "inkCoverage": { "type": "object" },
+    "limitations": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "reportSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/standards-validation.schema.json",
+  "title": "Pinned local standards-validation receipt",
+  "description": "A normalized receipt from one complete, source-bound validation by a transitively hash-pinned veraPDF bundle.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "schemaVersion", "standard", "sourceSha256", "status", "authoritative", "complete", "counts", "engine", "limitations"],
+  "properties": {
+    "kind": {"const": "standards-validation"},
+    "schemaVersion": {"const": 1},
+    "standard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "profile"],
+      "properties": {
+        "family": {"enum": ["PDF/A", "PDF/UA"]},
+        "profile": {"enum": ["pdfa-1a", "pdfa-1b", "pdfa-2a", "pdfa-2b", "pdfa-2u", "pdfa-3a", "pdfa-3b", "pdfa-3u", "pdfa-4", "pdfa-4e", "pdfa-4f", "pdfua-1", "pdfua-2"]}
+      }
+    },
+    "sourceSha256": {"$ref": "#/$defs/sha256"},
+    "status": {"enum": ["compliant", "noncompliant"]},
+    "authoritative": {"const": true},
+    "complete": {"const": true},
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["passedRules", "failedRules", "passedChecks", "failedChecks"],
+      "properties": {
+        "passedRules": {"$ref": "#/$defs/count"},
+        "failedRules": {"$ref": "#/$defs/count"},
+        "passedChecks": {"$ref": "#/$defs/count"},
+        "failedChecks": {"$ref": "#/$defs/count"}
+      }
+    },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "bundleSha256"],
+      "properties": {
+        "name": {"const": "veraPDF"},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "bundleSha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"type": "string", "minLength": 1, "maxLength": 240}
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "count": {"type": "integer", "minimum": 0, "maximum": 2147483647}
+  }
+}

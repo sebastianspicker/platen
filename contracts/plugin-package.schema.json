@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/plugin-package.schema.json",
+  "title": "Signed local process-worker plugin package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packageVersion", "manifest", "files", "signature"],
+  "properties": {
+    "packageVersion": {"const": 1},
+    "manifest": {"$ref": "#/$defs/manifest"},
+    "files": {"type": "array", "minItems": 1, "maxItems": 64, "items": {"$ref": "#/$defs/file"}},
+    "signature": {"$ref": "#/$defs/signature"}
+  },
+  "$defs": {
+    "pluginId": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:[.][a-z0-9-]+)+$"},
+    "semver": {"type": "string", "pattern": "^(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)$"},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "path": {"type": "string", "maxLength": 160, "pattern": "^[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+){0,5}$", "not": {"enum": ["package.json"]}},
+    "permission": {
+      "type": "object", "additionalProperties": false, "required": ["name", "reason"],
+      "properties": {
+        "name": {"enum": ["document.metadata", "document.read.bytes", "document.modify", "document.export", "ui.panel", "ui.toolbar", "storage.local"]},
+        "reason": {"type": "string", "minLength": 8}
+      }
+    },
+    "dependency": {
+      "type": "object", "additionalProperties": false, "required": ["id", "version", "digest"],
+      "properties": {"id": {"$ref": "#/$defs/pluginId"}, "version": {"$ref": "#/$defs/semver"}, "digest": {"$ref": "#/$defs/digest"}}
+    },
+    "manifest": {"oneOf": [{"$ref": "#/$defs/manifestV2"}, {"$ref": "#/$defs/manifestV3"}]},
+    "manifestV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["manifestVersion", "id", "name", "version", "protocolVersion", "entry", "capabilities", "permissions", "dependencies", "activation"],
+      "properties": {
+        "manifestVersion": {"const": 2}, "id": {"$ref": "#/$defs/pluginId"}, "name": {"type": "string", "minLength": 1},
+        "version": {"$ref": "#/$defs/semver"}, "protocolVersion": {"const": 1}, "entry": {"allOf": [{"$ref": "#/$defs/path"}, {"pattern": "[.]mjs$"}]},
+        "capabilities": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z][a-z0-9-]*(?:[.][a-z0-9-]+)+$"}}, "permissions": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/permission"}}, "dependencies": {"type": "array", "items": {"$ref": "#/$defs/dependency"}}, "activation": {"enum": ["manual", "on-capability"]}
+      }
+    },
+    "manifestV3": {
+      "type": "object", "additionalProperties": false,
+      "required": ["manifestVersion", "id", "name", "version", "protocolVersion", "entry", "capabilities", "permissions", "dependencies", "activation", "runtime"],
+      "properties": {
+        "manifestVersion": {"const": 3}, "id": {"$ref": "#/$defs/pluginId"}, "name": {"type": "string", "minLength": 1},
+        "version": {"$ref": "#/$defs/semver"}, "protocolVersion": {"const": 1}, "entry": {"allOf": [{"$ref": "#/$defs/path"}, {"pattern": "[.]js$"}]},
+        "capabilities": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z][a-z0-9-]*(?:[.][a-z0-9-]+)+$"}}, "permissions": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/permission"}}, "dependencies": {"type": "array", "maxItems": 0}, "activation": {"enum": ["manual", "on-capability"]}, "runtime": {"$ref": "#/$defs/runtime"}
+      }
+    },
+    "runtime": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "apiVersion"],
+      "properties": {"kind": {"const": "javascriptcore-classic-script"}, "apiVersion": {"const": 1}}
+    },
+    "file": {
+      "type": "object", "additionalProperties": false, "required": ["path", "mediaType", "size", "sha256", "content"],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"}, "mediaType": {"type": "string", "pattern": "^[a-z]+/[a-z0-9.+-]+$"},
+        "size": {"type": "integer", "minimum": 1, "maximum": 2097152}, "sha256": {"$ref": "#/$defs/digest"},
+        "content": {"type": "string", "contentEncoding": "base64"}
+      },
+      "allOf": [{
+        "if": {"properties": {"path": {"pattern": "[.](?:mjs|js)$"}}, "required": ["path"]},
+        "then": {"properties": {"mediaType": {"enum": ["application/javascript", "text/javascript"]}}}
+      }]
+    },
+    "signature": {
+      "type": "object", "additionalProperties": false, "required": ["algorithm", "publisherId", "keyId", "value"],
+      "properties": {
+        "algorithm": {"const": "ed25519"}, "publisherId": {"$ref": "#/$defs/pluginId"},
+        "keyId": {"type": "string", "pattern": "^[A-Za-z0-9._-]{1,80}$"},
+        "value": {"type": "string", "minLength": 88, "maxLength": 88, "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"}
+      }
+    }
+  }
+}

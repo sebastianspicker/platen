@@ -1,0 +1,125 @@
+{
+  "schema": "platen.frontend-screenshot.v1",
+  "product": "Platen",
+  "purpose": "Local visual regression evidence for the frontend redesign",
+  "capturePolicy": {
+    "source": "Generated deterministic PDF fixture only; never user documents",
+    "temporaryBaselinePolicy": "Baseline images remain outside the repository",
+    "browserQA": "Use a local browser harness; screenshots do not replace interaction or accessibility tests"
+  },
+  "screenshots": [
+    {
+      "path": "docs/screenshots/editor-ready.png",
+      "route": "editor",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "browser": "Google Chrome 150.0.7871.182",
+      "source": {
+        "fixture": "generated-two-page-fixture.pdf",
+        "sha256": "0dce9f2449a842e816393c3893cc96bbd6e5b5d18d50f8a8a76340514aeb58b2"
+      },
+      "state": "split-ready-search",
+      "capturedAt": "2026-07-24T07:34:06.370Z",
+      "notes": "Two-page local analysis is ready and the search rail shows one tolerance match on each page."
+    },
+    {
+      "path": "docs/screenshots/workflows.png",
+      "route": "workflows",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "browser": "Google Chrome 150.0.7871.182",
+      "source": {
+        "fixture": "generated-two-page-fixture.pdf",
+        "sha256": "0dce9f2449a842e816393c3893cc96bbd6e5b5d18d50f8a8a76340514aeb58b2"
+      },
+      "state": "workflow-catalog-document-open",
+      "capturedAt": "2026-07-24T07:34:06.370Z",
+      "notes": "Document operations remain source-bound while the generated fixture is open."
+    },
+    {
+      "path": "docs/screenshots/capability-catalog.png",
+      "route": "plugins",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "browser": "Google Chrome 150.0.7871.182",
+      "source": null,
+      "state": "capability-catalog",
+      "capturedAt": "2026-07-24T07:34:06.370Z",
+      "notes": "Capability coverage separates implemented host functions from the blocked third-party execution boundary."
+    },
+    {
+      "path": "docs/screenshots/trust-limits.png",
+      "route": "trust",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "browser": "Google Chrome 150.0.7871.182",
+      "source": {
+        "fixture": "generated-two-page-fixture.pdf",
+        "sha256": "0dce9f2449a842e816393c3893cc96bbd6e5b5d18d50f8a8a76340514aeb58b2"
+      },
+      "state": "local-policy-document-open",
+      "capturedAt": "2026-07-24T07:34:06.370Z",
+      "notes": "The processing boundary, immutable source, local engines, and non-claims are visible with a document open."
+    },
+    {
+      "path": "docs/screenshots/editor-mobile.png",
+      "route": "editor",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "browser": "Google Chrome 150.0.7871.182",
+      "source": null,
+      "state": "empty",
+      "capturedAt": "2026-07-24T07:34:06.370Z",
+      "notes": "The no-document workspace exposes local open and creation actions at the review viewport."
+    },
+    {
+      "path": "docs/screenshots/workflows-mobile.png",
+      "route": "workflows",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "browser": "Google Chrome 150.0.7871.182",
+      "source": null,
+      "state": "no-document",
+      "capturedAt": "2026-07-24T07:34:06.370Z",
+      "notes": "The operation map remains reviewable without an open document."
+    },
+    {
+      "path": "docs/screenshots/capability-mobile.png",
+      "route": "plugins",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "browser": "Google Chrome 150.0.7871.182",
+      "source": null,
+      "state": "capability-catalog",
+      "capturedAt": "2026-07-24T07:34:06.370Z",
+      "notes": "The selected OCR capability and execution-boundary warning remain visible at the review viewport."
+    },
+    {
+      "path": "docs/screenshots/trust-mobile.png",
+      "route": "trust",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "browser": "Google Chrome 150.0.7871.182",
+      "source": null,
+      "state": "local-policy-no-document",
+      "capturedAt": "2026-07-24T07:34:06.370Z",
+      "notes": "The local processing boundary and no-source state remain explicit at the review viewport."
+    }
+  ]
+}

@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Platen — Monograph</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #111111;
+      --ink-soft: #2a2a2a;
+      --mute: #5c5c5c;
+      --faint: #8a8a8a;
+      --ghost: #b0b0b0;
+      --line: #e6e6e6;
+      --line-soft: #efefef;
+      --wash: #f6f6f6;
+      --panel: #fcfcfc;
+      --paper: #ffffff;
+      --stage: #ececea;
+      --mark: #f0dc6a;
+      --ok: #0f6b45;
+      --shadow: 0 0 0 1px rgba(17, 17, 17, 0.05), 0 8px 28px rgba(17, 17, 17, 0.07);
+
+      --sans: "Instrument Sans", "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+      --mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+
+      --top: 48px;
+      --foot: 36px;
+      --rail: 48px;
+      --film: 140px;
+      --side: 292px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      color: var(--ink);
+      background: var(--wash);
+      font-family: var(--sans);
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 400;
+      letter-spacing: -0.005em;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow: hidden;
+    }
+    button, input {
+      font: inherit;
+      letter-spacing: inherit;
+      color: inherit;
+      background: none;
+      border: 0;
+      margin: 0;
+      padding: 0;
+    }
+    button { cursor: pointer; }
+    button:focus-visible,
+    input:focus-visible {
+      outline: 1.5px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    .app {
+      height: 100dvh;
+      display: grid;
+      grid-template-rows: var(--top) minmax(0, 1fr) var(--foot);
+    }
+
+    /* ═══════════ Top bar ═══════════ */
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 0 18px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+    }
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+    .brand {
+      font-size: 13.5px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      flex: 0 0 auto;
+    }
+    .brand span {
+      font-weight: 400;
+      color: var(--faint);
+      margin-left: 6px;
+      letter-spacing: -0.01em;
+    }
+    .divider {
+      width: 1px;
+      height: 14px;
+      background: var(--line);
+      flex: 0 0 auto;
+    }
+    .filename {
+      font-size: 13px;
+      font-weight: 450;
+      color: var(--ink-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: -0.015em;
+    }
+    .center {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      color: var(--mute);
+    }
+    .nav:hover { color: var(--ink); background: var(--wash); }
+    .nav svg { width: 16px; height: 16px; }
+    .pg {
+      font-size: 12.5px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      color: var(--ink-soft);
+      min-width: 44px;
+      text-align: center;
+      letter-spacing: -0.02em;
+    }
+    .right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 200px;
+      height: 32px;
+      padding: 0 11px;
+      border-radius: 8px;
+      background: var(--wash);
+    }
+    .search:focus-within {
+      background: var(--paper);
+      box-shadow: inset 0 0 0 1px var(--ink);
+    }
+    .search svg {
+      width: 14px;
+      height: 14px;
+      color: var(--ghost);
+      flex: 0 0 auto;
+    }
+    .search input {
+      flex: 1;
+      min-width: 0;
+      outline: 0;
+      font-size: 13px;
+      font-weight: 450;
+      letter-spacing: -0.01em;
+    }
+    .search input::placeholder { color: var(--ghost); }
+    .search i {
+      font-style: normal;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--faint);
+      font-variant-numeric: tabular-nums;
+    }
+    .btn {
+      height: 32px;
+      padding: 0 14px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: var(--paper);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+    .btn:hover { background: #000; }
+
+    /* ═══════════ Body ═══════════ */
+    .body {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: var(--rail) var(--film) minmax(0, 1fr) var(--side);
+    }
+
+    /* Rail */
+    nav.rail {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px 0;
+      gap: 4px;
+      background: var(--panel);
+      border-right: 1px solid var(--line-soft);
+    }
+    .rbtn {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: var(--faint);
+    }
+    .rbtn svg { width: 17px; height: 17px; }
+    .rbtn:hover { color: var(--ink-soft); background: var(--wash); }
+    .rbtn[aria-current="page"] {
+      color: var(--ink);
+      background: var(--wash);
+    }
+    .grow { flex: 1; }
+
+    /* Filmstrip */
+    .film {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: var(--panel);
+      border-right: 1px solid var(--line-soft);
+    }
+    .film-h {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    .film-h span {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--faint);
+      letter-spacing: -0.01em;
+    }
+    .film-h b {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--ghost);
+      font-variant-numeric: tabular-nums;
+    }
+    .film-list {
+      flex: 1;
+      overflow: auto;
+      padding: 14px 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .shot {
+      display: grid;
+      gap: 8px;
+      width: 100%;
+      text-align: left;
+    }
+    .shot-frame {
+      aspect-ratio: 1 / 1.294;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+    .shot:hover .shot-frame { border-color: #ccc; }
+    .shot[aria-current="true"] .shot-frame {
+      border-color: var(--ink);
+    }
+    .shot-n {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--faint);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+      padding-left: 1px;
+    }
+    .shot[aria-current="true"] .shot-n { color: var(--ink); }
+
+    /* Miniature drawing */
+    .mini {
+      position: absolute;
+      inset: 0;
+      color: #1a1a1a;
+    }
+    .mini .t {
+      position: absolute;
+      top: 8%;
+      left: 9%;
+      font: 600 5.5px/1 var(--mono);
+      letter-spacing: 0.03em;
+    }
+    .mini svg {
+      position: absolute;
+      left: 12%;
+      top: 18%;
+      width: 76%;
+      height: auto;
+      opacity: 0.88;
+    }
+    .mini .n {
+      position: absolute;
+      left: 9%;
+      bottom: 22%;
+      font: 400 3.8px/1.35 var(--mono);
+      color: #444;
+      width: 50%;
+    }
+    .mini .b {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      bottom: 6%;
+      border: 0.5px solid #222;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr 0.85fr;
+      font: 400 3.4px/1.2 var(--mono);
+    }
+    .mini .b > div {
+      padding: 2px 2.5px;
+      border-right: 0.5px solid #222;
+    }
+    .mini .b > div:last-child { border-right: 0; }
+    .mini .b strong { display: block; font-weight: 600; }
+
+    /* Stage */
+    .stage {
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--stage);
+    }
+    .stage-tools {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex: 0 0 auto;
+    }
+    .stage-caption {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--faint);
+      letter-spacing: -0.015em;
+    }
+    .z {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      color: var(--mute);
+    }
+    .z button {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      color: var(--mute);
+    }
+    .z button:hover { background: rgba(17,17,17,0.05); color: var(--ink); }
+    .z button svg { width: 14px; height: 14px; }
+    .z em {
+      font-style: normal;
+      font-size: 12px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      min-width: 38px;
+      text-align: center;
+      letter-spacing: -0.02em;
+      color: var(--mute);
+    }
+
+    .compare {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-content: center;
+      padding: 24px 40px 40px;
+      gap: 0 48px;
+    }
+    .pane {
+      width: 100%;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .page,
+    .evidence {
+      flex: 0 0 auto;
+    }
+    .pane-h {
+      width: min(100%, 408px);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 8px;
+    }
+    .pane-h h2 {
+      margin: 0;
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .pane-h p {
+      margin: 0;
+      font-size: 11.5px;
+      font-weight: 400;
+      color: var(--faint);
+      letter-spacing: -0.01em;
+    }
+
+    .page {
+      width: min(100%, 408px);
+      aspect-ratio: 1 / 1.294;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    /* Source page content */
+    .page .full {
+      position: absolute;
+      inset: 0;
+      padding: 7.5% 7.5% 10%;
+    }
+    .page .full .t {
+      position: absolute;
+      top: 6%;
+      left: 7.5%;
+      font: 600 10px/1 var(--mono);
+      letter-spacing: 0.02em;
+    }
+    .page .full svg {
+      display: block;
+      width: 68%;
+      margin: 11% auto 0;
+    }
+    .page .full .notes {
+      position: absolute;
+      left: 7.5%;
+      bottom: 15.5%;
+      width: 52%;
+      font: 400 7px/1.5 var(--mono);
+      color: #333;
+    }
+    .page .full .notes b {
+      font-weight: 600;
+      color: #111;
+    }
+    .page .full .block {
+      position: absolute;
+      left: 7%;
+      right: 7%;
+      bottom: 5.5%;
+      border: 0.75px solid #111;
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 0.95fr;
+      font: 400 6.5px/1.25 var(--mono);
+    }
+    .page .full .block > div {
+      padding: 4px 5px;
+      border-right: 0.75px solid #111;
+    }
+    .page .full .block > div:last-child { border-right: 0; }
+    .page .full .block strong {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 1px;
+    }
+
+    mark {
+      background: var(--mark);
+      color: inherit;
+      padding: 0 0.06em;
+      border-radius: 1px;
+    }
+
+    /* Reflow page */
+    .evidence {
+      width: min(100%, 408px);
+      aspect-ratio: 1 / 1.294;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      padding: 30px 32px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .evidence .num {
+      position: absolute;
+      top: 18px;
+      right: 22px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--ghost);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
+    .evidence .k {
+      margin: 0 0 6px;
+      font-size: 11.5px;
+      font-weight: 400;
+      color: var(--faint);
+      letter-spacing: -0.01em;
+    }
+    .evidence h3 {
+      margin: 0 0 18px;
+      font-size: 19px;
+      font-weight: 600;
+      letter-spacing: -0.035em;
+      line-height: 1.15;
+      color: var(--ink);
+    }
+    .evidence h4 {
+      margin: 18px 0 7px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--faint);
+      letter-spacing: -0.01em;
+    }
+    .evidence ul {
+      margin: 0;
+      padding: 0 0 0 1.05em;
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: var(--ink-soft);
+      letter-spacing: -0.01em;
+    }
+    .evidence table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      letter-spacing: -0.01em;
+    }
+    .evidence th {
+      text-align: left;
+      font-weight: 400;
+      color: var(--faint);
+      padding: 6px 12px 6px 0;
+      border-bottom: 1px solid var(--line-soft);
+      width: 40%;
+    }
+    .evidence td {
+      padding: 6px 0;
+      border-bottom: 1px solid var(--line-soft);
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+      font-weight: 450;
+    }
+
+    /* Side */
+    .side {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--panel);
+      border-left: 1px solid var(--line-soft);
+    }
+    .side-nav {
+      height: 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    .side-nav button {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--faint);
+      letter-spacing: -0.015em;
+      position: relative;
+    }
+    .side-nav button[aria-selected="true"] {
+      color: var(--ink);
+    }
+    .side-nav button[aria-selected="true"]::after {
+      content: "";
+      position: absolute;
+      left: 20%;
+      right: 20%;
+      bottom: 0;
+      height: 1.5px;
+      background: var(--ink);
+      border-radius: 1px 1px 0 0;
+    }
+    .side-body {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 12px 10px 20px;
+    }
+    .label {
+      margin: 10px 10px 4px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--faint);
+      letter-spacing: -0.01em;
+    }
+    .item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+      width: 100%;
+      padding: 10px 10px;
+      border-radius: 8px;
+      text-align: left;
+    }
+    .item:hover { background: var(--wash); }
+    .item .a {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+    .item .a strong {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .item .a span {
+      font-size: 11.5px;
+      font-weight: 400;
+      color: var(--faint);
+      letter-spacing: -0.01em;
+    }
+    .item .ok {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--ok);
+      letter-spacing: -0.01em;
+      padding-top: 1px;
+    }
+    .hit {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 8px;
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: left;
+    }
+    .hit:hover { background: var(--wash); }
+    .hit[aria-current="true"] { background: var(--wash); }
+    .hit .i {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--ghost);
+      font-variant-numeric: tabular-nums;
+      padding-top: 1px;
+      letter-spacing: -0.02em;
+    }
+    .hit[aria-current="true"] .i { color: var(--ink); }
+    .hit .c strong {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--faint);
+      margin-bottom: 2px;
+      letter-spacing: -0.01em;
+    }
+    .hit .c p {
+      margin: 0;
+      font-size: 12.5px;
+      line-height: 1.4;
+      color: var(--ink-soft);
+      letter-spacing: -0.01em;
+    }
+    .side-foot {
+      padding: 14px 16px 16px;
+      border-top: 1px solid var(--line-soft);
+      display: grid;
+      gap: 10px;
+    }
+    .side-foot .btn { width: 100%; height: 36px; border-radius: 8px; }
+    .side-foot p {
+      margin: 0;
+      font-size: 11.5px;
+      line-height: 1.4;
+      color: var(--faint);
+      letter-spacing: -0.01em;
+    }
+
+    /* ═══════════ Foot ═══════════ */
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 0 18px;
+      background: var(--paper);
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--faint);
+      letter-spacing: -0.01em;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .status > span {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+    .status > span + span::before {
+      content: "·";
+      margin: 0 10px;
+      color: var(--ghost);
+    }
+    .status b {
+      font-weight: 500;
+      color: var(--mute);
+    }
+    .status code {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      font-weight: 400;
+      color: var(--ghost);
+      margin-left: 6px;
+    }
+    .seal {
+      font-weight: 500;
+      color: var(--ok);
+      white-space: nowrap;
+      letter-spacing: -0.015em;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Platen">
+    <header>
+      <div class="left">
+        <div class="brand">Platen<span>The local-first PDF workbench.</span></div>
+        <div class="divider" aria-hidden="true"></div>
+        <div class="filename">generated-two-page-fixture.pdf</div>
+      </div>
+      <div class="center">
+        <button type="button" class="nav" aria-label="Previous page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5L9 12l5.5 5.5"/></svg>
+        </button>
+        <span class="pg">1 / 2</span>
+        <button type="button" class="nav" aria-label="Next page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6.5L15 12l-5.5 5.5"/></svg>
+        </button>
+      </div>
+      <div class="right">
+        <label class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.25"/><path d="M16 16.5L20 20.5"/></svg>
+          <input type="search" value="tolerance" aria-label="Search document" />
+          <i>2</i>
+        </label>
+        <button type="button" class="btn">Open</button>
+      </div>
+    </header>
+
+    <div class="body">
+      <nav class="rail" aria-label="Primary">
+        <button type="button" class="rbtn" aria-current="page" title="Workspace" aria-label="Workspace">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="4.5" width="6.5" height="6.5" rx="1"/><rect x="13" y="4.5" width="6.5" height="6.5" rx="1"/><rect x="4.5" y="13" width="6.5" height="6.5" rx="1"/><rect x="13" y="13" width="6.5" height="6.5" rx="1"/></svg>
+        </button>
+        <button type="button" class="rbtn" title="Operations" aria-label="Operations">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"><path d="M5 7.5h14M5 12h14M5 16.5h10"/></svg>
+        </button>
+        <button type="button" class="rbtn" title="Coverage" aria-label="Coverage">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6.5h14v11H5z"/><path d="M8 10h8M8 14h5.5"/></svg>
+        </button>
+        <button type="button" class="rbtn" title="Trust" aria-label="Trust">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="11" width="13" height="8.5" rx="1.5"/><path d="M8.5 11V8.2a3.5 3.5 0 017 0V11"/></svg>
+        </button>
+        <div class="grow"></div>
+        <button type="button" class="rbtn" title="Help" aria-label="Help">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M9.75 9.6a2.25 2.25 0 114.1 1.3c0 1.3-2.1 1.7-2.1 3.1M12 16.75h.01"/></svg>
+        </button>
+      </nav>
+
+      <aside class="film" aria-label="Pages">
+        <div class="film-h"><span>Pages</span><b>2</b></div>
+        <div class="film-list">
+          <button type="button" class="shot" aria-current="true">
+            <div class="shot-frame">
+              <div class="mini">
+                <div class="t">SECTION A–A</div>
+                <svg viewBox="0 0 120 90" fill="none" stroke="#1a1a1a" stroke-width="0.95">
+                  <circle cx="60" cy="42" r="24"/>
+                  <circle cx="60" cy="42" r="12"/>
+                  <circle cx="60" cy="42" r="3"/>
+                  <circle cx="60" cy="18" r="2.5"/>
+                  <circle cx="60" cy="66" r="2.5"/>
+                  <circle cx="36" cy="42" r="2.5"/>
+                  <circle cx="84" cy="42" r="2.5"/>
+                  <path d="M60 42 L84 22" stroke-dasharray="1.8 1.4"/>
+                  <path d="M24 80 H96"/>
+                </svg>
+                <div class="n">2. General <mark>tolerance</mark></div>
+                <div class="b">
+                  <div><strong>ACME</strong>ENG</div>
+                  <div><strong>FLANGE</strong>MTG</div>
+                  <div><strong>ACM-1001</strong>1/2</div>
+                </div>
+              </div>
+            </div>
+            <span class="shot-n">1</span>
+          </button>
+          <button type="button" class="shot">
+            <div class="shot-frame">
+              <div class="mini">
+                <div class="t">ELEVATION</div>
+                <svg viewBox="0 0 120 90" fill="none" stroke="#1a1a1a" stroke-width="0.95">
+                  <rect x="34" y="14" width="52" height="54" rx="0.4"/>
+                  <path d="M34 28 H86M34 42 H86M34 56 H86"/>
+                  <circle cx="48" cy="35" r="4"/><circle cx="72" cy="35" r="4"/>
+                  <path d="M42 78 H78"/>
+                </svg>
+                <div class="b">
+                  <div><strong>ACME</strong>ENG</div>
+                  <div><strong>FLANGE</strong>MTG</div>
+                  <div><strong>ACM-1001</strong>2/2</div>
+                </div>
+              </div>
+            </div>
+            <span class="shot-n">2</span>
+          </button>
+        </div>
+      </aside>
+
+      <main class="stage" aria-label="Document stage">
+        <div class="stage-tools">
+          <span class="stage-caption">Compare · page 1</span>
+          <div class="z">
+            <button type="button" aria-label="Zoom out">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6 12h12"/></svg>
+            </button>
+            <em>100%</em>
+            <button type="button" aria-label="Zoom in">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="compare">
+          <section class="pane" aria-label="Immutable source">
+            <div class="pane-h">
+              <h2>Source</h2>
+              <p>Immutable</p>
+            </div>
+            <div class="page">
+              <div class="full">
+                <div class="t">A · SECTION A–A</div>
+                <svg viewBox="0 0 160 120" fill="none" stroke="#111" stroke-width="1">
+                  <circle cx="80" cy="52" r="32"/>
+                  <circle cx="80" cy="52" r="16"/>
+                  <circle cx="80" cy="52" r="4"/>
+                  <circle cx="80" cy="20" r="3.2"/>
+                  <circle cx="80" cy="84" r="3.2"/>
+                  <circle cx="48" cy="52" r="3.2"/>
+                  <circle cx="112" cy="52" r="3.2"/>
+                  <path d="M80 52 L114 26" stroke-dasharray="2.4 1.8"/>
+                  <path d="M30 106 H130"/>
+                  <path d="M52 106v3M80 106v3M108 106v3"/>
+                  <text x="112" y="30" fill="#111" stroke="none" font-size="6.5" font-family="JetBrains Mono, ui-monospace, monospace">Ø60</text>
+                  <text x="94" y="50" fill="#111" stroke="none" font-size="6" font-family="JetBrains Mono, ui-monospace, monospace">Ø30 H7</text>
+                </svg>
+                <div class="notes">
+                  <b>NOTES</b><br/>
+                  1. All dimensions in millimeters.<br/>
+                  2. General <mark>tolerance</mark> ISO 2768-mK.<br/>
+                  3. Remove burrs and sharp edges 0.2 max.<br/>
+                  4. Material: Aluminum 6061-T6.<br/>
+                  5. Finish: Anodize, colorless.
+                </div>
+                <div class="block">
+                  <div><strong>ACME ENGINEERING</strong>Flange, Mounting</div>
+                  <div><strong>DWG NO.</strong>ACM-1001 · Rev B</div>
+                  <div><strong>SHEET</strong>1 of 2 · 2026-04-15</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="pane" aria-label="Text reflow evidence">
+            <div class="pane-h">
+              <h2>Text reflow</h2>
+              <p>Source-bound · read-only</p>
+            </div>
+            <div class="evidence">
+              <span class="num">1 / 2</span>
+              <p class="k">Page 1 · extracted locally</p>
+              <h3>Section A–A</h3>
+              <h4>Dimensions</h4>
+              <ul>
+                <li>Outer diameter: Ø60</li>
+                <li>Inner diameter: Ø30 H7</li>
+                <li>Overall height: 24 ±0.1</li>
+                <li>Surface finish: Ra 1.6</li>
+                <li>Bolt circle diameter: Ø84</li>
+                <li>Hole diameter: Ø45</li>
+              </ul>
+              <h4>Notes</h4>
+              <ul>
+                <li>All dimensions are in millimeters.</li>
+                <li>General <mark>tolerance</mark> ISO 2768-mK.</li>
+                <li>Remove burrs and sharp edges 0.2 max.</li>
+                <li>Material: Aluminum 6061-T6.</li>
+                <li>Finish: Anodize, colorless.</li>
+              </ul>
+              <h4>Metadata</h4>
+              <table>
+                <tr><th>Part name</th><td>Flange, Mounting</td></tr>
+                <tr><th>Drawing number</th><td>ACM-1001</td></tr>
+                <tr><th>Revision</th><td>B</td></tr>
+                <tr><th>Date</th><td>2026-04-15</td></tr>
+              </table>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <aside class="side" aria-label="Evidence inspector">
+        <div class="side-nav" role="tablist">
+          <button type="button" role="tab" aria-selected="true">Evidence</button>
+          <button type="button" role="tab" aria-selected="false">Operations</button>
+        </div>
+        <div class="side-body">
+          <p class="label">Structure</p>
+          <button type="button" class="item">
+            <span class="a"><strong>Reading order</strong><span>Logical · coverage known</span></span>
+            <span class="ok">OK</span>
+          </button>
+          <button type="button" class="item">
+            <span class="a"><strong>Fonts</strong><span>1 embedded · ToUnicode</span></span>
+            <span class="ok">OK</span>
+          </button>
+          <button type="button" class="item">
+            <span class="a"><strong>Images</strong><span>None on this page</span></span>
+            <span class="ok">OK</span>
+          </button>
+          <button type="button" class="item">
+            <span class="a"><strong>Tags</strong><span>Coverage known</span></span>
+            <span class="ok">OK</span>
+          </button>
+
+          <p class="label">Search · 2</p>
+          <button type="button" class="hit" aria-current="true">
+            <span class="i">1</span>
+            <span class="c">
+              <strong>Page 1 · notes</strong>
+              <p>…General <mark>tolerance</mark> ISO 2768-mK.</p>
+            </span>
+          </button>
+          <button type="button" class="hit">
+            <span class="i">2</span>
+            <span class="c">
+              <strong>Page 2 · title block</strong>
+              <p>…position <mark>tolerance</mark> is ±0.1 mm…</p>
+            </span>
+          </button>
+        </div>
+        <div class="side-foot">
+          <button type="button" class="btn">Export evidence</button>
+          <p>Creates a separate artifact. The source file is not modified.</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      <div class="status">
+        <span><b>Source</b><code>6F2B…8E7F</code></span>
+        <span>Local inspection complete</span>
+        <span>No derived output</span>
+      </div>
+      <div class="seal">Source unchanged</div>
+    </footer>
+  </div>
+</body>
+</html>

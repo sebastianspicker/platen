@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/plugin-native-release-policy.schema.json",
+  "title": "Signed native plugin runtime release policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "teamIdentifier",
+    "supervisorSha256",
+    "workerSha256",
+    "supervisorCdHash",
+    "workerCdHash",
+    "designatedRequirementSha256"
+  ],
+  "properties": {
+    "schema": {"const": "pdf-plugin-native-release-policy-v1"},
+    "version": {"const": 1},
+    "teamIdentifier": {"type": "string", "pattern": "^[A-Z0-9]{10}$"},
+    "supervisorSha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "workerSha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "supervisorCdHash": {"type": "string", "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"},
+    "workerCdHash": {"type": "string", "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"},
+    "designatedRequirementSha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; object-src 'self' blob:; frame-src blob:; worker-src 'none'; media-src 'none'; connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="color-scheme" content="light" />
+    <meta name="description" content="The local-first PDF workbench." />
+    <title>Platen</title>
+    <link rel="stylesheet" href="/styles/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">Skip to workspace</a>
+    <div id="app" aria-busy="true">
+      <main class="initial-loading" aria-labelledby="loading-title">
+        <h1 id="loading-title">Platen</h1>
+        <p>The local-first PDF workbench.</p>
+        <p>Loading local workspace…</p>
+      </main>
+    </div>
+    <div id="live-region" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+    <script type="module" src="/src/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,66 @@
+name: Bug report
+description: Report a reproducible defect without sensitive document content
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not attach private PDFs, extracted text, credentials, certificates, keys, internal paths, or sensitive reproductions. Use the private process in SECURITY.md for vulnerabilities.
+  - type: input
+    id: version
+    attributes:
+      label: Version or revision
+      description: Provide the alpha version and Git revision when available.
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options:
+        - Browser GUI
+        - CLI
+        - Loopback host
+        - macOS PDFKit helper
+        - Catalog or documentation
+        - Other local engine
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: List operating system, Node version, browser, and relevant local engine versions.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide minimal steps using a non-sensitive generated or public fixture.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the exact typed error code or sanitized output when relevant.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: This report contains no private PDF content, secrets, credentials, keys, certificates, internal paths, or personal data.
+          required: true
+        - label: This is not a security vulnerability report.
+          required: true

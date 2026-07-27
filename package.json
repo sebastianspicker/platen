@@ -1,0 +1,24 @@
+{
+  "name": "platen",
+  "version": "0.3.0-alpha.1",
+  "private": true,
+  "description": "The local-first PDF workbench.",
+  "type": "module",
+  "scripts": {
+    "cli": "node scripts/platen-cli.mjs",
+    "dev": "node scripts/serve.mjs",
+    "report": "node scripts/capability-report.mjs",
+    "report:write": "node scripts/capability-report.mjs --write",
+    "check:professional-clones": "node scripts/check-professional-handler-clones.mjs",
+    "native:build:pdfkit": "swift build -c release --package-path native/pdfkit-helper",
+    "release:validate": "node scripts/release/validate-current-release.mjs",
+    "test": "node scripts/run-tests.mjs",
+    "verify": "node scripts/verify.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "license": "MIT"
+}

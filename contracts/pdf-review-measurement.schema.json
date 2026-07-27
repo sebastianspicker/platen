@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/pdf-review-measurement.schema.json",
+  "title": "Source-bound PDF review measurement artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "schemaVersion", "sourceDigest", "revision", "measurement", "artifact", "receipt", "evidence", "limitations"],
+  "properties": {
+    "kind": {"const": "pdf-review-measurement"},
+    "schemaVersion": {"const": 1},
+    "sourceDigest": {"$ref": "#/$defs/sha256"},
+    "revision": {"type": "integer", "minimum": 0, "maximum": 1000000},
+    "measurement": {"$ref": "#/$defs/measurement"},
+    "artifact": {"type": "object", "required": ["sha256"], "properties": {"sha256": {"$ref": "#/$defs/sha256"}}},
+    "receipt": {"type": "object", "required": ["sourceSha256", "outputSha256", "measurementId", "page", "kind", "quantity", "unit", "annotationCount", "annotationSubtypes", "measurementDictionaryEmbedded"], "properties": {"sourceSha256": {"$ref": "#/$defs/sha256"}, "outputSha256": {"$ref": "#/$defs/sha256"}, "measurementId": {"$ref": "#/$defs/id"}, "page": {"type": "integer", "minimum": 1, "maximum": 100}, "kind": {"enum": ["distance", "perimeter", "area"]}, "quantity": {"type": "number", "exclusiveMinimum": 0}, "unit": {"enum": ["m", "m2"]}, "annotationCount": {"type": "integer", "minimum": 1, "maximum": 50}, "annotationSubtypes": {"type": "array", "minItems": 1, "maxItems": 50, "items": {"enum": ["line", "ink"]}}, "measurementDictionaryEmbedded": {"const": true}}},
+    "evidence": {"type": "object", "additionalProperties": false, "required": ["localOnly", "sourceBound", "nativeAnnotations", "helperReopened", "popplerParsed", "allPagesRendered", "sourceUnchanged"], "properties": {"localOnly": {"const": true}, "sourceBound": {"const": true}, "nativeAnnotations": {"const": true}, "helperReopened": {"const": true}, "popplerParsed": {"const": true}, "allPagesRendered": {"const": true}, "sourceUnchanged": {"const": true}}},
+    "limitations": {"type": "array", "minItems": 1, "maxItems": 16, "items": {"type": "string", "minLength": 1, "maxLength": 240}}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "point": {"type": "object", "additionalProperties": false, "required": ["x", "y"], "properties": {"x": {"type": "number"}, "y": {"type": "number"}}},
+    "source": {"type": "object", "additionalProperties": false, "required": ["sha256", "page", "displayBox", "box", "rotation", "geometrySha256"], "properties": {"sha256": {"$ref": "#/$defs/sha256"}, "page": {"type": "integer", "minimum": 1, "maximum": 100}, "displayBox": {"const": "crop"}, "box": {"type": "object", "required": ["left", "bottom", "right", "top"]}, "rotation": {"enum": [0, 90, 180, 270]}, "geometrySha256": {"$ref": "#/$defs/sha256"}}},
+    "measurement": {"type": "object", "required": ["schemaVersion", "id", "type", "source", "calibrationId", "kind", "geometry", "result", "label", "provenanceSha256", "createdAt"], "properties": {"schemaVersion": {"const": 2}, "id": {"$ref": "#/$defs/id"}, "type": {"const": "measurement"}, "source": {"$ref": "#/$defs/source"}, "calibrationId": {"$ref": "#/$defs/id"}, "kind": {"enum": ["distance", "perimeter", "area"]}, "geometry": {"type": "object", "required": ["space", "points"], "properties": {"space": {"const": "pdf-user-space-v1"}, "points": {"type": "array", "minItems": 2, "maxItems": 50, "items": {"$ref": "#/$defs/point"}}}}, "result": {"type": "object", "required": ["dimension", "siValue", "siUnit", "displayValue", "displayUnit"], "properties": {"dimension": {"enum": ["length", "area"]}, "siValue": {"type": "number", "exclusiveMinimum": 0}, "siUnit": {"enum": ["m", "m2"]}, "displayValue": {"type": "number", "exclusiveMinimum": 0}, "displayUnit": {"type": "string"}}}, "label": {"type": "string", "minLength": 1, "maxLength": 160}, "provenanceSha256": {"$ref": "#/$defs/sha256"}, "createdAt": {"type": "string", "format": "date-time"}}}
+  }
+}
