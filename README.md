@@ -2,6 +2,9 @@
 
 The local-first PDF workbench.
 
+[Open the static demo](https://sebastianspicker.github.io/platen/). It uses
+sanitized fixture data and marks every command-capable action as simulated.
+
 Platen is a local-first PDF inspection and editing tool with a browser
 GUI, a CLI, and a token-authenticated loopback host. Sources stay immutable.
 Operations write separately validated outputs. Engines are fixed local adapters
