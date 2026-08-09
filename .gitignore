@@ -56,6 +56,7 @@ Thumbs.db
 .grok/
 .claude/
 .cursor/
+/docs/agent/
 .continue/
 .windsurf/
 .aider*
