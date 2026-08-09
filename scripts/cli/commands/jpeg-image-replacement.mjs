@@ -36,7 +36,27 @@ export async function runJpegImageReplacementCommand(application, command, docum
     trustedAssetId = asset.id; runtime.cancelled(signal); const replacement = application.jpegImageReplacementBroker ?? application.jpegImageReplacement; if (!replacement?.replace) runtime.fail('CLI_JPEG_IMAGE_REPLACEMENT_UNAVAILABLE', 'JPEG image replacement is unavailable.');
     const result = snapshotRecord(await replacement.replace(document.id, { profile: PDF_JPEG_IMAGE_REPLACEMENT_PROFILE, sourceSha256: document.sha256, inputId: asset.id, inputSha256: asset.sha256, page: command.page, resourceName: command.resourceName }, { signal }), 'CLI_INVALID_RESULT', runtime); const resultArtifact = snapshotRecord(result.artifact, 'CLI_INVALID_RESULT', runtime); if (!resultArtifact?.id || typeof resultArtifact.id !== 'string') runtime.fail('CLI_INVALID_RESULT', 'The replacement artifact result is invalid.'); const artifact = snapshotRecord(application.store.getArtifact(resultArtifact.id), 'CLI_INVALID_RESULT', runtime); if (!artifact?.filePath || artifact.id !== resultArtifact.id || artifact.sha256 !== resultArtifact.sha256) runtime.fail('CLI_INVALID_RESULT', 'The replacement artifact does not match the trusted store.');
     if (artifact.size !== resultArtifact.size || artifact.documentId !== document.id || artifact.mediaType !== 'application/pdf') runtime.fail('CLI_INVALID_RESULT', 'The replacement artifact does not match the trusted store.'); trustedArtifactId = resultArtifact.id; runtime.cancelled(signal);
-    if (signal === undefined) await runtime.copyExclusive(artifact.filePath, command.output); else await runtime.copyExclusive(artifact.filePath, command.output, { signal }); copyCommitted = true; await runtime.emit(stdout, { ...result, artifact: { ...resultArtifact, output: basename(command.output) }, localOnly: true });
+    if (signal === undefined) await runtime.copyExclusive(artifact.filePath, command.output); else await runtime.copyExclusive(artifact.filePath, command.output, { signal }); copyCommitted = true;
+    const receipt = {
+      kind: result.kind,
+      sourceDigest: result.sourceDigest,
+      page: result.page,
+      resourceName: result.resourceName,
+      targetReference: result.targetReference,
+      replacementImage: result.replacementImage,
+      evidence: result.evidence,
+      limitations: result.limitations,
+      artifact: {
+        id: resultArtifact.id,
+        documentId: resultArtifact.documentId,
+        mediaType: resultArtifact.mediaType,
+        size: resultArtifact.size,
+        sha256: resultArtifact.sha256,
+        output: basename(command.output),
+      },
+      localOnly: true,
+    };
+    await runtime.emit(stdout, receipt);
   } finally {
     selected.bytes.fill(0);
     if (trustedArtifactId && typeof application.store.deleteArtifact === 'function') await application.store.deleteArtifact(trustedArtifactId).catch((error) => { if (!copyCommitted || error?.code !== 'ARTIFACT_NOT_FOUND') throw error; });

@@ -8,7 +8,7 @@ function array(value, min = 0, max = 500) { return Array.isArray(value) && value
 function integer(value, min, max) { return Number.isSafeInteger(value) && value >= min && value <= max; }
 function fail() { throw new TypeError('AEC measurement legend result is invalid.'); }
 function freeze(value) { if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value; for (const child of Object.values(value)) freeze(child); return Object.freeze(value); }
-function validateResult(result, request) {
+export function validateAecMeasurementLegendResult(result, request) {
   if (!exact(result, ['kind', 'schemaVersion', 'sourceDigest', 'sheetRevision', 'groups', 'recordCount']) || result.kind !== 'aec-measurement-legend' || result.schemaVersion !== 1 || result.sourceDigest !== request.sourceSha256 || result.sheetRevision !== request.expectedRevision || !SHA256.test(result.sourceDigest ?? '') || !integer(result.sheetRevision, 1, 1_000_000) || !integer(result.recordCount, 1, 500) || !array(result.groups, 1)) fail();
   const ids = new Set(); const provenance = new Set(); let count = 0; let previous = '';
   for (const group of result.groups) {
@@ -31,7 +31,7 @@ export function createAecMeasurementLegendEndpoints({ json }) {
       if (!OPAQUE_ID_PATTERN.test(documentId ?? '') || !exactObject(options, optionKeys) || (options.signal !== undefined && !(options.signal instanceof AbortSignal))) throw new TypeError('AEC measurement legend options are invalid.');
       const ids = request.measurementIds; const descriptors = ids && Object.getOwnPropertyDescriptors(ids);
       if (!exactObject(request, ['sourceSha256', 'expectedRevision', 'measurementIds']) || !SHA256.test(request.sourceSha256 ?? '') || !Number.isSafeInteger(request.expectedRevision) || request.expectedRevision < 1 || request.expectedRevision > 1_000_000 || !Array.isArray(ids) || ids.length < 1 || ids.length > 500 || Object.getOwnPropertySymbols(ids).length || Object.keys(ids).length !== ids.length || !descriptors?.length || descriptors.length.enumerable || descriptors.length.get || descriptors.length.set || Object.keys(descriptors).filter((key) => key !== 'length').some((key) => !descriptors[key].enumerable || !Object.hasOwn(descriptors[key], 'value')) || ids.some((id) => typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u.test(id)) || new Set(ids).size !== ids.length) throw new TypeError('AEC measurement legend request is invalid.');
-      return json(`/api/documents/${encodeURIComponent(documentId)}/aec-measurement-legend`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request), signal: options.signal }).then((body) => validateResult(body?.result, request));
+      return json(`/api/documents/${encodeURIComponent(documentId)}/aec-measurement-legend`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request), signal: options.signal }).then((body) => validateAecMeasurementLegendResult(body?.result, request));
     },
   });
 }

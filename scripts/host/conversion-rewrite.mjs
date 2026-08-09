@@ -35,7 +35,7 @@ export async function rewritePdfDocument({
     owner: documents,
     resourceId: documentId,
     externalSignal,
-    action: async ({ workspace, signal, checkQuota }) => {
+    action: async ({ workspace, signal, checkQuota, registerPromotedDocument }) => {
       const output = join(workspace, `${selected[2]}.pdf`);
       await documents.verifySource(documentId);
       const original = await inspectConversionOutput(poppler, input, signal);
@@ -60,15 +60,28 @@ export async function rewritePdfDocument({
         expected: { pageCount: original.pageCount },
         validation: {
           passed: true,
-          validators: ['source-sha256', 'pdfinfo-page-count'],
+          validators: mode === 'optimize'
+            ? ['source-sha256', 'ghostscript-exit-zero', 'pdfinfo-page-count']
+            : ['source-sha256', 'pdfinfo-page-count'],
           pageCount: derived.pageCount,
         },
       });
-      return documents.createDocument({
+      const derivedDocument = await documents.createDocument({
         stream: createReadStream(output),
         displayName: `${cleanConversionStem(source.displayName)}-${selected[2]}.pdf`,
         operation,
       });
+      registerPromotedDocument(derivedDocument);
+      const retainedPath = documents.getSourcePath(derivedDocument.id);
+      await documents.verifySource(derivedDocument.id);
+      const retained = await inspectConversionOutput(poppler, retainedPath, signal);
+      await documents.verifySource(derivedDocument.id);
+      if (retained.pageCount !== original.pageCount || retained.pageCount !== derived.pageCount) {
+        throw new HostError(
+          'DERIVED_PAGE_COUNT_MISMATCH', 'The retained rewrite changed the PDF page count.', 502,
+        );
+      }
+      return derivedDocument;
     },
   });
 }

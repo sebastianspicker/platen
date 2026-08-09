@@ -14,8 +14,9 @@ import {
 const MAX_PAGES = 100;
 const MAX_PAGE_TREE_DEPTH = 16;
 const MAX_PAGE_TREE_NODES = 256;
-const MAX_ANNOTATIONS = 256;
-const MAX_OUTLINE_ITEMS = 256;
+const MAX_ANNOTATIONS = 64;
+const MAX_OUTLINE_ITEMS = 64;
+const MAX_TARGETS = 64;
 const CATALOG_REJECTED = new Set([
   'AA', 'AcroForm', 'AF', 'Collection', 'Encrypt', 'JavaScript', 'Metadata', 'Names',
   'OCProperties', 'OpenAction', 'Perms', 'StructTreeRoot', 'URI', 'XFA',
@@ -154,7 +155,10 @@ function collectOutlines(sourceBytes, structure, state) {
       let childCount = 0;
       if (entries.get('First')) {
         if (!entries.get('Last')) throw unsupported();
-        const child = walk(pdfReference(entries.get('First')), current, [...path, index, 'children']);
+        // The inventory path is a sequence of sibling indexes.  Keeping it
+        // numeric makes nested bookmarks transportable through the strict
+        // client contract without weakening its schema.
+        const child = walk(pdfReference(entries.get('First')), current, [...path, index]);
         if (!sameReference(pdfReference(entries.get('Last')), child.last)) throw unsupported();
         childCount = child.count;
       }
@@ -183,6 +187,9 @@ function inventory(sourceBytes, structure) {
     links.push(Object.freeze({ ...link, page: state.pages.indexOf(page) + 1, fingerprint: locatorFingerprint(sourceBytes, 'link', link.annotationReference, { page: state.pages.indexOf(page) + 1, annotationIndex: link.annotationIndex }) }));
   }
   const outlines = collectOutlines(sourceBytes, structure, state);
+  if (links.length + outlines.items.length > MAX_TARGETS) {
+    throw unsupported('At most 64 direct internal link and bookmark targets are supported.');
+  }
   return Object.freeze({ ...state, links: Object.freeze(links), outlines });
 }
 

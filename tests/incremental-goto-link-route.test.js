@@ -53,6 +53,45 @@ test('router supplies artifact authority when a GoTo-link response disconnects a
   await handler(request, response);
   assert.deepEqual(deleted, ['router-artifact']);
 });
+
+test('GoTo-link route deletes a promoted artifact when cancellation occurs after promotion', async () => {
+  const deleted = []; const response = new EventEmitter();
+  const controller = new AbortController();
+  const store = { deleteArtifact: async (id) => { deleted.push(id); } };
+  const incrementalGoToLink = { async update() {
+    controller.abort(new Error('route-level cancellation'));
+    return { artifact: { id: 'router-artifact-cancelled' }, kind: 'pdf-incremental-goto-link' };
+  } };
+  const value = {
+    request: { method: 'POST' },
+    response,
+    url: new URL('http://local.test/api/documents/id/incremental-goto-link'),
+    documentId: 'id',
+    operation: 'incremental-goto-link',
+    processing: { signal: controller.signal },
+    store,
+    incrementalGoToLink,
+    bodyLimit: 2048,
+    exactJsonObject: (value, keys) => Object.keys(value).length === keys.length && Object.keys(value).every((key) => keys.includes(key)),
+    method: (request, expected) => assert.equal(request.method, expected),
+    readJson: async () => ({ ...requestValue, sourceSha256: digest }),
+    json: (_response, status, value) => { response.status = status; response.value = value; },
+  };
+  const request = Readable.from([JSON.stringify({ ...requestValue, sourceSha256: digest })]);
+  Object.assign(request, {
+    method: 'POST', url: '/api/documents/id/incremental-goto-link',
+    headers: {
+      host: '127.0.0.1:4173', origin: 'http://127.0.0.1:4173',
+      'content-type': 'application/json', 'x-platen-token': 'token',
+    },
+  });
+  const result = await handleIncrementalGoToLinkRoute(value);
+  assert.equal(result, true);
+  assert.deepEqual(deleted, ['router-artifact-cancelled']);
+  assert.equal(response.status, undefined);
+});
+
+
 test('bootstrap exposes GoTo-link readiness without requiring a browser contract', async () => {
   const response = {}; await handleBootstrapRoute({ pathname: '/api/bootstrap', request: { method: 'GET' }, response, service: { availability: async () => [] }, inputs: null, conversion: null, domainFacade: null, aecArtifacts: null, projectBundles: null, accessibilityRemediations: null, standardsValidations: null, incrementalMetadata: null, incrementalBleedBox: null, incrementalGoToLink: {}, pdfkitInspections: null, pdfkitOutlineSplits: null, pdfkitMutations: null, pdfkitProtection: null, pdfkitSanitization: null, redactionPlans: null, signatureTrustReady: false, pluginSandboxProbeReady: false, token: 'token', method: () => {}, requireLocalFetchMetadata: () => {}, json: (_response, _status, value) => { response.value = value; }, sanitizedEngineAvailability: (value) => value }); assert.equal(response.value.host.incrementalGoToLinkReady, true);
 });

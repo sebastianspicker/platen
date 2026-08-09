@@ -93,6 +93,13 @@ export async function runBoundedPrepressJob(core, documentId, externalSignal, ac
   let monitor = null;
   let result;
   let failure = null;
+  let promotedArtifact = null;
+  const registerPromotedArtifact = (artifact) => {
+    if (!artifact || typeof artifact.id !== 'string') {
+      fail('PREPRESS_ARTIFACT_CHANGED', 'Prepress artifact promotion did not return a revocable artifact.', 500);
+    }
+    promotedArtifact = artifact;
+  };
   try {
     const sourcePath = join(workspace, 'source.pdf');
     await copyFile(core.store.getSourcePath(document.id), sourcePath, fsConstants.COPYFILE_EXCL);
@@ -114,6 +121,7 @@ export async function runBoundedPrepressJob(core, documentId, externalSignal, ac
       signal: control.signal,
       runOptions: () => ({ signal: control.signal, timeoutMs: control.remainingMs() }),
       checkWorkspace: () => monitor.check(),
+      registerPromotedArtifact,
     });
     await monitor.check();
     cancelled(control.signal);
@@ -132,6 +140,18 @@ export async function runBoundedPrepressJob(core, documentId, externalSignal, ac
     } catch (error) {
       if (!failure) {
         failure = new HostError('PREPRESS_CLEANUP_FAILED', 'The private prepress workspace could not be removed.', 500, { cause: error });
+      }
+    }
+    if (failure && promotedArtifact) {
+      try {
+        await core.store.deleteArtifact(promotedArtifact.id);
+      } catch (error) {
+        failure = new HostError(
+          'PREPRESS_CLEANUP_FAILED',
+          'The private prepress workspace or promoted artifact could not be removed.',
+          500,
+          { cause: new AggregateError([failure, error], 'Prepress cleanup and artifact revocation failed.') },
+        );
       }
     }
   }

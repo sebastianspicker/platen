@@ -11,6 +11,7 @@ function createGenerationActions(context) {
     'publish-aec-measurement': aec.publishAecMeasurement,
     'generate-aec-measurement-legend': aec.generateAecMeasurementLegend,
     'discover-scanners': scanner?.discoverScanners ?? (() => {}),
+    'acquire-scanner': (element) => scanner?.acquireScanner?.(element.dataset.scannerDeviceId),
     'run-bates-numbering': bates?.runBatesNumbering ?? (() => {}),
     'export-project-bundle': domain.exportProjectBundle,
   };

@@ -23,6 +23,7 @@ async function fixture(context, options = {}) {
     cleanupJob: async (path) => { observed.cleaned += 1; await rm(path, { recursive: true, force: true }); if (options.cleanupFailure) throw new Error('cleanup failed'); },
     promotePdfArtifact: async (_id, path, promotion) => {
       observed.promoted += 1; const output = await readFile(path); if (options.replaceOnPromotion) { output[output.length - 1] ^= 1; await chmod(path, 0o600); await writeFile(path, output); }
+      if (options.sourceDriftAfterPromotion) await writeFile(sourcePath, Buffer.concat([bytes, Buffer.from('drift')]));
       if (options.cancelAfterPromotion) controller.abort(new Error('cancelled'));
       return { id: '22222222-2222-4222-8222-222222222222', sha256: createHash('sha256').update(output).digest('hex'), displayName: promotion.displayName, operation: promotion.operation };
     },
@@ -47,6 +48,12 @@ test('printer-marks service rejects getter, symbol, and non-enumerable request s
 
 test('printer-marks service snapshots mutable requests and revokes after cancellation', async (context) => {
   const setup = await fixture(context); const pending = setup.service.create(documentId, setup.request, { sourceSha256: setup.sha256 }); setup.request.pages[0] = 2; const result = await pending; assert.deepEqual(result.pages.map(({ page }) => page), [1, 2]); const cancelled = await fixture(context, { cancelAfterPromotion: true }); await assert.rejects(cancelled.service.create(documentId, cancelled.request, { sourceSha256: cancelled.sha256, signal: cancelled.controller.signal }), { code: 'JOB_CANCELLED', status: 499 }); assert.deepEqual(cancelled.observed.deleted, ['22222222-2222-4222-8222-222222222222']);
+});
+
+test('printer-marks service revokes a promoted artifact when the source drifts afterward', async (context) => {
+  const setup = await fixture(context, { sourceDriftAfterPromotion: true });
+  await assert.rejects(setup.service.create(documentId, setup.request, { sourceSha256: setup.sha256 }), { code: 'PDF_PRINTER_MARKS_FAILED', status: 502 });
+  assert.deepEqual(setup.observed.deleted, ['22222222-2222-4222-8222-222222222222']);
 });
 
 test('printer-marks service reports independent proof and cleanup failures', async (context) => {

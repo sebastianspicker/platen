@@ -13,16 +13,20 @@ import { EngineRegistry } from '../scripts/host/engine-registry.mjs';
 import { GhostscriptIccProfileProvider } from '../scripts/host/icc-profile-provider.mjs';
 import { PdfService } from '../scripts/host/pdf-service.mjs';
 import { parseInkCoverage, PrepressService } from '../scripts/host/prepress-service.mjs';
+import { runBoundedPrepressJob } from '../scripts/host/prepress/job-runtime.mjs';
+import { DEFAULT_PREPRESS_LIMITS } from '../scripts/host/prepress/prepress-support.mjs';
 import { makeMultiPagePdf, makeTextPdf } from './pdf-fixture.js';
 
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
 const TIFF = Buffer.from([0x49,0x49,42,0,8,0,0,0,2,0,0,1,4,0,1,0,0,0,1,0,0,0,1,1,4,0,1,0,0,0,1,0,0,0,0,0,0,0]);
 async function fixture(context, { pages = 1, ghostscriptImpl = null, imageMagickImpl = null, cleanupFails = false, limits = undefined } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'pdf-prepress-test-')); let cleaned = 0; let verified = 0;
+  const sourceSha256 = createHash('sha256').update('%PDF-1.7').digest('hex');
   const store = {
-    getDocument: (id) => ({ id, sha256: createHash('sha256').update('%PDF-1.7').digest('hex') }), getSourcePath: () => join(root, 'source.pdf'),
+    getDocument: (id) => ({ id, sha256: sourceSha256 }), getSourcePath: () => join(root, 'source.pdf'),
     verifySource: async () => { verified += 1; return true; }, createJobWorkspace: async () => { const workspace = join(root, `job-${cleaned}`); await mkdir(workspace); return workspace; },
     cleanupJob: async (workspace) => { cleaned += 1; if (cleanupFails) throw new Error('cleanup failed'); await rm(workspace, { recursive: true, force: true }); },
+    deleteArtifact: async () => {},
   };
   await writeFile(join(root, 'source.pdf'), '%PDF-1.7');
   const ghostscript = ghostscriptImpl ?? { execute: async (operation, parameters) => {
@@ -35,9 +39,10 @@ async function fixture(context, { pages = 1, ghostscriptImpl = null, imageMagick
   const pdfService = {
     inspect: async () => ({ pageCount: pages, encrypted: 'no', javascript: 'no' }),
     inspectPage: async () => ({ widthPoints: 612, heightPoints: 792 }),
-    listFonts: async () => [{ name: 'Embedded', embedded: 'yes', unicode: 'yes' }],
+    listFonts: async () => [{ name: 'Embedded', embedded: 'yes', unicode: 'yes', sourceSha256 }],
     listImages: async () => [],
     inspectStructure: async (_id, options) => ({
+      sourceDigest: sourceSha256,
       pageRange: { firstPage: 1, lastPage: options.lastPage, truncated: options.lastPage < pages },
       pageBoxes: Array.from({ length: options.lastPage }, (_, index) => ({
         page: index + 1, widthPoints: 612, heightPoints: 792,
@@ -84,6 +89,7 @@ test('prepress rejects page and DPI bounds and cancellation before engine execut
   await assert.rejects(service.renderSeparations('123e4567-e89b-42d3-a456-426614174000', { dpi: 301 }), { code: 'INVALID_DPI' });
   const controller = new AbortController(); controller.abort();
   await assert.rejects(service.analyzeInkCoverage('123e4567-e89b-42d3-a456-426614174000', { signal: controller.signal }), { code: 'JOB_CANCELLED', status: 499 });
+  await assert.rejects(service.runPreflight('123e4567-e89b-42d3-a456-426614174000', { profile: 'print-review', signal: controller.signal }), { code: 'JOB_CANCELLED', status: 499 });
 });
 
 test('prepress isolates native engines from the immutable source and rejects every unexpected output', async (context) => {
@@ -107,13 +113,35 @@ test('prepress enforces active whole-workspace and whole-job limits and surfaces
   await assert.rejects(cleanup.service.analyzeInkCoverage('doc'), { code: 'PREPRESS_CLEANUP_FAILED', status: 500 });
 });
 
+test('prepress revokes a promoted artifact when cancellation arrives after promotion', async (context) => {
+  const root = await mkdtemp(join(tmpdir(), 'pdf-prepress-revoke-'));
+  context.after(() => rm(root, { recursive: true, force: true }));
+  const source = join(root, 'source.pdf'); await writeFile(source, '%PDF-1.7');
+  const controller = new AbortController(); const deleted = [];
+  const core = {
+    limits: DEFAULT_PREPRESS_LIMITS,
+    store: {
+      getDocument: (id) => ({ id, sha256: createHash('sha256').update('%PDF-1.7').digest('hex') }),
+      getSourcePath: () => source, verifySource: async () => true,
+      createJobWorkspace: async () => mkdtemp(join(root, 'job-')),
+      cleanupJob: async (path) => rm(path, { recursive: true, force: true }),
+      deleteArtifact: async (id) => deleted.push(id),
+    },
+    pdf: { inspect: async () => ({ pageCount: 1 }) },
+  };
+  await assert.rejects(runBoundedPrepressJob(core, 'source', controller.signal, async ({ registerPromotedArtifact }) => {
+    registerPromotedArtifact({ id: 'derived-artifact' }); controller.abort(); return { ok: true };
+  }), { code: 'JOB_CANCELLED', status: 499 });
+  assert.deepEqual(deleted, ['derived-artifact']);
+});
+
 test('prepress lowers requested DPI to keep trusted-engine raster dimensions and pixels bounded', async (context) => {
   const root = await mkdtemp(join(tmpdir(), 'pdf-prepress-large-page-'));
   context.after(() => rm(root, { recursive: true, force: true }));
   const store = {
     getDocument: (id) => ({ id, sha256: createHash('sha256').update('%PDF-1.7').digest('hex') }), getSourcePath: () => join(root, 'source.pdf'),
     verifySource: async () => true, createJobWorkspace: async () => { const workspace = join(root, 'job'); await mkdir(workspace); return workspace; },
-    cleanupJob: async (workspace) => rm(workspace, { recursive: true, force: true }),
+    cleanupJob: async (workspace) => rm(workspace, { recursive: true, force: true }), deleteArtifact: async () => {},
   };
   await writeFile(join(root, 'source.pdf'), '%PDF-1.7');
   let engineDpi = null;
@@ -137,7 +165,7 @@ test('CMYK artifact creation never promotes a leftover engine output after nonze
   const store = {
     getDocument: (id) => ({ id, displayName: 'source.pdf', sha256: sourceSha256 }), getSourcePath: () => sourcePath,
     verifySource: async () => true, createJobWorkspace: async () => { const path = join(root, 'job'); await mkdir(path); return path; },
-    cleanupJob: async (path) => { cleaned = true; await rm(path, { recursive: true, force: true }); },
+    cleanupJob: async (path) => { cleaned = true; await rm(path, { recursive: true, force: true }); }, deleteArtifact: async () => {},
     promotePdfArtifact: async () => { promoted = true; throw new Error('must not promote'); },
   };
   const profileBytes = Buffer.from('bounded profile fixture'); const profileSha256 = createHash('sha256').update(profileBytes).digest('hex');

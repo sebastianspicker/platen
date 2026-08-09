@@ -22,6 +22,9 @@ import { createAcroFormRadioEndpoints } from './local-host-acroform-radio-endpoi
 import { createAcroFormTextFieldEndpoints } from './local-host-acroform-text-field-endpoints.js';
 import { createAcroFormChoiceEndpoints } from './local-host-acroform-choice-endpoints.js';
 import { createAcroFormSignatureFieldEndpoints } from './local-host-acroform-signature-field-endpoints.js';
+import { createAcroFormTabOrderTooltipEndpoints } from './local-host-acroform-tab-order-tooltip-endpoints.js';
+import { createAcroFormFillValidationEndpoints } from './local-host-acroform-fill-validation-endpoints.js';
+import { createAcroFormDataExportEndpoints } from './local-host-acroform-data-export-endpoints.js';
 import { createBatesNumberingEndpoints } from './local-host-bates-numbering-endpoints.js';
 import { createAecMeasurementLegendEndpoints } from './local-host-aec-measurement-legend-endpoints.js';
 import { createTaggedRemediationEndpoints } from './local-host-tagged-remediation-endpoints.js';
@@ -29,8 +32,12 @@ import { createJpegImageEndpoints } from './local-host-jpeg-image-endpoints.js';
 import { createJpegImageReplacementEndpoints } from './local-host-jpeg-image-replacement-endpoints.js';
 import { createPageLabelsEndpoints } from './local-host-page-labels-endpoints.js';
 import { createAdvancedSearchEndpoints } from './local-host-advanced-search-endpoints.js';
+import { createSensitivePatternEndpoints } from './local-host-sensitive-pattern-endpoints.js';
+import { createRedactionOverlayLabelEndpoints } from './local-host-redaction-overlay-label-endpoints.js';
 import { createSpecialistContentEndpoints } from './local-host-specialist-content-endpoints.js';
 import { createPageTextEndpoints } from './local-host-page-text-endpoints.js';
+import { createTextReflowEndpoints } from './local-host-text-reflow-endpoints.js';
+import { createR04ReviewEndpoints } from './local-host-r04-review-endpoints.js';
 import { createIncrementalMetadataEndpoints } from './local-host-incremental-metadata-endpoints.js';
 import { createJavaScriptRemovalEndpoints } from './local-host-javascript-removal-endpoints.js';
 import { createOcrEndpoints } from './local-host-ocr-endpoints.js';
@@ -41,9 +48,13 @@ import { createProjectEndpoints } from './local-host-project-endpoints.js';
 import { createRasterReviewEndpoints } from './local-host-raster-review-endpoints.js';
 import { createValidationEndpoints } from './local-host-validation-endpoints.js';
 import { createScannerDiscoveryEndpoints } from './local-host-scanner-discovery-endpoints.js';
+import { createScannerAcquisitionEndpoints } from './local-host-scanner-acquisition-endpoints.js';
 import { createPluginPackageEndpoints } from './local-host-plugin-package-endpoints.js';
 import { createFastWebViewEndpoints } from './local-host-fast-web-view-endpoints.js';
 import { createOoxmlExportEndpoints } from './local-host-ooxml-export-endpoints.js';
+import { createProfessionalAccessibilityEndpoints } from './local-host-professional-accessibility-endpoints.js';
+import { createProfessionalPrintInspectionEndpoints } from './local-host-professional-print-inspection-endpoints.js';
+import { createProfessionalPrintTransparencyEndpoints } from './local-host-professional-print-transparency-endpoints.js';
 
 const TOKEN_PATTERN = /^[0-9a-f]{64}$/i;
 
@@ -72,26 +83,23 @@ export class LocalHostClient {
   #incrementalAccessibilityMetadata;
   #incrementalPageVector;
   #incrementalPageTransition;
-  #fullPageRedaction;
-  #printerMarks;
-  #pageBackground;
-  #layerDefaults;
-  #signing;
-  #hiddenDataSanitization;
+  #fullPageRedaction; #printerMarks; #pageBackground;
+  #layerDefaults; #signing; #hiddenDataSanitization;
   #acroFormCheckbox;
   #acroFormRadio;
   #acroFormTextField;
   #acroFormChoice;
   #acroFormSignatureField;
+  #acroFormTabOrderTooltip; #acroFormFillValidation; #acroFormDataExport;
   #batesNumbering;
   #aecMeasurementLegend;
   #taggedRemediation;
   #jpegImage;
   #jpegImageReplacement;
   #pageLabels;
-  #advancedSearch;
+  #advancedSearch; #sensitivePatterns; #redactionOverlayLabels;
   #specialistContent;
-  #pageText;
+  #pageText; #textReflow;
   #incrementalMetadata;
   #javascriptRemoval;
   #ocr;
@@ -101,11 +109,9 @@ export class LocalHostClient {
   #projects;
   #rasterReview;
   #validation;
-  #scannerDiscovery;
+  #scannerDiscovery; #scannerAcquisition;
   #pluginPackages;
-  #fastWebView;
-  #ooxmlExport;
-
+  #fastWebView; #ooxmlExport; #professionalAccessibility; #professionalPrintInspection; #professionalPrintTransparency; #reviewR04;
   constructor({ fetchImpl = globalThis.fetch?.bind(globalThis) } = {}) {
     if (typeof fetchImpl !== 'function') throw new TypeError('LocalHostClient requires fetch.');
     this.#fetch = fetchImpl;
@@ -127,9 +133,7 @@ export class LocalHostClient {
     this.#incrementalAccessibilityMetadata = createIncrementalAccessibilityMetadataEndpoints(transport);
     this.#incrementalPageVector = createIncrementalPageVectorEndpoints(transport);
     this.#incrementalPageTransition = createIncrementalPageTransitionEndpoints(transport);
-    this.#fullPageRedaction = createFullPageRedactionEndpoints(transport);
-    this.#printerMarks = createPrinterMarksEndpoints(transport);
-    this.#pageBackground = createPageBackgroundEndpoints(transport);
+    this.#fullPageRedaction = createFullPageRedactionEndpoints(transport); this.#printerMarks = createPrinterMarksEndpoints(transport); this.#pageBackground = createPageBackgroundEndpoints(transport);
     this.#layerDefaults = createLayerDefaultsEndpoints(transport);
     this.#signing = createSigningEndpoints(transport);
     this.#hiddenDataSanitization = createHiddenDataSanitizationEndpoints(transport);
@@ -138,6 +142,7 @@ export class LocalHostClient {
     this.#acroFormTextField = createAcroFormTextFieldEndpoints(transport);
     this.#acroFormChoice = createAcroFormChoiceEndpoints(transport);
     this.#acroFormSignatureField = createAcroFormSignatureFieldEndpoints(transport);
+    this.#acroFormTabOrderTooltip = createAcroFormTabOrderTooltipEndpoints(transport); this.#acroFormFillValidation = createAcroFormFillValidationEndpoints(transport); this.#acroFormDataExport = createAcroFormDataExportEndpoints(transport);
     this.#batesNumbering = createBatesNumberingEndpoints(transport);
     this.#aecMeasurementLegend = createAecMeasurementLegendEndpoints(transport);
     this.#taggedRemediation = createTaggedRemediationEndpoints(transport);
@@ -145,8 +150,9 @@ export class LocalHostClient {
     this.#jpegImageReplacement = createJpegImageReplacementEndpoints(transport);
     this.#pageLabels = createPageLabelsEndpoints(transport);
     this.#advancedSearch = createAdvancedSearchEndpoints(transport);
+    this.#sensitivePatterns = createSensitivePatternEndpoints(transport); this.#redactionOverlayLabels = createRedactionOverlayLabelEndpoints(transport);
     this.#specialistContent = createSpecialistContentEndpoints(transport);
-    this.#pageText = createPageTextEndpoints(transport);
+    this.#pageText = createPageTextEndpoints(transport); this.#textReflow = createTextReflowEndpoints(transport);
     this.#incrementalMetadata = createIncrementalMetadataEndpoints(transport);
     this.#javascriptRemoval = createJavaScriptRemovalEndpoints(transport);
     this.#ocr = createOcrEndpoints(transport);
@@ -156,10 +162,13 @@ export class LocalHostClient {
     this.#projects = createProjectEndpoints(transport);
     this.#rasterReview = createRasterReviewEndpoints(transport);
     this.#validation = createValidationEndpoints(transport);
-    this.#scannerDiscovery = createScannerDiscoveryEndpoints(transport);
+    this.#scannerDiscovery = createScannerDiscoveryEndpoints(transport); this.#scannerAcquisition = createScannerAcquisitionEndpoints(transport);
     this.#pluginPackages = createPluginPackageEndpoints(transport);
     this.#fastWebView = createFastWebViewEndpoints(transport);
     this.#ooxmlExport = createOoxmlExportEndpoints(transport);
+    this.#professionalAccessibility = createProfessionalAccessibilityEndpoints(transport);
+    this.#professionalPrintInspection = createProfessionalPrintInspectionEndpoints(transport);
+    this.#professionalPrintTransparency = createProfessionalPrintTransparencyEndpoints(transport); this.#reviewR04 = createR04ReviewEndpoints(transport);
   }
 
   get connected() { return Boolean(this.#token); }
@@ -197,6 +206,7 @@ export class LocalHostClient {
   cropBoxSnapshot(...args) { return this.#documents.cropBoxSnapshot(...args); }
   extractPages(...args) { return this.#documents.extractPages(...args); }
   arrangePages(...args) { return this.#documents.arrangePages(...args); }
+  deletePages(...args) { return this.#documents.deletePages(...args); }
   mergeDocuments(...args) { return this.#documents.mergeDocuments(...args); }
   splitDocument(...args) { return this.#documents.splitDocument(...args); }
   splitByPageCount(...args) { return this.#documents.splitByPageCount(...args); }
@@ -240,9 +250,7 @@ export class LocalHostClient {
   runIncrementalPageTransition(...args) {
     return this.#incrementalPageTransition.runIncrementalPageTransition(...args);
   }
-  runFullPageRedaction(...args) {
-    return this.#fullPageRedaction.runFullPageRedaction(...args);
-  }
+  runFullPageRedaction(...args) { return this.#fullPageRedaction.runFullPageRedaction(...args); }
 
   runFullPageRedactionBatch(...args) {
     return this.#fullPageRedaction.runFullPageRedactionBatch(...args);
@@ -257,22 +265,31 @@ export class LocalHostClient {
   runLayerDefaults(...args) {
     return this.#layerDefaults.runLayerDefaults(...args);
   }
-  listSigningIdentities(...args) { return this.#signing.listSigningIdentities(...args); }
-  signCertificate(...args) { return this.#signing.signCertificate(...args); }
+  listSigningIdentities(...args) { return this.#signing.listSigningIdentities(...args); } signCertificate(...args) { return this.#signing.signCertificate(...args); }
+  validateCertificateSignatures(...args) { return this.#signing.validateCertificateSignatures(...args); } recordElectronicSigningIntent(...args) { return this.#signing.recordElectronicSigningIntent(...args); }
   sanitizeHiddenData(...args) { return this.#hiddenDataSanitization.sanitizeHiddenData(...args); }
   addAcroFormCheckbox(...args) { return this.#acroFormCheckbox.addAcroFormCheckbox(...args); }
   addAcroFormRadio(...args) { return this.#acroFormRadio.addAcroFormRadio(...args); }
   addAcroFormTextField(...args) { return this.#acroFormTextField.addAcroFormTextField(...args); }
   addAcroFormChoice(...args) { return this.#acroFormChoice.addAcroFormChoice(...args); }
   addAcroFormSignatureField(...args) { return this.#acroFormSignatureField.addAcroFormSignatureField(...args); }
+  updateAcroFormTabOrderTooltip(...args) { return this.#acroFormTabOrderTooltip.updateAcroFormTabOrderTooltip(...args); } fillAndSaveAcroForm(...args) { return this.#acroFormFillValidation.fillAndSaveAcroForm(...args); } validateAcroFormValues(...args) { return this.#acroFormFillValidation.validateAcroFormValues(...args); } exportAcroFormData(...args) { return this.#acroFormDataExport.exportAcroFormData(...args); }
   runBatesNumbering(...args) { return this.#batesNumbering.runBatesNumbering(...args); }
   generateAecMeasurementLegend(...args) { return this.#aecMeasurementLegend.generateAecMeasurementLegend(...args); }
   updateTaggedRemediation(...args) { return this.#taggedRemediation.updateTaggedRemediation(...args); }
   insertJpegImage(...args) { return this.#jpegImage.insertJpegImage(...args); }
   createPageLabels(...args) { return this.#pageLabels.createPageLabels(...args); }
   searchAdvancedText(...args) { return this.#advancedSearch.searchAdvancedText(...args); }
+  findSensitivePatterns(...args) { return this.#sensitivePatterns.findSensitivePatterns(...args); } applyRedactionOverlayLabel(...args) { return this.#redactionOverlayLabels.applyRedactionOverlayLabel(...args); }
   inspectSpecialistContent(...args) { return this.#specialistContent.inspectSpecialistContent(...args); }
   runPageText(...args) { return this.#pageText.runPageText(...args); }
+  reflowText(...args) { return this.#textReflow.reflowText(...args); }
+  addFileAudioAttachment(...args) { return this.#reviewR04.addFileAudioAttachment(...args); }
+  createReviewMeasurement(...args) { return this.#reviewR04.createReviewMeasurement(...args); } importReviewAnnotationXfdf(...args) { return this.#reviewR04.importReviewAnnotationXfdf(...args); }
+  exportCommentsToOffice(...args) { return this.#reviewR04.exportCommentsToOffice(...args); }
+  inspectFormJavaScriptInventory(...args) { return this.#reviewR04.inspectFormJavaScriptInventory(...args); } inspectXfaPresence(...args) { return this.#reviewR04.inspectXfaPresence(...args); }
+  generateReviewNotifications(...args) { return this.#reviewR04.generateReviewNotifications(...args); } markReviewNotificationRead(...args) { return this.#reviewR04.markReviewNotificationRead(...args); }
+  exportReviewSharedExchange(...args) { return this.#reviewR04.exportReviewSharedExchange(...args); } importReviewSharedExchange(...args) { return this.#reviewR04.importReviewSharedExchange(...args); } setReviewSidecarStatus(...args) { return this.#reviewR04.setReviewSidecarStatus(...args); } inspectReviewSidecar(...args) { return this.#reviewR04.inspectReviewSidecar(...args); }
   runIncrementalAccessibilityMetadata(...args) {
     return this.#incrementalAccessibilityMetadata.runIncrementalAccessibilityMetadata(...args);
   }
@@ -284,6 +301,13 @@ export class LocalHostClient {
   }
   runFastWebView(...args) { return this.#fastWebView.runFastWebView(...args); }
   exportOoxml(...args) { return this.#ooxmlExport.exportOoxml(...args); }
+  repairAccessibilityFormSemantics(...args) { return this.#professionalAccessibility.repairAccessibilityFormSemantics(...args); }
+  repairAccessibilityTableSemantics(...args) { return this.#professionalAccessibility.repairAccessibilityTableSemantics(...args); }
+  repairAccessibilityLinksBookmarks(...args) { return this.#professionalAccessibility.repairAccessibilityLinksBookmarks(...args); }
+  inspectAccessibilityTableSemanticsLocators(...args) { return this.#professionalAccessibility.inspectAccessibilityTableSemanticsLocators(...args); }
+  inspectAccessibilityLinksBookmarksLocators(...args) { return this.#professionalAccessibility.inspectAccessibilityLinksBookmarksLocators(...args); }
+  inspectPrintFonts(...args) { return this.#professionalPrintInspection.inspectPrintFonts(...args); }
+  inspectPrintImages(...args) { return this.#professionalPrintInspection.inspectPrintImages(...args); } flattenPrintTransparency(...args) { return this.#professionalPrintTransparency.flattenPrintTransparency(...args); }
   exportWord(documentId, sourceSha256, options = {}) { return this.exportOoxml(documentId, { profile: 'local-pdf-ooxml-export-v1', sourceSha256, format: 'word' }, options); }
   exportExcel(documentId, sourceSha256, options = {}) { return this.exportOoxml(documentId, { profile: 'local-pdf-ooxml-export-v1', sourceSha256, format: 'excel' }, options); }
   exportPowerpoint(documentId, sourceSha256, options = {}) { return this.exportOoxml(documentId, { profile: 'local-pdf-ooxml-export-v1', sourceSha256, format: 'powerpoint' }, options); }
@@ -302,8 +326,9 @@ export class LocalHostClient {
   sanitizePdfKitMetadata(...args) { return this.#pdfkit.sanitizePdfKitMetadata(...args); }
 
   runPluginSandboxProbe(...args) { return this.#platform.runPluginSandboxProbe(...args); }
-  discoverScanners(...args) { return this.#scannerDiscovery.discoverScanners(...args); }
+  discoverScanners(...args) { return this.#scannerDiscovery.discoverScanners(...args); } acquireScanner(...args) { return this.#scannerAcquisition.acquireScanner(...args); }
   listPluginPackages(...args) { return this.#pluginPackages.listPluginPackages(...args); }
+  listActivePluginCapabilities(...args) { return this.#pluginPackages.listActivePluginCapabilities(...args); }
   installPluginPackage(...args) { return this.#pluginPackages.installPluginPackage(...args); }
   activatePluginPackage(...args) { return this.#pluginPackages.activatePluginPackage(...args); }
   rollbackPluginPackage(...args) { return this.#pluginPackages.rollbackPluginPackage(...args); }
@@ -321,6 +346,7 @@ export class LocalHostClient {
   exportRedactionPlanReport(...args) { return this.#rasterReview.exportRedactionPlanReport(...args); }
   compareDocuments(...args) { return this.#comparison.compareDocuments(...args); }
   compareBatch(...args) { return this.#comparison.compareBatch(...args); }
+  createComparisonPackage(...args) { return this.#comparison.createComparisonPackage(...args); }
   runPrepress(...args) { return this.#prepress.runPrepress(...args); }
   convertToCmyk(...args) { return this.#prepress.convertToCmyk(...args); }
   createImposition(...args) { return this.#prepress.createImposition(...args); }

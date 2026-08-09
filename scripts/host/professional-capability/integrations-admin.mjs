@@ -8,7 +8,6 @@ import { writeInertPageAnnotation } from './inert-annotation-writer.mjs';
 import { assembleCadBimPdf } from './specialist-embed-pdf.mjs';
 import {
   adminIdentityRoles,
-  adminAuditTelemetry,
   adminSsoScim,
   adminDeploymentPackaging,
   adminUpdateManagement,
@@ -223,7 +222,6 @@ export const handlers = Object.freeze({
   async 'integrations.sensitivity-labels'(ctx = {}) { return integrationsSensitivityLabels(ctx); },
   async 'integrations.events-webhooks'(ctx = {}) { return integrationsEventsWebhooks(ctx); },
   async 'admin.identity-roles'(ctx = {}) { return adminIdentityRoles(ctx); },
-  async 'admin.audit-telemetry'(ctx = {}) { return adminAuditTelemetry(ctx); },
   async 'admin.sso-scim'(ctx = {}) { return adminSsoScim(ctx); },
   async 'admin.deployment-packaging'(ctx = {}) { return adminDeploymentPackaging(ctx); },
   async 'admin.update-management'(ctx = {}) { return adminUpdateManagement(ctx); },

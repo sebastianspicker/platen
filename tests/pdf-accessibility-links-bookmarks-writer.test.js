@@ -6,8 +6,9 @@ import {
   inspectPdfAccessibilityLinksBookmarks,
   writePdfAccessibilityLinksBookmarks,
 } from '../scripts/host/pdf-accessibility-links-bookmarks-writer.mjs';
+import { normalizePdfAccessibilityLinksBookmarks } from '../scripts/host/pdf-accessibility-links-bookmarks-contract.mjs';
 
-function fixture({ external = false, cycle = false } = {}) {
+function fixture({ external = false, cycle = false, nested = false } = {}) {
   const linkDestination = external ? '/A << /S /URI /URI (https://example.test) >>' : '/Dest [4 0 R /Fit]';
   const outlineNext = cycle ? '/Next 7 0 R' : '';
   const bodies = [
@@ -15,14 +16,15 @@ function fixture({ external = false, cycle = false } = {}) {
     '<< /Type /Pages /Count 2 /Kids [3 0 R 4 0 R] >>',
     '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /CropBox [0 0 100 100] /Annots [6 0 R] >>',
     '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /CropBox [0 0 100 100] >>',
-    '<< /Type /Outlines /First 7 0 R /Last 7 0 R /Count 1 >>',
+    `<< /Type /Outlines /First 7 0 R /Last 7 0 R /Count ${nested ? 2 : 1} >>`,
     `<< /Type /Annot /Subtype /Link /Rect [0 0 10 10] ${linkDestination} >>`,
-    `<< /Type /Outlines /Parent 5 0 R /Title (Go) /Dest [3 0 R /Fit] ${outlineNext} >>`,
+    `<< /Type /Outlines /Parent 5 0 R /Title (Go) /Dest [3 0 R /Fit] ${nested ? '/First 8 0 R /Last 8 0 R /Count 1' : outlineNext} >>`,
+    ...(nested ? ['<< /Type /Outlines /Parent 7 0 R /Title (Child) /Dest [4 0 R /Fit] >>'] : []),
   ];
   const chunks = ['%PDF-1.4\n']; const offsets = [];
   bodies.forEach((body, index) => { offsets.push(Buffer.byteLength(chunks.join(''), 'latin1')); chunks.push(`${index + 1} 0 obj\n${body}\nendobj\n`); });
   const xref = Buffer.byteLength(chunks.join(''), 'latin1');
-  chunks.push(`xref\n0 8\n0000000000 65535 f \n${offsets.map((offset) => `${String(offset).padStart(10, '0')} 00000 n \n`).join('')}trailer\n<< /Size 8 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+  chunks.push(`xref\n0 ${bodies.length + 1}\n0000000000 65535 f \n${offsets.map((offset) => `${String(offset).padStart(10, '0')} 00000 n \n`).join('')}trailer\n<< /Size ${bodies.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
   return Buffer.from(chunks.join(''), 'latin1');
 }
 
@@ -54,4 +56,18 @@ test('links/bookmarks reject stale source digests, forged locators, proxies, URI
   const uri = fixture({ external: true }); assert.throws(() => inspectPdfAccessibilityLinksBookmarksSource(uri, createHash('sha256').update(uri).digest('hex')), { code: 'UNSUPPORTED_ACCESSIBILITY_LINKS_BOOKMARKS_PDF' });
   const cyclic = fixture({ cycle: true }); assert.throws(() => inspectPdfAccessibilityLinksBookmarksSource(cyclic, createHash('sha256').update(cyclic).digest('hex')), { code: 'UNSUPPORTED_ACCESSIBILITY_LINKS_BOOKMARKS_PDF' });
   const surrogate = request(source, inventory); surrogate.links[0].purpose = '\ud800'; assert.throws(() => writePdfAccessibilityLinksBookmarks(source, surrogate), { code: 'INVALID_ACCESSIBILITY_LINKS_BOOKMARKS' });
+});
+
+test('links/bookmarks share the 64-target repair limit', () => {
+  const hash = (index) => index.toString(16).padStart(64, '0');
+  assert.throws(() => normalizePdfAccessibilityLinksBookmarks({
+    profile: 'local-classic-incremental-links-bookmarks-v1', sourceSha256: hash(0),
+    links: Array.from({ length: 64 }, (_, index) => ({ locator: { fingerprint: hash(index + 1) }, purpose: 'Purpose', targetPage: 1 })),
+    bookmarks: [{ locator: { fingerprint: hash(65) }, title: 'Bookmark', targetPage: 1 }],
+  }), { code: 'INVALID_ACCESSIBILITY_LINKS_BOOKMARKS' });
+});
+
+test('nested bookmark inventories use numeric paths for strict client transport', () => {
+  const inventory = inspectPdfAccessibilityLinksBookmarksSource(fixture({ nested: true }));
+  assert.deepEqual(inventory.bookmarks.map(({ path }) => path), [[0], [0, 0]]);
 });

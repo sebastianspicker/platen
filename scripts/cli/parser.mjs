@@ -9,86 +9,18 @@ import {
   parsedTokens,
   positiveInteger,
 } from './parser-foundation.mjs';
-import { parsePrepress } from './parser-prepress.mjs';
-import { parseAutomation } from './parser-automation.mjs';
-import { parseLayerDefaults } from './parser-layer-defaults.mjs';
-import { parseAcroFormCheckbox, parseAcroFormRadio, parseAcroFormTextField, parseAcroFormSignatureField, parseAecMeasurementLegend, parseAdvancedSearch, parseCertificateSign, parseHiddenDataSanitization, parseJpegImage, parseJpegImageReplacement, parsePageLabels, parseSigningIdentities, parseTaggedRemediation } from './parser-signing.mjs';
-import { parseScanAppend, parseScannerDiscovery } from './parser-scanner.mjs';
-import { parseAccessibilityReview, parseAccessibilityMetadata, parseAecBatchLink, parseAcroFormChoice, parseAdminPluginPackage, parseBatesNumbering, parsePageTransition, parseSnapshotRegion } from './parser-production.mjs';
+import { parsePrepress } from './parser-prepress.mjs'; import { parseAutomation } from './parser-automation.mjs';
+import { parseLayerDefaults } from './parser-layer-defaults.mjs'; import { parseAcroFormCheckbox, parseAcroFormRadio, parseAcroFormTextField, parseAcroFormSignatureField, parseAecMeasurementLegend, parseAdvancedSearch, parseCertificateSign, parseHiddenDataSanitization, parseJpegImage, parseJpegImageReplacement, parsePageLabels, parseSigningIdentities, parseTaggedRemediation } from './parser-signing.mjs';
+import { parseScanAppend, parseScannerDiscovery } from './parser-scanner.mjs'; import { parseAccessibilityReview, parseAccessibilityMetadata, parseAecBatchLink, parseAcroFormChoice, parseAdminPluginPackage, parseAdminPolicyConfiguration, parseAdminAuditTelemetry, parseBatesNumbering, parsePageTransition, parseSnapshotRegion } from './parser-production.mjs';
 import { parseFullPageRedactionBatch, parsePrinterMarks } from './parser-full-page-redaction.mjs'; import { parseOoxmlExport } from './parser-ooxml.mjs';
 import { parsePageBackground } from './parser-page-background.mjs'; import { parseFastWebView } from './parser-fast-web-view.mjs';
-import { parseProfessionalCapability } from './parser-professional.mjs';
-const ALLOWLIST_ACTIONS = Object.freeze(['list', 'enroll', 'revoke', 'unrevoke', 'remove']);
-const PLUGIN_ID = Object.freeze(/^[a-z][a-z0-9]*(?:\.[a-z0-9-]+)+$/u);
+import { parsePageWatermark } from './parser-page-watermark.mjs'; import { parseProfessionalCapability } from './parser-professional.mjs'; import { parseTextReflow } from './parser-text-reflow.mjs';
+import { parseCadPdfCreation, parseHtmlConversion, parseOptimizeCompress, parsePagePngExport, parsePostscriptConversion, parseStructuredExport } from './parser-r02.mjs';
+import { parsePrintToPdf } from './parser-print-to-pdf.mjs';
+const ALLOWLIST_ACTIONS = Object.freeze(['list', 'enroll', 'revoke', 'unrevoke', 'remove']); const PLUGIN_ID = Object.freeze(/^[a-z][a-z0-9]*(?:\.[a-z0-9-]+)+$/u);
 const KEY_ID = Object.freeze(/^[A-Za-z0-9._-]{1,80}$/u);
-export const CLI_HELP = `Platen local CLI
-Usage:
-  npm run cli -- engines [--output FILE]
-  npm run cli -- inspect INPUT.pdf [--structure] [--tag-text] [--output FILE] | fast-web-view INPUT.pdf --output OUTPUT.pdf
-  npm run cli -- accessibility-review INPUT.pdf --output REPORT.json
-  npm run cli -- accessibility-metadata INPUT.pdf --language BCP47 --title TITLE --output OUTPUT.pdf
-  npm run cli -- signature-review INPUT.pdf --output REPORT.json
-  npm run cli -- compare-content PRIMARY.pdf SECONDARY.pdf [--format json|csv] --output REPORT
-  npm run cli -- create-blank [--pages N] --output OUTPUT.pdf
-  npm run cli -- convert-local INPUT.png --output OUTPUT.pdf
-  npm run cli -- text INPUT.pdf [--format json|text|rtf|html|xml] [--output FILE]
-  npm run cli -- export-ooxml INPUT.pdf --format word|excel|powerpoint --output OUTPUT.(docx|xlsx|pptx)
-  npm run cli -- ocr INPUT.pdf --output OUTPUT.pdf [--language eng] [--cleanup PRESET] [--segmentation MODE]
-  npm run cli -- ocr-layout INPUT.pdf [--page N] [--region X,Y,W,H] [--no-tables] [--format json|html|alto] [--output FILE]
-  npm run cli -- ocr-batch INPUT.pdf... --output-dir DIRECTORY [--language eng] [--cleanup PRESET] [--segmentation MODE]
-  npm run cli -- watch-ocr INPUT_DIRECTORY --output-dir NEW_DIRECTORY [--once] [--max-files N] [--interval-ms N] [--settle-ms N]
-  npm run cli -- prepress INPUT.pdf --operation OPERATION [--profile print-review|archive-review] [--format json|xml] [--layout 2x1|2x2] [--page N] [--dpi N] [--output FILE]
-  npm run cli -- layer-defaults INPUT.pdf --changes 0:on,1-3:off --output OUTPUT.pdf
-  npm run cli -- signing-identities
-  npm run cli -- certificate-sign INPUT.pdf --certificate-sha256 DIGEST --page N --field-name NAME --output OUTPUT.pdf [--reason TEXT] [--location TEXT] [--contact TEXT] [--placeholder-bytes N]
-  npm run cli -- sanitize-hidden-data INPUT.pdf --output OUTPUT.pdf
-  npm run cli -- add-checkbox INPUT.pdf --field-name NAME --page N --rect X,Y,W,H --output OUTPUT.pdf
-  npm run cli -- add-radio-group INPUT.pdf --group-name NAME --options OPTIONS.json --output OUTPUT.pdf
-  npm run cli -- acroform-text-field INPUT.pdf --page N --field NAME --rect X,Y,W,H --output OUTPUT.pdf
-  npm run cli -- acroform-signature-field INPUT.pdf --page N --field NAME --rect X,Y,W,H --output OUTPUT.pdf
-  npm run cli -- aec-measurement-legend INPUT.pdf --format json|csv --output LEGEND
-  npm run cli -- aec-batch-link INPUT.pdf --links LINKS.json --output OUTPUT.pdf
-  npm run cli -- scanner-discovery [--output DISCOVERY.json]
-  npm run cli -- scan-append PRIMARY.pdf SCAN.(png|jpg|jpeg|tif|tiff) --after-page N --output OUTPUT.pdf
-  npm run cli -- acroform-choice INPUT.pdf --field NAME --page N --rect X,Y,W,H --options OPTIONS.json --output OUTPUT.pdf
-  npm run cli -- bates-numbering INPUT.pdf --pages 1,3-5 --output OUTPUT.pdf [--start N] [--prefix TEXT] [--suffix TEXT] [--padding N] [--position POS] [--margin N] [--font-size N]
-  npm run cli -- page-transition INPUT.pdf --pages 1,3-5 --duration SECONDS --output OUTPUT.pdf
-  npm run cli -- tagged-remediation INPUT.pdf --plan PLAN.json --output OUTPUT.pdf
-  npm run cli -- insert-jpeg INPUT.pdf IMAGE.jpg --page N --rect X,Y,W,H --output OUTPUT.pdf
-  npm run cli -- replace-jpeg INPUT.pdf IMAGE.jpg --page N --resource-name NAME --output OUTPUT.pdf
-  npm run cli -- page-labels INPUT.pdf --ranges RANGES.json --output OUTPUT.pdf
-  npm run cli -- advanced-search INPUT.pdf --query TEXT [--mode literal|wildcard] [--case-sensitive] [--whole-word] [--context N] [--max-results N] --output RESULTS.json
-  npm run cli -- specialist-content INPUT.pdf
-  npm run cli -- redact-pages INPUT.pdf --pages 1,3-5 --output OUTPUT.pdf
-  npm run cli -- printer-marks INPUT.pdf --pages 1,3-5 --output OUTPUT.pdf
-  npm run cli -- page-background INPUT.pdf --pages 1,3-5 --color R,G,B --output OUTPUT.pdf
-  npm run cli -- snapshot-region INPUT.pdf --page N --region X,Y,W,H [--dpi N] --output OUTPUT.png
-  npm run cli -- automation-submit-inspect INPUT.pdf --automation-root DIRECTORY [--idempotency-key KEY] [--output FILE]
-  npm run cli -- automation-submit INPUT.pdf --automation-root DIRECTORY (--operation inspect|ocr|output-intent|full-page-redaction | --preset PRESET_ID) [operation options]
-  npm run cli -- automation-submit-ocr INPUT.pdf --automation-root DIRECTORY [--language eng] [--cleanup PRESET] [--segmentation MODE] [--idempotency-key KEY] [--output FILE]
-  npm run cli -- automation-submit-output-intent INPUT.pdf --automation-root DIRECTORY [--idempotency-key KEY] [--output FILE]
-  npm run cli -- automation-submit-full-page-redaction INPUT.pdf --pages 1,2,3 --automation-root DIRECTORY [--idempotency-key KEY] [--output FILE]
-  npm run cli -- automation-submit-sequence INPUT.pdf --sequence SEQUENCE_ID --automation-root DIRECTORY [--idempotency-key KEY] [--output REPORT]
-  npm run cli -- automation-run --automation-root DIRECTORY [--output FILE]
-  npm run cli -- automation-status JOB_ID --automation-root DIRECTORY [--output FILE]
-  npm run cli -- automation-cancel JOB_ID --automation-root DIRECTORY [--output FILE]
-  npm run cli -- automation-output-list --automation-root DIRECTORY [--output FILE]
-  npm run cli -- automation-output-copy OUTPUT_ID --sha256 DIGEST --automation-root DIRECTORY --output OUTPUT.pdf
-  npm run cli -- automation-output-delete OUTPUT_ID --sha256 DIGEST --automation-root DIRECTORY [--output FILE]
-  npm run cli -- admin.plugin-allowlist --action list --trust-root STATE_DIRECTORY [--output STATE.json]
-  npm run cli -- admin.plugin-allowlist --action enroll --trust-root STATE_DIRECTORY --publisher-id PUBLISHER_ID --key-id KEY_ID --public-key PEM_FILE --plugin-id ID[,ID...] [--output STATE.json]
-  npm run cli -- admin.plugin-allowlist --action revoke --trust-root STATE_DIRECTORY --publisher-id PUBLISHER_ID --key-id KEY_ID [--output STATE.json]
-  npm run cli -- admin.plugin-allowlist --action unrevoke --trust-root STATE_DIRECTORY --publisher-id PUBLISHER_ID --key-id KEY_ID [--output STATE.json]
-  npm run cli -- admin.plugin-allowlist --action remove --trust-root STATE_DIRECTORY --publisher-id PUBLISHER_ID --key-id KEY_ID --expected-fingerprint FINGERPRINT [--output STATE.json]
-  npm run cli -- admin.plugin-package --action list|install|activate|rollback --plugin-root PACKAGE_DIRECTORY --trust-root STATE_DIRECTORY [--package PACKAGE.json] [--plugin-id ID] [--version VERSION] [--output STATE.json]
-All processing is local. Outputs are created exclusively and never overwrite an
-existing path. OCR PDFs are rasterized and do not preserve interactive PDF
-structure. Prepress output is review evidence, not press or standards
-certification. Accessibility review is heuristic and does not validate PDF/UA.
-Content comparison covers extracted text tokens only; it does not prove visual,
-layout, reading-order, annotation, or object equivalence. Local conversion is
-limited to one bounded non-interlaced 8-bit RGB or RGBA PNG and does not certify
-pixel or color fidelity.`;
+import { CLI_HELP } from './parser-help.mjs';
+export { CLI_HELP };
 function parseEngines(command, positionals, output) {
   exactPositionals(positionals, 0);
   return Object.freeze({ command, output });
@@ -143,6 +75,17 @@ function parseLocalConversion(command, positionals, output) {
   }
   return Object.freeze({ command, input, output });
 }
+function parseOfficeLocalConversion(command, positionals, output) {
+  const [input] = exactPositionals(positionals, 1);
+  if (!/\.odt$/iu.test(input)) {
+    fail('CLI_INVALID_OPTION', 'The convert-office-local executable subset accepts .odt input only.');
+  }
+  if (!output) fail('CLI_INVALID_OPTION', 'The convert-office-local command requires --output.');
+  if (!/\.pdf$/iu.test(output)) {
+    fail('CLI_INVALID_OPTION', 'The convert-office-local output must use the .pdf extension.');
+  }
+  return Object.freeze({ command, input, output });
+}
 function parseText(command, positionals, values, output) {
   const [input] = exactPositionals(positionals, 1);
   const format = values.get('format') ?? 'json';
@@ -187,7 +130,6 @@ function parseOcrLayout(command, positionals, values, flags, output) {
     ...ocrOptions(values),
   });
 }
-
 function requiredOutputDirectory(values, commandName) {
   const outputDirectory = values.has('output-dir')
     ? boundedPath(values.get('output-dir'), 'Output directory')
@@ -197,7 +139,6 @@ function requiredOutputDirectory(values, commandName) {
   }
   return outputDirectory;
 }
-
 function parseOcrBatch(command, positionals, values) {
   const inputs = exactPositionals(positionals, 1, MAX_BATCH_FILES);
   const outputDirectory = requiredOutputDirectory(values, 'ocr-batch');
@@ -208,7 +149,6 @@ function parseOcrBatch(command, positionals, values) {
     ...ocrOptions(values),
   });
 }
-
 function parsePluginIds(value) {
   const normalized = typeof value === 'string'
     ? value.split(',').map((entry) => entry.trim()).filter(Boolean)
@@ -219,6 +159,103 @@ function parsePluginIds(value) {
   }
   return normalized;
 }
+const ALLOWLIST_LIST_OPTIONS = Object.freeze(['action', 'trust-root', 'output']);
+const ALLOWLIST_ENROLL_OPTIONS = Object.freeze([
+  'action', 'trust-root', 'publisher-id', 'key-id', 'public-key', 'plugin-id', 'output',
+]);
+const ALLOWLIST_REMOVE_OPTIONS = Object.freeze([
+  'action', 'trust-root', 'publisher-id', 'key-id', 'expected-fingerprint', 'output',
+]);
+const ALLOWLIST_STATE_OPTIONS = Object.freeze([
+  'action', 'trust-root', 'publisher-id', 'key-id', 'output',
+]);
+function requireOnlyOptions(values, allowed, message) {
+  if ([...values.keys()].some((key) => !allowed.includes(key))) {
+    fail('CLI_INVALID_OPTION', message);
+  }
+}
+function requiredAllowlistIdentity(values) {
+  const publisherId = values.get('publisher-id');
+  const keyId = values.get('key-id');
+  if (typeof publisherId !== 'string' || !PLUGIN_ID.test(publisherId)) {
+    fail('CLI_INVALID_OPTION', '--publisher-id is required and must use the canonical plugin-id format.');
+  }
+  if (typeof keyId !== 'string' || !KEY_ID.test(keyId)) {
+    fail('CLI_INVALID_OPTION', '--key-id is required and must be a non-empty ASCII identifier.');
+  }
+  return { publisherId, keyId };
+}
+function parseAllowlistList({ command, action, values, trustRoot, output }) {
+  requireOnlyOptions(
+    values,
+    ALLOWLIST_LIST_OPTIONS,
+    'list action only accepts --action, --trust-root, and optional --output.',
+  );
+  return Object.freeze({ command, action, trustRoot, output });
+}
+function parseAllowlistEnroll({ command, action, values, trustRoot, output }) {
+  const { publisherId, keyId } = requiredAllowlistIdentity(values);
+  const publicKey = values.get('public-key');
+  const pluginIds = parsePluginIds(values.get('plugin-id'));
+  if (typeof publicKey !== 'string' || !publicKey) {
+    fail('CLI_INVALID_OPTION', '--public-key is required for enroll.');
+  }
+  requireOnlyOptions(
+    values,
+    ALLOWLIST_ENROLL_OPTIONS,
+    'enroll action accepts only --action, --trust-root, --publisher-id, --key-id, --public-key, --plugin-id, and optional --output.',
+  );
+  return Object.freeze({
+    command,
+    action,
+    publisherId,
+    keyId,
+    publicKey,
+    pluginIds,
+    trustRoot,
+    output,
+  });
+}
+function parseAllowlistRemove({ command, action, values, trustRoot, output }) {
+  const { publisherId, keyId } = requiredAllowlistIdentity(values);
+  const expectedFingerprint = values.get('expected-fingerprint');
+  if (!/^[a-f0-9]{64}$/u.test(expectedFingerprint ?? '')) {
+    fail('CLI_INVALID_OPTION', '--expected-fingerprint is required and must be exact lowercase SHA-256.');
+  }
+  requireOnlyOptions(
+    values,
+    ALLOWLIST_REMOVE_OPTIONS,
+    'remove action accepts only --action, --trust-root, --publisher-id, --key-id, --expected-fingerprint, and optional --output.',
+  );
+  return Object.freeze({
+    command,
+    action,
+    publisherId,
+    keyId,
+    trustRoot,
+    output,
+    expectedFingerprint,
+  });
+}
+function parseAllowlistStateChange({ command, action, values, trustRoot, output }) {
+  const { publisherId, keyId } = requiredAllowlistIdentity(values);
+  requireOnlyOptions(
+    values,
+    ALLOWLIST_STATE_OPTIONS,
+    `${action} action accepts only --action, --trust-root, --publisher-id, --key-id, and optional --output.`,
+  );
+  if (!values.has('publisher-id') || !values.has('key-id')) {
+    fail('CLI_INVALID_OPTION', `${action} action requires --publisher-id and --key-id.`);
+  }
+  return Object.freeze({ command, action, publisherId, keyId, trustRoot, output });
+}
+const ALLOWLIST_ACTION_PARSERS = Object.freeze({
+  list: parseAllowlistList,
+  enroll: parseAllowlistEnroll,
+  revoke: parseAllowlistStateChange,
+  unrevoke: parseAllowlistStateChange,
+  remove: parseAllowlistRemove,
+});
 function parseAdminPluginAllowlist(command, positionals, values) {
   exactPositionals(positionals, 0);
   const action = values.get('action');
@@ -230,65 +267,7 @@ function parseAdminPluginAllowlist(command, positionals, values) {
   }
   const trustRoot = boundedPath(values.get('trust-root'), 'Trust root');
   const output = values.has('output') ? boundedPath(values.get('output'), 'Output') : null;
-  if (action === 'list') {
-    if ([...values.keys()].some((key) => key !== 'action' && key !== 'trust-root' && key !== 'output')) {
-      fail('CLI_INVALID_OPTION', 'list action only accepts --action, --trust-root, and optional --output.');
-    }
-    return Object.freeze({ command, action, trustRoot, output });
-  }
-  const publisherId = values.get('publisher-id');
-  const keyId = values.get('key-id');
-  if (typeof publisherId !== 'string' || !PLUGIN_ID.test(publisherId)) {
-    fail('CLI_INVALID_OPTION', '--publisher-id is required and must use the canonical plugin-id format.');
-  }
-  if (typeof keyId !== 'string' || !KEY_ID.test(keyId)) {
-    fail('CLI_INVALID_OPTION', '--key-id is required and must be a non-empty ASCII identifier.');
-  }
-  if (action === 'enroll') {
-    const publicKey = values.get('public-key');
-    const pluginIds = parsePluginIds(values.get('plugin-id'));
-    if (typeof publicKey !== 'string' || !publicKey) {
-      fail('CLI_INVALID_OPTION', '--public-key is required for enroll.');
-    }
-    if ([...values.keys()].some((key) => key !== 'action' && key !== 'trust-root' && key !== 'publisher-id' && key !== 'key-id' && key !== 'public-key' && key !== 'plugin-id' && key !== 'output')) {
-      fail('CLI_INVALID_OPTION', 'enroll action accepts only --action, --trust-root, --publisher-id, --key-id, --public-key, --plugin-id, and optional --output.');
-    }
-    return Object.freeze({
-      command,
-      action,
-      publisherId,
-      keyId,
-      publicKey,
-      pluginIds,
-      trustRoot,
-      output,
-    });
-  }
-  if (action === 'remove') {
-    const expectedFingerprint = values.get('expected-fingerprint');
-    if (!/^[a-f0-9]{64}$/u.test(expectedFingerprint ?? '')) {
-      fail('CLI_INVALID_OPTION', '--expected-fingerprint is required and must be exact lowercase SHA-256.');
-    }
-    if ([...values.keys()].some((key) => key !== 'action' && key !== 'trust-root' && key !== 'publisher-id' && key !== 'key-id' && key !== 'expected-fingerprint' && key !== 'output')) {
-      fail('CLI_INVALID_OPTION', 'remove action accepts only --action, --trust-root, --publisher-id, --key-id, --expected-fingerprint, and optional --output.');
-    }
-    return Object.freeze({
-      command,
-      action,
-      publisherId,
-      keyId,
-      trustRoot,
-      output,
-      expectedFingerprint,
-    });
-  }
-  if (![...values.keys()].every((key) => key === 'action' || key === 'trust-root' || key === 'publisher-id' || key === 'key-id' || key === 'output')) {
-    fail('CLI_INVALID_OPTION', `${action} action accepts only --action, --trust-root, --publisher-id, --key-id, and optional --output.`);
-  }
-  if (!values.has('publisher-id') || !values.has('key-id')) {
-    fail('CLI_INVALID_OPTION', `${action} action requires --publisher-id and --key-id.`);
-  }
-  return Object.freeze({ command, action, publisherId, keyId, trustRoot, output });
+  return ALLOWLIST_ACTION_PARSERS[action]({ command, action, values, trustRoot, output });
 }
 function parseWatchOcr(command, positionals, values, flags) {
   const [inputDirectory] = exactPositionals(positionals, 1);
@@ -319,81 +298,76 @@ function parseWatchOcr(command, positionals, values, flags) {
     ...ocrOptions(values),
   });
 }
+function isHelpRequest(argv) {
+  return argv.length === 0 || ['help', '--help', '-h'].includes(argv[0]);
+}
+const COMMAND_PARSERS = Object.freeze({
+  engines: ({ command, positionals, output }) => parseEngines(command, positionals, output),
+  inspect: ({ command, positionals, flags, output }) => parseInspect(command, positionals, flags, output),
+  'fast-web-view': ({ command, positionals, output }) => parseFastWebView(command, positionals, output),
+  'accessibility-review': ({ command, positionals, output }) => parseAccessibilityReview(command, positionals, output),
+  'accessibility-metadata': ({ command, positionals, values, output }) => parseAccessibilityMetadata(command, positionals, values, output),
+  'aec-batch-link': ({ command, positionals, values, output }) => parseAecBatchLink(command, positionals, values, output),
+  'signature-review': ({ command, positionals, output }) => parseSignatureReview(command, positionals, output),
+  'compare-content': ({ command, positionals, values, output }) => parseContentComparison(command, positionals, values, output),
+  'professional-capability': ({ command, positionals, values, output }) => parseProfessionalCapability(command, positionals, values, output),
+  'create-blank': ({ command, positionals, values, output }) => parseCreateBlank(command, positionals, values, output),
+  'convert-local': ({ command, positionals, output }) => parseLocalConversion(command, positionals, output),
+  'convert-office-local': ({ command, positionals, output }) => parseOfficeLocalConversion(command, positionals, output),
+  'convert-html-local': ({ command, positionals, output }) => parseHtmlConversion(command, positionals, output),
+  'convert-postscript-local': ({ command, positionals, output }) => parsePostscriptConversion(command, positionals, output),
+  'create-cad-pdf-local': ({ command, positionals, output }) => parseCadPdfCreation(command, positionals, output),
+  'print-to-pdf-local': ({ command, positionals, output }) => parsePrintToPdf(command, positionals, output),
+  'export-structured-local': ({ command, positionals, values, output }) => parseStructuredExport(command, positionals, values, output),
+  'optimize-compress-local': ({ command, positionals, output }) => parseOptimizeCompress(command, positionals, output),
+  'export-page-png-local': ({ command, positionals, values, output }) => parsePagePngExport(command, positionals, values, output),
+  text: ({ command, positionals, values, output }) => parseText(command, positionals, values, output),
+  'export-ooxml': ({ command, positionals, values, output }) => parseOoxmlExport(command, positionals, values, output),
+  ocr: ({ command, positionals, values, output }) => parseOcr(command, positionals, values, output),
+  'ocr-layout': ({ command, positionals, values, flags, output }) => parseOcrLayout(command, positionals, values, flags, output),
+  'ocr-batch': ({ command, positionals, values }) => parseOcrBatch(command, positionals, values),
+  'watch-ocr': ({ command, positionals, values, flags }) => parseWatchOcr(command, positionals, values, flags),
+  'text-reflow': ({ command, positionals, values, output }) => parseTextReflow(command, positionals, values, output),
+  'layer-defaults': ({ command, positionals, values, output }) => parseLayerDefaults(command, positionals, values, output),
+  'signing-identities': ({ command, positionals, output }) => parseSigningIdentities(command, positionals, output),
+  'scanner-discovery': ({ command, positionals, output }) => parseScannerDiscovery(command, positionals, output),
+  'scan-append': ({ command, positionals, values, output }) => parseScanAppend(command, positionals, values, output),
+  'acroform-choice': ({ command, positionals, values, output }) => parseAcroFormChoice(command, positionals, values, output),
+  'bates-numbering': ({ command, positionals, values, output }) => parseBatesNumbering(command, positionals, values, output),
+  'page-transition': ({ command, positionals, values, output }) => parsePageTransition(command, positionals, values, output),
+  'certificate-sign': ({ command, positionals, values, flags, output }) => parseCertificateSign(command, positionals, values, flags, output),
+  'sanitize-hidden-data': ({ command, positionals, output }) => parseHiddenDataSanitization(command, positionals, output),
+  'add-checkbox': ({ command, positionals, values, output }) => parseAcroFormCheckbox(command, positionals, values, output),
+  'add-radio-group': ({ command, positionals, values, output }) => parseAcroFormRadio(command, positionals, values, output),
+  'acroform-text-field': ({ command, positionals, values, output }) => parseAcroFormTextField(command, positionals, values, output),
+  'acroform-signature-field': ({ command, positionals, values, output }) => parseAcroFormSignatureField(command, positionals, values, output),
+  'aec-measurement-legend': ({ command, positionals, values, output }) => parseAecMeasurementLegend(command, positionals, values, output),
+  'tagged-remediation': ({ command, positionals, values, output }) => parseTaggedRemediation(command, positionals, values, output),
+  'insert-jpeg': ({ command, positionals, values, output }) => parseJpegImage(command, positionals, values, output),
+  'replace-jpeg': ({ command, positionals, values, output }) => parseJpegImageReplacement(command, positionals, values, output),
+  'page-labels': ({ command, positionals, values, output }) => parsePageLabels(command, positionals, values, output),
+  'advanced-search': ({ command, positionals, values, flags, output }) => parseAdvancedSearch(command, positionals, values, flags, output),
+  'specialist-content': ({ command, positionals }) => parseSpecialistContent(command, positionals),
+  'redact-pages': ({ command, positionals, values, output }) => parseFullPageRedactionBatch(command, positionals, values, output),
+  'printer-marks': ({ command, positionals, values, output }) => parsePrinterMarks(command, positionals, values, output),
+  'page-background': ({ command, positionals, values, output }) => parsePageBackground(command, positionals, values, output),
+  'page-watermark': ({ command, positionals, values, output }) => parsePageWatermark(command, positionals, values, output),
+  'snapshot-region': ({ command, positionals, values, output }) => parseSnapshotRegion(command, positionals, values, output),
+  'admin.plugin-allowlist': ({ command, positionals, values }) => parseAdminPluginAllowlist(command, positionals, values),
+  'admin.plugin-package': ({ command, positionals, values }) => parseAdminPluginPackage(command, positionals, values),
+  'admin.policy-configuration': ({ command, positionals, values, output }) => parseAdminPolicyConfiguration(command, positionals, values, output),
+  'admin.audit-telemetry': ({ command, positionals, values, output }) => parseAdminAuditTelemetry(command, positionals, values, output),
+});
 export function parseCliArguments(argv) {
   if (!Array.isArray(argv) || argv.some((value) => typeof value !== 'string')) {
     fail('CLI_INVALID_ARGUMENTS', 'CLI arguments must be strings.');
   }
-  if (
-    !argv.length
-    || argv[0] === 'help'
-    || argv[0] === '--help'
-    || argv[0] === '-h'
-  ) return Object.freeze({ command: 'help' });
+  if (isHelpRequest(argv)) return Object.freeze({ command: 'help' });
   const command = argv[0];
   const { values, flags, positionals } = parsedTokens(command, argv.slice(1));
   const output = values.has('output') ? boundedPath(values.get('output'), 'Output') : null;
-  if (command === 'engines') return parseEngines(command, positionals, output);
-  if (command === 'inspect') return parseInspect(command, positionals, flags, output); if (command === 'fast-web-view') return parseFastWebView(command, positionals, output);
-  if (command === 'accessibility-review') {
-    return parseAccessibilityReview(command, positionals, output);
-  }
-  if (command === 'accessibility-metadata') {
-    return parseAccessibilityMetadata(command, positionals, values, output);
-  }
-  if (command === 'aec-batch-link') return parseAecBatchLink(command, positionals, values, output);
-  if (command === 'signature-review') {
-    return parseSignatureReview(command, positionals, output);
-  }
-  if (command === 'compare-content') {
-    return parseContentComparison(command, positionals, values, output);
-  }
-  if (command === 'professional-capability') return parseProfessionalCapability(command, positionals, values, output);
-  if (command === 'create-blank') {
-    return parseCreateBlank(command, positionals, values, output);
-  }
-  if (command === 'convert-local') {
-    return parseLocalConversion(command, positionals, output);
-  }
-  if (command === 'text') {
-    return parseText(command, positionals, values, output);
-  }
-  if (command === 'export-ooxml') return parseOoxmlExport(command, positionals, values, output);
-  if (command === 'ocr') {
-    return parseOcr(command, positionals, values, output);
-  }
-  if (command === 'ocr-layout') {
-    return parseOcrLayout(command, positionals, values, flags, output);
-  }
-  if (command === 'ocr-batch') {
-    return parseOcrBatch(command, positionals, values);
-  }
-  if (command === 'watch-ocr') {
-    return parseWatchOcr(command, positionals, values, flags);
-  }
-  if (command === 'layer-defaults') {
-    return parseLayerDefaults(command, positionals, values, output);
-  }
-  if (command === 'signing-identities') return parseSigningIdentities(command, positionals, output);
-  if (command === 'scanner-discovery') return parseScannerDiscovery(command, positionals, output); if (command === 'scan-append') return parseScanAppend(command, positionals, values, output);
-  if (command === 'acroform-choice') return parseAcroFormChoice(command, positionals, values, output);
-  if (command === 'bates-numbering') return parseBatesNumbering(command, positionals, values, output); if (command === 'page-transition') return parsePageTransition(command, positionals, values, output);
-  if (command === 'certificate-sign') return parseCertificateSign(command, positionals, values, output); if (command === 'sanitize-hidden-data') return parseHiddenDataSanitization(command, positionals, output);
-  if (command === 'add-checkbox') return parseAcroFormCheckbox(command, positionals, values, output);
-  if (command === 'add-radio-group') return parseAcroFormRadio(command, positionals, values, output); if (command === 'acroform-text-field') return parseAcroFormTextField(command, positionals, values, output); if (command === 'acroform-signature-field') return parseAcroFormSignatureField(command, positionals, values, output); if (command === 'aec-measurement-legend') return parseAecMeasurementLegend(command, positionals, values, output);
-  if (command === 'tagged-remediation') return parseTaggedRemediation(command, positionals, values, output);
-  if (command === 'insert-jpeg') return parseJpegImage(command, positionals, values, output);
-  if (command === 'replace-jpeg') return parseJpegImageReplacement(command, positionals, values, output);
-  if (command === 'page-labels') return parsePageLabels(command, positionals, values, output);
-  if (command === 'advanced-search') return parseAdvancedSearch(command, positionals, values, flags, output);
-  if (command === 'specialist-content') return parseSpecialistContent(command, positionals);
-  if (command === 'redact-pages') return parseFullPageRedactionBatch(command, positionals, values, output);
-  if (command === 'printer-marks') return parsePrinterMarks(command, positionals, values, output); if (command === 'page-background') return parsePageBackground(command, positionals, values, output); if (command === 'snapshot-region') return parseSnapshotRegion(command, positionals, values, output);
+  const context = { command, positionals, values, flags, output };
+  if (Object.hasOwn(COMMAND_PARSERS, command)) return COMMAND_PARSERS[command](context);
   if (command.startsWith('automation-')) return parseAutomation(command, positionals, values, output);
-  if (command === 'admin.plugin-allowlist') {
-    return parseAdminPluginAllowlist(command, positionals, values);
-  }
-  if (command === 'admin.plugin-package') {
-    return parseAdminPluginPackage(command, positionals, values);
-  }
   return parsePrepress(command, positionals, values, output);
 }

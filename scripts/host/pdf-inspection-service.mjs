@@ -31,6 +31,7 @@ export class PdfInspectionService {
   listImages(...args) { return this.#resources.listImages(...args); }
   listAttachments(...args) { return this.#resources.listAttachments(...args); }
   renderThumbnail(...args) { return this.#raster.renderThumbnail(...args); }
+  renderOverlayPageExactDpi(...args) { return this.#raster.renderOverlayPageExactDpi(...args); }
   renderCropBoxPage(...args) { return this.#raster.renderCropBoxPage(...args); }
   renderCropBoxSnapshot(...args) { return this.#raster.renderCropBoxSnapshot(...args); }
   verifySignatures(documentId, { signal } = {}) { return this.#signatures.verify(documentId, { signal }); }

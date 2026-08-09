@@ -9,9 +9,7 @@ import {
   parsePdfStructure,
   resolvePdfObject,
 } from './pdf-classic-structure.mjs';
-import {
-  normalizeClassicPdfObjectValue,
-} from './pdf-classic-object-value.mjs';
+import { normalizeClassicPdfObjectValue } from './pdf-classic-object-value.mjs';
 import { validatePdfDeletionReferences } from './pdf-incremental-deletion-validation.mjs';
 
 const MAX_APPEND_BYTES = 1024 * 1024;
@@ -28,26 +26,11 @@ function failure(code, message) {
   return error;
 }
 
-function invalid() {
-  return failure(
-    'INVALID_CLASSIC_INCREMENTAL_REVISION',
-    'The classic incremental revision request is invalid.',
-  );
-}
+function invalid() { return failure('INVALID_CLASSIC_INCREMENTAL_REVISION', 'The classic incremental revision request is invalid.'); }
 
-function limitExceeded() {
-  return failure(
-    'CLASSIC_INCREMENTAL_LIMIT_EXCEEDED',
-    'The classic incremental revision exceeds its fixed safety limits.',
-  );
-}
+function limitExceeded() { return failure('CLASSIC_INCREMENTAL_LIMIT_EXCEEDED', 'The classic incremental revision exceeds its fixed safety limits.'); }
 
-function invalidOutput() {
-  return failure(
-    'INVALID_CLASSIC_INCREMENTAL_OUTPUT',
-    'The classic incremental revision failed structural verification.',
-  );
-}
+function invalidOutput() { return failure('INVALID_CLASSIC_INCREMENTAL_OUTPUT', 'The classic incremental revision failed structural verification.'); }
 
 export function checkedIncrementalSource(sourceBytes, sourceStructure) {
   const buffer = sourceStructure
@@ -183,6 +166,23 @@ export function incrementalChangingIdHex(structure, changingId) {
   return changingId.toString('hex').toUpperCase();
 }
 
+function framedIncrementalRecord(record, offset) {
+  const streamBytes = recordStreams.get(record) ?? null;
+  if ((streamBytes === null) !== (record.streamLength === null)
+    || (streamBytes && (streamBytes.length !== record.streamLength
+      || createHash('sha256').update(streamBytes).digest('hex') !== record.streamSha256))) throw invalid();
+  const header = Buffer.from(`${record.reference.object} ${record.reference.generation} obj\n${record.body}`, 'latin1');
+  const tail = Buffer.from(streamBytes ? '\nstream\n' : '\n', 'latin1');
+  const end = Buffer.from(streamBytes ? '\nendstream\nendobj\n' : 'endobj\n', 'latin1');
+  const framedRecord = Object.freeze({ ...record, offset });
+  recordStreams.set(framedRecord, streamBytes);
+  return {
+    chunks: streamBytes ? [header, tail, streamBytes, end] : [header, tail, end],
+    length: header.length + tail.length + (streamBytes?.length ?? 0) + end.length,
+    record: framedRecord,
+  };
+}
+
 export function incrementalRevisionBytes(
   sourceBytes, structure, records, effectiveSize, infoReference, idHex,
 ) {
@@ -192,24 +192,11 @@ export function incrementalRevisionBytes(
   for (const record of records) {
     const offset = sourceBytes.length + objectsLength;
     if (offset > MAX_OFFSET) throw limitExceeded();
-    const streamBytes = recordStreams.get(record) ?? null;
-    if ((streamBytes === null) !== (record.streamLength === null)
-      || (streamBytes && (streamBytes.length !== record.streamLength
-        || createHash('sha256').update(streamBytes).digest('hex') !== record.streamSha256))) throw invalid();
-    const header = Buffer.from(
-      `${record.reference.object} ${record.reference.generation} obj\n${record.body}`,
-      'latin1',
-    );
-    const tail = Buffer.from(streamBytes ? '\nstream\n' : '\n', 'latin1');
-    const end = Buffer.from(streamBytes ? '\nendstream\nendobj\n' : 'endobj\n', 'latin1');
-    objectChunks.push(header, tail);
-    if (streamBytes) objectChunks.push(streamBytes);
-    objectChunks.push(end);
-    objectsLength += header.length + tail.length + (streamBytes?.length ?? 0) + end.length;
+    const frame = framedIncrementalRecord(record, offset);
+    objectChunks.push(...frame.chunks);
+    objectsLength += frame.length;
     if (objectsLength > MAX_APPEND_BYTES) throw limitExceeded();
-    const framedRecord = Object.freeze({ ...record, offset });
-    recordStreams.set(framedRecord, streamBytes);
-    framed.push(framedRecord);
+    framed.push(frame.record);
   }
   const xrefOffset = sourceBytes.length + objectsLength;
   if (xrefOffset > MAX_OFFSET) throw limitExceeded();
@@ -293,22 +280,32 @@ export function validateIncrementalRecordRoles(structure, records, info) {
   );
 }
 
+function writtenXrefEntryMatchesRecord(entry, record) {
+  return entry.object === record.reference.object
+    && entry.generation === record.reference.generation
+    && entry.offset === record.offset
+    && entry.status === 'n';
+}
+
+function writtenObjectMatchesRecord(output, record, object) {
+  const normalized = normalizeClassicPdfObjectValue(object.value);
+  const streamBytes = recordStreams.get(record) ?? null;
+  if (normalized.body !== record.body) return false;
+  if (object.stream !== (streamBytes !== null)) return false;
+  if (object.streamLength !== (streamBytes?.length ?? 0)) return false;
+  return streamBytes === null || output.buffer.subarray(
+    object.streamStart, object.streamStart + object.streamLength,
+  ).equals(streamBytes);
+}
+
 export function verifyIncrementalWrittenRecords(output, records, entriesByObject) {
   records.forEach((record, index) => {
     const entry = entriesByObject?.get(record.reference.object)
       ?? output.revisions[0].entries[index];
-    if (entry.object !== record.reference.object
-      || entry.generation !== record.reference.generation
-      || entry.offset !== record.offset || entry.status !== 'n') throw invalidOutput();
+    if (!writtenXrefEntryMatchesRecord(entry, record)) throw invalidOutput();
     const object = resolvePdfObject(output, record.reference);
+    if (!writtenObjectMatchesRecord(output, record, object)) throw invalidOutput();
     const normalized = normalizeClassicPdfObjectValue(object.value);
-    const streamBytes = recordStreams.get(record) ?? null;
-    if (normalized.body !== record.body
-      || object.stream !== (streamBytes !== null)
-      || object.streamLength !== (streamBytes?.length ?? 0)
-      || (streamBytes && !output.buffer.subarray(
-        object.streamStart, object.streamStart + object.streamLength,
-      ).equals(streamBytes))) throw invalidOutput();
     for (const reference of normalized.references) resolvePdfObject(output, reference);
   });
 }

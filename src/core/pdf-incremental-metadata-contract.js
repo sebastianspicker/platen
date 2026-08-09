@@ -64,6 +64,14 @@ function invalidResult() {
   );
 }
 
+function exactProvenanceObject(value, keys) {
+  const prototype = value && typeof value === 'object' ? Object.getPrototypeOf(value) : null;
+  return Boolean(value) && !Array.isArray(value)
+    && (prototype === Object.prototype || prototype === null)
+    && Object.keys(value).length === keys.length
+    && Object.keys(value).every((key) => keys.includes(key));
+}
+
 function validArtifact(artifact, documentId, sourceSha256) {
   return exactObject(artifact, [
     'id', 'documentId', 'displayName', 'mediaType', 'size', 'sha256', 'operation', 'createdAt',
@@ -90,10 +98,10 @@ function validOperation(operation, { documentId, sourceSha256, outputSha256, upd
     && exactObject(operation.inputs[0], ['documentId', 'sha256', 'role'])
     && operation.inputs[0].documentId === documentId
     && operation.inputs[0].sha256 === sourceSha256 && operation.inputs[0].role === 'source'
-    && exactObject(operation.parameters, ['profile', 'updatedFields'])
+    && exactProvenanceObject(operation.parameters, ['profile', 'updatedFields'])
     && operation.parameters.profile === INCREMENTAL_METADATA_PROFILE
     && sameFields(operation.parameters.updatedFields, updatedFields)
-    && exactObject(operation.expected, [
+    && exactProvenanceObject(operation.expected, [
       'pageCount', 'sourceUnchanged', 'sourcePrefixPreserved', 'rasterized',
     ])
     && Number.isSafeInteger(operation.expected.pageCount)
@@ -110,7 +118,7 @@ function sameFields(value, expected = STANDARD_METADATA_FIELDS) {
 }
 
 function validValidation(value, pageCount, outputSha256) {
-  return exactObject(value, ['passed', 'validators', 'pageCount', 'outputSha256'])
+  return exactProvenanceObject(value, ['passed', 'validators', 'pageCount', 'outputSha256'])
     && value.passed === true && value.pageCount === pageCount
     && value.outputSha256 === outputSha256
     && sameFields(value.validators, INCREMENTAL_METADATA_VALIDATORS);

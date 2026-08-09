@@ -218,18 +218,33 @@ test('PDFKit metadata-sanitization parser accepts only a category-bounded proof 
 
 test('PDFKit AEC parser accepts only source-bound inert annotation receipts', () => {
   assert.equal(parsePdfkitAecMeasurementResponse(aecMeasurementSuccess).annotationSubtypes[0], 'ink');
+  for (const [kind, unit] of [['distance', 'm'], ['perimeter', 'm']]) {
+    const linear = JSON.parse(aecMeasurementSuccess);
+    Object.assign(linear.result, { kind, unit, annotationSubtypes: ['line'] });
+    assert.equal(parsePdfkitAecMeasurementResponse(JSON.stringify(linear)).kind, kind);
+  }
   const count = JSON.parse(aecMeasurementSuccess);
   Object.assign(count.result, {
     kind: 'count', quantity: 2, unit: 'count', calibrationId: null,
     annotationCount: 2, annotationSubtypes: ['circle', 'circle'],
   });
   assert.equal(parsePdfkitAecMeasurementResponse(JSON.stringify(count)).calibrationId, null);
-  for (const mutate of [
-    (value) => { value.result.measurementDictionaryEmbedded = true; },
-    (value) => { value.result.annotationSubtypes = ['javascript']; },
-    (value) => { value.result.outputSha256 = value.result.sourceSha256; },
-    (value) => { value.result.calibrationId = null; },
-    (value) => { value.result.localPath = '/private/output.pdf'; },
+  for (const [, mutate] of [
+    ['embedded measurement dictionary', (value) => { value.result.measurementDictionaryEmbedded = true; }],
+    ['invalid annotation subtype', (value) => { value.result.annotationSubtypes = ['javascript']; }],
+    ['identical source and output digests', (value) => { value.result.outputSha256 = value.result.sourceSha256; }],
+    ['missing calibration for an area measurement', (value) => { value.result.calibrationId = null; }],
+    ['extra receipt field', (value) => { value.result.localPath = '/private/output.pdf'; }],
+    ['missing receipt field', (value) => { delete value.result.pageCount; }],
+    ['mismatched measurement unit', (value) => { value.result.unit = 'm'; }],
+    ['count calibration', (value) => {
+      Object.assign(value.result, { kind: 'count', quantity: 2, unit: 'count', annotationCount: 2, annotationSubtypes: ['circle', 'circle'] });
+    }],
+    ['count annotation subtype', (value) => {
+      Object.assign(value.result, { kind: 'count', quantity: 2, unit: 'count', calibrationId: null, annotationCount: 2, annotationSubtypes: ['circle', 'ink'] });
+    }],
+    ['non-count annotation count', (value) => { value.result.annotationCount = 2; value.result.annotationSubtypes = ['ink', 'ink']; }],
+    ['out-of-range page', (value) => { value.result.page = 101; }],
   ]) {
     const invalid = JSON.parse(aecMeasurementSuccess); mutate(invalid);
     assert.throws(() => parsePdfkitAecMeasurementResponse(JSON.stringify(invalid)), { code: 'INVALID_RESPONSE' });

@@ -59,19 +59,55 @@ export async function runConversionJob({
   const workspace = await owner.createJobWorkspace(resourceId);
   const deadline = createDeadline(externalSignal, MAX_CONVERSION_JOB_MS);
   const quota = createWorkspaceQuotaMonitor(workspace, deadline);
+  let result;
+  let failure = null;
+  let promotedDocument = null;
+  const registerPromotedDocument = (document) => {
+    if (!document || typeof document.id !== 'string') {
+      throw new HostError('CONVERSION_OUTPUT_INVALID', 'Conversion did not return a revocable derived document.', 502);
+    }
+    promotedDocument = document;
+  };
   try {
-    return await action({ workspace, signal: deadline.signal, checkQuota: quota.check });
+    result = await action({
+      workspace,
+      signal: deadline.signal,
+      checkQuota: quota.check,
+      registerPromotedDocument,
+    });
+    if (deadline.signal.aborted) throw deadline.signal.reason ?? new Error('Conversion was cancelled.');
+    if (typeof owner.verifySource === 'function') await owner.verifySource(resourceId);
   } catch (error) {
-    if (quota.error) throw quota.error;
-    throw mapConversionError(error, {
+    failure = quota.error ?? mapConversionError(error, {
       timedOut: deadline.timedOut,
       cancelled: externalSignal?.aborted,
     });
   } finally {
     quota.stop();
     deadline.dispose();
-    await owner.cleanupJob(workspace);
+    try {
+      await owner.cleanupJob(workspace);
+    } catch (error) {
+      failure ??= new HostError(
+        'CONVERSION_CLEANUP_FAILED', 'The private conversion workspace could not be removed.', 500,
+        { cause: error },
+      );
+    }
+    if (failure && promotedDocument) {
+      try {
+        await owner.deleteDocument(promotedDocument.id);
+      } catch (error) {
+        failure = new HostError(
+          'CONVERSION_CLEANUP_FAILED',
+          'The private conversion workspace or derived document could not be removed.',
+          500,
+          { cause: new AggregateError([failure, error], 'Conversion cleanup and document revocation failed.') },
+        );
+      }
+    }
   }
+  if (failure) throw failure;
+  return result;
 }
 
 export async function inspectConversionOutput(poppler, filePath, signal) {

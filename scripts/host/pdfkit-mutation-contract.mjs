@@ -161,9 +161,10 @@ export function summarizePdfKitMutation(mutation) {
           ? 'form-radio-select' : 'form-fill', page: mutation.formFill.page,
       annotationIndex: mutation.formFill.annotationIndex, fieldType: mutation.formFill.fieldType,
     });
-    const targeted = mutation.annotationUpdate ?? mutation.annotationRemove;
+    const targeted = mutation.annotationProperties ?? mutation.annotationUpdate ?? mutation.annotationRemove;
     return Object.freeze({
-      category: mutation.annotationUpdate ? 'annotation-update' : 'annotation-remove',
+      category: mutation.annotationProperties ? 'annotation-properties'
+        : mutation.annotationUpdate ? 'annotation-update' : 'annotation-remove',
       page: targeted.page, annotationIndex: targeted.annotationIndex, subtype: targeted.subtype,
     });
   }

@@ -7,7 +7,7 @@ import {
 } from './local-host-client-pdfkit-fixture.js';
 
 const targetedMutation = (formFill) => ({
-  formFill, annotationUpdate: null, annotationRemove: null,
+  formFill, annotationUpdate: null, annotationRemove: null, annotationProperties: null,
 });
 
 test('local host client strictly validates targeted text and annotation mutations', async () => {

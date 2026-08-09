@@ -1,4 +1,5 @@
 import { HostError } from '../host-error.mjs';
+import { collectActivePluginCapabilityCatalog } from '../plugin-active-capability-catalog.mjs';
 import { PACKAGE_LIMITS, PLUGIN_ID, SEMVER } from '../plugin-package-contract.mjs';
 import { validatePluginSandboxStatus } from '../../../src/core/plugin-sandbox-status-contract.js';
 
@@ -23,6 +24,13 @@ function lifecycleResult(action, result) {
 }
 
 async function handlePackageLifecycleRoute({ pathname, request, response, url, processing, pluginPackages, method, readJson, readBytes, requireContentType, json }) {
+  if (pathname === '/api/plugin-capability-catalog') {
+    method(request, 'GET');
+    if ([...url.searchParams].length) throw new HostError('INVALID_PARAMETER', 'Plugin capability catalog listing does not accept query parameters.', 400);
+    if (!pluginPackages) throw new HostError('PLUGIN_PACKAGE_UNAVAILABLE', 'Plugin package management is unavailable.', 503);
+    json(response, 200, await collectActivePluginCapabilityCatalog(pluginPackages, { signal: processing.signal }));
+    return true;
+  }
   if (pathname === '/api/plugin-packages') {
     method(request, 'GET');
     if ([...url.searchParams].length) throw new HostError('INVALID_PARAMETER', 'Plugin package listing does not accept query parameters.', 400);
@@ -82,6 +90,8 @@ export async function handlePluginPlatformRoute(context) {
   if (!isExactEmptyObject(await readJson(request, PLUGIN_SANDBOX_PROBE_BODY_LIMIT))) {
     throw new HostError('INVALID_PLUGIN_SANDBOX_PROBE', 'Plugin sandbox probing requires an empty JSON object.', 400);
   }
-  json(response, 200, validatePluginSandboxStatus(await pluginSandboxStatus.getStatus()));
+  json(response, 200, validatePluginSandboxStatus(await pluginSandboxStatus.getStatus({
+    signal: context.processing.signal,
+  })));
   return true;
 }

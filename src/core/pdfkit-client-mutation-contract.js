@@ -3,12 +3,15 @@ import {
   validPdfKitLocator,
   validPdfKitRectangle,
 } from './pdfkit-client-contract-shared.js';
+import { validPdfKitAnnotationProperties } from './pdfkit-targeted-annotation-properties-contract.js';
 
 const PDFKIT_MUTATION_KEYS = new Set(['metadata', 'pageBox', 'rotation', 'annotations']);
-const PDFKIT_TARGETED_KEYS = new Set(['formFill', 'annotationUpdate', 'annotationRemove']);
+const PDFKIT_TARGETED_KEYS = new Set([
+  'formFill', 'annotationUpdate', 'annotationProperties', 'annotationRemove',
+]);
 const PDFKIT_BOXES = new Set(['media', 'crop', 'bleed', 'trim', 'art']);
 const PDFKIT_CREATABLE_ANNOTATIONS = new Set([
-  'text', 'freeText', 'square', 'circle', 'highlight',
+  'text', 'freeText', 'square', 'circle', 'highlight', 'underline',
 ]);
 const PDFKIT_TARGETABLE_ANNOTATIONS = new Set([
   'freeText', 'square', 'circle', 'highlight',
@@ -17,6 +20,24 @@ const PDFKIT_TARGETABLE_ANNOTATIONS = new Set([
 function validPdfKitText(value) {
   return value === null || (typeof value === 'string'
     && new TextEncoder().encode(value).byteLength <= 1_024);
+}
+
+function validPdfKitFormFill(value) {
+  if (!validPdfKitLocator(value, ['fieldType', 'value']) || typeof value.value !== 'string') {
+    return false;
+  }
+  if (value.fieldType === 'button') return ['on', 'off', 'select'].includes(value.value);
+  return ['text', 'choice'].includes(value.fieldType)
+    && new TextEncoder().encode(value.value).byteLength <= 1_024;
+}
+
+function validPdfKitAnnotationUpdate(value) {
+  const bytes = typeof value.contents === 'string'
+    ? new TextEncoder().encode(value.contents).byteLength : 0;
+  return validPdfKitLocator(value, ['subtype', 'contents', 'rect'])
+    && PDFKIT_TARGETABLE_ANNOTATIONS.has(value.subtype)
+    && bytes > 0 && bytes <= 1_024
+    && validPdfKitRectangle(value.rect);
 }
 
 export function validPdfKitMutation(mutation) {
@@ -51,25 +72,12 @@ export function validPdfKitMutation(mutation) {
 export function validPdfKitTargetedMutation(mutation) {
   if (!exactObject(mutation, [...PDFKIT_TARGETED_KEYS])) return false;
   const selected = Number(mutation.formFill !== null)
-    + Number(mutation.annotationUpdate !== null) + Number(mutation.annotationRemove !== null);
+    + Number(mutation.annotationUpdate !== null) + Number(mutation.annotationProperties !== null)
+    + Number(mutation.annotationRemove !== null);
   if (selected !== 1) return false;
-  if (mutation.formFill !== null) {
-    if (!validPdfKitLocator(mutation.formFill, ['fieldType', 'value'])
-      || typeof mutation.formFill.value !== 'string') return false;
-    if (mutation.formFill.fieldType === 'button') {
-      return ['on', 'off', 'select'].includes(mutation.formFill.value);
-    }
-    return ['text', 'choice'].includes(mutation.formFill.fieldType)
-      && new TextEncoder().encode(mutation.formFill.value).byteLength <= 1_024;
-  }
-  if (mutation.annotationUpdate !== null) {
-    const bytes = typeof mutation.annotationUpdate.contents === 'string'
-      ? new TextEncoder().encode(mutation.annotationUpdate.contents).byteLength : 0;
-    return validPdfKitLocator(mutation.annotationUpdate, ['subtype', 'contents', 'rect'])
-      && PDFKIT_TARGETABLE_ANNOTATIONS.has(mutation.annotationUpdate.subtype)
-      && bytes > 0 && bytes <= 1_024
-      && validPdfKitRectangle(mutation.annotationUpdate.rect);
-  }
+  if (mutation.formFill !== null) return validPdfKitFormFill(mutation.formFill);
+  if (mutation.annotationUpdate !== null) return validPdfKitAnnotationUpdate(mutation.annotationUpdate);
+  if (mutation.annotationProperties !== null) return validPdfKitAnnotationProperties(mutation.annotationProperties);
   return validPdfKitLocator(mutation.annotationRemove, ['subtype'])
     && PDFKIT_TARGETABLE_ANNOTATIONS.has(mutation.annotationRemove.subtype);
 }

@@ -6,6 +6,31 @@ export class PdfOneDocumentComposition {
 
   constructor({ inspection, executor }) { this.#inspection = inspection; this.#executor = executor; }
 
+  async #atomicOutputs(createOutput, outputCount, signal) {
+    const artifacts = [];
+    try {
+      for (let index = 0; index < outputCount; index += 1) {
+        if (signal?.aborted) throw new HostError('JOB_CANCELLED', 'The split operation was cancelled.', 499);
+        const artifact = await createOutput(index);
+        if (!artifact || typeof artifact.id !== 'string' || artifact.id.length < 1) {
+          throw new HostError('COMPOSITION_OUTPUT_INVALID', 'Split returned an invalid retained-artifact receipt.', 502);
+        }
+        artifacts.push(artifact);
+        if (signal?.aborted) throw new HostError('JOB_CANCELLED', 'The split operation was cancelled.', 499);
+      }
+      return Object.freeze(artifacts);
+    } catch (error) {
+      const rollback = await Promise.allSettled(artifacts.map(({ id }) => this.#executor.deleteArtifact(id)));
+      const failures = rollback.filter(({ status }) => status === 'rejected').map(({ reason }) => reason);
+      if (failures.length) {
+        throw new HostError('SPLIT_ROLLBACK_FAILED', 'Split could not revoke every earlier output after incomplete execution.', 500, {
+          cause: new AggregateError([error, ...failures]),
+        });
+      }
+      throw error;
+    }
+  }
+
   async extractPages(documentId, pages, { operationType = 'extract-pages', fileLabel = null, parameters = {}, signal } = {}) {
     const inspection = await this.#inspection.inspect(documentId, { signal });
     const selected = validatePages(pages, inspection.pageCount);
@@ -24,9 +49,10 @@ export class PdfOneDocumentComposition {
   async splitDocument(documentId, { signal } = {}) {
     const inspection = await this.#inspection.inspect(documentId, { signal });
     if (inspection.pageCount > MAX_SPLIT_OUTPUTS) throw new HostError('SPLIT_OUTPUT_LIMIT', `Split-to-individual-files is limited to ${MAX_SPLIT_OUTPUTS} output PDFs per operation.`, 422);
-    const artifacts = [];
-    for (let page = 1; page <= inspection.pageCount; page += 1) artifacts.push(await this.extractPages(documentId, [page], { operationType: 'split-document', fileLabel: `page-${page}`, signal }));
-    return Object.freeze(artifacts);
+    return this.#atomicOutputs((index) => {
+      const page = index + 1;
+      return this.extractPages(documentId, [page], { operationType: 'split-document', fileLabel: `page-${page}`, signal });
+    }, inspection.pageCount, signal);
   }
 
   async splitByPageCount(documentId, pagesPerOutput, { signal } = {}) {
@@ -34,17 +60,15 @@ export class PdfOneDocumentComposition {
     const inspection = await this.#inspection.inspect(documentId, { signal });
     const outputCount = Math.ceil(inspection.pageCount / pagesPerOutput);
     if (outputCount > MAX_SPLIT_OUTPUTS) throw new HostError('SPLIT_OUTPUT_LIMIT', `This rule would create ${outputCount} PDFs; at most ${MAX_SPLIT_OUTPUTS} outputs are allowed.`, 422);
-    const artifacts = [];
-    for (let outputIndex = 0; outputIndex < outputCount; outputIndex += 1) {
+    return this.#atomicOutputs((outputIndex) => {
       const firstPage = outputIndex * pagesPerOutput + 1;
       const lastPage = Math.min(inspection.pageCount, firstPage + pagesPerOutput - 1);
       const pages = Array.from({ length: lastPage - firstPage + 1 }, (_, index) => firstPage + index);
-      artifacts.push(await this.extractPages(documentId, pages, {
+      return this.extractPages(documentId, pages, {
         operationType: 'split-by-page-count', fileLabel: `pages-${firstPage}-${lastPage}`,
         parameters: { splitRule: { kind: 'every-pages', pagesPerOutput, outputIndex: outputIndex + 1, outputCount } }, signal,
-      }));
-    }
-    return Object.freeze(artifacts);
+      });
+    }, outputCount, signal);
   }
 
   async duplicatePages(documentId, pages, { signal } = {}) {

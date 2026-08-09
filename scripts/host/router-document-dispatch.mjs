@@ -2,11 +2,11 @@ export async function handleDocumentRoutes(options) {
   const { pathname, request, response, url, processing, store, workspaceState, routes, limits } = options;
   const documentPattern = new RegExp([
     "^\\/api\\/documents\\/([^/]+)(?:\\/(workspace|domain|aec-calibration|aec-measurement|aec-materialization|project-bundle|portable-project-bundle|source|inspection|structure|text|thumbna",
-    "il|cropbox-raster|cropbox-snapshot|fonts|images|attachments|signatures|extract|arrange|merge|split|split-rule|split-outline|duplicate|reverse|interleave|insert|replace|copy-page|oc",
-    "r|ocr-analysis|rewrite|mutation|compare|prepress\\/output-intent|prepress|redaction-plan|redaction-application|redaction-report|accessibility-review|accessibility-proposal|standards",
-    "-validation|pdfkit-inspection|pdfkit-mutation|pdfkit-text-field-widget|pdfkit-protection|pdfkit-protection-removal|sanitization|sanitize-hidden-data|acroform-checkbox|acroform-radi",
-    "o|acroform-text-field|acroform-choice|acroform-signature-field|bates-numbering|tagged-remediation|insert-jpeg|replace-jpeg|page-labels|advanced-search|incremental-metadata|incremental-bleed-box|incremental-goto-link|incremental-named-destination|incremental-page-vector|incremental-page-transition|",
-    "page-text|full-page-redaction|full-page-redaction-batch|printer-marks|page-background|specialist-content|layer-defaults|certificate-sign|incremental-accessibility-metadata|javascript-removal|attachment-removal|annotation-flatten|aec-measurement-legend|fast-web-view|export-ooxml))?$"
+    "il|cropbox-raster|cropbox-snapshot|fonts|images|attachments|signatures|extract|arrange|delete|merge|split|split-rule|split-outline|duplicate|reverse|interleave|insert|replace|copy-page|oc",
+    "r|ocr-analysis|ocr-editable|rewrite|mutation|compare|prepress\\/output-intent|prepress|redaction-plan|redaction-application|redaction-report|accessibility-review|accessibility-proposal|standards",
+    "-validation|pdfkit-inspection|pdfkit-mutation|pdfkit-text-field-widget|pdfkit-protection|pdfkit-protection-removal|sanitization|sanitize-hidden-data|acroform-checkbox|acroform-barcode|acroform-radi",
+    "o|acroform-text-field|acroform-choice|acroform-signature-field|acroform-tab-order-tooltip|acroform-fill-save|acroform-validate|acroform-data-export|comparison-package|bates-numbering|tagged-remediation|professional-print-inspection|professional-print-transparency|accessibility-form-semantics|accessibility-table-semantics|accessibility-links-bookmarks|accessibility-table-semantics-inventory|accessibility-links-bookmarks-inventory|insert-jpeg|replace-jpeg|page-labels|advanced-search|sensitive-patterns|incremental-metadata|incremental-bleed-box|incremental-goto-link|incremental-named-destination|incremental-page-vector|incremental-page-transition|",
+    "page-text|text-reflow|file-audio-attachment|review-measurement|review-annotation-import-export|review-shared-exchange|review-notifications|review-notification-read|review-sidecar-status|review-sidecar-inspect|comments-to-office|form-javascript-inventory|xfa-inspection|full-page-redaction|full-page-redaction-batch|redaction-overlay-label|printer-marks|page-background|specialist-content|layer-defaults|certificate-sign|electronic-signing-intent|incremental-accessibility-metadata|javascript-removal|attachment-removal|annotation-flatten|aec-measurement-legend|fast-web-view|export-ooxml))?$"
   ].join(''));
   const documentMatch = pathname.match(documentPattern);
   if (!documentMatch) return false;
@@ -21,27 +21,47 @@ export async function handleDocumentRoutes(options) {
   if (await routes.incrementalPageVector({ ...shared, incrementalPageVector: options.incrementalPageVector, bodyLimit: limits.incrementalPageVector })) return true;
   if (await routes.incrementalPageTransition?.({ ...shared, incrementalPageTransition: options.incrementalPageTransition, bodyLimit: limits.incrementalPageTransition })) return true;
   if (await routes.pageText({ ...shared, pageText: options.pageText, bodyLimit: limits.pageText })) return true;
+  if (await routes.textReflow?.({ ...shared, textReflow: options.textReflow, bodyLimit: limits.textReflow })) return true;
+  if (await routes.fileAudioAttachment?.({ ...shared, fileAudioAttachments: options.fileAudioAttachments, bodyLimit: limits.fileAudioAttachment })) return true;
+  if (await routes.reviewMeasurement?.({ ...shared, reviewMeasurements: options.reviewMeasurements, bodyLimit: limits.reviewMeasurement })) return true;
+  if (await routes.reviewAnnotationImportExport?.({ ...shared, reviewAnnotationImportExport: options.reviewAnnotationImportExport, bodyLimit: limits.reviewAnnotationImportExport })) return true;
+  if (await routes.reviewSharedExchange?.({ ...shared, reviewSharedExchange: options.reviewSharedExchange, bodyLimit: limits.reviewSharedExchange })) return true;
+  if (await routes.commentsToOffice?.({ ...shared, commentsToOffice: options.commentsToOffice, bodyLimit: limits.commentsToOffice })) return true;
+  if (await routes.reviewNotifications?.({ ...shared, reviewNotifications: options.reviewNotifications, bodyLimit: limits.reviewNotifications })) return true;
+  if (await routes.reviewSidecar?.({ ...shared, reviewSidecar: options.reviewSidecar, bodyLimit: limits.reviewSidecar })) return true;
+  if (await routes.formJavaScriptInventory?.({ ...shared, formJavaScriptInventory: options.formJavaScriptInventory, bodyLimit: limits.formJavaScriptInventory })) return true;
+  if (await routes.xfaInspection?.({ ...shared, xfaInspection: options.xfaInspection, bodyLimit: limits.xfaInspection })) return true;
   if (await routes.ooxmlExport?.({ ...shared, ooxmlExport: options.ooxmlExport, processing, bodyLimit: limits.ooxmlExport })) return true;
+  if (await routes.ocrEditable?.({ ...shared, ocrEditableOutput: options.ocrEditableOutput })) return true;
   if (await routes.fullPageRedaction({ ...shared, fullPageRedaction: options.fullPageRedaction, bodyLimit: limits.fullPageRedaction })) return true;
   if (await routes.fullPageRedactionBatch({ ...shared, fullPageRedaction: options.fullPageRedaction, bodyLimit: limits.fullPageRedactionBatch })) return true;
+  if (await routes.redactionOverlayLabel?.({ ...shared, redactionOverlayLabels: options.redactionOverlayLabels, bodyLimit: limits.redactionOverlayLabel })) return true;
   if (await routes.printerMarks({ ...shared, printerMarks: options.printerMarks, bodyLimit: limits.printerMarks })) return true;
   if (await routes.pageBackground?.({ ...shared, pageBackground: options.pageBackground, bodyLimit: limits.pageBackground })) return true;
   if (await routes.specialistContent({ ...shared, specialistContent: options.specialistContent, specialistContentReady: options.specialistContentReady, bodyLimit: limits.specialistContent })) return true;
   if (await routes.layerDefaults({ ...shared, layerDefaults: options.layerDefaults, bodyLimit: limits.layerDefaults })) return true;
   if (await routes.certificateSign({ ...shared, certificateSignature: options.certificateSignature, signingIdentityReady: options.signingIdentityReady, bodyLimit: limits.certificateSignature })) return true;
+  if (await routes.electronicSigningIntent?.({ ...shared, electronicSigningIntent: options.electronicSigningIntent, bodyLimit: 4_096 })) return true;
   if (await routes.hiddenDataSanitization({ ...shared, hiddenDataSanitization: options.hiddenDataSanitization, bodyLimit: limits.hiddenDataSanitization })) return true;
   if (await routes.acroFormCheckbox({ ...shared, acroFormCheckbox: options.acroFormCheckbox })) return true;
   if (await routes.acroFormRadio({ ...shared, acroFormRadio: options.acroFormRadio })) return true;
   if (await routes.acroFormTextField?.({ ...shared, acroFormTextField: options.acroFormTextField })) return true;
   if (await routes.acroFormChoice?.({ ...shared, acroFormChoice: options.acroFormChoice })) return true;
   if (await routes.acroFormSignatureField?.({ ...shared, acroFormSignatureField: options.acroFormSignatureField })) return true;
+  if (await routes.acroFormBarcode?.({ ...shared, acroFormBarcode: options.acroFormBarcode })) return true;
+  if (await routes.acroFormTabOrderTooltip?.({ ...shared, acroFormTabOrderTooltip: options.acroFormTabOrderTooltip })) return true;
+  if (await routes.acroFormFillValidation?.({ ...shared, acroFormFillSave: options.acroFormFillSave, acroFormValidation: options.acroFormValidation, bodyLimit: operation === 'acroform-fill-save' ? limits.acroFormFillSave : limits.acroFormValidation })) return true;
+  if (await routes.acroFormDataExport?.({ ...shared, acroFormDataExport: options.acroFormDataExport, bodyLimit: limits.acroFormDataExport })) return true;
+  if (await routes.comparisonPackage?.({ ...shared, comparisonPackages: options.comparisonPackages })) return true;
   if (await routes.batesNumbering?.({ ...shared, batesNumbering: options.batesNumbering, bodyLimit: limits.batesNumbering })) return true;
   if (await routes.aecMeasurementLegend?.({ ...shared, aecMeasurementLegend: options.aecMeasurementLegend })) return true;
   if (await routes.taggedRemediation({ ...shared, taggedRemediation: options.taggedRemediation, taggedRemediationReady: options.taggedRemediationReady, bodyLimit: limits.taggedRemediation })) return true;
+  if (await routes.professionalAccessibility?.({ ...shared, professionalCapabilities: options.professionalCapabilities, bodyLimit: limits.professionalAccessibility })) return true;
   if (await routes.jpegImage({ ...shared, jpegImage: options.jpegImage, jpegImageReady: options.jpegImageReady, bodyLimit: limits.jpegImage })) return true;
   if (await routes.jpegImageReplacement?.({ ...shared, jpegImageReplacement: options.jpegImageReplacement, jpegImageReplacementReady: options.jpegImageReplacementReady, bodyLimit: limits.jpegImageReplacement })) return true;
   if (await routes.pageLabels({ ...shared, pageLabels: options.pageLabels, pageLabelsReady: options.pageLabelsReady, bodyLimit: limits.pageLabels })) return true;
   if (await routes.advancedSearch({ ...shared, advancedSearch: options.advancedSearch, advancedSearchReady: options.advancedSearchReady, bodyLimit: limits.advancedSearch })) return true;
+  if (await routes.sensitivePatterns?.({ ...shared, sensitivePatterns: options.sensitivePatterns, bodyLimit: limits.sensitivePatterns })) return true;
   if (await routes.incrementalAccessibilityMetadata({ ...shared, incrementalAccessibilityMetadata: options.incrementalAccessibilityMetadata, bodyLimit: limits.incrementalAccessibilityMetadata })) return true;
   if (await routes.removal({ ...shared, javascriptRemoval: options.javascriptRemoval, attachmentRemoval: options.attachmentRemoval, annotationFlatten: options.annotationFlatten })) return true;
   if (await routes.fastWebView?.({ ...shared, fastWebView: options.fastWebView, bodyLimit: limits.fastWebView })) return true;

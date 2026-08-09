@@ -567,8 +567,10 @@ professional redaction claim remain outside this bridge.
 
 Comparison verifies both immutable source digests around each job. Exact word
 diffs, rendered-pixel difference masks, annotation-sidecar diffs, batch limits,
-and JSON/CSV reports are bounded. Overlay and side-by-side comparison modes are
-explicit descriptors only and never claim rendered composite output.
+and JSON/CSV reports are bounded. Overlay renders one paired page at fixed 72
+dpi into a decoded, digest-bound in-memory red/cyan PNG with no alignment,
+registration, retention, or multipage claim. Side-by-side remains an explicit
+review-layout descriptor and does not create composite output.
 
 `ProjectBundleService` canonically serializes the complete bounded workspace
 without its session document identifier, hashes the payload, and binds it to
@@ -1115,7 +1117,8 @@ path rejects unsigned SwiftPM artifacts, and no signed/notarized release pair or
 signed release-policy resource is shipped. More importantly, a meaningful
 `RLIMIT_AS` setting returns `EINVAL` on the current macOS host; the worker
 attests `hardMemoryQuota: false`, the adapter terminates it before operation
-authority is created, and `platform.plugins.runtime-sandbox` stays blocked.
+authority is created, and `platform.plugins.runtime-sandbox` is therefore a
+planned professional claim with a blocked prototype tier.
 Node path opens also cannot atomically pin ancestor directories. Production
 enablement requires a Developer-ID-signed, hardened-runtime, App-Sandbox,
 notarized pair, a supported hard-memory control, and adversarial packaged

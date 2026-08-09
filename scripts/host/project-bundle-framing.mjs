@@ -60,19 +60,43 @@ export function validateProjectWorkspace(workspace) {
   const keys = Object.keys(workspace.namespaces);
   if (keys.length !== WORKSPACE_NAMESPACES.length || keys.some((key) => !WORKSPACE_NAMESPACES.includes(key)) || WORKSPACE_NAMESPACES.some((key) => !Array.isArray(workspace.namespaces[key]))) fail('PROJECT_BUNDLE_INVALID', 'Project bundle workspace namespaces are invalid.');
 }
-export function parseProjectBundle(input) {
-  let raw;
-  if (typeof input === 'string') raw = input;
-  else if (Buffer.isBuffer(input)) { try { raw = new TextDecoder('utf-8', { fatal: true }).decode(input); } catch { fail('PROJECT_BUNDLE_INVALID_UTF8', 'Project bundle bytes must be valid UTF-8.'); } }
-  else fail('PROJECT_BUNDLE_INVALID', 'Project bundle input must be canonical JSON text.');
-  if (Buffer.byteLength(raw, 'utf8') > PROJECT_BUNDLE_MAX_BYTES) fail('PROJECT_BUNDLE_TOO_LARGE', 'Project bundle exceeds the local size limit.', 413);
-  let bundle; try { bundle = JSON.parse(raw); } catch { fail('PROJECT_BUNDLE_INVALID_JSON', 'Project bundle is not valid JSON.'); }
-  if (canonicalizeProjectBundle(bundle) !== raw) fail('PROJECT_BUNDLE_NONCANONICAL', 'Project bundle JSON must be canonical.');
+
+function decodeUtf8(bytes, code, message) {
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(bytes); } catch { fail(code, message); }
+}
+
+function parseCanonicalJson(raw, { invalidJsonCode, invalidJsonMessage, noncanonicalCode, noncanonicalMessage }) {
+  let value; try { value = JSON.parse(raw); } catch { fail(invalidJsonCode, invalidJsonMessage); }
+  if (canonicalizeProjectBundle(value) !== raw) fail(noncanonicalCode, noncanonicalMessage);
+  return value;
+}
+
+function projectBundleText(input) {
+  if (typeof input === 'string') return input;
+  if (Buffer.isBuffer(input)) return decodeUtf8(input, 'PROJECT_BUNDLE_INVALID_UTF8', 'Project bundle bytes must be valid UTF-8.');
+  fail('PROJECT_BUNDLE_INVALID', 'Project bundle input must be canonical JSON text.');
+}
+
+function validateProjectBundleHeader(bundle) {
   assertExactKeys(bundle, BUNDLE_KEYS, 'Project bundle');
   if (bundle.schemaVersion !== PROJECT_BUNDLE_SCHEMA_VERSION || !isProjectBundleDigest(bundle.sourcePdfSha256) || !isProjectBundleDigest(bundle.payloadSha256)) fail('PROJECT_BUNDLE_INVALID', 'Project bundle header is invalid.');
   validateProjectWorkspace(bundle.workspace);
+}
+
+function validateProjectBundleIntegrity(bundle) {
   const payload = { schemaVersion: bundle.schemaVersion, sourcePdfSha256: bundle.sourcePdfSha256, workspace: bundle.workspace };
   if (projectBundleDigest(canonicalizeProjectBundle(payload)) !== bundle.payloadSha256) fail('PROJECT_BUNDLE_INTEGRITY_FAILED', 'Project bundle payload digest does not match its content.');
+}
+
+export function parseProjectBundle(input) {
+  const raw = projectBundleText(input);
+  if (Buffer.byteLength(raw, 'utf8') > PROJECT_BUNDLE_MAX_BYTES) fail('PROJECT_BUNDLE_TOO_LARGE', 'Project bundle exceeds the local size limit.', 413);
+  const bundle = parseCanonicalJson(raw, {
+    invalidJsonCode: 'PROJECT_BUNDLE_INVALID_JSON', invalidJsonMessage: 'Project bundle is not valid JSON.',
+    noncanonicalCode: 'PROJECT_BUNDLE_NONCANONICAL', noncanonicalMessage: 'Project bundle JSON must be canonical.',
+  });
+  validateProjectBundleHeader(bundle);
+  validateProjectBundleIntegrity(bundle);
   return bundle;
 }
 
@@ -81,15 +105,34 @@ export function createPortableProjectManifest(source, workspace) {
   const payload = portablePayload(source, workspace);
   return { ...payload, payloadSha256: projectBundleDigest(canonicalizeProjectBundle(payload)) };
 }
-export function parsePortableProjectManifest(bytes) {
-  let raw; try { raw = new TextDecoder('utf-8', { fatal: true }).decode(bytes); } catch { fail('PORTABLE_PROJECT_INVALID_UTF8', 'Portable project manifest must be valid UTF-8.'); }
-  let manifest; try { manifest = JSON.parse(raw); } catch { fail('PORTABLE_PROJECT_INVALID_JSON', 'Portable project manifest is not valid JSON.'); }
-  if (canonicalizeProjectBundle(manifest) !== raw) fail('PORTABLE_PROJECT_NONCANONICAL', 'Portable project manifest JSON must be canonical.');
+
+function validPortableProjectSource(source) {
+  if (source.mediaType !== 'application/pdf') return false;
+  if (!Number.isSafeInteger(source.size) || source.size < 1 || source.size > DEFAULT_MAX_PDF_BYTES) return false;
+  if (!isProjectBundleDigest(source.sha256)) return false;
+  if (typeof source.displayName !== 'string') return false;
+  return source.displayName === cleanDisplayName(source.displayName) && Buffer.byteLength(source.displayName, 'utf8') <= 200;
+}
+
+function validatePortableProjectManifestHeader(manifest) {
   assertExactKeys(manifest, PORTABLE_KEYS, 'Portable project manifest');
   assertExactKeys(manifest.source, PORTABLE_SOURCE_KEYS, 'Portable project source');
-  if (manifest.schemaVersion !== PORTABLE_PROJECT_BUNDLE_SCHEMA_VERSION || manifest.kind !== 'portable-pdf-project' || manifest.source.mediaType !== 'application/pdf' || !Number.isSafeInteger(manifest.source.size) || manifest.source.size < 1 || manifest.source.size > DEFAULT_MAX_PDF_BYTES || !isProjectBundleDigest(manifest.source.sha256) || typeof manifest.source.displayName !== 'string' || manifest.source.displayName !== cleanDisplayName(manifest.source.displayName) || Buffer.byteLength(manifest.source.displayName, 'utf8') > 200 || !isProjectBundleDigest(manifest.payloadSha256)) fail('PORTABLE_PROJECT_INVALID', 'Portable project manifest header is invalid.');
+  if (manifest.schemaVersion !== PORTABLE_PROJECT_BUNDLE_SCHEMA_VERSION || manifest.kind !== 'portable-pdf-project' || !validPortableProjectSource(manifest.source) || !isProjectBundleDigest(manifest.payloadSha256)) fail('PORTABLE_PROJECT_INVALID', 'Portable project manifest header is invalid.');
   validateProjectWorkspace(manifest.workspace);
+}
+
+function validatePortableProjectManifestIntegrity(manifest) {
   if (projectBundleDigest(canonicalizeProjectBundle(portablePayload(manifest.source, manifest.workspace))) !== manifest.payloadSha256) fail('PORTABLE_PROJECT_INTEGRITY_FAILED', 'Portable project manifest digest does not match its content.');
+}
+
+export function parsePortableProjectManifest(bytes) {
+  const raw = decodeUtf8(bytes, 'PORTABLE_PROJECT_INVALID_UTF8', 'Portable project manifest must be valid UTF-8.');
+  const manifest = parseCanonicalJson(raw, {
+    invalidJsonCode: 'PORTABLE_PROJECT_INVALID_JSON', invalidJsonMessage: 'Portable project manifest is not valid JSON.',
+    noncanonicalCode: 'PORTABLE_PROJECT_NONCANONICAL', noncanonicalMessage: 'Portable project manifest JSON must be canonical.',
+  });
+  validatePortableProjectManifestHeader(manifest);
+  validatePortableProjectManifestIntegrity(manifest);
   return manifest;
 }
 export function portableProjectMagic() { return Buffer.from(PORTABLE_MAGIC); }

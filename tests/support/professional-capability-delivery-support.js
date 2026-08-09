@@ -1,140 +1,22 @@
-import { createHash } from 'node:crypto';
-import { createBlankPdf, createTextPdf } from '../../scripts/host/pdf-factory.mjs';
-import { encodeRgbaPng } from '../../scripts/host/raster-png-codec.mjs';
+import { contextFor, deterministicColorConversionContext } from './professional-capability-context.js';
+import { scanAppendContext, scanDuplexContext } from './professional-capability-scan-contexts.js';
 import {
-  redactionFixture,
-  signatureFixture,
-  formFixture,
-  editableTextPdf,
-} from '../../scripts/host/professional-capability/fixtures.mjs';
+  pngFixture,
+  psFixture,
+  cadFixture,
+  printerMarksFixture,
+} from './professional-capability-delivery-fixtures.js';
 
-export const pngFixture = encodeRgbaPng({
-  width: 4,
-  height: 4,
-  pixels: Buffer.alloc(4 * 4 * 4, 200),
-});
-export const psFixture = Buffer.from('%!PS-Adobe-3.0\n(Hello) show\nshowpage\n', 'latin1');
-export const cadFixture = Buffer.from(JSON.stringify({
-  title: 'CAD',
-  entities: [{ type: 'line', x1: 0, y1: 0, x2: 100, y2: 50 }],
-}), 'utf8');
-
-export function contextFor(id) {
-  const blank = createBlankPdf({ pages: 1, title: 'evidence' });
-  const text = 'Evidence alpha beta. Contract value is $12,000. Email j.doe@example.com on 2026-07-01. Chapter One';
-  const ctx = {
-    deterministic: true,
-    seed: id,
-    pages: 1,
-    title: 'evidence',
-    text,
-    question: 'What is the contract value?',
-    sourcePdf: blank,
-    sourceBytes: blank,
-    inputBytes: blank,
-    leftText: 'alpha beta gamma',
-    rightText: 'alpha delta gamma',
-    html: '<p>Hello evidence</p>',
-    clipboardText: 'clipboard evidence',
-    jobName: 'job-evidence',
-    postscript: psFixture.toString('latin1'),
-    parts: ['A', 'B'],
-    entities: [{ type: 'line', x1: 0, y1: 0, x2: 1, y2: 1 }],
-    rows: [['k', 'v'], ['1', '2']],
-    slides: ['S1', 'S2'],
-    regionText: 'region',
-    documents: [
-      { id: 'a', text: 'Safety valve review finds risk.' },
-      { id: 'b', text: 'Safety valve maintenance overdue.' },
-    ],
-    files: [
-      { name: 'a.txt', bytes: Buffer.from('one'), description: 'A' },
-      { name: 'b.txt', bytes: Buffer.from('two'), description: 'B' },
-    ],
-    query: 'a.txt',
-    prompt: 'blueprint stamp',
-    claims: ['Contract'],
-    target: 'es',
-    targetLanguage: 'es',
-    instruction: 'highlight risk',
-    body: 'office body',
-    consent: true,
-    pngBytes: pngFixture,
-    region: { x: 0, y: 0, width: 1, height: 1 },
-    sources: [
-      { kind: 'text', bytes: Buffer.from('Part A', 'utf8'), extension: '.txt', label: 'A' },
-      { kind: 'text', bytes: Buffer.from('Part B', 'utf8'), extension: '.txt', label: 'B' },
-    ],
-    secret: 'secret',
-    value: 'Ada Lovelace',
-    userPassword: 'UserPass12!abc',
-    ownerPassword: 'OwnerPass12!xyz',
-    find: 'hello world',
-    replace: 'HELLO WORLD',
-  };
-  if (id === 'convert.images-to-pdf' || id === 'export.selected-region' || id === 'export.images') {
-    ctx.sourceBytes = pngFixture;
-    ctx.pngBytes = pngFixture;
-  }
-  if (id === 'create.postscript-to-pdf') {
-    ctx.sourceBytes = psFixture;
-    ctx.inputBytes = psFixture;
-  }
-  if (id === 'create.cad-to-pdf') {
-    ctx.sourceBytes = cadFixture;
-    ctx.inputBytes = cadFixture;
-  }
-  if (id === 'create.multiformat-combine') {
-    ctx.sources = [
-      { kind: 'text', bytes: Buffer.from('Alpha', 'utf8'), extension: '.txt' },
-      { kind: 'text', bytes: Buffer.from('Beta', 'utf8'), extension: '.txt' },
-    ];
-  }
-  if (id.startsWith('sign.')) {
-    ctx.sourcePdf = signatureFixture();
-    ctx.sourceBytes = ctx.sourcePdf;
-  }
-  if (id === 'sign.identity-verification') {
-    // Bound expected fingerprint — never self-match theater (expected defaults to claim hash).
-    ctx.claimedSubject = 'CN=Local Signer';
-    ctx.expectedFingerprint = createHash('sha256').update('CN=Local Signer').digest('hex');
-  }
-  if (id.startsWith('redaction.') || id === 'sanitize.selective-content') {
-    ctx.sourcePdf = redactionFixture({ secret: 'secret' });
-    ctx.sourceBytes = ctx.sourcePdf;
-    ctx.secret = 'secret';
-  }
-  if (id.startsWith('forms.')) {
-    ctx.sourcePdf = formFixture();
-    ctx.sourceBytes = ctx.sourcePdf;
-  }
-  if (id === 'edit.text' || id === 'edit.find-replace' || id === 'edit.text-reflow') {
-    ctx.sourcePdf = editableTextPdf('hello world');
-    ctx.sourceBytes = ctx.sourcePdf;
-  }
-  if (id.startsWith('portfolios.') || id === 'document.embedded-files') {
-    delete ctx.sourcePdf;
-  }
-  if (id === 'security.encryption-aes' || id === 'security.open-password' || id === 'security.security-envelopes' || id === 'security.certificate-encryption') {
-    ctx.sourcePdf = createTextPdf({ text: 'CONFIDENTIAL-PAYLOAD', title: 'Sensitive' });
-    ctx.secret = 'CONFIDENTIAL-PAYLOAD';
-  }
-  if (id === 'viewer.search' || id === 'viewer.advanced-search') {
-    ctx.query = 'Contract';
-    ctx.text = 'Evidence alpha beta. Contract value is $12,000. Email j.doe@example.com on 2026-07-01. Chapter One';
-  }
-  if (id === 'accessibility.alt-text') {
-    ctx.altText = 'Chart of quarterly revenue';
-    delete ctx.text; // avoid long bulk text as alt
-  }
-    if (id.startsWith('aec.')) {
-    delete ctx.sourcePdf;
-    delete ctx.sourceBytes;
-  }
-  return ctx;
-}
-
-
+export {
+  contextFor,
+  deterministicColorConversionContext,
+  scanAppendContext,
+  scanDuplexContext,
+  pngFixture,
+  psFixture,
+  cadFixture,
+  printerMarksFixture,
+};
 export function readOutcomePath(outcome, path) {
   if (path.endsWith('.length')) {
     const base = path.slice(0, -'.length'.length);

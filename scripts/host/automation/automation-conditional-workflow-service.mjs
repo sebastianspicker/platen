@@ -7,6 +7,7 @@ import {
   conditionalWorkflowFingerprint,
   normalizeAutomationConditionalCancelRequest,
   normalizeAutomationConditionalExecuteRequest,
+  normalizeAutomationConditionalReleaseRequest,
 } from './automation-conditional-workflow-contract.mjs';
 import { executeAutomationConditionalWorkflow } from './automation-conditional-workflow-runtime.mjs';
 import {
@@ -120,8 +121,10 @@ export class AutomationConditionalWorkflowService {
       const pending = record.jobs.filter((jobId) => !record.cancellationAttempts.has(jobId));
       const failures = [];
       for (const jobId of pending) {
-        record.cancellationAttempts.add(jobId);
-        try { await this.#api.cancel({ principal: record.principal, grant: record.grant, jobId }); }
+        try {
+          await this.#api.cancel({ principal: record.principal, grant: record.grant, jobId });
+          record.cancellationAttempts.add(jobId);
+        }
         catch (error) { failures.push(error); }
       }
       if (failures.length > 0) {
@@ -136,7 +139,6 @@ export class AutomationConditionalWorkflowService {
 
   async cancel(value) {
     const request = normalizeAutomationConditionalCancelRequest(value);
-    await this.#authorize(request, 'cancel');
     const record = [...this.#executions.values()].find((item) => item.executionId === request.executionId
       && item.principal === request.principal && item.grant.grantId === request.grant.grantId);
     if (!record) conditionalFail('AUTOMATION_CONDITIONAL_NOT_FOUND', 'Conditional execution was not found.', 404);
@@ -144,6 +146,20 @@ export class AutomationConditionalWorkflowService {
     record.controller.abort();
     await this.#cleanupRecord(record);
     return Object.freeze({ schemaVersion: 1, executionId: request.executionId, cancelled: true });
+  }
+
+  async release(value) {
+    if (this.#closed) conditionalFail('AUTOMATION_CONDITIONAL_CLOSED', 'Conditional workflow service is closed.', 409);
+    const request = normalizeAutomationConditionalReleaseRequest(value);
+    const match = [...this.#executions.entries()].find(([, item]) => item.executionId === request.executionId
+      && item.principal === request.principal && item.grant.grantId === request.grant.grantId);
+    if (!match) conditionalFail('AUTOMATION_CONDITIONAL_NOT_FOUND', 'Conditional execution was not found.', 404);
+    const [key, record] = match;
+    await this.#authorize({ ...request, source: record.source, workflow: record.workflow }, 'release');
+    await record.promise;
+    if (this.#executions.get(key) !== record) conditionalFail('AUTOMATION_CONDITIONAL_NOT_FOUND', 'Conditional execution was not found.', 404);
+    this.#executions.delete(key);
+    return Object.freeze({ schemaVersion: 1, executionId: request.executionId, released: true, localOnly: true });
   }
 
   async close() {

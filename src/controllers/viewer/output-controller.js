@@ -9,6 +9,17 @@ import {
   prepareSnapshotPng,
 } from '../../core/snapshot-output.js';
 
+const SHA256_LOWERCASE_HEX = /^[a-f0-9]{64}$/;
+
+function isSourceReadyAnalysis(state) {
+  const { analysis } = state;
+  return analysis?.status === 'ready'
+    && typeof analysis.documentId === 'string'
+    && analysis.documentId !== ''
+    && typeof analysis.sha256 === 'string'
+    && SHA256_LOWERCASE_HEX.test(analysis.sha256);
+}
+
 function normalizedStateRegion(state) {
   return normalizeSnapshotRegion(Object.fromEntries(
     ['x', 'y', 'width', 'height'].map((key) => [
@@ -24,6 +35,11 @@ function documentStem(name) {
 
 function createReadSelectedPage({ state, announce, showError, documentApi, windowApi }) {
   return function readSelectedPage() {
+    if (state.busyAction) return;
+    if (!isSourceReadyAnalysis(state)) {
+      showError(new Error('Read aloud is unavailable until the current document analysis is ready.'));
+      return;
+    }
     const speech = windowApi.speechSynthesis;
     const Utterance = windowApi.SpeechSynthesisUtterance;
     const text = readAloudText(state.analysis.textPages, state.selectedPage);
@@ -88,7 +104,11 @@ function createCopySelectedPageText({
   navigatorApi,
 }) {
   return async function copySelectedPageText() {
-    if (!state.analysis.documentId || state.busyAction) return;
+    if (state.busyAction) return;
+    if (!isSourceReadyAnalysis(state)) {
+      showError(new Error('Page text copy is unavailable until the current analysis is ready.'));
+      return;
+    }
     const text = pageTextForClipboard(state.analysis.textPages, state.selectedPage);
     if (!text) {
       showError(new Error('No bounded extracted text is available for the selected page.'));
@@ -101,8 +121,15 @@ function createCopySelectedPageText({
 
     const operation = captureOperation();
     const selectedPage = state.selectedPage;
+    const sourceDocumentId = state.analysis.documentId;
+    const sourceAnalysisSha256 = state.analysis.sha256;
+    const sourceAnalysisStatus = state.analysis.status;
     const pageGeneration = selectionTracker.generation;
     const isCurrent = () => operationIsCurrent(operation)
+      && operation.documentId === sourceDocumentId
+      && state.analysis.status === sourceAnalysisStatus
+      && state.analysis.documentId === sourceDocumentId
+      && state.analysis.sha256 === sourceAnalysisSha256
       && state.selectedPage === selectedPage
       && selectionTracker.generation === pageGeneration;
     state.busyAction = `Copying text from page ${selectedPage}…`;

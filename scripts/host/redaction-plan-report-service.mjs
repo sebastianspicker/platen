@@ -30,7 +30,7 @@ function validMark(mark) {
   const common = ['id', 'page', 'pageGeometrySha256', 'textBinding'];
   const target = exact(mark, [...common, 'fullPage']) && mark.fullPage === true
     ? true : exact(mark, [...common, 'region']) && validRegion(mark.region);
-  return target && ID.test(mark.id ?? '') && page(mark.page) && SHA256.test(mark.pageGeometrySha256 ?? '')
+  return target && typeof mark.id === 'string' && ID.test(mark.id) && page(mark.page) && SHA256.test(mark.pageGeometrySha256 ?? '')
     && exact(mark.textBinding, ['hmacSha256', 'length']) && SHA256.test(mark.textBinding.hmacSha256 ?? '')
     && Number.isSafeInteger(mark.textBinding.length) && mark.textBinding.length > 0 && mark.textBinding.length <= (256 * 1024);
 }
@@ -117,7 +117,7 @@ export class RedactionPlanReportService {
 
   #plan(snapshot, request) {
     const record = snapshot?.namespaces?.redactions?.find((entry) => entry.id === request.planId);
-    const strict = exact(record, PLAN_KEYS) && ID.test(record.id ?? '') && record.type === 'redaction-plan'
+    const strict = exact(record, PLAN_KEYS) && typeof record.id === 'string' && ID.test(record.id) && record.type === 'redaction-plan'
       && record.profile === PLAN_PROFILE && record.schemaVersion === 1 && record.status === 'proposed-not-applied'
       && publicTimestamp(record.createdAtLocal) !== null
       && SHA256.test(record.sourceSha256 ?? '') && record.coordinateSpace === 'normalized-cropbox-top-left-v1'

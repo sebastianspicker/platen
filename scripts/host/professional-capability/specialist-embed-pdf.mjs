@@ -133,32 +133,6 @@ export function assembleBarcodeFieldPdf({ value, fieldName = 'Barcode.Field' } =
   });
 }
 
-/** PDF/X-style OutputIntent assignment (structural, not ICC-certified). */
-export function assembleOutputIntentPdf({ intent = 'FOGRA39' } = {}) {
-  const name = String(intent).slice(0, 80);
-  const icc = Buffer.from(`ICC-PROFILE-PLACEHOLDER-${name}`, 'latin1');
-  const objects = new Map();
-  const { alloc, nextId } = allocIds();
-  const catalogId = alloc();
-  const pagesId = alloc();
-  const pageId = alloc();
-  const contentId = alloc();
-  const fontId = alloc();
-  const destId = alloc();
-  const intentId = alloc();
-
-  const content = `BT /F1 12 Tf 72 720 Td ${pdfLiteral(`OutputIntent ${name}`)} Tj ET\n`;
-  objects.set(fontId, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
-  objects.set(contentId, `<< /Length ${Buffer.byteLength(content, 'latin1')} >>\nstream\n${content}endstream`);
-  objects.set(pageId, `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 612 792] /Contents ${contentId} 0 R /Resources << /Font << /F1 ${fontId} 0 R >> >> >>`);
-  objects.set(pagesId, `<< /Type /Pages /Count 1 /Kids [${pageId} 0 R] >>`);
-  objects.set(destId, `<< /N 3 /Length ${icc.length} >>\nstream\n${icc.toString('latin1')}\nendstream`);
-  objects.set(intentId, `<< /Type /OutputIntent /S /GTS_PDFX /OutputConditionIdentifier ${pdfLiteral(name)} /Info ${pdfLiteral(name)} /RegistryName ${pdfLiteral('http://www.color.org')} /DestOutputProfile ${destId} 0 R >>`);
-  objects.set(catalogId, `<< /Type /Catalog /Pages ${pagesId} 0 R /OutputIntents [${intentId} 0 R] >>`);
-
-  return Object.freeze({ bytes: finalizeSpecialistPdf(objects, catalogId, nextId), intent: name });
-}
-
 /** Spot color via Separation colorspace on page resources. */
 export function assembleSpotColorPdf({ spots = [{ name: 'PANTONE 185 C', cmyk: [0, 0.91, 0.76, 0] }] } = {}) {
   const list = (Array.isArray(spots) && spots.length ? spots : [{ name: 'PANTONE 185 C', cmyk: [0, 0.91, 0.76, 0] }]).slice(0, 16);

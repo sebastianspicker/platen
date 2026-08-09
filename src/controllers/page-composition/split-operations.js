@@ -25,11 +25,12 @@ export function createSplitOperations({
   async function splitDocument() {
     if (!state.analysis.documentId || state.busyAction) return;
     const operation = captureOperation();
+    const sourceSha256 = state.analysis.sha256;
     state.busyAction = 'Splitting PDF into individual page files…';
     state.error = null;
     render();
     try {
-      const artifacts = await client.splitDocument(operation.documentId, {
+      const artifacts = await client.splitDocument(operation.documentId, sourceSha256, {
         signal: operation.controller.signal,
       });
       if (!operationIsCurrent(operation)) return;
@@ -54,12 +55,14 @@ export function createSplitOperations({
       return;
     }
     const operation = captureOperation();
+    const sourceSha256 = state.analysis.sha256;
     state.busyAction = `Splitting the PDF every ${pagesPerOutput} page${pagesPerOutput === 1 ? '' : 's'}…`;
     state.error = null;
     render();
     try {
       const artifacts = await client.splitByPageCount(
         operation.documentId,
+        sourceSha256,
         pagesPerOutput,
         { signal: operation.controller.signal },
       );

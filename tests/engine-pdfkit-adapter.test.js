@@ -49,6 +49,27 @@ test('PDFKit mutation uses the same pinned executable and private request bounda
   assert.deepEqual(calls[0].args, ['--request', await realpath(request)]);
 });
 
+test('PDFKit targeted mutation accepts only its dedicated source-bound receipt', async () => {
+  const workspace = await mkdtemp(join(tmpdir(), 'pdfkit-adapter-targeted-'));
+  const request = join(workspace, 'request.json');
+  await writeFile(request, '{}', { mode: 0o600 }); await chmod(workspace, 0o700);
+  const calls = [];
+  const receipt = JSON.stringify({ version: 1, ok: true, result: {
+    schema: 'pdfkit-targeted-mutation-receipt-v1', version: 1, operation: 'targetedMutate',
+    category: 'annotation-properties', sourceSha256: 'b'.repeat(64), outputSha256: 'c'.repeat(64),
+    pageCount: 2, appliedEdits: 1, reopenVerified: true, annotationPropertiesGeometryVerified: true,
+    annotationPropertiesColorVerified: true, rawAnnotationColorVerified: true,
+    nonTargetAnnotationsVerified: true, targetAnnotationPreservationVerified: true,
+  } });
+  const adapter = new PDFKitAdapter({
+    executable: '/trusted/pdfkit-inspect', expectedSha256: helperDigest, verifyExecutable: async () => {},
+    runner: async (invocation) => { calls.push(invocation); return { stdout: receipt, stderr: '', exitCode: 0 }; },
+  });
+  const result = await adapter.targetedMutate({ workspacePath: workspace, requestPath: request });
+  assert.equal(result.rawAnnotationColorVerified, true);
+  assert.deepEqual(calls[0].args, ['--request', await realpath(request)]);
+});
+
 test('PDFKit local GoTo uses the pinned helper and its strict compact parser', async () => {
   const workspace = await mkdtemp(join(tmpdir(), 'pdfkit-adapter-goto-'));
   const request = join(workspace, 'request.json');

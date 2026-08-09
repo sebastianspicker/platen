@@ -10,3 +10,16 @@ export async function scheduleArtifactCleanup({ processing, response, store }, a
   });
   return false;
 }
+
+export async function scheduleDocumentCleanup({ processing, response, store }, documentId) {
+  if (processing.signal.aborted || response.destroyed) {
+    await store.deleteDocument(documentId);
+    return true;
+  }
+  let responseDelivered = false;
+  response.once('finish', () => { responseDelivered = true; });
+  response.once('close', () => {
+    if (!responseDelivered) void store.deleteDocument(documentId).catch(() => {});
+  });
+  return false;
+}

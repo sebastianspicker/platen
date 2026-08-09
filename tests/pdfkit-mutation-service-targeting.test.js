@@ -68,6 +68,44 @@ test('PDFKit mutation requires every output page to render and maps cancellation
   });
 });
 
+test('PDFKit mutation revokes only its promoted artifact when cancellation arrives after promotion', async (context) => {
+  const controller = new AbortController();
+  const setup = await fixture({ abortAfterPromotion: () => controller.abort() });
+  context.after(setup.dispose);
+  await assert.rejects(
+    setup.service.mutate(documentId, mutation(), mutationOptions(controller.signal)),
+    { code: 'JOB_CANCELLED', status: 499 },
+  );
+  assert.deepEqual(setup.state().deleted, ['22222222-2222-4222-8222-222222222222']);
+  assert.equal(setup.state().cleaned, true);
+});
+
+test('PDFKit mutation revokes its promoted artifact when private workspace cleanup fails', async (context) => {
+  const setup = await fixture({ cleanupFailure: new Error('fixture cleanup failure') });
+  context.after(setup.dispose);
+  await assert.rejects(
+    setup.service.mutate(documentId, mutation(), mutationOptions()),
+    { code: 'PDFKIT_MUTATION_CLEANUP_FAILED', status: 500 },
+  );
+  assert.deepEqual(setup.state().deleted, ['22222222-2222-4222-8222-222222222222']);
+  assert.equal(setup.state().cleaned, true);
+});
+
+test('PDFKit mutation surfaces failed artifact revocation during post-promotion cancellation', async (context) => {
+  const controller = new AbortController();
+  const setup = await fixture({
+    abortAfterPromotion: () => controller.abort(),
+    deleteFailure: new Error('fixture revocation failure'),
+  });
+  context.after(setup.dispose);
+  await assert.rejects(
+    setup.service.mutate(documentId, mutation(), mutationOptions(controller.signal)),
+    { code: 'PDFKIT_MUTATION_CLEANUP_FAILED', status: 500 },
+  );
+  assert.deepEqual(setup.state().deleted, ['22222222-2222-4222-8222-222222222222']);
+  assert.equal(setup.state().cleaned, true);
+});
+
 test('PDFKit mutation rejects unsafe output topology', async (context) => {
   const setup = await fixture(); context.after(setup.dispose);
   setup.service = new PdfKitMutationService({
@@ -77,6 +115,7 @@ test('PDFKit mutation rejects unsafe output topology', async (context) => {
       createJobWorkspace: async () => mkdtemp(join(setup.root, 'job-')),
       cleanupJob: async (workspace) => rm(workspace, { recursive: true, force: true }),
       promotePdfArtifact: async () => assert.fail('unsafe output must not be promoted'),
+      deleteArtifact: async () => assert.fail('unsafe output must not be deleted'),
     },
     poppler: { async execute(operation, parameters) {
       if (operation === 'inspect') return { stdout: 'Pages: 2\nEncrypted: no\nForm: none\nJavaScript: no\n' };
@@ -100,6 +139,7 @@ test('targeted PDFKit mutation binds a private form value to an exact source loc
     },
     annotationUpdate: null,
     annotationRemove: null,
+    annotationProperties: null,
   };
   const result = await setup.service.mutate(documentId, targeted, {
     sourceSha256: sourceDigest, profile: 'macos-pdfkit-targeted-v1',
@@ -126,6 +166,7 @@ test('targeted PDFKit mutation forwards only an on/off checkbox intent without r
     },
     annotationUpdate: null,
     annotationRemove: null,
+    annotationProperties: null,
   };
   const result = await setup.service.mutate(documentId, targeted, {
     sourceSha256: sourceDigest, profile: 'macos-pdfkit-targeted-v1',
@@ -149,6 +190,7 @@ test('targeted PDFKit mutation records only a fixed canonical radio-selection in
     },
     annotationUpdate: null,
     annotationRemove: null,
+    annotationProperties: null,
   };
   const result = await setup.service.mutate(documentId, targeted, {
     sourceSha256: sourceDigest, profile: 'macos-pdfkit-targeted-v1',
@@ -176,6 +218,7 @@ test('targeted annotation removal records a verified selective-sanitization delt
     annotationRemove: {
       page: 1, annotationIndex: 3, fingerprint: '7'.repeat(64), subtype: 'freeText',
     },
+    annotationProperties: null,
   };
   const result = await setup.service.mutate(documentId, targeted, {
     sourceSha256: sourceDigest, profile: 'macos-pdfkit-targeted-v1',
@@ -197,6 +240,28 @@ test('targeted annotation removal records a verified selective-sanitization delt
   assert.doesNotMatch(JSON.stringify(state.promoted.options.operation), /7777777777777777|fingerprint|contents/);
 });
 
+test('targeted Square properties retain only safe provenance and require native color evidence', async (context) => {
+  const setup = await fixture(); context.after(setup.dispose);
+  const targeted = {
+    formFill: null, annotationUpdate: null, annotationRemove: null,
+    annotationProperties: {
+      page: 2, annotationIndex: 4, fingerprint: '6'.repeat(64), subtype: 'square',
+      rect: { x: 12, y: 24, width: 48, height: 36 }, strokeColor: '#12abef',
+    },
+  };
+  const result = await setup.service.mutate(documentId, targeted, {
+    sourceSha256: sourceDigest, profile: 'macos-pdfkit-targeted-v1',
+  });
+  const state = setup.state();
+  assert.equal(result.artifact.displayName, 'source-annotation-properties.pdf');
+  assert.deepEqual({ ...state.promoted.options.operation.parameters }, {
+    category: 'annotation-properties', page: 2, annotationIndex: 4, subtype: 'square',
+  });
+  assert.equal(result.evidence.rawAnnotationColorVerified, true);
+  assert.equal(state.promoted.options.operation.validation.validators.includes('raw-annotation-c-rgb'), true);
+  assert.doesNotMatch(JSON.stringify(state.promoted.options.operation), /6666666666666666|12abef/);
+});
+
 test('targeted PDFKit mutation identifies an empty choice as a private clear operation', async (context) => {
   const setup = await fixture({ sourceSafety: 'Encrypted: no\nForm: AcroForm\nJavaScript: no' });
   context.after(setup.dispose);
@@ -206,6 +271,7 @@ test('targeted PDFKit mutation identifies an empty choice as a private clear ope
     },
     annotationUpdate: null,
     annotationRemove: null,
+    annotationProperties: null,
   };
   await setup.service.mutate(documentId, targeted, {
     sourceSha256: sourceDigest, profile: 'macos-pdfkit-targeted-v1',
@@ -236,7 +302,7 @@ test('targeted PDFKit mutation rejects unsafe source classes, signed input, and 
   context.after(signed.dispose);
   const formFill = {
     formFill: { page: 1, annotationIndex: 0, fingerprint: 'd'.repeat(64), fieldType: 'text', value: '' },
-    annotationUpdate: null, annotationRemove: null,
+    annotationUpdate: null, annotationRemove: null, annotationProperties: null,
   };
   await assert.rejects(signed.service.mutate(documentId, formFill, {
     sourceSha256: sourceDigest, profile: 'macos-pdfkit-targeted-v1',
@@ -247,11 +313,15 @@ test('targeted PDFKit mutation rejects unsafe source classes, signed input, and 
     sourceSha256: sourceDigest, profile: 'unsupported-profile',
   }), { code: 'INVALID_PDFKIT_MUTATION', status: 400 });
   for (const targeted of [
-    { formFill: null, annotationUpdate: null, annotationRemove: null },
+    { formFill: null, annotationUpdate: null, annotationRemove: null, annotationProperties: null },
     { ...formFill, unexpected: true },
     { ...formFill, formFill: { ...formFill.formFill, fingerprint: 'D'.repeat(64) } },
     { ...formFill, formFill: { ...formFill.formFill, fieldType: 'button', value: 'checked' } },
     { formFill: null, annotationUpdate: { page: 1, annotationIndex: 0, fingerprint: 'd'.repeat(64), subtype: 'text', contents: 'x', rect: { x: 1, y: 1, width: 10, height: 10 } }, annotationRemove: null },
+    { formFill: null, annotationUpdate: null, annotationRemove: null, annotationProperties: {
+      page: 1, annotationIndex: 0, fingerprint: 'd'.repeat(64), subtype: 'square',
+      rect: { x: 1, y: 1, width: 10, height: 10 }, strokeColor: '#12ABef',
+    } },
   ]) {
     await assert.rejects(plain.service.mutate(documentId, targeted, {
       sourceSha256: sourceDigest, profile: 'macos-pdfkit-targeted-v1',

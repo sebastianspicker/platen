@@ -41,9 +41,10 @@ export function parseAdvancedSearch(command, positionals, values, flags, output)
   let context = 32; if (values.has('context')) { if (!/^\d+$/u.test(String(values.get('context'))) || Number(values.get('context')) > 200) fail('CLI_INVALID_OPTION', '--context must be from 0 through 200.'); context = Number(values.get('context')); } const maxResults = values.has('max-results') ? positiveInteger(values.get('max-results'), '--max-results', 1_000) : 100;
   return Object.freeze({ command, input, query, mode, caseSensitive: flags.has('case-sensitive'), wholeWord: flags.has('whole-word'), context, maxResults, output: boundedPath(output, 'Output') });
 }
-export function parseCertificateSign(command, positionals, values, output) {
+export function parseCertificateSign(command, positionals, values, flags, output) {
   const [input] = exactPositionals(positionals, 1);
   if (!output) fail('CLI_INVALID_OPTION', 'certificate-sign requires --output.');
+  if (!flags.has('consent')) fail('CLI_INVALID_OPTION', 'certificate-sign requires explicit --consent for this operation.');
   const certificateSha256 = values.get('certificate-sha256');
   if (!/^[0-9a-f]{64}$/u.test(certificateSha256 ?? '')) fail('CLI_INVALID_OPTION', '--certificate-sha256 must be a lowercase SHA-256 digest.');
   if (!values.has('field-name')) fail('CLI_INVALID_OPTION', 'certificate-sign requires --field-name.');
@@ -57,5 +58,5 @@ export function parseCertificateSign(command, positionals, values, output) {
   }
   const placeholderBytes = values.has('placeholder-bytes') ? positiveInteger(values.get('placeholder-bytes'), '--placeholder-bytes', 262_144) : 16_384;
   if (placeholderBytes < 4_096) fail('CLI_INVALID_OPTION', '--placeholder-bytes must be from 4096 through 262144.');
-  return Object.freeze({ command, input, output: boundedPath(output, 'Output'), certificateSha256, page, fieldName, reason, location, contact, placeholderBytes });
+  return Object.freeze({ command, input, output: boundedPath(output, 'Output'), certificateSha256, page, fieldName, reason, location, contact, placeholderBytes, consent: true });
 }

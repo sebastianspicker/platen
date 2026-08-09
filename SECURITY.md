@@ -97,9 +97,10 @@ or executable third-party plugin path.
   disconnected plugin foundations remain exact, reviewed, non-executable
   classifications. Run it against a trusted, quiescent checkout. Node does not
   expose fully pinned `openat`-style traversal here, so a hostile same-user
-  ancestor swap can cause a read before postflight rejects the receipt. Signing,
-  notarization, SBOM generation, publication, and distribution trust remain
-  outside this local receipt, whose `distributionStatus` is always `not-ready`.
+  ancestor swap can cause a read before postflight rejects the receipt. The
+  receipt includes a deterministic local source-inventory SBOM, while signing,
+  notarization, retained candidate attestation, publication, and distribution
+  trust remain outside it. Its `distributionStatus` is always `not-ready`.
 - Engine adapters resolve fixed absolute executables, use argument arrays with
   `shell: false`, set a minimal environment, reject extreme page geometry, use
   explicit raster pixel boxes, and bound time, output, active children, and

@@ -24,9 +24,9 @@ export async function handleCertificateSignRoute({ request, response, url, docum
   if ([...url.searchParams].length) throw new HostError('INVALID_PARAMETER', 'Certificate signing does not accept query parameters.', 400);
   if (!signingIdentityReady || !certificateSignature) throw new HostError('CERTIFICATE_SIGNATURE_UNAVAILABLE', 'The staged signing identity helper is unavailable.', 503);
   const body = await readJson(request, bodyLimit);
-  if (!exactJsonObject(body, ['profile', 'sourceSha256', 'certificateSha256', 'page', 'fieldName', 'reason', 'location', 'contact', 'placeholderBytes']) || body.profile !== PDF_SIGNATURE_CONTAINER_PROFILE || !/^[0-9a-f]{64}$/u.test(body.sourceSha256) || !/^[0-9a-f]{64}$/u.test(body.certificateSha256)) throw new HostError('INVALID_CERTIFICATE_SIGNATURE_REQUEST', 'Certificate signing requires the fixed profile, current source digest, certificate digest, page, and bounded metadata.', 400);
+  if (!exactJsonObject(body, ['profile', 'sourceSha256', 'certificateSha256', 'page', 'fieldName', 'reason', 'location', 'contact', 'placeholderBytes', 'consent']) || body.profile !== PDF_SIGNATURE_CONTAINER_PROFILE || body.consent !== true || !/^[0-9a-f]{64}$/u.test(body.sourceSha256) || !/^[0-9a-f]{64}$/u.test(body.certificateSha256)) throw new HostError('INVALID_CERTIFICATE_SIGNATURE_REQUEST', 'Certificate signing requires explicit consent, the fixed profile, current source digest, certificate digest, page, and bounded metadata.', 400);
   const { certificateSha256, ...requestValue } = body;
-  const result = await certificateSignature.sign(documentId, requestValue, { certificateSha256, signal: processing.signal });
+  const result = await certificateSignature.sign(documentId, requestValue, { certificateSha256, consent: true, signal: processing.signal });
   if (await scheduleArtifactCleanup({ processing, response, store }, result.artifact.id)) return true;
   json(response, 201, { result }); return true;
 }

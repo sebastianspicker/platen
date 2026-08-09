@@ -6,6 +6,7 @@ export {
   parsePdfkitLocalGoToResponse,
   parsePdfkitLocalGoToRemovalResponse,
   parsePdfkitMutationResponse,
+  parsePdfkitTargetedMutationResponse,
   parsePdfkitOutlineBookmarkResponse,
   parsePdfkitOutlineBookmarkRemovalResponse,
   parsePdfkitOutlineBookmarkRenameResponse,

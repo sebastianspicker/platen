@@ -29,7 +29,12 @@ function text(value) {
 }
 function limitation(value) { return typeof value === 'string' && value.length >= 1 && value.length <= 512 && /^[\x20-\x7E]*$/u.test(value); }
 function freeze(value) { if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value; for (const child of Object.values(value)) freeze(child); return Object.freeze(value); }
-function validRef(value) { return exact(value, ['object', 'generation']) && Number.isSafeInteger(value.object) && value.object > 0 && Number.isSafeInteger(value.generation) && value.generation >= 0; }
+function validRef(value) {
+  const keys = Object.hasOwn(value ?? {}, 'type') ? ['type', 'object', 'generation'] : ['object', 'generation'];
+  return exact(value, keys) && (!Object.hasOwn(value, 'type') || value.type === 'ref')
+    && Number.isSafeInteger(value.object) && value.object > 0
+    && Number.isSafeInteger(value.generation) && value.generation >= 0;
+}
 function validateResult(body, context) {
   const result = body?.result; const proof = result?.proof; const operation = result?.artifact?.operation;
   const validOperation = exact(operation, ['schemaVersion', 'id', 'type', 'inputs', 'parameters', 'expected', 'validation', 'completedAt']) && operation.schemaVersion === 1 && UUID.test(operation.id ?? '') && typeof operation.completedAt === 'string' && !Number.isNaN(Date.parse(operation.completedAt)) && operation.type === 'pdf-acroform-choice' && Array.isArray(operation.inputs) && operation.inputs.length === 1 && exact(operation.inputs[0], ['documentId', 'sha256', 'role']) && operation.inputs[0].documentId === context.documentId && operation.inputs[0].sha256 === context.sourceSha256 && operation.inputs[0].role === 'source'

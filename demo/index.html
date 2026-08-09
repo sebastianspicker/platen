@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A static, non-processing demonstration of the Platen local PDF workbench." />
+    <title>Platen static demo</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="demo-notice" role="status">
+      <strong>Static demo</strong><span>This page processes no files, stores no documents, and produces no output.</span>
+    </div>
+    <div class="app-shell">
+      <header class="menu-bar">
+        <a class="brand" href="#workspace" aria-label="Platen static demo home">platen<span>local proof desk</span></a>
+        <nav class="route-nav" aria-label="Primary navigation">
+          <a href="#workspace" data-route="workspace">Workspace</a>
+          <a href="#operations" data-route="operations">Operations</a>
+          <a href="#coverage" data-route="coverage">Coverage</a>
+          <a href="#trust" data-route="trust">Trust</a>
+        </nav>
+        <span class="local-state"><i></i>Fixture only</span>
+      </header>
+
+      <main id="main" tabindex="-1">
+        <section class="route" id="workspace" data-view="workspace" aria-labelledby="workspace-title">
+          <header class="route-heading">
+            <div><p class="eyebrow">Workspace</p><h1 id="workspace-title">Sample acquisition packet</h1></div>
+            <span class="fixture-tag">Generated fixture · 2 pages</span>
+          </header>
+          <div class="proof-strip" aria-label="Fixture status">
+            <div><span>Source</span><strong>Generated sample.pdf</strong></div>
+            <div><span>State</span><strong class="success-text">Inspection shown</strong></div>
+            <div><span>Page</span><strong id="page-position">1 / 2</strong></div>
+            <div><span>Privacy</span><strong>Sanitized data</strong></div>
+          </div>
+          <div class="workspace-grid">
+            <aside class="pages-panel" aria-label="Fixture pages">
+              <div class="panel-title"><span>Pages</span><b>2</b></div>
+              <div class="page-list" role="list">
+                <button class="page-thumb is-selected" data-page="1" type="button" aria-current="page"><span class="mini-page"></span><strong>1</strong><small>Brief</small></button>
+                <button class="page-thumb" data-page="2" type="button"><span class="mini-page page-two"></span><strong>2</strong><small>Scope</small></button>
+              </div>
+            </aside>
+            <article class="page-stage" aria-label="Document preview">
+              <div class="stage-controls">
+                <span>Static preview</span>
+                <div class="page-switcher" role="group" aria-label="Page navigation">
+                  <button class="icon-button" id="previous-page" type="button" aria-label="Previous fixture page">←</button>
+                  <span id="stage-page">Page 1 of 2</span>
+                  <button class="icon-button" id="next-page" type="button" aria-label="Next fixture page">→</button>
+                </div>
+              </div>
+              <div class="paper" id="paper" aria-live="polite"></div>
+            </article>
+            <aside class="inspector" aria-label="Fixture inspector">
+              <div class="panel-title"><span>Inspection</span><span class="badge neutral">Read-only</span></div>
+              <dl>
+                <div><dt>Pages</dt><dd>2</dd></div>
+                <div><dt>PDF version</dt><dd>1.7</dd></div>
+                <div><dt>Tagged</dt><dd>Present</dd></div>
+                <div><dt>Text layer</dt><dd>Available</dd></div>
+                <div><dt>Source hash</dt><dd class="mono">demo…7c4a</dd></div>
+              </dl>
+              <div class="inspector-callout"><strong>Demo boundary</strong><p>This inventory is illustrative. No file has been opened or inspected.</p></div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="route" id="operations" data-view="operations" aria-labelledby="operations-title" hidden>
+          <header class="route-heading"><div><p class="eyebrow">Operations</p><h1 id="operations-title">Bounded local work</h1><p>Illustrative operations for the generated fixture. The demo cannot run them.</p></div></header>
+          <div class="operation-layout">
+            <section class="operation-list" aria-label="Operation list">
+              <article><div><span class="badge">Simulated</span><h2>Extract current page</h2><p>Would create a separately validated one-page output.</p></div><button class="button primary simulated-action" type="button" data-action="Extract current page">Simulated extract</button></article>
+              <article><div><span class="badge">Simulated</span><h2>Run accessibility review</h2><p>Would report heuristic findings without establishing conformance.</p></div><button class="button simulated-action" type="button" data-action="Run accessibility review">Simulated review</button></article>
+              <article><div><span class="badge">Simulated</span><h2>Export inspection record</h2><p>Would publish a new sidecar record, never modifying the source.</p></div><button class="button simulated-action" type="button" data-action="Export inspection record">Simulated export</button></article>
+              <article><div><span class="badge">Simulated</span><h2>Apply a redaction plan</h2><p>Requires a validated, bounded local rewrite in the real workbench.</p></div><button class="button danger simulated-action" type="button" data-action="Apply a redaction plan">Simulated apply</button></article>
+            </section>
+            <aside class="operation-brief"><p class="eyebrow">Output contract</p><h2>Separate, validated output</h2><p>Platen keeps the selected source immutable. In this demo, even the output is imaginary.</p><ul><li>Source remains unchanged</li><li>Local engines are not invoked</li><li>No browser upload is available</li></ul></aside>
+          </div>
+        </section>
+
+        <section class="route" id="coverage" data-view="coverage" aria-labelledby="coverage-title" hidden>
+          <header class="route-heading"><div><p class="eyebrow">Coverage</p><h1 id="coverage-title">Capability ledger excerpt</h1><p>Small, generated examples of the project’s bounded-capability model.</p></div>
+            <label class="filter"><span class="sr-only">Filter capability examples</span><input id="coverage-filter" type="search" placeholder="Filter examples" autocomplete="off" /></label>
+          </header>
+          <div class="coverage-summary"><div><strong>5</strong><span>representative examples</span></div><div><strong>4</strong><span>bounded or proven</span></div><div><strong>1</strong><span>unavailable example</span></div></div>
+          <div class="coverage-table-wrap"><table><caption class="sr-only">Generated capability examples</caption><thead><tr><th>Area</th><th>Example boundary</th><th>Status</th></tr></thead><tbody id="coverage-rows"></tbody></table></div>
+          <p class="table-note">Counts and rows are presentation fixtures, not a live catalog query.</p>
+        </section>
+
+        <section class="route trust-route" id="trust" data-view="trust" aria-labelledby="trust-title" hidden>
+          <header class="route-heading"><div><p class="eyebrow">Trust</p><h1 id="trust-title">Trust &amp; limits</h1><p>The real workbench is local-first. This public demo is intentionally inert.</p></div></header>
+          <div class="trust-grid">
+            <article><h2>What this page does</h2><ul><li>Renders generated fixture text in your browser</li><li>Stores route and filter state only in the page session</li><li>Labels illustrative controls before they can be selected</li></ul></article>
+            <article><h2>What this page does not do</h2><ul><li>Open, upload, read, or process local files</li><li>Run engines, commands, or local services</li><li>Export, download, mutate, or retain a document</li></ul></article>
+            <article class="trust-note"><p class="eyebrow">Real product boundary</p><h2>Review every operation independently.</h2><p>A local-first interface does not make every PDF operation safe or universally supported. The real application exposes limits at the operation boundary.</p></article>
+          </div>
+        </section>
+      </main>
+      <footer class="status-bar"><span class="status-dot"></span><span id="feedback" role="status">Static demo ready. No file activity is possible.</span><span class="status-spacer"></span><span>Generated fixture · no network required</span></footer>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

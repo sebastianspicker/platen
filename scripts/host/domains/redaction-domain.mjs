@@ -59,6 +59,31 @@ function collectMatches(page, regex, kind, label, predicate = () => true) {
   return matches;
 }
 
+/** Pure bounded sensitive-text detector shared by local redaction and source scans. */
+export function detectSensitiveTextPages(pages, { customPatterns } = {}) {
+  const patterns = safeCustomPatterns(customPatterns);
+  const marks = [];
+  for (const page of pageInput(pages)) {
+    marks.push(...collectMatches(page, EMAIL, 'email', 'Email'));
+    marks.push(...collectMatches(page, PHONE, 'phone', 'Phone', (value) => value.replace(/\D/g, '').length <= 15));
+    marks.push(...collectMatches(page, CARD, 'payment-card', 'Payment card', luhn));
+    for (const pattern of patterns) {
+      if (pattern.regex) marks.push(...collectMatches(page, pattern.regex, 'custom-regex', pattern.label));
+      else if (pattern.literal) {
+        let start = 0;
+        while (marks.length < MAX_MATCHES) {
+          const found = page.text.indexOf(pattern.literal, start);
+          if (found < 0) break;
+          marks.push(matchRecord(page, found, found + pattern.literal.length, 'custom-literal', pattern.label));
+          start = found + Math.max(1, pattern.literal.length);
+        }
+      }
+    }
+    if (marks.length >= MAX_MATCHES) break;
+  }
+  return Object.freeze(marks.slice(0, MAX_MATCHES).map((mark, index) => Object.freeze({ id: `detected-${index + 1}`, ...mark })));
+}
+
 /** Owns local redaction detection and proposal records; it never changes PDF bytes. */
 export class RedactionDomainService {
   #workspace;
@@ -71,27 +96,7 @@ export class RedactionDomainService {
   }
 
   detectSensitiveText(pages, { customPatterns } = {}) {
-    const patterns = safeCustomPatterns(customPatterns);
-    const marks = [];
-    for (const page of pageInput(pages)) {
-      marks.push(...collectMatches(page, EMAIL, 'email', 'Email'));
-      marks.push(...collectMatches(page, PHONE, 'phone', 'Phone', (value) => value.replace(/\D/g, '').length <= 15));
-      marks.push(...collectMatches(page, CARD, 'payment-card', 'Payment card', luhn));
-      for (const pattern of patterns) {
-        if (pattern.regex) marks.push(...collectMatches(page, pattern.regex, 'custom-regex', pattern.label));
-        else if (pattern.literal) {
-          let start = 0;
-          while (marks.length < MAX_MATCHES) {
-            const found = page.text.indexOf(pattern.literal, start);
-            if (found < 0) break;
-            marks.push(matchRecord(page, found, found + pattern.literal.length, 'custom-literal', pattern.label));
-            start = found + Math.max(1, pattern.literal.length);
-          }
-        }
-      }
-      if (marks.length >= MAX_MATCHES) break;
-    }
-    return Object.freeze(marks.slice(0, MAX_MATCHES).map((mark, index) => Object.freeze({ id: `detected-${index + 1}`, ...mark })));
+    return detectSensitiveTextPages(pages, { customPatterns });
   }
 
   createRedactionPlan(documentId, { pages, customPatterns, rectangles = [], fullPages = [] } = {}, { expectedRevision } = {}) {

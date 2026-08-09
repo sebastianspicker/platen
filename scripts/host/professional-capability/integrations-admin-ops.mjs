@@ -29,26 +29,6 @@ export function adminIdentityRoles(ctx = {}) {
   });
 }
 
-export function adminAuditTelemetry(ctx = {}) {
-  const events = Array.isArray(ctx.events) ? ctx.events : [
-    { type: 'capability.run', at: new Date(0).toISOString() },
-  ];
-  const chain = [];
-  let prev = 'GENESIS';
-  for (const [i, event] of events.slice(0, 100).entries()) {
-    const entry = { index: i, prev, event };
-    const entrySha256 = createHash('sha256').update(JSON.stringify(entry)).digest('hex');
-    chain.push(Object.freeze({ ...entry, entrySha256 }));
-    prev = entrySha256;
-  }
-  return result('admin.audit-telemetry', {
-    method: 'local-admin-audit-hash-chain',
-    chain: Object.freeze(chain),
-    head: prev,
-    count: chain.length,
-  });
-}
-
 export function adminSsoScim(ctx = {}) {
   denyNetwork(ctx);
   if (ctx.sso === true || ctx.scim === true) {

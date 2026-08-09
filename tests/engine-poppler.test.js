@@ -18,6 +18,7 @@ import {
   buildPdfsigDumpArgs,
   buildPdftocairoArgs,
   buildPdftocairoCropBoxArgs,
+  buildPdftocairoOverlayExactDpiArgs,
   buildPdftotextArgs,
   buildPdftotextStdinArgs,
   buildPdftotextRegionArgs,
@@ -83,6 +84,10 @@ test('Poppler builders produce exact fixed argv without shell fragments', () => 
     ['-png', '-singlefile', '-cropbox', '-f', '3', '-l', '3', '-scale-to', '2304', '/tmp/input.pdf', '/tmp/cropbox-page'],
   );
   assert.deepEqual(
+    buildPdftocairoOverlayExactDpiArgs({ input: '/tmp/input.pdf', outputPrefix: '/tmp/overlay', page: 3, dpi: 72 }),
+    ['-png', '-singlefile', '-f', '3', '-l', '3', '-r', '72', '/tmp/input.pdf', '/tmp/overlay'],
+  );
+  assert.deepEqual(
     buildPdfimagesExtractArgs({ input: '/tmp/input.pdf', outputPrefix: '/tmp/image' }),
     ['-all', '/tmp/input.pdf', '/tmp/image'],
   );
@@ -127,6 +132,10 @@ test('Poppler builders reject path escapes, unsafe patterns, and unbounded value
     /maxDimension must be/,
   );
   assert.throws(
+    () => buildPdftocairoOverlayExactDpiArgs({ input: '/tmp/in.pdf', outputPrefix: '/tmp/out', page: 1, dpi: 35 }),
+    /dpi must be/,
+  );
+  assert.throws(
     () => buildPdfuniteArgs({ inputs: ['/tmp/a.pdf', '/tmp/b.pdf'], output: '/tmp/a.pdf' }),
     /must not replace/,
   );
@@ -161,5 +170,14 @@ test('adapter resolves the fixed tool and forwards only a validated invocation',
     args: ['-nssdir', 'sql:/tmp/signature-job', '-nocert', '-no-ocsp', '/tmp/signed.pdf'],
     timeoutMs: 2_000,
   }]);
+  await adapter.execute('renderOverlayExactDpiPng', {
+    input: '/tmp/input.pdf', outputPrefix: '/tmp/overlay', page: 3, dpi: 72,
+  }, { timeoutMs: 2_000 });
+  assert.deepEqual(probes, ['pdfsig', 'pdftocairo']);
+  assert.deepEqual(calls[1], {
+    executable: '/engines/pdftocairo',
+    args: ['-png', '-singlefile', '-f', '3', '-l', '3', '-r', '72', '/tmp/input.pdf', '/tmp/overlay'],
+    timeoutMs: 2_000,
+  });
   await assert.rejects(() => adapter.execute('unknown', {}), /Unknown Poppler operation/);
 });

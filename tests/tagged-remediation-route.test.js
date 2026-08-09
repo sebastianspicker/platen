@@ -13,7 +13,19 @@ function context({ aborted = false, ready = true } = {}) {
     taggedRemediation: ready ? {
       update: async (...args) => {
         calls.push(args); return {
-          kind: 'tagged-pdf-remediation', artifact: { id: 'artifact' },
+          kind: 'tagged-pdf-remediation', profile: request.profile,
+          sourceDigest: request.sourceSha256,
+          artifact: {
+            id: 'artifact', documentId: 'doc', displayName: 'tagged.pdf',
+            mediaType: 'application/pdf', size: 128, sha256: 'b'.repeat(64),
+            operation: { inputs: [{ documentId: 'doc', sha256: request.sourceSha256 }] },
+            createdAt: '2026-08-03T00:00:00.000Z', filePath: '/private/artifacts/tagged.pdf',
+          },
+          proof: { outputSha256: 'b'.repeat(64) },
+          evidence: {
+            sourceBound: true, sourceUnchanged: true, outputDigestBound: true,
+            independentInspection: true, localOnly: true,
+          },
           limitations: ['not PDF/UA'],
         };
       },
@@ -28,5 +40,21 @@ function context({ aborted = false, ready = true } = {}) {
     calls, deleted,
   };
 }
-test('tagged route forwards canonical plan and revokes on cancellation', async () => { const value = context(); assert.equal(await handleTaggedRemediationRoute(value), true); assert.equal(value.response.status, 201); assert.equal(value.calls[0][0], 'doc'); assert.equal(value.calls[0][1].profile, request.profile); assert.deepEqual(value.calls[0][1].plan, request.plan); const cancelled = context({ aborted: true }); assert.equal(await handleTaggedRemediationRoute(cancelled), true); assert.deepEqual(cancelled.deleted, ['artifact']); });
+test('tagged route forwards the canonical plan and exposes only the public result contract', async () => {
+  const value = context();
+  assert.equal(await handleTaggedRemediationRoute(value), true);
+  assert.equal(value.response.status, 201);
+  assert.equal(value.calls[0][0], 'doc');
+  assert.equal(value.calls[0][1].profile, request.profile);
+  assert.deepEqual(value.calls[0][1].plan, request.plan);
+  assert.equal(value.response.value.result.artifact.id, 'artifact');
+  assert.equal(Object.hasOwn(value.response.value.result.artifact, 'filePath'), false);
+  assert.deepEqual(value.response.value.result.evidence, {
+    sourceBound: true, sourceUnchanged: true, outputDigestBound: true,
+    independentInspection: true,
+  });
+  const cancelled = context({ aborted: true });
+  assert.equal(await handleTaggedRemediationRoute(cancelled), true);
+  assert.deepEqual(cancelled.deleted, ['artifact']);
+});
 test('tagged route rejects unavailable or malformed plan', async () => { await assert.rejects(handleTaggedRemediationRoute(context({ ready: false })), { code: 'TAGGED_PDF_REMEDIATION_UNAVAILABLE' }); await assert.rejects(handleTaggedRemediationRoute({ ...context(), readJson: async () => ({ ...request, plan: null }) }), { code: 'INVALID_TAGGED_PDF_REMEDIATION_OPTIONS' }); });

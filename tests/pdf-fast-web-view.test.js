@@ -1,12 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { Readable } from 'node:stream';
 import { resolveExecutable } from '../scripts/host/engine-registry.mjs';
 import {
   buildQpdfCheckLinearizationArgs,
   buildQpdfLinearizeArgs,
+  QpdfAdapter,
 } from '../scripts/host/adapters/qpdf.mjs';
+import { DocumentStore } from '../scripts/host/document-store.mjs';
+import { EngineRegistry } from '../scripts/host/engine-registry.mjs';
+import { createTextPdf } from '../scripts/host/pdf-factory.mjs';
 import { PdfFastWebViewService } from '../scripts/host/pdf-fast-web-view-service.mjs';
 import {
   normalizePdfFastWebView,
@@ -50,8 +57,36 @@ test('fast-web-view service exposes an explicit unavailable probe and fails clos
 });
 
 const qpdfInstalled = await resolveExecutable('qpdf').then(() => true).catch(() => false);
-test('installed qpdf linearization path is available when the fixed local engine exists', { skip: !qpdfInstalled }, async () => {
-  assert.equal(qpdfInstalled, true);
+test('installed qpdf linearizes a retained artifact with verified metadata and source preservation', { skip: !qpdfInstalled }, async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'platen-fast-web-view-live-'));
+  const store = await new DocumentStore({ root: join(root, 'store') }).initialize();
+  t.after(async () => { await store.dispose(); await rm(root, { recursive: true, force: true }); });
+  const source = createTextPdf({ text: 'fast web-view live fixture', title: 'Fast Web View' });
+  const document = await store.createDocument({ stream: Readable.from([source]), displayName: 'source.pdf' });
+  const registry = new EngineRegistry();
+  const qpdf = new QpdfAdapter({ registry });
+  const service = new PdfFastWebViewService({ store, qpdf });
+
+  const result = await service.linearize(
+    document.id,
+    { profile: PDF_FAST_WEB_VIEW_PROFILE },
+    { sourceSha256: document.sha256 },
+  );
+  const artifact = store.getArtifact(result.artifact.id);
+  const artifactBytes = await readFile(artifact.filePath);
+  const prefix = artifactBytes.subarray(0, Math.min(16 * 1024, artifactBytes.length)).toString('latin1');
+  const declaredLength = Number(prefix.match(/\/L\s+(\d+)\b/u)?.[1]);
+  const endFirstPage = Number(prefix.match(/\/E\s+(\d+)\b/u)?.[1]);
+
+  await qpdf.execute('checkLinearization', { input: artifact.filePath, workspace: root }, { timeoutMs: 30_000 });
+  assert.equal((await readFile(store.getSourcePath(document.id))).equals(source), true);
+  assert.equal(artifact.size, artifactBytes.length);
+  assert.equal(artifact.sha256, createHash('sha256').update(artifactBytes).digest('hex'));
+  assert.equal(result.artifact.size, artifact.size);
+  assert.equal(result.artifact.sha256, artifact.sha256);
+  assert.match(prefix, /\/Linearized\s+1(?:\.0+)?\b/u);
+  assert.equal(declaredLength, artifact.size);
+  assert.ok(Number.isSafeInteger(endFirstPage) && endFirstPage > 0 && endFirstPage <= artifact.size);
 });
 
 function linearizedFixture() {

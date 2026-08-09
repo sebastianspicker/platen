@@ -61,13 +61,19 @@ export function createArrangementOperations({
     if (!state.analysis.documentId || !arrangementChanged() || state.busyAction) return;
     const operation = captureOperation();
     const pageOrder = [...state.pageOrder];
+    const sourceSha256 = state.analysis.sha256;
+    const pageCount = state.analysis.inspection?.pageCount ?? 0;
     state.busyAction = 'Creating arranged PDF…';
     state.error = null;
     render();
     try {
-      const artifact = await client.arrangePages(operation.documentId, pageOrder, {
-        signal: operation.controller.signal,
-      });
+      const isOrderedSubset = pageOrder.every((page, index) => index === 0 || pageOrder[index - 1] < page);
+      const removedPages = isOrderedSubset
+        ? Array.from({ length: pageCount }, (_, index) => index + 1).filter((page) => !pageOrder.includes(page))
+        : [];
+      const artifact = removedPages.length > 0
+        ? await client.deletePages(operation.documentId, sourceSha256, removedPages, { signal: operation.controller.signal })
+        : await client.arrangePages(operation.documentId, sourceSha256, pageOrder, { signal: operation.controller.signal });
       if (!operationIsCurrent(operation)) return;
       const blob = await client.artifact(artifact.id, { signal: operation.controller.signal });
       if (!operationIsCurrent(operation)) return;

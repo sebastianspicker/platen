@@ -148,9 +148,53 @@ test('AEC artifact routes are authenticated, origin-bound, bounded, and call onl
 });
 
 test('authenticated prepress endpoint exposes only bounded named operations', async (context) => {
-  const { handler, store } = await fixture(context);
+  const { handler, store, prepress } = await fixture(context);
   const document = await store.createDocument({ stream: Readable.from([makeTextPdf('PREPRESS')]), displayName: 'prepress.pdf' });
   const headers = { origin: 'http://127.0.0.1:4173', 'content-type': 'application/json', 'x-platen-token': 'test-session-token' };
+  const outputSha256 = 'b'.repeat(64);
+  const profileSha256 = 'c'.repeat(64);
+  const artifactId = '123e4567-e89b-42d3-a456-426614174000';
+  const operationId = '123e4567-e89b-42d3-a456-426614174001';
+  const createdAt = '2026-08-03T10:00:00.000Z';
+  const validators = (kind) => kind === 'cmyk'
+    ? ['source-sha256', 'icc-header-and-tags', 'icc-profile-sha256', 'ghostscript-exit-zero', 'poppler-page-count', 'poppler-page-boxes', 'poppler-passive-content', 'poppler-text-equivalence', 'poppler-render-all-pages', 'artifact-sha256']
+    : ['source-sha256', 'uniform-source-page-geometry', 'ghostscript-exit-zero', 'poppler-page-count', 'poppler-sheet-geometry', 'poppler-passive-content', 'poppler-text-equivalence', 'poppler-render-all-pages', 'artifact-sha256'];
+  const artifact = ({ kind, type, parameters, expected, pageCount }) => ({
+    id: artifactId, documentId: document.id, displayName: 'production-cmyk.pdf', mediaType: 'application/pdf',
+    size: 2_048, sha256: outputSha256, filePath: '/private/production-cmyk.pdf', privateBytes: Buffer.from('PDF'), createdAt,
+    operation: createOperationProvenance({
+      id: operationId, type, inputs: [{ documentId: document.id, sha256: document.sha256, role: 'source' }], parameters, expected,
+      validation: { passed: true, validators: validators(kind), outputSha256, pageCount, textSha256: 'd'.repeat(64) }, completedAt: createdAt,
+    }),
+  });
+  const cmykProfile = {
+    id: 'ghostscript-default-cmyk', description: 'Ghostscript bundled default CMYK profile', version: '10.0.0',
+    deviceClass: 'output', colorSpace: 'CMYK', connectionSpace: 'Lab', renderingIntent: 1, size: 512, sha256: profileSha256, tagCount: 4,
+  };
+  prepress.convertToCmyk = async () => ({
+    kind: 'icc-cmyk-artifact', schemaVersion: 1, sourceDigest: document.sha256,
+    artifact: artifact({ kind: 'cmyk', type: 'ghostscript-icc-cmyk', pageCount: 2,
+      parameters: { profileId: cmykProfile.id, profileSha256, renderingIntent: 'relative-colorimetric', blackPointCompensation: true, preserveSeparations: true, overrideEmbeddedIcc: false },
+      expected: { pageCount: 2, outputColorSpace: 'CMYK-targeted', rasterized: false } }),
+    profile: cmykProfile,
+    recipe: { colorConversionStrategy: 'CMYK', renderingIntent: 'relative-colorimetric', blackPointCompensation: true, preservesSeparationAndDeviceN: true, overrideEmbeddedIcc: false, downsampling: false },
+    receipt: { engine: { name: 'Ghostscript', version: '10.0.0' }, outputSha256, pageCount: 2, pageGeometryPreserved: true, textExtractionEquivalent: true, everyPageRendered: true, outputIntentEmbeddedOrValidated: false, pdfXValidated: false },
+    authoritative: false,
+    limitations: ['This is CMYK-targeted normalization through an exact local ICC profile, not PDF/X, GWG, Ghent, or press certification.', 'Ghostscript does not colorimetrically retarget existing DeviceCMYK values; Separation and DeviceN colorants are preserved rather than eliminated.', 'No PDF OutputIntent is assigned or validated, and complex transparency, optional content, annotations, links, and metadata may be rewritten.'],
+  });
+  prepress.createImposition = async () => {
+    const layout = { id: '2x1', across: 2, down: 1, order: 'upper-left-row-major', sourcePageCount: 3, sheetCount: 2, sourcePage: { widthPoints: 612, heightPoints: 792, rotation: 0 }, sheet: { widthPoints: 1224, heightPoints: 792 }, marks: 'none' };
+    return {
+      kind: 'imposition-artifact', schemaVersion: 1, sourceDigest: document.sha256,
+      artifact: artifact({ kind: 'imposition', type: 'ghostscript-nup-imposition', pageCount: 2,
+        parameters: { layout: '2x1', across: 2, down: 1, order: 'upper-left-row-major', marks: false },
+        expected: { pageCount: 2, sheetWidthPoints: 1224, sheetHeightPoints: 792, rasterized: false } }),
+      layout,
+      receipt: { engine: { name: 'Ghostscript', version: '10.0.0' }, outputSha256, pageCount: 2, vectorOrientedPdfwriteRewrite: true, unconditionalVectorPreservationClaim: false, textExtractionEquivalent: true, everySheetRendered: true, pdfXValidated: false },
+      authoritative: false,
+      limitations: ['This is bounded row-major N-up, not booklet, signature, creep, gutter, step-and-repeat, or production imposition.', 'Printer marks are unavailable because the installed engine has no validated production marks contract.', 'Ghostscript writes a new vector-oriented PDF but may rewrite or rasterize unsupported constructs; links, destinations, tags, annotations, forms, optional content, and signatures are not preserved by contract.'],
+    };
+  };
   const result = await invoke(handler, { method: 'POST', url: `/api/documents/${document.id}/prepress`, headers, body: JSON.stringify({ operation: 'separations', page: 1, dpi: 144 }) });
   assert.equal(result.statusCode, 200);
   assert.deepEqual(JSON.parse(result.body).result.kind, 'separations');
@@ -158,7 +202,8 @@ test('authenticated prepress endpoint exposes only bounded named operations', as
   assert.equal(JSON.stringify(JSON.parse(result.body)).includes('/private/'), false);
   const preflight = await invoke(handler, { method: 'POST', url: `/api/documents/${document.id}/prepress`, headers, body: JSON.stringify({ operation: 'preflight', profile: 'archive-review' }) });
   assert.equal(JSON.parse(preflight.body).result.kind, 'preflight-review');
-  assert.equal(JSON.parse(preflight.body).result.options.profile, 'archive-review');
+  assert.equal(JSON.parse(preflight.body).result.profile.id, 'archive-review');
+  assert.equal(JSON.parse(preflight.body).result.document.sha256, document.sha256);
   const invalidProfile = await invoke(handler, { method: 'POST', url: `/api/documents/${document.id}/prepress`, headers, body: JSON.stringify({ operation: 'preflight', profile: 'PDF/X-4' }) });
   assert.equal(invalidProfile.statusCode, 400);
   assert.equal(JSON.parse(invalidProfile.body).error.code, 'INVALID_PREFLIGHT_PROFILE');
@@ -169,11 +214,20 @@ test('authenticated prepress endpoint exposes only bounded named operations', as
   const invalidBody = await invoke(handler, { method: 'POST', url: `/api/documents/${document.id}/prepress`, headers, body: JSON.stringify({ operation: 'ink-coverage', dpi: 144 }) });
   assert.equal(invalidBody.statusCode, 400); assert.equal(JSON.parse(invalidBody.body).error.code, 'INVALID_PREPRESS_OPTIONS');
   const cmyk = await invoke(handler, { method: 'POST', url: `/api/documents/${document.id}/prepress`, headers, body: JSON.stringify({ operation: 'icc-convert', profile: 'ghostscript-default-cmyk' }) });
-  assert.equal(JSON.parse(cmyk.body).result.kind, 'icc-cmyk-artifact');
+  const cmykBody = JSON.parse(cmyk.body);
+  assert.deepEqual(Object.keys(cmykBody.result), ['kind', 'schemaVersion', 'sourceDigest', 'artifact', 'authoritative', 'limitations', 'profile', 'recipe', 'receipt']);
+  assert.equal(cmykBody.result.kind, 'icc-cmyk-artifact');
+  assert.deepEqual(Object.keys(cmykBody.result.artifact), ['id', 'documentId', 'displayName', 'mediaType', 'size', 'sha256', 'operation', 'createdAt']);
+  assert.equal(JSON.stringify(cmykBody).includes('/private/'), false);
+  assert.equal(JSON.stringify(cmykBody).includes('privateBytes'), false);
   const invalidCmyk = await invoke(handler, { method: 'POST', url: `/api/documents/${document.id}/prepress`, headers, body: JSON.stringify({ operation: 'icc-convert', profile: 'custom' }) });
   assert.equal(invalidCmyk.statusCode, 400); assert.equal(JSON.parse(invalidCmyk.body).error.code, 'INVALID_ICC_PROFILE');
-  const imposed = await invoke(handler, { method: 'POST', url: `/api/documents/${document.id}/prepress`, headers, body: JSON.stringify({ operation: 'imposition', layout: '2x2', marks: true }) });
-  assert.deepEqual(JSON.parse(imposed.body).result.options.layout, '2x2');
+  const imposed = await invoke(handler, { method: 'POST', url: `/api/documents/${document.id}/prepress`, headers, body: JSON.stringify({ operation: 'imposition', layout: '2x1', marks: false }) });
+  const imposedBody = JSON.parse(imposed.body);
+  assert.deepEqual(Object.keys(imposedBody.result), ['kind', 'schemaVersion', 'sourceDigest', 'artifact', 'authoritative', 'limitations', 'layout', 'receipt']);
+  assert.equal(imposedBody.result.layout.id, '2x1');
+  assert.equal(JSON.stringify(imposedBody).includes('/private/'), false);
+  assert.equal(JSON.stringify(imposedBody).includes('privateBytes'), false);
   const invalidImposition = await invoke(handler, { method: 'POST', url: `/api/documents/${document.id}/prepress`, headers, body: JSON.stringify({ operation: 'imposition', layout: '3x1', marks: 'yes' }) });
   assert.equal(invalidImposition.statusCode, 400); assert.equal(JSON.parse(invalidImposition.body).error.code, 'INVALID_IMPOSITION_OPTIONS');
   const production = await invoke(handler, { method: 'POST', url: `/api/documents/${document.id}/prepress`, headers, body: JSON.stringify({ operation: 'production-validation' }) });

@@ -24,6 +24,7 @@ async function dispatchMutation(adapter, normalized, workspace, requestPath, opt
   if (normalized.outlineBookmarkRename) return adapter.renameOutlineBookmark(input, options);
   if (normalized.lineAnnotation) return adapter.addLineAnnotation(input, options);
   if (normalized.inkAnnotation) return adapter.addInkAnnotation(input, options);
+  if (normalized.targeted) return adapter.targetedMutate(input, options);
   return adapter.mutate(input, options);
 }
 

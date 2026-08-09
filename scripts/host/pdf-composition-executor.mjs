@@ -21,13 +21,57 @@ import { parsePdfInfo } from './pdf-service-foundation.mjs';
 
 const COPY_MAX_BYTES = 64 * 1024 * 1024;
 
+function active(deadline, externalSignal) {
+  if (externalSignal?.aborted || deadline.signal.aborted) {
+    throw deadline.signal.reason ?? new Error('Page composition was cancelled.');
+  }
+}
+
 export class PdfCompositionExecutor {
-  #store; #adapter; #validation;
+  #store; #adapter; #validation; #sourceManifestCache = new Map();
 
   constructor({ store, adapter, validation }) {
     this.#store = store;
     this.#adapter = adapter;
     this.#validation = validation;
+  }
+
+  deleteArtifact(artifactId) { return this.#store.deleteArtifact(artifactId); }
+
+  async #sourceManifest(documentId, source, pageCount, workspace, signal, prefix) {
+    const cacheKey = `${documentId}:${source.sha256}`;
+    let pending = this.#sourceManifestCache.get(cacheKey);
+    if (!pending) {
+      pending = this.#validation.semanticManifest(
+        this.#store.getSourcePath(documentId), pageCount, workspace, { signal, prefix },
+      );
+      this.#sourceManifestCache.set(cacheKey, pending);
+      try {
+        return await pending;
+      } catch (error) {
+        this.#sourceManifestCache.delete(cacheKey);
+        throw error;
+      }
+    }
+    return pending;
+  }
+
+  async #cleanupLifecycle({ workspace, quota, deadline, artifact, completed, operationError }) {
+    quota?.stop();
+    deadline.dispose();
+    let workspaceError = null;
+    if (workspace) {
+      try { await this.#store.cleanupJob(workspace); } catch (error) { workspaceError = error; }
+    }
+    let revocationError = null;
+    if (artifact?.id && (!completed || workspaceError)) {
+      try { await this.#store.deleteArtifact(artifact.id); } catch (error) { revocationError = error; }
+    }
+    if (workspaceError || revocationError) {
+      throw new HostError('COMPOSITION_CLEANUP_FAILED', 'Page composition could not clean its workspace or revoke its incomplete artifact.', 500, {
+        cause: new AggregateError([operationError, workspaceError, revocationError].filter(Boolean)),
+      });
+    }
   }
 
   async composePages(primaryDocumentId, selections, {
@@ -43,6 +87,9 @@ export class PdfCompositionExecutor {
     const deadline = createDeadline(externalSignal, MAX_COMPOSE_JOB_MS);
     let workspace = null;
     let quota = null;
+    let artifact = null;
+    let completed = false;
+    let operationError = null;
     try {
       const sourceIds = [...new Set([primaryDocumentId, ...selected.map(({ documentId }) => documentId)])];
       if (sourceIds.length > MAX_COMPOSE_SOURCES) {
@@ -54,6 +101,11 @@ export class PdfCompositionExecutor {
       await this.#validation.verifySources(sourceIds);
       workspace = await this.#store.createJobWorkspace(primaryDocumentId);
       quota = createWorkspaceQuotaMonitor(workspace, deadline);
+      const sourceManifests = new Map(await Promise.all(sourceIds.map(async (documentId, index) => [
+        documentId,
+        await this.#sourceManifest(documentId, sources.get(documentId), inspections.get(documentId).pageCount, workspace, deadline.signal, `source-${index}-proof`),
+      ])));
+      const expectedManifestPages = selected.map(({ documentId, page }) => sourceManifests.get(documentId).pages[page - 1]);
       const pageFiles = [];
       for (const [index, selection] of selected.entries()) {
         const input = this.#store.getSourcePath(selection.documentId);
@@ -78,6 +130,12 @@ export class PdfCompositionExecutor {
       const derivedInspection = await this.#validation.validateDerivedPdf(combinedPath, {
         expectedPageCount: selected.length, signal: deadline.signal,
       });
+      const outputManifest = await this.#validation.validateCompositionManifest(
+        combinedPath,
+        expectedManifestPages,
+        workspace,
+        { signal: deadline.signal, prefix: 'output-proof' },
+      );
       await Promise.all(pageFiles.filter((filePath) => filePath !== combinedPath)
         .map((filePath) => unlink(filePath).catch(() => {})));
       await quota.check();
@@ -86,7 +144,7 @@ export class PdfCompositionExecutor {
       const stem = basename(primary.displayName, extname(primary.displayName));
       const sourceIndex = new Map(sourceIds.map((documentId, index) => [documentId, index]));
       const expectedSha256 = await this.#validation.digestOutput(combinedPath);
-      return await this.#store.promotePdfArtifact(primaryDocumentId, combinedPath, {
+      artifact = await this.#store.promotePdfArtifact(primaryDocumentId, combinedPath, {
         displayName: `${stem}-${fileLabel}.pdf`, expectedSha256, signal: deadline.signal,
         operation: createOperationProvenance({
           type: operationType,
@@ -96,19 +154,23 @@ export class PdfCompositionExecutor {
           parameters: {
             selections: selected.map(({ documentId, page }) => ({ input: sourceIndex.get(documentId), page })), ...parameters,
           },
-          expected: { pageCount: selected.length },
-          validation: { passed: true, validators: ['source-sha256', 'pdfinfo-page-count'], pageCount: derivedInspection.pageCount },
+          expected: { pageCount: selected.length, manifestSha256: outputManifest.sha256 },
+          validation: { passed: true, validators: ['source-sha256', 'pdfinfo-page-count', 'semantic-page-manifest'], pageCount: derivedInspection.pageCount, manifestSha256: outputManifest.sha256 },
         }),
       });
+      active(deadline, externalSignal);
+      await this.#validation.verifySources(sourceIds);
+      active(deadline, externalSignal);
+      completed = true;
+      return artifact;
     } catch (error) {
-      if (quota?.error) throw quota.error;
-      if (deadline.timedOut) throw new HostError('COMPOSE_JOB_TIMEOUT', 'The derived-page operation exceeded its five-minute deadline.', 504, { cause: error });
-      if (externalSignal?.aborted) throw new HostError('JOB_CANCELLED', 'The derived-page operation was cancelled.', 499, { cause: error });
-      throw mapEngineError(error);
+      if (quota?.error) operationError = quota.error;
+      else if (deadline.timedOut) operationError = new HostError('COMPOSE_JOB_TIMEOUT', 'The derived-page operation exceeded its five-minute deadline.', 504, { cause: error });
+      else if (externalSignal?.aborted) operationError = new HostError('JOB_CANCELLED', 'The derived-page operation was cancelled.', 499, { cause: error });
+      else operationError = mapEngineError(error);
+      throw operationError;
     } finally {
-      quota?.stop();
-      deadline.dispose();
-      if (workspace) await this.#store.cleanupJob(workspace);
+      await this.#cleanupLifecycle({ workspace, quota, deadline, artifact, completed, operationError });
     }
   }
 
@@ -117,6 +179,9 @@ export class PdfCompositionExecutor {
     const deadline = createDeadline(externalSignal, MAX_MERGE_JOB_MS);
     let workspace = null;
     let quota = null;
+    let artifact = null;
+    let completed = false;
+    let operationError = null;
     try {
       const primary = this.#store.getDocument(primaryDocumentId);
       const secondary = this.#store.getDocument(secondaryDocumentId);
@@ -128,6 +193,11 @@ export class PdfCompositionExecutor {
       ]);
       workspace = await this.#store.createJobWorkspace(primaryDocumentId);
       quota = createWorkspaceQuotaMonitor(workspace, deadline);
+      const [primaryManifest, secondaryManifest] = await Promise.all([
+        this.#sourceManifest(primaryDocumentId, primary, primaryInspection.pageCount, workspace, deadline.signal, 'primary-source-proof'),
+        this.#sourceManifest(secondaryDocumentId, secondary, secondaryInspection.pageCount, workspace, deadline.signal, 'secondary-source-proof'),
+      ]);
+      const expectedManifestPages = [...primaryManifest.pages, ...secondaryManifest.pages];
       const output = join(workspace, 'merged.pdf');
       await this.#validation.verifySources([primaryDocumentId, secondaryDocumentId]);
       await this.#adapter.execute('mergeDocuments', { inputs: [primaryPath, secondaryPath], output }, {
@@ -135,12 +205,18 @@ export class PdfCompositionExecutor {
         maxStdoutBytes: 64 * 1024, maxStderrBytes: 256 * 1024,
       });
       await quota.check();
-      await this.#validation.verifySources([secondaryDocumentId]);
+      await this.#validation.verifySources([primaryDocumentId, secondaryDocumentId]);
       const expectedPageCount = primaryInspection.pageCount + secondaryInspection.pageCount;
       const derivedInspection = await this.#validation.validateDerivedPdf(output, { expectedPageCount, signal: deadline.signal });
+      const outputManifest = await this.#validation.validateCompositionManifest(
+        output,
+        expectedManifestPages,
+        workspace,
+        { signal: deadline.signal, prefix: 'merged-output-proof' },
+      );
       const stem = basename(primary.displayName, extname(primary.displayName));
       const expectedSha256 = await this.#validation.digestOutput(output);
-      return await this.#store.promotePdfArtifact(primaryDocumentId, output, {
+      artifact = await this.#store.promotePdfArtifact(primaryDocumentId, output, {
         displayName: `${stem}-merged.pdf`, expectedSha256, signal: deadline.signal,
         operation: createOperationProvenance({
           type: 'merge-documents',
@@ -148,25 +224,29 @@ export class PdfCompositionExecutor {
             { documentId: primaryDocumentId, sha256: primary.sha256, role: 'primary' },
             { documentId: secondaryDocumentId, sha256: secondary.sha256, role: 'secondary' },
           ],
-          parameters: {}, expected: { pageCount: expectedPageCount },
-          validation: { passed: true, validators: ['source-sha256', 'pdfinfo-page-count'], pageCount: derivedInspection.pageCount },
+          parameters: {}, expected: { pageCount: expectedPageCount, manifestSha256: outputManifest.sha256 },
+          validation: { passed: true, validators: ['source-sha256', 'pdfinfo-page-count', 'semantic-page-manifest'], pageCount: derivedInspection.pageCount, manifestSha256: outputManifest.sha256 },
         }),
       });
+      active(deadline, externalSignal);
+      await this.#validation.verifySources([primaryDocumentId, secondaryDocumentId]);
+      active(deadline, externalSignal);
+      completed = true;
+      return artifact;
     } catch (error) {
-      if (quota?.error) throw quota.error;
-      if (deadline.timedOut) throw new HostError('MERGE_JOB_TIMEOUT', 'The merge operation exceeded its two-minute deadline.', 504, { cause: error });
-      if (externalSignal?.aborted) throw new HostError('JOB_CANCELLED', 'The merge operation was cancelled.', 499, { cause: error });
-      throw mapEngineError(error);
+      if (quota?.error) operationError = quota.error;
+      else if (deadline.timedOut) operationError = new HostError('MERGE_JOB_TIMEOUT', 'The merge operation exceeded its two-minute deadline.', 504, { cause: error });
+      else if (externalSignal?.aborted) operationError = new HostError('JOB_CANCELLED', 'The merge operation was cancelled.', 499, { cause: error });
+      else operationError = mapEngineError(error);
+      throw operationError;
     } finally {
-      quota?.stop();
-      deadline.dispose();
-      if (workspace) await this.#store.cleanupJob(workspace);
+      await this.#cleanupLifecycle({ workspace, quota, deadline, artifact, completed, operationError });
     }
   }
 
   async copyPageBetweenDocuments(primaryDocumentId, secondaryDocumentId, request, { signal: externalSignal } = {}) {
     if (primaryDocumentId === secondaryDocumentId) throw new HostError('INVALID_COPY_PAGE', 'Choose distinct primary and secondary PDFs.', 400);
-    const deadline = createDeadline(externalSignal, MAX_COMPOSE_JOB_MS); let workspace = null; let quota = null;
+    const deadline = createDeadline(externalSignal, MAX_COMPOSE_JOB_MS); let workspace = null; let quota = null; let artifact = null; let completed = false; let operationError = null;
     try {
       const primarySource = this.#store.getDocument(primaryDocumentId); const secondarySource = this.#store.getDocument(secondaryDocumentId);
       if (primarySource.size > COPY_MAX_BYTES || secondarySource.size > COPY_MAX_BYTES || primarySource.size < 1 || secondarySource.size < 1) throw new HostError('COPY_PAGE_INPUT_TOO_LARGE', 'Copy-page inputs must be non-empty PDFs no larger than 64 MiB.', 413);
@@ -197,7 +277,8 @@ export class PdfCompositionExecutor {
       if (!isDeepStrictEqual(outputManifest.pages, expectedPages)) throw new HostError('COPY_PAGE_MANIFEST_MISMATCH', 'The copied PDF page manifest does not match the requested source-page order.', 502);
       await Promise.all([assertPrivateSourceCopy({ path: primaryPath, identity: primaryIdentity, expectedSha256: primarySource.sha256, expectedSize: primarySource.size, maximumBytes: COPY_MAX_BYTES }), assertPrivateSourceCopy({ path: secondaryPath, identity: secondaryIdentity, expectedSha256: secondarySource.sha256, expectedSize: secondarySource.size, maximumBytes: COPY_MAX_BYTES })]); await this.#validation.verifySources([primaryDocumentId, secondaryDocumentId]);
       const expectedSha256 = await this.#validation.digestOutput(output); const stem = basename(primarySource.displayName, extname(primarySource.displayName));
-      return await this.#store.promotePdfArtifact(primaryDocumentId, output, { displayName: `${stem}-page-copied.pdf`, expectedSha256, signal: deadline.signal, operation: createOperationProvenance({ type: 'copy-page-between-documents', inputs: [{ documentId: primaryDocumentId, sha256: primarySource.sha256, role: 'primary' }, { documentId: secondaryDocumentId, sha256: secondarySource.sha256, role: 'secondary' }], parameters: { profile: requestChecked.profile, sourcePage: requestChecked.sourcePage, afterPage: requestChecked.afterPage, selections: selections.map(({ role, page }) => ({ input: role === 'primary' ? 0 : 1, page })) }, expected: { pageCount: selections.length, manifestSha256: outputManifest.sha256 }, validation: { passed: true, validators: PDF_COPY_PAGE_VALIDATORS, pageCount: selections.length, manifestSha256: outputManifest.sha256 } }) });
-    } catch (error) { if (quota?.error) throw quota.error; if (deadline.timedOut) throw new HostError('COMPOSE_JOB_TIMEOUT', 'The copy-page operation exceeded its five-minute deadline.', 504, { cause: error }); if (externalSignal?.aborted) throw new HostError('JOB_CANCELLED', 'The copy-page operation was cancelled.', 499, { cause: error }); throw mapEngineError(error); } finally { quota?.stop(); deadline.dispose(); if (workspace) await this.#store.cleanupJob(workspace); }
+      artifact = await this.#store.promotePdfArtifact(primaryDocumentId, output, { displayName: `${stem}-page-copied.pdf`, expectedSha256, signal: deadline.signal, operation: createOperationProvenance({ type: 'copy-page-between-documents', inputs: [{ documentId: primaryDocumentId, sha256: primarySource.sha256, role: 'primary' }, { documentId: secondaryDocumentId, sha256: secondarySource.sha256, role: 'secondary' }], parameters: { profile: requestChecked.profile, sourcePage: requestChecked.sourcePage, afterPage: requestChecked.afterPage, selections: selections.map(({ role, page }) => ({ input: role === 'primary' ? 0 : 1, page })) }, expected: { pageCount: selections.length, manifestSha256: outputManifest.sha256 }, validation: { passed: true, validators: PDF_COPY_PAGE_VALIDATORS, pageCount: selections.length, manifestSha256: outputManifest.sha256 } }) });
+      active(deadline, externalSignal); await this.#validation.verifySources([primaryDocumentId, secondaryDocumentId]); active(deadline, externalSignal); completed = true; return artifact;
+    } catch (error) { if (quota?.error) operationError = quota.error; else if (deadline.timedOut) operationError = new HostError('COMPOSE_JOB_TIMEOUT', 'The copy-page operation exceeded its five-minute deadline.', 504, { cause: error }); else if (externalSignal?.aborted) operationError = new HostError('JOB_CANCELLED', 'The copy-page operation was cancelled.', 499, { cause: error }); else operationError = mapEngineError(error); throw operationError; } finally { await this.#cleanupLifecycle({ workspace, quota, deadline, artifact, completed, operationError }); }
   }
 }

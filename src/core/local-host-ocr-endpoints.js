@@ -1,5 +1,8 @@
 import { PlatenError } from './errors.js';
-import { normalizeOcrBatchRequest, normalizeOcrDocumentRequest, normalizeOcrLayoutRequest, validateOcrBatchManifest, validateOcrDocumentResult, validateOcrLayoutResult } from './ocr-contract.js';
+import { normalizeOcrBatchRequest, normalizeOcrDocumentRequest, normalizeOcrLayoutRequest, validateOcrBatchManifest, validateOcrDocumentResult, validateOcrEditableOutputResult, validateOcrLayoutResult } from './ocr-contract.js';
+import { exactObject, OPAQUE_ID_PATTERN } from './pdfkit-client-contract-shared.js';
+
+const SHA256 = /^[a-f0-9]{64}$/u;
 
 export function createOcrEndpoints({ json }) {
   return {
@@ -20,6 +23,23 @@ export function createOcrEndpoints({ json }) {
       const normalized = normalizeOcrLayoutRequest(options, requestedLanguages);
       return json(`/api/documents/${encodeURIComponent(documentId)}/ocr-analysis`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(normalized), signal }).then((body) => validateOcrLayoutResult(body.result));
     },
+    ocrEditableOutput(documentId, sourceSha256, { signal } = {}) {
+      if (!OPAQUE_ID_PATTERN.test(documentId ?? '') || !SHA256.test(sourceSha256 ?? '')
+        || !exactObject({ signal }, ['signal']) || (signal !== undefined && !(signal instanceof AbortSignal))) {
+        throw new TypeError('OCR editable output options are invalid.');
+      }
+      return json(`/api/documents/${encodeURIComponent(documentId)}/ocr-editable`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sourceSha256, language: 'eng' }), signal,
+      }).then((body) => {
+        const result = validateOcrEditableOutputResult(body?.result ?? body);
+        if (result.sourceDigest !== sourceSha256 || result.artifact.documentId !== documentId) {
+          throw new PlatenError('INVALID_LOCAL_HOST', 'The local host returned editable OCR output for a different source.');
+        }
+        return result;
+      });
+    },
+    exportOcrEditable(...args) { return this.ocrEditableOutput(...args); },
     ocrBatch(request, installedLanguages, { signal } = {}) {
       const normalized = normalizeOcrBatchRequest(request, installedLanguages);
       return json('/api/ocr/batch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(normalized), signal }).then((body) => {

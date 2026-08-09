@@ -1,4 +1,6 @@
 import { nextRotation, nextZoom, requestElementFullscreen } from '../core/ui-actions.js';
+import { deriveViewerGridVisibility } from '../core/viewer-grid-overlay.js';
+import { nextViewerPageLayout } from '../core/viewer-page-layout.js';
 
 function createShellActions(context) {
   const {
@@ -48,7 +50,18 @@ function createViewerModeActions(context) {
     'toggle-split-view': () => viewer.setViewerMode(
       state.viewerMode === 'split' ? 'native' : 'split',
     ),
-    'toggle-grid': () => { state.showGrid = !state.showGrid; render(); },
+    'cycle-page-layout': () => {
+      state.viewerPageLayout = nextViewerPageLayout(state.viewerPageLayout ?? 'single');
+      render();
+    },
+    'toggle-grid': () => {
+      state.showGrid = deriveViewerGridVisibility({
+        requested: !state.showGrid,
+        document: state.document,
+        analysis: state.analysis,
+      });
+      render();
+    },
     'history-back': () => viewer.navigateHistory(-1),
     'history-forward': () => viewer.navigateHistory(1),
     'read-selected-page': viewer.readSelectedPage,

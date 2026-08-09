@@ -91,13 +91,16 @@ function admit(source, request) {
   let structure; try { structure = parseClassicPdfStructure(source); } catch { unsupported('Only valid classic-xref PDFs are admitted.'); }
   if (structure.revisions.length !== 1) unsupported('Only one unsigned source revision is admitted.');
   const catalog = resolvedDictionary(structure, structure.root, 'catalog'); if (catalog.get('Type')?.value !== 'Catalog' || catalog.get('Pages')?.type !== 'ref') unsupported('The catalog is outside the passive form subset.');
-  const pages = []; pageBoxWalk(structure, ref(catalog.get('Pages')), null, pages, new Set()); if (pages.length < 1 || pages.length > 10_000) unsupported('The page count is outside the bound.');
+  const pages = []; pageBoxWalk(structure, ref(catalog.get('Pages')), null, pages, new Set()); if (pages.length < 1) unsupported('The page tree is empty.');
   const seenObjects = new Set(); for (const entry of structure.effective.values()) if (entry.status === 'n') { const object = resolveClassicPdfObject(structure, ref({ type: 'ref', object: entry.object, generation: entry.generation })); rejectActiveValue(object.value, `object ${entry.object}`, structure, seenObjects); }
   const acroRef = catalog.get('AcroForm'); if (acroRef?.type !== 'ref') unsupported('An existing AcroForm is required.'); const acro = resolvedDictionary(structure, ref(acroRef), 'AcroForm'); if (acro.get('Fields')?.type !== 'array') unsupported('The AcroForm field tree is malformed.');
   const selected = pages[request.target.page - 1]; if (!selected) invalid('target.page is outside the document.'); const annots = selected.entries.get('Annots'); if (annots?.type !== 'array' || request.target.annotationIndex >= annots.values.length) invalid('target does not identify an existing page widget.');
   const annotationRefs = annots.values.map((value) => ref(value)); const unique = new Set(annotationRefs.map((value) => `${value.object}:${value.generation}`)); if (unique.size !== annotationRefs.length) unsupported('The page annotation inventory contains duplicate widget references.');
   const widgetRef = annotationRefs[request.target.annotationIndex]; const widget = resolvedDictionary(structure, widgetRef, 'target widget'); if (widget.get('Type')?.value !== 'Annot' || widget.get('Subtype')?.value !== 'Widget') invalid('target does not identify a widget.');
+  const inheritedFlags = inheritedFieldEntry(structure, widgetRef, 'Ff');
   const type = fieldType(inheritedFieldEntry(structure, widgetRef, 'FT')); if (!['text', 'button', 'choice'].includes(type)) unsupported('Only non-signature AcroForm widgets are admitted.');
+  if (type === 'button' && inheritedFlags?.type === 'number' && (inheritedFlags.value & 65536) !== 0) unsupported('Push buttons are not admitted.');
+  if (pages.length !== 1 && !(type === 'button' && inheritedFlags?.type === 'number' && (inheritedFlags.value & 32768) !== 0)) unsupported('Only single-page passive AcroForms are admitted.');
   if (fingerprint(request.sourceSha256, request.target.page, request.target.annotationIndex, type) !== request.target.fingerprint) invalid('target fingerprint does not match the trusted source inventory.');
   const fieldRefs = acro.get('Fields').values.map((value) => ref(value)); const fieldSet = new Set(); const fieldWidgets = new Set();
   function walkField(reference, stack = new Set()) {

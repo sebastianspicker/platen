@@ -15,6 +15,14 @@ import { runPrepressCommand } from './cli/commands/prepress.mjs';
 import { runAutomationCommand } from './cli/commands/automation.mjs';
 import { runComparisonCommand } from './cli/commands/comparison.mjs';
 import { runConversionCommand } from './cli/commands/conversion.mjs';
+import { runOfficeConversionCommand } from './cli/commands/office-conversion.mjs';
+import { runHtmlConversionCommand } from './cli/commands/html-conversion.mjs';
+import { runPostScriptConversionCommand } from './cli/commands/postscript-conversion.mjs';
+import { runCadToPdfCommand } from './cli/commands/cad-to-pdf.mjs';
+import { runPrintToPdfCommand } from './cli/commands/print-to-pdf.mjs';
+import { runStructuredExportLocalCommand } from './cli/commands/structured-export.mjs';
+import { runPageImageExportCommand } from './cli/commands/page-image-export.mjs';
+import { runOptimizeCompressCommand } from './cli/commands/optimize-compress.mjs';
 import { runPluginAllowlistCommand } from './cli/commands/plugin-allowlist.mjs';
 import { runLayerDefaultsCommand } from './cli/commands/layer-defaults.mjs';
 import { runCertificateSignCommand, runSigningIdentitiesCommand } from './cli/commands/signing.mjs';
@@ -31,6 +39,7 @@ import { runSpecialistContentCommand } from './cli/commands/specialist-content.m
 import { runFullPageRedactionBatchCommand } from './cli/commands/full-page-redaction.mjs';
 import { runPrinterMarksCommand } from './cli/commands/printer-marks.mjs';
 import { runPageBackgroundCommand } from './cli/commands/page-background.mjs';
+import { runPageWatermarkCommand } from './cli/commands/page-watermark.mjs';
 import { runSnapshotRegionCommand } from './cli/commands/snapshot-region.mjs';
 import { runScannerDiscoveryCommand } from './cli/commands/scanner-discovery.mjs';
 import { runScanAppendCommand } from './cli/commands/scan-append.mjs';
@@ -38,9 +47,15 @@ import { runAcroFormChoiceCommand } from './cli/commands/acroform-choice.mjs';
 import { runBatesNumberingCommand } from './cli/commands/bates-numbering.mjs';
 import { runPageTransitionCommand } from './cli/commands/page-transition.mjs';
 import { runPluginPackageCommand } from './cli/commands/plugin-package.mjs';
+import { runAdminPolicyCommand } from './cli/commands/admin-policy.mjs';
+import { runAdminAuditCommand } from './cli/commands/admin-audit.mjs';
 import { runFastWebViewCommand } from './cli/commands/fast-web-view.mjs';
 import { runOoxmlExportCommand } from './cli/commands/ooxml-export.mjs';
 import { runProfessionalCapabilityCommand } from './cli/commands/professional-capability.mjs';
+import { runTextReflowCommand } from './cli/commands/text-reflow.mjs';
+import { createAutomationRecipeCliAuthority } from './cli/automation-recipe-authority.mjs';
+import { createAutomationConditionalCliAuthority } from './cli/automation-conditional-authority.mjs';
+import { createAutomationSubmitCliAuthority } from './cli/automation-submit-authority.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 export { CLI_HELP, parseCliArguments };
@@ -48,6 +63,14 @@ export { CLI_HELP, parseCliArguments };
 export async function runCli(argv, { createApplication = createLocalApplication, stdout = process.stdout, applicationRoot = root, signal } = {}) {
   const command = parseCliArguments(argv);
   if (command.command === 'help') { await runtime.emit(stdout, `${CLI_HELP}\n`); return; }
+  const automationRecipeAuthority = command.command === 'automation-run-recipe'
+    ? createAutomationRecipeCliAuthority(command) : null;
+  const automationConditionalAuthority = command.command === 'automation-run-conditional'
+    ? createAutomationConditionalCliAuthority(command) : null;
+  const automationSubmitAuthority = command.command.startsWith('automation-submit')
+    ? createAutomationSubmitCliAuthority(command) : null;
+  const automationCapabilityAuthority = automationRecipeAuthority ?? automationConditionalAuthority
+    ?? automationSubmitAuthority;
   const application = await createApplication({
     root: applicationRoot,
     host: '127.0.0.1',
@@ -55,6 +78,8 @@ export async function runCli(argv, { createApplication = createLocalApplication,
     automationRoot: command.automationRoot ?? null,
     ...(command.trustRoot ? { publisherTrustRoot: command.trustRoot } : {}),
     ...(command.pluginRoot ? { pluginPackageRoot: command.pluginRoot } : {}),
+    ...(command.policyRoot ? { adminPolicyRoot: command.policyRoot } : {}),
+    ...(automationCapabilityAuthority ? { automationCapabilityAuthority } : {}),
   });
   try {
     runtime.cancelled(signal);
@@ -69,18 +94,35 @@ export async function runCli(argv, { createApplication = createLocalApplication,
       await runPluginAllowlistCommand(application, command, stdout, signal, runtime);
       return;
     }
+    if (command.command === 'admin.policy-configuration') {
+      await runAdminPolicyCommand(application, command, stdout, signal, runtime);
+      return;
+    }
+    if (command.command === 'admin.audit-telemetry') {
+      await runAdminAuditCommand(application, command, stdout, signal, runtime);
+      return;
+    }
     if (command.command === 'admin.plugin-package') {
       await runPluginPackageCommand(application, command, stdout, signal, runtime);
       return;
     }
     if (command.command === 'compare-content') { await runComparisonCommand(application, command, stdout, signal, runtime); return; }
     if (command.command === 'convert-local') { await runConversionCommand(application, command, stdout, signal, runtime); return; }
+    if (command.command === 'convert-office-local') { await runOfficeConversionCommand(application, command, stdout, signal, runtime); return; }
+    if (command.command === 'convert-html-local') { await runHtmlConversionCommand(application, command, stdout, signal, runtime); return; }
+    if (command.command === 'convert-postscript-local') { await runPostScriptConversionCommand(application, command, stdout, signal, runtime); return; }
+    if (command.command === 'create-cad-pdf-local') { await runCadToPdfCommand(application, command, stdout, signal, runtime); return; }
+    if (command.command === 'print-to-pdf-local') { await runPrintToPdfCommand(application, command, stdout, signal, runtime); return; }
     if (command.command === 'create-blank' || command.command === 'inspect' || command.command === 'text' || command.command === 'accessibility-review' || command.command === 'signature-review') { await runDocumentCommand(application, command, stdout, signal, runtime); return; }
     if (command.command === 'fast-web-view') { await runFastWebViewCommand(application, command, await runtime.uploadPdf(application, command.input, signal), stdout, signal, runtime); return; }
     if (command.command === 'ocr' || command.command === 'ocr-layout') { await runOcrCommand(application, command, stdout, signal, runtime); return; }
     const document = await runtime.uploadPdf(application, command.input, signal);
+    if (command.command === 'export-structured-local') { await runStructuredExportLocalCommand(application, command, document, stdout, signal, runtime); return; }
+    if (command.command === 'export-page-png-local') { await runPageImageExportCommand(application, command, document, stdout, signal, runtime); return; }
+    if (command.command === 'optimize-compress-local') { await runOptimizeCompressCommand(application, command, document, stdout, signal, runtime); return; }
     if (command.command === 'accessibility-metadata') { await runAccessibilityMetadataCommand(application, command, document, stdout, signal, runtime); return; }
     if (command.command === 'layer-defaults') { await runLayerDefaultsCommand(application, command, document, stdout, signal, runtime); return; }
+    if (command.command === 'text-reflow') { await runTextReflowCommand(application, command, document, stdout, signal, runtime); return; }
     if (command.command === 'certificate-sign') { await runCertificateSignCommand(application, command, document, stdout, signal, runtime); return; }
     if (command.command === 'sanitize-hidden-data') { await runHiddenDataSanitizationCommand(application, command, document, stdout, signal, runtime); return; }
     if (command.command === 'add-checkbox') { await runAcroFormCheckboxCommand(application, command, document, stdout, signal, runtime); return; }
@@ -101,6 +143,7 @@ export async function runCli(argv, { createApplication = createLocalApplication,
     if (command.command === 'redact-pages') { await runFullPageRedactionBatchCommand(application, command, document, stdout, signal, runtime); return; }
     if (command.command === 'printer-marks') { await runPrinterMarksCommand(application, command, document, stdout, signal, runtime); return; }
     if (command.command === 'page-background') { await runPageBackgroundCommand(application, command, document, stdout, signal, runtime); return; }
+    if (command.command === 'page-watermark') { await runPageWatermarkCommand(application, command, document, stdout, signal, runtime); return; }
     if (command.command === 'snapshot-region') { await runSnapshotRegionCommand(application, command, document, stdout, signal, runtime); return; }
     if (command.command === 'export-ooxml') { await runOoxmlExportCommand(application, command, document, stdout, signal, runtime); return; }
     if (command.command === 'scan-append') { await runScanAppendCommand(application, command, document, stdout, signal, runtime); return; }

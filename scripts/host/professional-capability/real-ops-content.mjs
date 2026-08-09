@@ -3,19 +3,16 @@
  */
 import { createHash, createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 import { createBlankPdf, createTextPdf } from '../pdf-factory.mjs';
-import { preparePdfSignatureContainer, embedDetachedCms, getPreparedPdfSignatureBytesToSign, inspectPdfSignatureContainer } from '../pdf-signature-container-writer.mjs';
 import { writeFullPageRedaction, FULL_PAGE_REDACTION_PROFILE } from '../pdf-full-page-redaction-writer.mjs';
 import { preparePdfAcroFormTextField, inspectPdfAcroFormTextField, PDF_ACROFORM_TEXT_FIELD_PROFILE } from '../pdf-acroform-text-field-writer.mjs';
 import { writeIncrementalAecMeasureDictionary, inspectIncrementalAecMeasureDictionary } from '../pdf-aec-measure-writer.mjs';
 import { buildPdfHiddenDataSanitization, PDF_HIDDEN_DATA_SANITIZER_PROFILE } from '../pdf-hidden-data-sanitizer.mjs';
-import { writePdfTextEdit } from '../pdf-text-edit-writer.mjs';
-import { PDF_TEXT_EDIT_PROFILE } from '../pdf-text-edit-contract.mjs';
 import { diffTokens } from '../comparison-algorithms.mjs';
 import { pdfUtf16BeString } from '../pdf-classic-text-string.mjs';
 import { parsePdfStructure, resolvePdfObject } from '../pdf-classic-structure.mjs';
 import { planPdfObjectTransaction } from '../pdf-classic-object-transaction.mjs';
 import { pdfDictionary } from '../pdf-classic-syntax.mjs';
-import { result, fail, requireString, requireBytes, sha256 } from './support.mjs';
+import { result, fail, requireString, requireBytes } from './support.mjs';
 import {
   classicPassivePdf,
   redactionFixture,
@@ -25,12 +22,7 @@ import {
   editableTextPdf,
   digest,
 } from './fixtures.mjs';
-
-function derCmsStub(payload = Buffer.from('local-cms-v1')) {
-  // Minimal definite-length SEQUENCE wrapping opaque content for container embedder.
-  const inner = Buffer.concat([Buffer.from([0x04, payload.length]), payload]);
-  return Buffer.concat([Buffer.from([0x30, inner.length]), inner]);
-}
+import { textEditWithRetainedBoundary } from './text-edit-retained-boundary.mjs';
 
 export function opFormsAuthor(ctx = {}) {
   const source = requireBytes(ctx.sourcePdf ?? ctx.sourceBytes ?? formFixture(), 'sourcePdf');
@@ -205,37 +197,8 @@ function aecFixtureLine() {
   return Buffer.from(chunks.join(''), 'latin1');
 }
 
-export function opEditText(ctx = {}) {
-  const find = requireString(ctx.find ?? 'hello world', 'find', { min: 1, max: 200 });
-  const replace = requireString(ctx.replace ?? find.toUpperCase(), 'replace', { min: 1, max: 200 });
-  if (Buffer.byteLength(find, 'latin1') !== Buffer.byteLength(replace, 'latin1')) {
-    fail('INVALID_TEXT_EDIT', 'Find/replace must be equal length for the pure writer subset.', 400);
-  }
-  const source = requireBytes(ctx.sourcePdf ?? ctx.sourceBytes ?? editableTextPdf(find), 'sourcePdf');
-  const written = writePdfTextEdit(source, {
-    profile: PDF_TEXT_EDIT_PROFILE,
-    page: Number.isSafeInteger(ctx.page) ? ctx.page : 1,
-    find,
-    replace,
-  });
-  // Incremental edit preserves the source byte prefix; proof.replacementCount is authoritative.
-  if (written.proof?.replacementCount !== 1) {
-    fail('TEXT_EDIT_INCOMPLETE', 'Expected exactly one text replacement.', 502);
-  }
-  if (!written.bytes.includes(Buffer.from(replace, 'latin1'))) {
-    fail('TEXT_EDIT_MISSING_REPLACE', 'Replace text not present after edit.', 502);
-  }
-  return result('edit.text', {
-    method: 'local-pdf-text-edit-writer',
-    sourceSha256: digest(source),
-    outputSha256: digest(written.bytes),
-    pdf: written.bytes,
-    bytes: written.bytes.length,
-    proof: written.proof,
-    find,
-    replace,
-    replacementCount: written.proof.replacementCount,
-  });
+export async function opEditText(ctx = {}) {
+  return textEditWithRetainedBoundary(ctx);
 }
 
 export function opCompareContent(ctx = {}) {

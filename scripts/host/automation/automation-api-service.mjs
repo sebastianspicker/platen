@@ -1,17 +1,8 @@
 import { types as nodeTypes } from 'node:util';
 import { HostError, asHostError } from '../host-error.mjs';
-import {
-  AUTOMATION_FULL_PAGE_REDACTION_TYPE,
-  AUTOMATION_INSPECT_TYPE,
-  AUTOMATION_INSPECT_PRESET,
-  AUTOMATION_OCR_TYPE,
-  AUTOMATION_OCR_PRESET,
-  AUTOMATION_OUTPUT_INTENT_TYPE,
-  AUTOMATION_OUTPUT_INTENT_PRESET,
-  OPAQUE_ID,
-  SHA256,
-} from './automation-operation-contract.mjs';
+import { AUTOMATION_FULL_PAGE_REDACTION_TYPE, AUTOMATION_INSPECT_TYPE, AUTOMATION_INSPECT_PRESET, AUTOMATION_OCR_TYPE, AUTOMATION_OCR_PRESET, AUTOMATION_OUTPUT_INTENT_TYPE, AUTOMATION_OUTPUT_INTENT_PRESET, OPAQUE_ID, SHA256 } from './automation-operation-contract.mjs';
 import { AUTOMATION_SEQUENCE_TYPE } from './automation-sequence-contract.mjs';
+import { sameSubmissionData, sourceTransaction } from './automation-api-submission.mjs';
 import {
   apiFail,
   normalizeAutomationApiCancelRequest,
@@ -33,12 +24,7 @@ const QUEUE_ERROR_MAP = Object.freeze({
   INVALID_QUEUE_JOB_TYPE: ['AUTOMATION_API_OPERATION_DENIED', 403],
   QUEUE_LEASE_CONFLICT: ['AUTOMATION_API_QUEUE_CONFLICT', 409],
 });
-const API_ERROR_CODES = new Set([
-  'AUTOMATION_API_CAPABILITY_DENIED', 'AUTOMATION_API_RESOURCE_NOT_FOUND',
-  'AUTOMATION_API_RESULT_INVALID', 'AUTOMATION_API_REPLAY_CONFLICT',
-  'AUTOMATION_API_OPERATION_DENIED', 'AUTOMATION_API_GRANT_MISMATCH',
-  'AUTOMATION_API_SOURCE_NOT_FOUND', 'AUTOMATION_API_OUTPUT_NOT_FOUND',
-]);
+const API_ERROR_CODES = new Set(['AUTOMATION_API_CAPABILITY_DENIED', 'AUTOMATION_API_RESOURCE_NOT_FOUND', 'AUTOMATION_API_RESULT_INVALID', 'AUTOMATION_API_REPLAY_CONFLICT', 'AUTOMATION_API_OPERATION_DENIED', 'AUTOMATION_API_GRANT_MISMATCH', 'AUTOMATION_API_SOURCE_NOT_FOUND', 'AUTOMATION_API_OUTPUT_NOT_FOUND', 'AUTOMATION_API_ADMISSION_UNCERTAIN', 'AUTOMATION_API_ADMISSION_CONFLICT', 'AUTOMATION_API_SOURCE_COMMIT_UNCERTAIN']);
 const DURABLE_AUTOMATION_TYPES = new Set([
   AUTOMATION_FULL_PAGE_REDACTION_TYPE,
   AUTOMATION_INSPECT_TYPE,
@@ -102,6 +88,7 @@ function publicJob(job) {
 function sourceBinding(opened, expected) {
   plain(opened, 'Automation API source');
   if (opened.id !== expected.id || opened.sha256 !== expected.sha256
+    || !Number.isSafeInteger(opened.size) || opened.size < 5
     || !opened.stream || typeof opened.stream.destroy !== 'function') {
     throw new HostError('AUTOMATION_API_SOURCE_NOT_FOUND', 'Automation API source was not found.', 404);
   }
@@ -128,8 +115,9 @@ export class AutomationApiService {
 
   constructor({ queue, registry, sources, worker = null, authority, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)), clock = () => Date.now() } = {}) {
     if (!queue || typeof queue.enqueue !== 'function' || typeof queue.get !== 'function'
-      || typeof queue.cancel !== 'function' || !registry
-      || typeof sources?.openVerified !== 'function' || typeof sources?.getOutputMetadata !== 'function'
+      || typeof queue.cancel !== 'function' || typeof queue.admission !== 'function' || !registry
+      || typeof sources?.openVerified !== 'function' || typeof sources?.commit !== 'function'
+      || typeof sources?.getOutputMetadata !== 'function'
       || (!worker && typeof queue.cancel !== 'function')
       || (!authority || typeof authority.authorize !== 'function')
       || typeof sleep !== 'function' || typeof clock !== 'function') {
@@ -147,7 +135,7 @@ export class AutomationApiService {
   async #authorize(request, action, operation = null) {
     const capability = requiredCapability(action);
     try {
-      const result = await this.#authority.authorize(request.grant, Object.freeze({
+      const context = {
         principal: request.principal,
         capability,
         action,
@@ -155,7 +143,9 @@ export class AutomationApiService {
         source: request.source ?? null,
         jobId: request.jobId ?? null,
         outputId: request.outputId ?? null,
-      }));
+      };
+      if (action === 'submit' && this.#authority.requiresIdempotencyBinding === true) context.idempotencyKey = request.idempotencyKey;
+      const result = await this.#authority.authorize(request.grant, Object.freeze(context));
       if (result === false) throw new HostError('AUTOMATION_API_CAPABILITY_DENIED', 'Automation API capability grant does not authorize this action.', 403);
     } catch (error) {
       if (error?.code === 'AUTOMATION_API_CAPABILITY_DENIED') throw error;
@@ -269,36 +259,67 @@ export class AutomationApiService {
     }
   }
 
+  #queuedSubmission(value, operation, transaction) {
+    plain(value, 'Automation API queue response');
+    const keys = Reflect.ownKeys(value);
+    if (keys.length !== 2 || keys.some((key) => !['idempotent', 'job'].includes(key))
+      || typeof value.idempotent !== 'boolean') throw new HostError('AUTOMATION_API_RESULT_INVALID', 'Automation API queue response is invalid.', 502);
+    plain(value.job, 'Automation API queue job');
+    const job = publicJob(value.job);
+    if (job.type !== operation.type || !sameSubmissionData(value.job.payload, operation.payload)
+      || !sameSubmissionData(value.job.transaction, { source: transaction, output: null })) {
+      throw new HostError('AUTOMATION_API_RESULT_INVALID', 'Automation API queue job does not match the submitted request.', 502);
+    }
+    return Object.freeze({ job: value.job, idempotent: value.idempotent });
+  }
+
+  async #admittedSubmission(request, operation, transaction) {
+    let admission;
+    try { admission = await this.#queue.admission(request.idempotencyKey); }
+    catch (cause) { throw new HostError('AUTOMATION_API_ADMISSION_UNCERTAIN', 'Automation API admission could not be confirmed.', 503, { cause }); }
+    if (!admission?.existing) return null;
+    try {
+      return this.#queuedSubmission({ job: admission.existing, idempotent: true }, operation, transaction);
+    } catch (cause) {
+      throw new HostError('AUTOMATION_API_ADMISSION_CONFLICT', 'Automation API admission conflicts with the durable queue.', 409, { cause });
+    }
+  }
+
+  async #commitAcceptedSource(source) {
+    try { await this.#sources.commit(source); }
+    catch (cause) { throw new HostError('AUTOMATION_API_SOURCE_COMMIT_UNCERTAIN', 'Automation API admission completed but source finalization requires recovery.', 503, { cause }); }
+  }
+
+  async #finishSubmission(request, accepted, source) {
+    try { this.#rememberJob(request, accepted.job); }
+    catch (cause) {
+      if (cause?.code === 'AUTOMATION_API_REPLAY_CONFLICT') throw cause;
+      throw new HostError('AUTOMATION_API_ADMISSION_UNCERTAIN', 'Automation API admission could not be finalized.', 503, { cause });
+    }
+    await this.#commitAcceptedSource(source);
+    return Object.freeze({ schemaVersion: 1, idempotent: accepted.idempotent, job: publicJob(accepted.job) });
+  }
+
   async submit(value) {
     const request = normalizeAutomationApiSubmitRequest(value);
     await this.#authorize(request, 'submit', request.operation);
     this.#checkIdempotency(request);
     const source = await this.#openSource(request);
+    const transaction = sourceTransaction(source);
     const operation = this.#registryRequest(source, request.operation);
     plain(operation, 'Automation API operation');
     const operationKeys = Reflect.ownKeys(operation);
     if (operationKeys.length !== 2 || operationKeys.some((key) => !['payload', 'type'].includes(key))) {
       throw new HostError('AUTOMATION_API_RESULT_INVALID', 'Automation API operation request is invalid.', 502);
     }
-    let queued;
-    try {
-      queued = await this.#queue.enqueue({ ...operation, idempotencyKey: request.idempotencyKey });
-    } catch (error) { throw mappedError(error); }
-    plain(queued, 'Automation API queue response');
-    const queueKeys = Reflect.ownKeys(queued);
-    if (queueKeys.length !== 2 || queueKeys.some((key) => !['idempotent', 'job'].includes(key))
-      || typeof queued.idempotent !== 'boolean') throw new HostError('AUTOMATION_API_RESULT_INVALID', 'Automation API queue response is invalid.', 502);
-    const checkedJob = publicJob(queued.job);
-    if (checkedJob.type !== operation.type) throw new HostError('AUTOMATION_API_RESULT_INVALID', 'Automation API queue job type does not match the requested operation.', 502);
-    try { this.#rememberJob(request, queued.job); }
+    let accepted;
+    try { accepted = this.#queuedSubmission(await this.#queue.enqueue({ ...operation, idempotencyKey: request.idempotencyKey, transaction }), operation, transaction); }
     catch (error) {
-      // The durable queue is the trusted linearization point. Never cancel a
-      // job already owned by another request; only a validated, newly returned
-      // identity could be safely rolled back, and this boundary deliberately
-      // fails closed if ownership cannot be recorded.
-      throw error;
+      const recovered = await this.#admittedSubmission(request, operation, transaction);
+      if (!recovered) throw mappedError(error);
+      accepted = recovered;
     }
-    return Object.freeze({ schemaVersion: 1, idempotent: queued.idempotent, job: checkedJob });
+    return this.#finishSubmission(request, accepted, source);
   }
 
   async status(value) {

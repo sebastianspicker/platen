@@ -173,6 +173,11 @@ function validateInput(input) {
   if (!input.inspection || !Number.isSafeInteger(input.inspection.pageCount) || input.inspection.pageCount < 1) fail('INVALID_PREFLIGHT_INPUT', 'Preflight requires valid document inspection evidence.');
   if (!input.structure || !Array.isArray(input.structure.pageBoxes) || !input.structure.pageRange) fail('INVALID_PREFLIGHT_INPUT', 'Preflight requires bounded page-box evidence.');
   if (!Array.isArray(input.fonts) || !Array.isArray(input.images) || input.fonts.length > MAX_RESOURCE_RECORDS || input.images.length > MAX_RESOURCE_RECORDS) fail('PREFLIGHT_RESOURCE_LIMIT', 'Preflight resource inventory exceeds the local report limit.', 413);
+  if (input.structure.sourceDigest !== input.document.sha256
+    || input.fonts.some((font) => font?.sourceSha256 !== input.document.sha256)
+    || input.images.some((image) => image?.sourceSha256 !== input.document.sha256)) {
+    fail('INVALID_PREFLIGHT_INPUT', 'Preflight structure and resource evidence must match the immutable source digest.');
+  }
 }
 
 function commonChecks({ inspection, fonts }) {

@@ -120,9 +120,11 @@ test('document reset clears mutable AcroForm state and results', () => {
   value.state.acroFormRadioOptions = [{ label: 'x' }];
   value.state.acroFormStatus = 'success';
   value.state.acroFormResult = { artifact: { displayName: 'x.pdf' } };
+  value.state.pdfkitExistingAnnotationStrokeColor = '#000000';
   resetDocumentState(value.state, () => {}, { opening: false });
   assert.equal(value.state.acroFormCheckboxFieldName, 'check-1');
   assert.equal(value.state.acroFormRadioOptions.length, 2);
   assert.equal(value.state.acroFormStatus, 'idle');
   assert.equal(value.state.acroFormResult, null);
+  assert.equal(value.state.pdfkitExistingAnnotationStrokeColor, '#d32f2f');
 });

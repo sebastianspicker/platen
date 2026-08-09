@@ -93,20 +93,21 @@ export function parseAdminPluginPackage(command, positionals, values) {
   exactPositionals(positionals, 0);
   const action = values.get('action');
   if (!action || !PACKAGE_ACTIONS.includes(action)) fail('CLI_INVALID_OPTION', '--action must be list, install, activate, or rollback.');
-  if (!values.has('plugin-root') || !values.has('trust-root')) fail('CLI_INVALID_OPTION', 'admin.plugin-package requires explicit --plugin-root and --trust-root.');
+  if (!values.has('plugin-root') || !values.has('trust-root') || !values.has('policy-root')) fail('CLI_INVALID_OPTION', 'admin.plugin-package requires explicit --plugin-root, --trust-root, and --policy-root.');
   const pluginRoot = boundedPath(values.get('plugin-root'), 'Plugin root');
   const trustRoot = boundedPath(values.get('trust-root'), 'Trust root');
+  const policyRoot = boundedPath(values.get('policy-root'), 'Policy root');
   const output = values.has('output') ? boundedPath(values.get('output'), 'Output') : null;
-  const allowed = new Set(['action', 'plugin-root', 'trust-root', 'output']);
+  const allowed = new Set(['action', 'plugin-root', 'trust-root', 'policy-root', 'output']);
   if (action === 'list') {
-    if ([...values.keys()].some((key) => !allowed.has(key))) fail('CLI_INVALID_OPTION', 'list only accepts --action, --plugin-root, --trust-root, and optional --output.');
-    return Object.freeze({ command, action, pluginRoot, trustRoot, output });
+    if ([...values.keys()].some((key) => !allowed.has(key))) fail('CLI_INVALID_OPTION', 'list only accepts --action, --plugin-root, --trust-root, --policy-root, and optional --output.');
+    return Object.freeze({ command, action, pluginRoot, trustRoot, policyRoot, output });
   }
   if (action === 'install') {
     const packagePath = values.get('package');
     if (typeof packagePath !== 'string') fail('CLI_INVALID_OPTION', 'install requires --package.');
-    if ([...values.keys()].some((key) => !new Set([...allowed, 'package']).has(key))) fail('CLI_INVALID_OPTION', 'install accepts only --action, --plugin-root, --trust-root, --package, and optional --output.');
-    return Object.freeze({ command, action, pluginRoot, trustRoot, packagePath: boundedPath(packagePath, 'Package'), output });
+    if ([...values.keys()].some((key) => !new Set([...allowed, 'package']).has(key))) fail('CLI_INVALID_OPTION', 'install accepts only --action, --plugin-root, --trust-root, --policy-root, --package, and optional --output.');
+    return Object.freeze({ command, action, pluginRoot, trustRoot, policyRoot, packagePath: boundedPath(packagePath, 'Package'), output });
   }
   const pluginId = values.get('plugin-id');
   if (typeof pluginId !== 'string' || !PLUGIN_ID.test(pluginId)) fail('CLI_INVALID_OPTION', `${action} requires a canonical --plugin-id.`);
@@ -114,5 +115,60 @@ export function parseAdminPluginPackage(command, positionals, values) {
   const version = values.get('version');
   if (action === 'activate' && !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u.test(version ?? '')) fail('CLI_INVALID_OPTION', 'activate requires a canonical --version.');
   if (action === 'rollback' && version !== undefined) fail('CLI_INVALID_OPTION', 'rollback does not accept --version.');
-  return Object.freeze({ command, action, pluginRoot, trustRoot, pluginId, version: version ?? null, output });
+  return Object.freeze({ command, action, pluginRoot, trustRoot, policyRoot, pluginId, version: version ?? null, output });
+}
+
+const POLICY_ACTIONS = Object.freeze(['show', 'set']);
+
+export function parseAdminPolicyConfiguration(command, positionals, values, output) {
+  exactPositionals(positionals, 0);
+  const action = values.get('action');
+  if (!action || !POLICY_ACTIONS.includes(action)) {
+    fail('CLI_INVALID_OPTION', '--action must be show or set.');
+  }
+  if (!values.has('policy-root')) {
+    fail('CLI_INVALID_OPTION', 'admin.policy-configuration requires explicit --policy-root.');
+  }
+  const policyRoot = boundedPath(values.get('policy-root'), 'Policy root');
+  if (action === 'show') {
+    if ([...values.keys()].some((key) => !new Set(['action', 'policy-root', 'output']).has(key))) {
+      fail('CLI_INVALID_OPTION', 'show only accepts --action, --policy-root, and optional --output.');
+    }
+    return Object.freeze({ command, action, policyRoot, output });
+  }
+  if ([...values.keys()].some((key) => !new Set(['action', 'policy-root', 'plugin-package-administration', 'expected-state-sha256', 'output']).has(key))) {
+    fail('CLI_INVALID_OPTION', 'set only accepts --action, --policy-root, --plugin-package-administration, --expected-state-sha256, and optional --output.');
+  }
+  const pluginPackageAdministration = values.get('plugin-package-administration');
+  if (pluginPackageAdministration !== 'enabled' && pluginPackageAdministration !== 'disabled') {
+    fail('CLI_INVALID_OPTION', '--plugin-package-administration must be enabled or disabled.');
+  }
+  const expectedStateSha256 = values.get('expected-state-sha256');
+  if (!/^[a-f0-9]{64}$/u.test(expectedStateSha256 ?? '')) {
+    fail('CLI_INVALID_OPTION', '--expected-state-sha256 must be exact lowercase SHA-256.');
+  }
+  return Object.freeze({
+    command,
+    action,
+    policyRoot,
+    pluginPackageAdministration: pluginPackageAdministration === 'enabled',
+    expectedStateSha256,
+    output,
+  });
+}
+
+export function parseAdminAuditTelemetry(command, positionals, values, output) {
+  exactPositionals(positionals, 0);
+  if (values.get('action') !== 'list') {
+    fail('CLI_INVALID_OPTION', '--action must be list.');
+  }
+  if (!values.has('policy-root')) {
+    fail('CLI_INVALID_OPTION', 'admin.audit-telemetry requires explicit --policy-root.');
+  }
+  if ([...values.keys()].some((key) => !new Set(['action', 'policy-root', 'limit', 'output']).has(key))) {
+    fail('CLI_INVALID_OPTION', 'list only accepts --action, --policy-root, optional --limit, and optional --output.');
+  }
+  const policyRoot = boundedPath(values.get('policy-root'), 'Policy root');
+  const limit = values.has('limit') ? positiveInteger(values.get('limit'), '--limit', 100) : 100;
+  return Object.freeze({ command, action: 'list', policyRoot, limit, output });
 }

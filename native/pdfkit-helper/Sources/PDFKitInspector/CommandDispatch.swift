@@ -60,7 +60,7 @@ private func dispatchRequestOperation(_ operation: String, data: Data, workspace
     case "targetedMutate":
         let request = try strictTargetedMutationRequest(from: data)
         let inputData = try readPrivateInput(workspace.appendingPathComponent(request.inputFilename))
-        emit(MutationSuccessResponse(result: try targetedMutate(request, workspace: workspace, inputData: inputData)))
+        emit(TargetedMutationSuccessResponse(result: try targetedMutate(request, workspace: workspace, inputData: inputData)))
     case "addLocalGoToLink":
         let request = try strictLocalGoToRequest(from: data)
         let inputData = try readPrivateInput(workspace.appendingPathComponent(request.inputFilename))

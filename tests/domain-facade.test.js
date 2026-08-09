@@ -22,12 +22,12 @@ test('the facade explicitly maps every safe public domain method and documents u
   const operations = setup().listOperations();
   assert.deepEqual(operations, DOMAIN_OPERATION_REGISTRY);
   const supported = Object.values(operations).flatMap((group) => Object.entries(group).filter(([, entry]) => entry.supported).map(([name]) => name));
-  // 17 review/forms, 15 AEC, 15 collaboration, and 7 trust-domain methods
+  // 17 review/forms, 17 AEC, 15 collaboration, and 7 trust-domain methods
   // are prototype-safe and mapped to their single-owner services.
-  assert.equal(supported.length, 54);
+  assert.equal(supported.length, 56);
   assert.deepEqual(Object.keys(operations.review), ['createAnnotation', 'reply', 'updateAnnotation', 'setReviewState', 'queryAnnotations', 'exportReviewJson', 'importReviewJson', 'reviewSummary']);
   assert.deepEqual(Object.keys(operations.forms).slice(0, 9), ['createField', 'setValue', 'resetValues', 'validate', 'submitResponse', 'exportForms', 'importForms', 'detectFields', 'staticToFillable']);
-  assert.deepEqual(Object.keys(operations.AEC), ['snapshot', 'createToolset', 'createMarkup', 'listMarkups', 'createCustomColumn', 'evaluateCustomColumn', 'createSpace', 'createDrawingSet', 'createSheet', 'createRevisionOverlay', 'createBatchPlan', 'legends', 'calibrateGeoPage', 'pageToGeo', 'takeoff']);
+  assert.deepEqual(Object.keys(operations.AEC), ['snapshot', 'createToolset', 'createReviewSession', 'measurementToolset', 'createMarkup', 'listMarkups', 'createCustomColumn', 'evaluateCustomColumn', 'createSpace', 'createDrawingSet', 'createSheet', 'createRevisionOverlay', 'createBatchPlan', 'legends', 'calibrateGeoPage', 'pageToGeo', 'takeoff']);
   assert.deepEqual(Object.keys(operations.collaboration), ['createProject', 'createRevision', 'transitionRevision', 'createWorkspace', 'createReviewSession', 'recordParticipant', 'recordActivity', 'createNotification', 'createSharePackage', 'recordVersion', 'createRepositoryConnector', 'createRetentionRule', 'checkout', 'checkin', 'appendSyncJournal']);
   assert.deepEqual(Object.keys(operations.redaction).slice(0, 2), ['detectSensitiveText', 'createRedactionPlan']);
   assert.deepEqual(Object.keys(operations.accessibility), ['inspect', 'exportReport', 'proposeRemediation']);

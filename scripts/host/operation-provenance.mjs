@@ -82,6 +82,16 @@ function normalizeInputs(inputs) {
   }));
 }
 
+function validateManifestEvidence(expected, validation) {
+  const expectedDigest = expected.manifestSha256;
+  const validationDigest = validation.manifestSha256;
+  if (expectedDigest === undefined && validationDigest === undefined) return;
+  if (!DIGEST.test(String(expectedDigest ?? '')) || !DIGEST.test(String(validationDigest ?? ''))
+    || expectedDigest.toLowerCase() !== validationDigest.toLowerCase()) {
+    invalid('manifest evidence must contain matching SHA-256 digests in expected and validation.');
+  }
+}
+
 export function createOperationProvenance({
   id = randomUUID(),
   type,
@@ -98,13 +108,15 @@ export function createOperationProvenance({
   if (!Array.isArray(checkedValidation.validators) || checkedValidation.validators.length === 0) {
     invalid('validation.validators must list at least one completed validator.');
   }
+  const checkedExpected = jsonObject(expected, 'expected');
+  validateManifestEvidence(checkedExpected, checkedValidation);
   return Object.freeze({
     schemaVersion: OPERATION_PROVENANCE_VERSION,
     id,
     type,
     inputs: normalizeInputs(inputs),
     parameters: jsonObject(parameters, 'parameters'),
-    expected: jsonObject(expected, 'expected'),
+    expected: checkedExpected,
     validation: checkedValidation,
     completedAt: isoTimestamp(completedAt),
   });

@@ -31,6 +31,7 @@ private func annotationType(_ value: String) -> PDFAnnotationSubtype? {
     case "square": return .square
     case "circle": return .circle
     case "highlight": return .highlight
+    case "underline": return .underline
     default: return nil
     }
 }

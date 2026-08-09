@@ -15,6 +15,15 @@ export async function removePdfKitProtection({ store, poppler, adapter }, docume
   const normalized = normalizeProtectionRemovalRequest(removalInput);
   const protectedArtifact = store.getArtifact(normalized.artifactId);
   if (protectedArtifact.sha256 !== normalized.artifactSha256) fail('SOURCE_VERSION_MISMATCH', 'The protected artifact digest no longer matches this removal request.', 409);
+  // Bind the operation to a second store read. This rejects stale or replaced
+  // artifact records before any credential reaches the native helper.
+  const retainedArtifact = store.getArtifact(normalized.artifactId);
+  if (!retainedArtifact || retainedArtifact.id !== protectedArtifact.id
+    || retainedArtifact.documentId !== document.id || retainedArtifact.sha256 !== protectedArtifact.sha256
+    || retainedArtifact.size !== protectedArtifact.size
+    || JSON.stringify(retainedArtifact.operation) !== JSON.stringify(protectedArtifact.operation)) {
+    fail('PDFKIT_PROTECTION_REMOVAL_SOURCE_UNSUPPORTED', 'The retained protected artifact changed during admission.', 422);
+  }
   if (protectedArtifact.size < 64 || protectedArtifact.size > MAX_OUTPUT_BYTES) fail('PDFKIT_PROTECTION_REMOVAL_SOURCE_UNSUPPORTED', 'The retained protected artifact is outside the fixed size boundary.', 422);
   const { profile: sourceProfile, permissions, pageCount: protectedPageCount } = deriveProtectedArtifactProfile(protectedArtifact, document);
   const job = createJobSignal(externalSignal);
@@ -88,7 +97,10 @@ export async function removePdfKitProtection({ store, poppler, adapter }, docume
     if (externalSignal?.aborted) throw new HostError('JOB_CANCELLED', 'PDFKit protection removal was cancelled.', 499, { cause: error });
     if (error instanceof HostError) throw error;
     if (error?.code === 'INVALID_REQUEST') throw new HostError('INVALID_PDFKIT_PROTECTION_REMOVAL_OPTIONS', 'The pinned helper rejected the fixed protection-removal request.', 400);
-    if (error?.code === 'MUTATION_FAILED') throw new HostError('PDFKIT_PROTECTION_REMOVAL_REJECTED', 'The owner credential or protected artifact is outside the fixed protection-removal boundary.', 422);
+    if (error?.code === 'MUTATION_FAILED' || error?.code === 'OWNER_PASSWORD_INVALID'
+      || error?.code === 'OWNER_AUTHORIZATION_FAILED' || error?.code === 'INVALID_OWNER_PASSWORD') {
+      throw new HostError('PDFKIT_PROTECTION_REMOVAL_REJECTED', 'The owner credential or protected artifact is outside the fixed protection-removal boundary.', 422);
+    }
     if (error?.code === 'OUTPUT_INVALID') throw new HostError('PDFKIT_PROTECTION_REMOVAL_OUTPUT_INVALID', 'The pinned helper could not prove the unencrypted derived copy.', 502, { cause: error });
     throw new HostError('PDFKIT_PROTECTION_REMOVAL_FAILED', 'The pinned local PDFKit helper could not create a verified unencrypted copy.', 502, { cause: error });
   } finally {

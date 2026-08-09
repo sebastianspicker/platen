@@ -17,8 +17,16 @@ const COMMAND_OPTIONS = Object.freeze({
   'signature-review': Object.freeze({ values: new Set(['output']), flags: new Set() }),
   'compare-content': Object.freeze({ values: new Set(['format', 'output']), flags: new Set() }),
   'create-blank': Object.freeze({ values: new Set(['pages', 'output']), flags: new Set() }),
-  'professional-capability': Object.freeze({ values: new Set(['capability-id', 'output']), flags: new Set() }),
+  'professional-capability': Object.freeze({ values: new Set(['capability-id', 'request', 'output']), flags: new Set() }),
   'convert-local': Object.freeze({ values: new Set(['output']), flags: new Set() }),
+  'convert-office-local': Object.freeze({ values: new Set(['output']), flags: new Set() }),
+  'convert-html-local': Object.freeze({ values: new Set(['output']), flags: new Set() }),
+  'convert-postscript-local': Object.freeze({ values: new Set(['output']), flags: new Set() }),
+  'create-cad-pdf-local': Object.freeze({ values: new Set(['output']), flags: new Set() }),
+  'print-to-pdf-local': Object.freeze({ values: new Set(['output']), flags: new Set() }),
+  'export-structured-local': Object.freeze({ values: new Set(['format', 'output']), flags: new Set() }),
+  'optimize-compress-local': Object.freeze({ values: new Set(['output']), flags: new Set() }),
+  'export-page-png-local': Object.freeze({ values: new Set(['page', 'dpi', 'output']), flags: new Set() }),
   text: Object.freeze({ values: new Set(['format', 'output']), flags: new Set() }),
   'export-ooxml': Object.freeze({ values: new Set(['format', 'output']), flags: new Set() }),
   ocr: Object.freeze({
@@ -51,6 +59,12 @@ const COMMAND_OPTIONS = Object.freeze({
       'language', 'cleanup', 'segmentation', 'pages', 'output',
     ]), flags: new Set(),
   }),
+  'automation-submit-batch': Object.freeze({
+    values: new Set([
+      'automation-root', 'idempotency-key', 'operation', 'preset',
+      'language', 'cleanup', 'segmentation', 'pages', 'output',
+    ]), flags: new Set(),
+  }),
   'automation-submit-ocr': Object.freeze({
     values: new Set([
       'automation-root', 'idempotency-key', 'language', 'cleanup', 'segmentation', 'output',
@@ -65,21 +79,37 @@ const COMMAND_OPTIONS = Object.freeze({
   'automation-submit-sequence': Object.freeze({
     values: new Set(['automation-root', 'sequence', 'idempotency-key', 'output']), flags: new Set(),
   }),
+  'automation-run-recipe': Object.freeze({
+    values: new Set(['automation-root', 'recipe', 'repeat', 'idempotency-key', 'output']), flags: new Set(),
+  }),
+  'automation-run-conditional': Object.freeze({
+    values: new Set(['automation-root', 'workflow', 'idempotency-key', 'output']), flags: new Set(),
+  }),
   'automation-run': Object.freeze({ values: new Set(['automation-root', 'output']), flags: new Set() }),
   'automation-status': Object.freeze({ values: new Set(['automation-root', 'output']), flags: new Set() }),
   'automation-cancel': Object.freeze({ values: new Set(['automation-root', 'output']), flags: new Set() }),
+  'automation-watch-discover': Object.freeze({ values: new Set(['automation-root', 'output']), flags: new Set() }),
+  'automation-schedule-create': Object.freeze({ values: new Set(['automation-root', 'schedule-id', 'principal', 'grant-id', 'source-id', 'sha256', 'operation-id', 'operation-kind', 'pages', 'first-at', 'interval-ms', 'output']), flags: new Set() }),
+  'automation-schedule-list': Object.freeze({ values: new Set(['automation-root', 'principal', 'grant-id', 'output']), flags: new Set() }),
+  'automation-schedule-tick': Object.freeze({ values: new Set(['automation-root', 'principal', 'grant-id', 'now', 'output']), flags: new Set() }),
+  'automation-schedule-cancel': Object.freeze({ values: new Set(['automation-root', 'schedule-id', 'principal', 'grant-id', 'output']), flags: new Set() }),
+  'automation-job-status': Object.freeze({ values: new Set(['automation-root', 'principal', 'grant-id', 'output']), flags: new Set() }),
+  'automation-processing-report': Object.freeze({ values: new Set(['automation-root', 'principal', 'grant-id', 'output']), flags: new Set() }),
   'automation-output-list': Object.freeze({ values: new Set(['automation-root', 'output']), flags: new Set() }),
   'automation-output-copy': Object.freeze({ values: new Set(['automation-root', 'sha256', 'output']), flags: new Set() }),
   'automation-output-delete': Object.freeze({ values: new Set(['automation-root', 'sha256', 'output']), flags: new Set() }),
   'admin.plugin-allowlist': Object.freeze({ values: new Set(['action', 'trust-root', 'publisher-id', 'key-id', 'public-key', 'plugin-id', 'expected-fingerprint', 'output']), flags: new Set() }),
-  'admin.plugin-package': Object.freeze({ values: new Set(['action', 'plugin-root', 'trust-root', 'package', 'plugin-id', 'version', 'output']), flags: new Set() }),
+  'admin.plugin-package': Object.freeze({ values: new Set(['action', 'plugin-root', 'trust-root', 'policy-root', 'package', 'plugin-id', 'version', 'output']), flags: new Set() }),
+  'admin.policy-configuration': Object.freeze({ values: new Set(['action', 'policy-root', 'plugin-package-administration', 'expected-state-sha256', 'output']), flags: new Set() }),
+  'admin.audit-telemetry': Object.freeze({ values: new Set(['action', 'policy-root', 'limit', 'output']), flags: new Set() }),
   prepress: Object.freeze({
     values: new Set(['operation', 'profile', 'format', 'layout', 'page', 'dpi', 'output']),
     flags: new Set(),
   }),
   'layer-defaults': Object.freeze({ values: new Set(['changes', 'output']), flags: new Set() }),
+  'text-reflow': Object.freeze({ values: new Set(['request', 'output']), flags: new Set() }),
   'signing-identities': Object.freeze({ values: new Set(['output']), flags: new Set() }),
-  'certificate-sign': Object.freeze({ values: new Set(['certificate-sha256', 'page', 'field-name', 'reason', 'location', 'contact', 'placeholder-bytes', 'output']), flags: new Set() }),
+  'certificate-sign': Object.freeze({ values: new Set(['certificate-sha256', 'page', 'field-name', 'reason', 'location', 'contact', 'placeholder-bytes', 'output']), flags: new Set(['consent']) }),
   'sanitize-hidden-data': Object.freeze({ values: new Set(['output']), flags: new Set() }),
   'add-checkbox': Object.freeze({ values: new Set(['field-name', 'page', 'rect', 'output']), flags: new Set() }),
   'add-radio-group': Object.freeze({ values: new Set(['group-name', 'options', 'output']), flags: new Set() }),
@@ -101,6 +131,7 @@ const COMMAND_OPTIONS = Object.freeze({
   'redact-pages': Object.freeze({ values: new Set(['pages', 'output']), flags: new Set() }),
   'printer-marks': Object.freeze({ values: new Set(['pages', 'output']), flags: new Set() }),
   'page-background': Object.freeze({ values: new Set(['pages', 'color', 'output']), flags: new Set() }),
+  'page-watermark': Object.freeze({ values: new Set(['pages', 'text', 'output']), flags: new Set() }),
   'snapshot-region': Object.freeze({ values: new Set(['page', 'region', 'dpi', 'output']), flags: new Set() }),
 });
 

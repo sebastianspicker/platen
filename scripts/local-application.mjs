@@ -9,14 +9,12 @@ import { GhostscriptAdapter } from './host/adapters/ghostscript.mjs';
 import { QpdfAdapter } from './host/adapters/qpdf.mjs';
 import { ImageMagickAdapter } from './host/adapters/imagemagick.mjs';
 import { LibreOfficeAdapter } from './host/adapters/libreoffice.mjs';
-import { RasterMutationAdapter } from './host/adapters/raster-mutation.mjs';
-import { AccessibilityRemediationService } from './host/accessibility-remediation-service.mjs';
-import { AccessibilityReviewService } from './host/accessibility-review-service.mjs';
-import { AecArtifactService } from './host/aec-artifact-service.mjs';
-import { PdfReviewMeasurementService } from './host/pdf-review-measurement-service.mjs';
+import { RasterMutationAdapter } from './host/adapters/raster-mutation.mjs'; import { createCupsfilterAdapter } from './host/adapters/cupsfilter.mjs';
+import { AccessibilityRemediationService } from './host/accessibility-remediation-service.mjs'; import { AccessibilityReviewService } from './host/accessibility-review-service.mjs';
+import { AecArtifactService } from './host/aec-artifact-service.mjs'; import { PdfReviewMeasurementService } from './host/pdf-review-measurement-service.mjs'; import { PdfReviewAnnotationImportExportService } from './host/pdf-review-annotation-import-export-service.mjs';
 import { PdfReviewSharedExchangeService } from './host/pdf-review-shared-exchange-service.mjs';
-import { PdfReviewNotificationsService } from './host/pdf-review-notifications-service.mjs';
-import { ConversionService } from './host/conversion-service.mjs';
+import { PdfReviewNotificationsService } from './host/pdf-review-notifications-service.mjs'; import { createPdfReviewSidecarService } from './host/pdf-review-sidecar-service.mjs';
+import { ConversionService } from './host/conversion-service.mjs'; import { CupsPrintToPdfService } from './host/cups-print-to-pdf-service.mjs';
 import { DocumentStore } from './host/document-store.mjs';
 import { DomainFacade } from './host/domain-facade.mjs';
 import { EngineRegistry } from './host/engine-registry.mjs';
@@ -30,20 +28,22 @@ import { PdfIncrementalNamedDestinationService } from './host/pdf-incremental-na
 import { PdfPageVectorService } from './host/pdf-page-vector-service.mjs';
 import { PdfIncrementalPageTransitionService } from './host/pdf-incremental-page-transition-service.mjs';
 import { PdfPageTextService } from './host/pdf-page-text-service.mjs';
-import { PdfFullPageRedactionService } from './host/pdf-full-page-redaction-service.mjs';
+import { PdfTextEditService } from './host/pdf-text-edit-service.mjs';
+import { PdfFullPageRedactionService } from './host/pdf-full-page-redaction-service.mjs'; import { PdfRedactionOverlayLabelService } from './host/pdf-redaction-overlay-label-service.mjs';
 import { PdfPrinterMarksService } from './host/pdf-printer-marks-service.mjs';
-import { PdfPageBackgroundService } from './host/pdf-page-background-service.mjs';
+import { PdfPageBackgroundService } from './host/pdf-page-background-service.mjs'; import { PdfPageWatermarkService } from './host/pdf-page-watermark-service.mjs';
+import { PdfPageHeaderFooterService } from './host/pdf-page-header-footer-service.mjs';
 import { PdfLayerDefaultsService } from './host/pdf-layer-defaults-service.mjs';
-import { PdfCertificateSignatureService } from './host/pdf-certificate-signature-service.mjs';
+import { PdfCertificateSignatureService } from './host/pdf-certificate-signature-service.mjs'; import { ElectronicSigningIntentService } from './host/electronic-signing-intent-service.mjs';
 import { PdfHiddenDataSanitizationService } from './host/pdf-hidden-data-sanitization-service.mjs';
 import { PdfAcroFormCheckboxService } from './host/pdf-acroform-checkbox-service.mjs';
 import { PdfAcroFormRadioService } from './host/pdf-acroform-radio-service.mjs';
 import { PdfAcroFormTextFieldService } from './host/pdf-acroform-text-field-service.mjs';
 import { PdfAcroFormBarcodeService } from './host/pdf-acroform-barcode.mjs';
-import { PdfFormJavaScriptInventoryService } from './host/pdf-form-javascript.mjs';
+import { PdfFormJavaScriptInventoryService } from './host/pdf-form-javascript.mjs'; import { PdfXfaInspectionService } from './host/pdf-xfa-inspection.mjs';
 import { PdfAcroFormChoiceService } from './host/pdf-acroform-choice-service.mjs';
 import { PdfAcroFormSignatureFieldService } from './host/pdf-acroform-signature-field-service.mjs';
-import { PdfAcroFormTabOrderTooltipService } from './host/pdf-acroform-tab-order-tooltip-service.mjs';
+import { PdfAcroFormTabOrderTooltipService } from './host/pdf-acroform-tab-order-tooltip-service.mjs'; import { PdfAcroFormFillSaveService } from './host/pdf-acroform-fill-save-service.mjs'; import { PdfAcroFormValidationService } from './host/pdf-acroform-validation-service.mjs'; import { PdfAcroFormDataExportService } from './host/pdf-acroform-data-export-service.mjs';
 import { PdfAccessibilityFormSemanticsService } from './host/pdf-accessibility-form-semantics.mjs';
 import { PdfAccessibilityTableSemanticsService } from './host/pdf-accessibility-table-semantics.mjs';
 import { PdfTextReflowService } from './host/pdf-text-reflow.mjs';
@@ -54,7 +54,7 @@ import { PdfJpegImageInputBroker } from './host/pdf-jpeg-image-input-broker.mjs'
 import { PdfJpegImageReplacementService } from './host/pdf-jpeg-image-replacement-service.mjs';
 import { PdfJpegImageReplacementInputBroker } from './host/pdf-jpeg-image-replacement-input-broker.mjs';
 import { PdfPageLabelsService } from './host/pdf-page-labels-service.mjs';
-import { PdfAdvancedSearchService } from './host/pdf-advanced-search-service.mjs';
+import { PdfAdvancedSearchService } from './host/pdf-advanced-search-service.mjs'; import { PdfSensitivePatternService } from './host/pdf-sensitive-pattern-service.mjs';
 import { PdfSpecialistContentService } from './host/pdf-specialist-content-service.mjs';
 import { AecMeasurementLegendService } from './host/aec-measurement-legend-service.mjs';
 import { SigningIdentityDirectoryService } from './host/signing-identity-directory-service.mjs';
@@ -89,10 +89,14 @@ import { createAppHandler } from './host/router.mjs';
 import { WorkspaceStateStore } from './host/workspace-state.mjs';
 import { createStaticHandler } from './server-lib.mjs';
 import { createLocalApplicationAutomation } from './host/local-application-automation.mjs';
-import { PublisherTrustAuthority } from './host/publisher-trust-authority.mjs';
+import { PublisherTrustAuthority } from './host/publisher-trust-authority.mjs'; import { LocalAdminPolicyAuthority } from './host/admin-policy-authority.mjs'; import { LocalAdminAuditAuthority } from './host/admin-audit-authority.mjs';
 import { PluginPackageStore } from './host/plugin-package-store.mjs';
 import { PluginRuntimeAuthorityRegistry } from './host/plugin-runtime-authority-registry.mjs';
 import { deliverProfessionalCapability, listProfessionalHandlers } from './host/professional-capability/index.mjs';
+import { createProfessionalAccessibilityDelivery } from './host/professional-accessibility-delivery.mjs';
+import { createProfessionalPageOrganizationDelivery } from './host/professional-page-organization-delivery.mjs';
+import { createProfessionalContentEditingDelivery } from './host/professional-content-editing-delivery.mjs';
+import { createProfessionalPrintDelivery } from './host/professional-capability/standards-preflight-print.mjs';
 
 async function createEngineRuntime({ root, sessionRoot, runner, store, inputs, PdfServiceClass }) {
   const pluginSandboxStatus = new PluginSandboxStatusService({ runner });
@@ -104,13 +108,13 @@ async function createEngineRuntime({ root, sessionRoot, runner, store, inputs, P
   const qpdf = new QpdfAdapter({ registry, runner });
   const libreOffice = new LibreOfficeAdapter({ registry, runner });
   const imageMagick = new ImageMagickAdapter({ registry, runner });
-  const raster = new RasterMutationAdapter({ registry, runner });
+  const raster = new RasterMutationAdapter({ registry, runner }); const cupsfilter = createCupsfilterAdapter({ processRunner: runner });
   const { signatureTrustAdapter, signatureTrustHelper } = await stageSignatureTrustRuntime({ root, sessionRoot, runner });
   const { signingIdentityAdapter, signingIdentityHelper } = await stageSigningIdentityRuntime({ root, sessionRoot, runner });
   const service = new PdfServiceClass({ store, registry, adapter, ocrAdapter, ocrImageAdapter, signatureTrustAdapter });
   const certificateSignature = new PdfCertificateSignatureService({ store, adapter: signingIdentityAdapter });
   const signingIdentityDirectory = new SigningIdentityDirectoryService({ root: sessionRoot, adapter: signingIdentityAdapter });
-  return { pluginSandboxStatus, registry, adapter, ghostscript, qpdf, libreOffice, imageMagick, raster, service, certificateSignature, signingIdentityDirectory, signatureTrustAdapter, signatureTrustHelper, signingIdentityAdapter, signingIdentityHelper, inputs };
+  return { pluginSandboxStatus, registry, adapter, ghostscript, qpdf, libreOffice, imageMagick, raster, cupsfilter, service, certificateSignature, signingIdentityDirectory, signatureTrustAdapter, signatureTrustHelper, signingIdentityAdapter, signingIdentityHelper, inputs };
 }
 
 async function createOptionalRuntime({ root, sessionRoot, runner, store, service, adapter }) {
@@ -126,7 +130,7 @@ function createDocumentServices({ store, inputs, adapter, service, registry }) {
   const jpegImageReplacement = new PdfJpegImageReplacementService({ store, poppler: adapter });
   const jpegImageReplacementBroker = new PdfJpegImageReplacementInputBroker({ inputs, service: jpegImageReplacement, store });
   const pageLabels = new PdfPageLabelsService({ store });
-  const advancedSearch = new PdfAdvancedSearchService({ store, inspection: service });
+  const advancedSearch = new PdfAdvancedSearchService({ store, inspection: service }); const sensitivePatterns = new PdfSensitivePatternService({ store, inspection: service });
   const spellcheck = new PdfSpellcheckService({ store, inspection: service });
   const specialistContent = new PdfSpecialistContentService({ store });
   const acroFormTextField = new PdfAcroFormTextFieldService({ store });
@@ -151,19 +155,22 @@ function createDocumentServices({ store, inputs, adapter, service, registry }) {
     fileAudioAttachments: new PdfFileAudioAttachmentService({ store, inputs }),
     accessibilityLinksBookmarks: new PdfAccessibilityLinksBookmarksService({ store }),
     pageText: new PdfPageTextService({ store, poppler: adapter }),
-    fullPageRedaction: new PdfFullPageRedactionService({ store, poppler: adapter }),
+    textEdit: new PdfTextEditService({ store, poppler: adapter }),
+    fullPageRedaction: new PdfFullPageRedactionService({ store, poppler: adapter }), redactionOverlayLabels: new PdfRedactionOverlayLabelService({ store }),
     printerMarks: new PdfPrinterMarksService({ store }),
     pageBackground: new PdfPageBackgroundService({ store }),
+    pageWatermark: new PdfPageWatermarkService({ store }),
+    pageHeaderFooter: new PdfPageHeaderFooterService({ store }),
     layerDefaults: new PdfLayerDefaultsService({ store }),
     hiddenDataSanitization: new PdfHiddenDataSanitizationService({ store }),
     acroFormCheckbox: new PdfAcroFormCheckboxService({ store }),
     acroFormRadio: new PdfAcroFormRadioService({ store }),
     acroFormTextField,
     acroFormBarcode: new PdfAcroFormBarcodeService({ store }),
-    formJavaScriptInventory: new PdfFormJavaScriptInventoryService({ store }),
+    formJavaScriptInventory: new PdfFormJavaScriptInventoryService({ store }), xfaInspection: new PdfXfaInspectionService({ store }),
     acroFormChoice: new PdfAcroFormChoiceService({ store }),
     acroFormSignatureField: new PdfAcroFormSignatureFieldService({ store }),
-    acroFormTabOrderTooltip: new PdfAcroFormTabOrderTooltipService({ store }),
+    acroFormTabOrderTooltip: new PdfAcroFormTabOrderTooltipService({ store }), acroFormFillSave: new PdfAcroFormFillSaveService({ store }), acroFormValidation: new PdfAcroFormValidationService({ store }), acroFormDataExport: new PdfAcroFormDataExportService({ store }),
     accessibilityFormSemantics: new PdfAccessibilityFormSemanticsService({ store }),
     accessibilityTableSemantics: new PdfAccessibilityTableSemanticsService({ store }),
     textReflow: new PdfTextReflowService({ store }),
@@ -175,7 +182,7 @@ function createDocumentServices({ store, inputs, adapter, service, registry }) {
     jpegImageReplacement,
     jpegImageReplacementBroker,
     pageLabels,
-    advancedSearch,
+    advancedSearch, sensitivePatterns,
     spellcheck,
     specialistContent,
     incrementalAccessibilityMetadata: new PdfIncrementalAccessibilityMetadataService({ store, poppler: adapter }),
@@ -195,14 +202,14 @@ function createDocumentServices({ store, inputs, adapter, service, registry }) {
   };
 }
 
-function createWorkflowServices({ store, inputs, service, adapter, ghostscript, qpdf, libreOffice, imageMagick, raster, registry, pdfkitAdapter, workspaceState, pdfkitInspections, ComparisonServiceClass }) {
+function createWorkflowServices({ store, inputs, service, adapter, ghostscript, qpdf, libreOffice, imageMagick, raster, cupsfilter, registry, pdfkitAdapter, workspaceState, pdfkitInspections, ComparisonServiceClass }) {
   const conversion = new ConversionService({ documents: store, inputs, poppler: adapter, ghostscript, libreOffice, imageMagick });
   const domainFacade = new DomainFacade(workspaceState);
   const aecArtifacts = new AecArtifactService({ store, pdfService: service, workspaceState, poppler: adapter, pdfkit: pdfkitAdapter });
-  const reviewMeasurements = new PdfReviewMeasurementService({ store, pdfService: service, workspaceState, poppler: adapter, pdfkit: pdfkitAdapter });
+  const reviewMeasurements = new PdfReviewMeasurementService({ store, pdfService: service, workspaceState, poppler: adapter, pdfkit: pdfkitAdapter }); const reviewAnnotationImportExport = new PdfReviewAnnotationImportExportService({ store, workspaceState });
   const reviewSharedExchange = new PdfReviewSharedExchangeService({ documents: store, workspace: workspaceState });
   const commentsToOffice = new CommentsToOfficeService({ documents: store, workspace: workspaceState });
-  const reviewNotifications = new PdfReviewNotificationsService({ documents: store, workspace: workspaceState });
+  const reviewNotifications = new PdfReviewNotificationsService({ documents: store, workspace: workspaceState }); const reviewSidecar = createPdfReviewSidecarService({ documents: store, workspace: workspaceState });
   const projectBundles = new ProjectBundleService(store, workspaceState, { validateDocument: (documentId, options) => service.inspect(documentId, options) });
   const rasterMutations = new RasterMutationService({ store, poppler: adapter, imageMagick, raster });
   const redactionPlans = new RedactionPlanService({ documentStore: store, workspaceStateStore: workspaceState, poppler: adapter, rasterMutations });
@@ -211,8 +218,8 @@ function createWorkflowServices({ store, inputs, service, adapter, ghostscript, 
   const comparisonPackages = new ComparisonPackageService({ store, comparison: comparisons });
   const prepress = new PrepressService({ store, pdfService: service, poppler: adapter, ghostscript, imageMagick, iccProfileProvider: new GhostscriptIccProfileProvider({ registry }) });
   const accessibilityReviews = new AccessibilityReviewService({ store, pdfService: service, pdfkitInspectionService: pdfkitInspections });
-  const accessibilityRemediations = new AccessibilityRemediationService({ documentStore: store, workspaceStateStore: workspaceState, reviewProvider: accessibilityReviews });
-  return { conversion, domainFacade, aecArtifacts, reviewMeasurements, reviewSharedExchange, commentsToOffice, reviewNotifications, projectBundles, rasterMutations, redactionPlans, redactionPlanReports, comparisons, comparisonPackages, prepress, accessibilityReviews, accessibilityRemediations, fastWebView: new PdfFastWebViewService({ store, qpdf }) };
+  const accessibilityRemediations = new AccessibilityRemediationService({ documentStore: store, workspaceStateStore: workspaceState, reviewProvider: accessibilityReviews }); const electronicSigningIntent = new ElectronicSigningIntentService({ store, workspaceState });
+  return { conversion, cupsPrintToPdf: new CupsPrintToPdfService({ inputs, documents: store, poppler: adapter, cupsfilter }), domainFacade, aecArtifacts, reviewMeasurements, reviewAnnotationImportExport, reviewSharedExchange, commentsToOffice, reviewNotifications, reviewSidecar, projectBundles, rasterMutations, redactionPlans, redactionPlanReports, comparisons, comparisonPackages, prepress, accessibilityReviews, accessibilityRemediations, electronicSigningIntent, fastWebView: new PdfFastWebViewService({ store, qpdf }) };
 }
 
 function createApplicationClose(automation, store) {
@@ -236,33 +243,39 @@ function createApplicationClose(automation, store) {
   };
 }
 
-export async function createLocalApplication({ root, host = '127.0.0.1', port = 4173, token = randomBytes(32).toString('hex'), automationRoot = null, publisherTrustRoot = null, pluginPackageRoot = null, automationCapabilityAuthority = null, automationPrinterInventory = undefined, automationPrintAdapter = undefined, automationWebhookDestinationInventory = undefined, automationWebhookEventFactsResolver = undefined, automationWebhookDeliveryAdapter = undefined, automationPreflightEngine = undefined }, { PdfServiceClass, ComparisonServiceClass } = {}) {
-  const sessionRoot = await mkdtemp(join(tmpdir(), 'platen-session-'));
-  const trustedPublisherAuthority = await new PublisherTrustAuthority({ root: publisherTrustRoot ?? join(sessionRoot, 'publisher-trust') }).initialize();
-  const trustedPublishers = trustedPublisherAuthority.store;
-  const packageRoot = pluginPackageRoot ?? join(sessionRoot, 'plugin-packages');
-  let pluginRuntimeAuthorities;
-  const pluginPackages = new PluginPackageStore({
-    root: packageRoot,
-    trustedPublishers,
-    activationTransition: (transition) => pluginRuntimeAuthorities.transition(transition),
+function createProfessionalCapabilities({ store, documents, workflows, listProfessionalHandlers }) {
+  const professionalAccessibility = createProfessionalAccessibilityDelivery({ store, services: documents,
+    deliver: deliverProfessionalCapability, list: listProfessionalHandlers });
+  const professionalContentEditing = createProfessionalContentEditingDelivery({ store, services: documents,
+    deliver: professionalAccessibility.deliver, list: listProfessionalHandlers });
+  const professionalPageOrganization = createProfessionalPageOrganizationDelivery({ store,
+    services: { ...documents, pdfkitMutations: workflows.pdfkitMutations, blankPageFactory: workflows.conversion },
+    deliver: professionalContentEditing.deliver, list: listProfessionalHandlers });
+  const professionalPrint = createProfessionalPrintDelivery({ store, services: { ...documents, ...workflows },
+    deliver: professionalPageOrganization.deliver, list: listProfessionalHandlers });
+  return Object.freeze({
+    professionalAccessibility,
+    professionalContentEditing,
+    professionalPageOrganization,
+    professionalPrint,
+    professionalCapabilities: Object.freeze({
+      ...professionalPrint,
+      deliverSourceBound: professionalAccessibility.deliverSourceBound,
+      deliverTextSourceBound: professionalContentEditing.deliverSourceBound,
+      deliverContentEditingSourceBound: professionalContentEditing.deliverSourceBound,
+      deliverPageOrganizationSourceBound: professionalPageOrganization.deliverSourceBound,
+      deliverAccessibilitySourceBound: professionalAccessibility.deliverSourceBound,
+      deliverPrintSourceBound: professionalPrint.deliverSourceBound,
+      inventorySourceBound: professionalAccessibility.inventorySourceBound,
+    }),
   });
-  pluginRuntimeAuthorities = new PluginRuntimeAuthorityRegistry({
-    resolveActivation: (id) => pluginPackages.getActivation(id),
-  });
-  await pluginPackages.initialize();
-  const store = await new DocumentStore({ root: sessionRoot }).initialize();
-  const inputs = await new InputAssetStore({ root: sessionRoot }).initialize();
-  const runner = createProcessLimiter({ concurrency: 4, maximumQueued: 24 });
-  if (typeof PdfServiceClass !== 'function' || typeof ComparisonServiceClass !== 'function') throw new TypeError('createLocalApplication requires the composition-root service classes.');
-  const engine = await createEngineRuntime({ root, sessionRoot, runner, store, inputs, PdfServiceClass });
-  const optional = await createOptionalRuntime({ root, sessionRoot, runner, store, service: engine.service, adapter: engine.adapter });
-  const documents = createDocumentServices({ store, inputs, adapter: engine.adapter, service: engine.service, registry: engine.registry });
-  const workspaceState = new WorkspaceStateStore(store);
-  const workflows = createWorkflowServices({ ...engine, ...optional, ...documents, store, inputs, workspaceState, pdfkitAdapter: optional.pdfkitAdapter, pdfkitInspections: optional.pdfkitInspections, ComparisonServiceClass });
-  const staticHandler = createStaticHandler({ root, host, port });
-  const handler = createAppHandler({
-    staticHandler,
+}
+
+function createLocalApplicationHandler({
+  root, host, port, token, store, engine, inputs, workflows, workspaceState, optional, documents, pluginPackages, pluginRuntimeAuthorities, professionalCapabilities,
+}) {
+  return createAppHandler({
+    staticHandler: createStaticHandler({ root, host, port }),
     store,
     service: engine.service,
     inputs,
@@ -289,18 +302,65 @@ export async function createLocalApplication({ root, host = '127.0.0.1', port = 
     jpegImageReady: Boolean(documents.jpegImageBroker),
     pageLabels: documents.pageLabels,
     pageLabelsReady: Boolean(documents.pageLabels),
-    advancedSearch: documents.advancedSearch,
+    advancedSearch: documents.advancedSearch, sensitivePatterns: documents.sensitivePatterns, redactionOverlayLabels: documents.redactionOverlayLabels,
     advancedSearchReady: Boolean(documents.advancedSearch),
     specialistContent: documents.specialistContent,
     specialistContentReady: Boolean(documents.specialistContent),
     pluginSandboxStatus: engine.pluginSandboxStatus,
     pluginPackages,
     pluginRuntimeAuthorities,
-    scannerDiscovery: optional.scannerDiscovery,
-    scannerDiscoveryReady: Boolean(optional.scannerDiscovery),
+    scannerDiscovery: optional.scannerDiscovery, scannerDiscoveryReady: Boolean(optional.scannerDiscovery),
+    scannerAcquisition: optional.scannerAcquisition, scannerAcquisitionReady: Boolean(optional.scannerAcquisition),
+    professionalCapabilities,
     token,
     host,
     port,
+  });
+}
+
+export async function createLocalApplication({ root, host = '127.0.0.1', port = 4173, token = randomBytes(32).toString('hex'), automationRoot = null, publisherTrustRoot = null, pluginPackageRoot = null, adminPolicyRoot = null, automationCapabilityAuthority = null, automationPrinterInventory = undefined, automationPrintAdapter = undefined, automationWebhookDestinationInventory = undefined, automationWebhookEventFactsResolver = undefined, automationWebhookDeliveryAdapter = undefined, automationPreflightEngine = undefined }, { PdfServiceClass, ComparisonServiceClass } = {}) {
+  const sessionRoot = await mkdtemp(join(tmpdir(), 'platen-session-'));
+  const trustedPublisherAuthority = await new PublisherTrustAuthority({ root: publisherTrustRoot ?? join(sessionRoot, 'publisher-trust') }).initialize(); const trustedPublishers = trustedPublisherAuthority.store;
+  const adminPolicy = adminPolicyRoot ? await new LocalAdminPolicyAuthority({ root: adminPolicyRoot }).initialize() : null; const adminAudit = adminPolicyRoot ? new LocalAdminAuditAuthority({ root: adminPolicyRoot }) : null;
+  const packageRoot = pluginPackageRoot ?? join(sessionRoot, 'plugin-packages'); let pluginRuntimeAuthorities;
+  const pluginPackages = new PluginPackageStore({
+    root: packageRoot, trustedPublishers, administrationPolicy: adminPolicy,
+    activationTransition: (transition) => pluginRuntimeAuthorities.transition(transition),
+  });
+  pluginRuntimeAuthorities = new PluginRuntimeAuthorityRegistry({
+    resolveActivation: (id) => pluginPackages.getActivation(id),
+  });
+  await pluginPackages.initialize();
+  const store = await new DocumentStore({ root: sessionRoot }).initialize();
+  const inputs = await new InputAssetStore({ root: sessionRoot }).initialize();
+  const runner = createProcessLimiter({ concurrency: 4, maximumQueued: 24 });
+  if (typeof PdfServiceClass !== 'function' || typeof ComparisonServiceClass !== 'function') throw new TypeError('createLocalApplication requires the composition-root service classes.');
+  const engine = await createEngineRuntime({ root, sessionRoot, runner, store, inputs, PdfServiceClass });
+  const optional = await createOptionalRuntime({ root, sessionRoot, runner, store, service: engine.service, adapter: engine.adapter });
+  const documents = createDocumentServices({ store, inputs, adapter: engine.adapter, service: engine.service, registry: engine.registry });
+  const workspaceState = new WorkspaceStateStore(store);
+  const workflows = createWorkflowServices({ ...engine, ...optional, ...documents, store, inputs, workspaceState, pdfkitAdapter: optional.pdfkitAdapter, pdfkitInspections: optional.pdfkitInspections, ComparisonServiceClass });
+  const { professionalCapabilities } = createProfessionalCapabilities({
+    store,
+    documents,
+    workflows: { ...documents, ...workflows, pdfkitMutations: optional.pdfkitMutations },
+    listProfessionalHandlers,
+  });
+  const handler = createLocalApplicationHandler({
+    root,
+    host,
+    port,
+    token,
+    store,
+    engine,
+    inputs,
+    workflows,
+    workspaceState,
+    optional,
+    documents,
+    pluginPackages,
+    pluginRuntimeAuthorities,
+    professionalCapabilities,
   });
   const automation = await createLocalApplicationAutomation({ automationRoot, store, service: engine.service, fullPageRedaction: documents.fullPageRedaction, outputIntentService: Object.freeze({ assign: (documentId, request, options) => workflows.prepress.assignOutputIntent(documentId, request, options) }), automationCapabilityAuthority, automationPrinterInventory, automationPrintAdapter, automationWebhookDestinationInventory, automationWebhookEventFactsResolver, automationWebhookDeliveryAdapter, automationPreflightEngine });
   const close = createApplicationClose(automation, store);
@@ -321,22 +381,20 @@ export async function createLocalApplication({ root, host = '127.0.0.1', port = 
     pluginSandboxStatus: engine.pluginSandboxStatus,
     pluginPackages,
     pluginRuntimeAuthorities,
-    scannerDiscovery: optional.scannerDiscovery,
-    scannerDiscoveryReady: Boolean(optional.scannerDiscovery),
+    scannerDiscovery: optional.scannerDiscovery, scannerDiscoveryReady: Boolean(optional.scannerDiscovery),
+    scannerAcquisition: optional.scannerAcquisition, scannerAcquisitionReady: Boolean(optional.scannerAcquisition),
     pdfkitHelper: optional.pdfkitHelper,
     signatureTrustHelper: engine.signatureTrustHelper,
     signingIdentityAdapter: engine.signingIdentityAdapter,
     signingIdentityHelper: engine.signingIdentityHelper,
     signingIdentityReady: Boolean(engine.signingIdentityAdapter),
     trustedPublishers: trustedPublisherAuthority,
+    adminPolicy, adminAudit,
     token,
     host,
     port,
     automation,
-    professionalCapabilities: Object.freeze({
-      deliver: deliverProfessionalCapability,
-      list: listProfessionalHandlers,
-    }),
+    professionalCapabilities,
     close,
   });
 }

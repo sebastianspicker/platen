@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { discoverTestFiles } from './test-files.mjs';
 import { REQUIRED_FILES } from './verify-required-files.mjs';
+import { verifyCapabilityProofs } from './verify-capability-proofs.mjs';
 import { assertCurrentSourceReachability } from './source-module-reachability.mjs';
 import { prepareNativeTests } from './prepare-native-tests.mjs';
 
@@ -25,6 +26,8 @@ if (Object.keys(pkg.dependencies ?? {}).length || Object.keys(pkg.devDependencie
   throw new Error('The dependency-free scaffold must not declare npm dependencies.');
 }
 
+const capabilityProofs = verifyCapabilityProofs(root);
+
 const reachability = assertCurrentSourceReachability(root, required);
 
 prepareNativeTests(root);
@@ -33,4 +36,4 @@ const result = spawnSync(process.execPath, ['--test', ...testFiles], { cwd: root
 if (result.error) throw result.error;
 if (result.status !== 0) process.exit(result.status ?? 1);
 
-console.log(`Verified ${testFiles.length} test files, ${reachability.reachable.length} reachable production modules, exhaustive JavaScript and native Swift source inventory, strict JSON catalogs, and zero npm dependencies.`);
+console.log(`Verified ${testFiles.length} test files, ${reachability.reachable.length} reachable production modules, ${capabilityProofs.total} closed capability-proof records, exhaustive JavaScript and native Swift source inventory, strict JSON catalogs, and zero npm dependencies.`);

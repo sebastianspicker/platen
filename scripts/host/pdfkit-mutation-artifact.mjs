@@ -37,6 +37,7 @@ function displayName(source, normalized, pageBoxEvidence) {
   if (normalized.outlineBookmarkRename) return `${stem}-bookmark-renamed.pdf`;
   if (normalized.lineAnnotation) return `${stem}-line-annotation.pdf`;
   if (normalized.inkAnnotation) return `${stem}-ink-annotation.pdf`;
+  if (normalized.objectProperties) return `${stem}-annotation-properties.pdf`;
   if (normalized.mutation.rotation) {
     return `${stem}-page-${normalized.mutation.rotation.page}-rotated-${normalized.mutation.rotation.degrees}.pdf`;
   }
@@ -64,6 +65,8 @@ function limitations(normalized, pageBoxEvidence) {
     operation = 'The new annotation is one inert open ink path with fixed appearance; forms, actions, media, attachments, and presentation automation are rejected.';
   } else if (normalized.selectiveSanitization) {
     operation = 'The selected page/index reachable annotation descriptor occurrence is omitted after reopen, while every other descriptor and its order are unchanged.';
+  } else if (normalized.objectProperties) {
+    operation = 'Only the exact source-bound inert Square annotation bounds and PDFKit border color change; target contents, flags, sensitive action shape, and every non-target descriptor order are verified after reopen.';
   } else if (normalized.radioSelection) {
     operation = 'The selected canonical radio widget is chosen through a privately validated parent-and-kids group; option names, prior state, current selection, and appearances are not returned.';
   } else if (normalized.mutation.rotation) {
@@ -92,6 +95,10 @@ function validatorsFor(normalized, pageBoxEvidence) {
     'poppler-page-count',
     'poppler-render-all-pages',
     ...(normalized.targeted ? ['source-bound-annotation-locator', 'native-active-content-graph'] : []),
+    ...(normalized.objectProperties ? [
+      'pdfkit-annotation-geometry-reopen', 'pdfkit-annotation-border-color-reopen',
+      'raw-annotation-c-rgb', 'non-target-annotation-descriptors', 'target-annotation-preservation',
+    ] : []),
     ...(normalized.radioSelection
       ? ['source-bound-radio-group', 'raw-radio-v-as-state', 'radio-render-change'] : []),
     ...(normalized.selectiveSanitization ? ['raw-reachable-annotation-delta'] : []),
@@ -158,6 +165,11 @@ function mutationEvidence(normalized, pageBoxEvidence) {
     } : {}),
     ...(normalized.lineAnnotation ? { lineGeometryVerified: true, fixedLineStylesVerified: true } : {}),
     ...(normalized.inkAnnotation ? { inkGeometryVerified: true, rawInkListVerified: true } : {}),
+    ...(normalized.objectProperties ? {
+      annotationGeometryVerified: true, annotationBorderColorVerified: true,
+      rawAnnotationColorVerified: true, nonTargetAnnotationDescriptorsVerified: true,
+      targetAnnotationPreservationVerified: true,
+    } : {}),
     ...(normalized.mutation.rotation ? { persistentPageRotationVerified: true } : {}),
     ...(pageBoxEvidence?.box === 'crop' ? { persistentCropBoxVerified: true } : {}),
     ...(pageBoxEvidence?.box === 'bleed' ? {
@@ -227,7 +239,7 @@ export async function promotePdfKitMutationArtifact({
     sourceDigest: source.sha256,
     artifact,
     appliedEdits: nativeResult.appliedEdits,
-    postflight: normalized.localGoTo || normalized.localGoToRemoval
+    postflight: normalized.targeted || normalized.localGoTo || normalized.localGoToRemoval
       || normalized.outlineBookmark || normalized.outlineBookmarkRemoval || normalized.outlineBookmarkRename
       || normalized.lineAnnotation || normalized.inkAnnotation
       ? nativeResult

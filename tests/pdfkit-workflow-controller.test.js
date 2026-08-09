@@ -14,6 +14,7 @@ function fixture(overrides = {}) {
   const calls = {
     renders: 0, announcements: [], downloads: [], sanitizations: [], outlineMutations: [],
     localGoToRemovals: [], outlineRemovals: [], outlineRenames: [],
+    targetedMutations: [],
   };
   const operation = { documentId: 'document-1', controller: new AbortController() };
   const controller = createPdfKitWorkflowController({
@@ -64,6 +65,10 @@ function fixture(overrides = {}) {
         calls.localGoToRemovals.push({ documentId, sourceSha256, mutation, options });
         return { artifact: { displayName: 'link-removed.pdf' } };
       },
+      async runPdfKitTargetedMutation(documentId, sourceSha256, mutation, options) {
+        calls.targetedMutations.push({ documentId, sourceSha256, mutation, options });
+        return { artifact: { displayName: 'square-properties.pdf' } };
+      },
     },
     captureOperation: () => operation,
     operationIsCurrent: () => true,
@@ -107,6 +112,35 @@ test('PDFKit controller preserves inspection defaults, JSON export, and sanitiza
   assert.equal(calls.sanitizations[0].documentId, 'document-1');
   assert.equal(calls.sanitizations[0].sourceSha256, 'a'.repeat(64));
   assert(calls.sanitizations[0].options.signal instanceof AbortSignal);
+});
+
+test('PDFKit controller sends one exact Square annotation-property mutation', async () => {
+  const sourceSha256 = 'a'.repeat(64);
+  const { controller, calls } = fixture({
+    host: { pdfkitMutationReady: true },
+    pdfkitInspectionResult: {
+      sourceDigest: sourceSha256,
+      pageCount: 1,
+      pages: [{
+        index: 1,
+        boxes: { media: { x: 0, y: 0, width: 612, height: 792 } },
+        annotations: [{ annotationIndex: 6, subtype: 'square', fingerprint: 'b'.repeat(64) }],
+      }],
+    },
+    pdfkitExistingAnnotationIndex: '6',
+    pdfkitExistingAnnotationRect: { x: 40, y: 45, width: 170, height: 70 },
+    pdfkitExistingAnnotationStrokeColor: '#d32f2f',
+  });
+  await controller.runPdfKitTargetedMutation('annotation-properties');
+  assert.deepEqual(calls.targetedMutations[0].mutation, {
+    formFill: null,
+    annotationUpdate: null,
+    annotationProperties: {
+      page: 1, annotationIndex: 6, fingerprint: 'b'.repeat(64), subtype: 'square',
+      rect: { x: 40, y: 45, width: 170, height: 70 }, strokeColor: '#d32f2f',
+    },
+    annotationRemove: null,
+  });
 });
 
 test('PDFKit controller sends one exact outline bookmark through the artifact pipeline', async () => {

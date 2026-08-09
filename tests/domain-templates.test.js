@@ -15,7 +15,7 @@ test('every supported workflow operation receives a JSON-object starter payload'
       count += 1;
     }
   }
-  assert.equal(count, 54);
+  assert.equal(count, 56);
 });
 
 test('starter payloads include current revisions and immutable source digests where required', () => {
@@ -26,4 +26,32 @@ test('starter payloads include current revisions and immutable source digests wh
   });
   assert.equal(signing.input.documentDigest, 'f'.repeat(64));
   assert.equal(signing.options.expectedRevision, 3);
+
+  const customColumn = domainPayloadValue('AEC', 'evaluateCustomColumn', {
+    revision: 5, documentDigest: 'c'.repeat(64),
+  });
+  assert.equal(customColumn.sourceSha256, 'c'.repeat(64));
+  assert.equal(customColumn.options.expectedRevision, 5);
+
+  const pageCoordinate = domainPayloadValue('AEC', 'pageToGeo', {
+    revision: 6, documentDigest: 'e'.repeat(64),
+  });
+  assert.equal(pageCoordinate.sourceSha256, 'e'.repeat(64));
+  assert.equal(pageCoordinate.options.expectedRevision, 6);
+
+  for (const operation of [
+    'createToolset', 'createReviewSession', 'measurementToolset', 'createDrawingSet',
+    'createRevisionOverlay', 'createBatchPlan',
+  ]) {
+    const payload = domainPayloadValue('AEC', operation, {
+      revision: 8, documentDigest: 'a'.repeat(64),
+    });
+    assert.equal(payload.input.sourceSha256, 'a'.repeat(64), operation);
+    assert.equal(payload.options.expectedRevision, 8, operation);
+  }
+  const overlay = domainPayloadValue('AEC', 'createRevisionOverlay', {
+    revision: 8, documentDigest: 'a'.repeat(64),
+  });
+  assert.equal(overlay.input.toDigest, overlay.input.sourceSha256);
+  assert.notEqual(overlay.input.fromDigest, overlay.input.toDigest);
 });

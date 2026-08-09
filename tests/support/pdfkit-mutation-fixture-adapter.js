@@ -62,6 +62,28 @@ export class PdfKitMutationFixtureAdapter {
     };
   }
 
+  async targetedMutate(invocation, executionOptions) {
+    const request = await this.#stage(invocation, executionOptions, nativeOutput);
+    const properties = request.mutation.annotationProperties !== null;
+    return {
+      schema: 'pdfkit-targeted-mutation-receipt-v1',
+      version: 1,
+      operation: 'targetedMutate',
+      category: properties ? 'annotation-properties' : 'targeted-mutation',
+      sourceSha256: sourceDigest,
+      outputSha256: outputDigest(nativeOutput),
+      pageCount: this.#options.helperPages,
+      appliedEdits: 1,
+      reopenVerified: true,
+      annotationPropertiesGeometryVerified: properties,
+      annotationPropertiesColorVerified: properties,
+      rawAnnotationColorVerified: properties,
+      nonTargetAnnotationsVerified: properties,
+      targetAnnotationPreservationVerified: properties,
+      ...(this.#options.targetedReceiptOverride ?? {}),
+    };
+  }
+
   async addLocalGoToLink(invocation, executionOptions) {
     const output = Buffer.concat([sourceBytes, Buffer.from('\n% local GoTo derived fixture')]);
     const request = await this.#stage(invocation, executionOptions, output);

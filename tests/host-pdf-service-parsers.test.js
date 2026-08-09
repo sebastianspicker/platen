@@ -25,6 +25,11 @@ test('Poppler output parsers normalize document evidence', () => {
   assert.deepEqual(parsePageDimensions('Page    2 size: 612 x 792 pts (letter)\n', 2), {
     page: 2, widthPoints: 612, heightPoints: 792,
   });
+  assert.equal(parsePageDimensions('Page 2 size: 612 x 792 pts\nPage 2 rot: 270\n', 2).rotation, 270);
+  assert.throws(
+    () => parsePageDimensions('Page 2 size: 612 x 792 pts\nPage 2 rot: 45\n', 2),
+    { code: 'INVALID_ENGINE_OUTPUT', status: 502 },
+  );
 
   assert.deepEqual(parseTextPages('first\fsecond\f', 2), [
     { page: 1, text: 'first' },
@@ -33,8 +38,20 @@ test('Poppler output parsers normalize document evidence', () => {
   assert.equal(parseFonts('name                                 type              encoding         emb sub uni object ID\n------------------------------------ ----------------- ---------------- --- --- --- ---------\nHelvetica                            Type 1            Custom           no  no  no       4  0\n').length, 1);
   const image = parseImages('page   num  type   width height color comp bpc  enc interp  object ID x-ppi y-ppi size ratio\n--------------------------------------------------------------------------------------------\n   1     0 image     100   200  rgb     3   8  image  no         8  0    72    72 120B 1%\n')[0];
   assert.equal(image.width, 100);
+  assert.equal(image.number, 0);
   assert.equal(image.objectId, 8);
   assert.equal(image.generation, 0);
+  const unknownPpi = parseImages('page   num  type   width height color comp bpc  enc interp  object ID x-ppi y-ppi size ratio\n--------------------------------------------------------------------------------------------\n   1     0 image     100   200  rgb     3   8  image  no         8  0     0     - 120B 1%\n')[0];
+  assert.equal(unknownPpi.xPpi, null);
+  assert.equal(unknownPpi.yPpi, null);
+  assert.throws(
+    () => parseFonts('name type encoding emb sub uni object ID\nFakeFont Type 1 WinAnsi maybe no no 8 0\n'),
+    { code: 'INVALID_ENGINE_OUTPUT', status: 502 },
+  );
+  assert.throws(
+    () => parseImages('page num type width height color comp bpc enc interp object ID x-ppi y-ppi size ratio\n1 0 image 100 200 rgb 3 8 image no 8 0 not-a-ppi 72 120B 1%\n'),
+    { code: 'INVALID_ENGINE_OUTPUT', status: 502 },
+  );
   assert.deepEqual(parseAttachments('2 embedded files\n1: note.txt\n2: data.csv\n').map(({ name }) => name), ['note.txt', 'data.csv']);
   assert.equal(parseSignatures("File 'plain.pdf' does not contain any signatures").count, 0);
   assert.deepEqual(parseTesseractLanguages('List of available languages (2):\neng\ndeu\n'), ['deu', 'eng']);
@@ -57,6 +74,36 @@ test('Poppler output parsers normalize document evidence', () => {
     page: 1, type: 'URI', url: 'https://example.test/local',
   });
   assert.deepEqual(parseTaggedStructure('Document\n  P\n    Span\n').lines.map(({ depth }) => depth), [0, 2, 4]);
+});
+
+test('resource listings parse stdout only and reject malformed Poppler resource rows', async () => {
+  const documentId = 'resource-document';
+  const sourceSha256 = 'a'.repeat(64);
+  const store = {
+    getDocument(id) { assert.equal(id, documentId); return { sha256: sourceSha256 }; },
+    getSourcePath(id) { assert.equal(id, documentId); return '/private/source.pdf'; },
+    async verifySource(id) { assert.equal(id, documentId); return true; },
+  };
+  const stdout = [
+    'name                                 type              encoding         emb sub uni object ID',
+    '------------------------------------ ----------------- ---------------- --- --- --- ---------',
+    'Helvetica                            Type 1            WinAnsi          yes  no  yes      4  0',
+  ].join('\n');
+  const service = new PdfService({
+    store, registry: {},
+    adapter: { async execute(operation) {
+      assert.equal(operation, 'listFonts');
+      return {
+        stdout,
+        stderr: 'warning: font cache changed\nFakeFont                            Type 1            WinAnsi          yes no  yes      9  0\n',
+      };
+    } },
+  });
+  const fonts = await service.listFonts(documentId);
+  assert.deepEqual(fonts, [{
+    name: 'Helvetica', type: 'Type 1', encoding: 'WinAnsi', embedded: 'yes',
+    subset: 'no', unicode: 'yes', sourceSha256,
+  }]);
 });
 
 test('named destination parser fails closed and retains only its bounded page-level inventory', () => {
@@ -249,4 +296,3 @@ test('offline signature executor accepts only strict exit, stderr, and private N
     code: 'SIGNATURE_OUTPUT_UNRECOGNIZED', status: 502,
   });
 });
-

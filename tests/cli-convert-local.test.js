@@ -6,13 +6,13 @@ import { basename, join } from 'node:path';
 import { Writable } from 'node:stream';
 import test from 'node:test';
 import { parseCliArguments, runCli } from '../scripts/platen-cli.mjs';
+import { runConversionCommand } from '../scripts/cli/commands/conversion.mjs';
 import { createOperationProvenance } from '../scripts/host/operation-provenance.mjs';
 import { createBlankPdf } from '../scripts/host/pdf-factory.mjs';
 import { decodePng, encodeRgbaPng } from '../scripts/host/raster-png-codec.mjs';
 
 const assetId = '22222222-2222-4222-8222-222222222222';
 const documentId = '33333333-3333-4333-8333-333333333333';
-
 function capture() {
   const chunks = [];
   return {
@@ -22,7 +22,6 @@ function capture() {
     text: () => Buffer.concat(chunks).toString('utf8'),
   };
 }
-
 function sourcePng() {
   return encodeRgbaPng({
     width: 2,
@@ -34,9 +33,9 @@ function sourcePng() {
     ]),
   });
 }
-
 function fakeApplication(sourceBytes, {
   abortController = null,
+  deleteDocumentError = null,
   documentOverrides = {},
   operationOverrides = {},
   inspectionOverrides = {},
@@ -51,7 +50,11 @@ function fakeApplication(sourceBytes, {
   const pdfBytes = createBlankPdf({ title: 'Converted image' });
   const pdfSha256 = createHash('sha256').update(pdfBytes).digest('hex');
   const state = {
-    createdInputs: 0, conversionCalls: 0, exportCalls: 0, disposed: false,
+    createdInputs: 0,
+    conversionCalls: 0,
+    exportCalls: 0,
+    deletedDocuments: [],
+    disposed: false,
   };
   const asset = Object.freeze({
     id: assetId,
@@ -134,11 +137,16 @@ function fakeApplication(sourceBytes, {
           };
         },
       },
-      store: { async dispose() { state.disposed = true; } },
+      store: {
+        async deleteDocument(id) {
+          state.deletedDocuments.push(id);
+          if (deleteDocumentError) throw deleteDocumentError;
+        },
+        async dispose() { state.disposed = true; },
+      },
     },
   };
 }
-
 test('convert-local parser exposes only one mandatory-output PNG input', () => {
   assert.deepEqual(parseCliArguments([
     'convert-local', 'source.PNG', '--output', 'output.pdf',
@@ -154,7 +162,124 @@ test('convert-local parser exposes only one mandatory-output PNG input', () => {
     { code: 'CLI_INVALID_ARGUMENTS' },
   );
 });
-
+function directConversionRuntime(sourceBytes, fixture, {
+  abortController = null,
+  abortAfterWrite = false,
+  emitError = null,
+  publishOutput = false,
+  receipt = Object.freeze({ size: fixture.pdfBytes.length, sha256: createHash('sha256').update(fixture.pdfBytes).digest('hex') }),
+} = {}) {
+  const calls = [];
+  const emitted = [];
+  return {
+    calls,
+    emitted,
+    canonicalOutputTarget: async (output) => { calls.push(['target', output]); },
+    readLocalInputBytes: async () => ({ bytes: Buffer.from(sourceBytes), displayName: 'source.png' }),
+    cancelled(signal) { if (signal?.aborted) throw Object.assign(new Error('The local CLI operation was cancelled.'), { code: 'JOB_CANCELLED' }); },
+    async writeExclusiveVerified(output, bytes, signal, finalize) {
+      calls.push(['writeExclusiveVerified', output, Buffer.from(bytes), signal]);
+      let published = false;
+      try {
+        if (publishOutput) {
+          await writeFile(output, bytes, { mode: 0o600 });
+          published = true;
+        }
+        if (abortAfterWrite) abortController?.abort();
+        await finalize(receipt);
+        return receipt;
+      } catch (error) {
+        if (published) await rm(output, { force: true });
+        throw error;
+      }
+    },
+    async emit(_stdout, value) { if (emitError) throw emitError; emitted.push(value); },
+    fail(code, message) { throw Object.assign(new Error(message), { code }); },
+  };
+}
+test('convert-local verifies the immutable publication receipt before emitting', async () => {
+  const sourceBytes = sourcePng();
+  const fixture = fakeApplication(sourceBytes);
+  const runtime = directConversionRuntime(sourceBytes, fixture);
+  await runConversionCommand(
+    fixture.application,
+    { input: 'source.png', output: 'output.pdf' },
+    capture().stream,
+    undefined,
+    runtime,
+  );
+  assert.equal(runtime.calls[1][0], 'writeExclusiveVerified');
+  assert.equal(runtime.calls[1][2].equals(fixture.pdfBytes), true);
+  assert.equal(runtime.emitted.length, 1);
+  assert.deepEqual(fixture.state.deletedDocuments, []);
+});
+test('convert-local revokes the exact derived document on receipt mismatch or cancellation', async (context) => {
+  const sourceBytes = sourcePng();
+  const mismatch = fakeApplication(sourceBytes);
+  const mismatchRuntime = directConversionRuntime(sourceBytes, mismatch, {
+    receipt: Object.freeze({ size: 1, sha256: '0'.repeat(64) }),
+  });
+  await assert.rejects(runConversionCommand(
+    mismatch.application,
+    { input: 'source.png', output: 'mismatch.pdf' },
+    capture().stream,
+    undefined,
+    mismatchRuntime,
+  ), { code: 'CLI_INVALID_CONVERTED_PDF' });
+  assert.deepEqual(mismatch.state.deletedDocuments, [documentId]);
+  assert.equal(mismatchRuntime.emitted.length, 0);
+  const controller = new AbortController();
+  const cancellation = fakeApplication(sourceBytes);
+  const directory = await mkdtemp(join(tmpdir(), 'platen-cli-convert-cancel-'));
+  context.after(() => rm(directory, { recursive: true, force: true }));
+  const cancelledPath = join(directory, 'cancelled.pdf');
+  const cancellationRuntime = directConversionRuntime(sourceBytes, cancellation, {
+    abortController: controller,
+    abortAfterWrite: true,
+    publishOutput: true,
+  });
+  await assert.rejects(runConversionCommand(
+    cancellation.application,
+    { input: 'source.png', output: cancelledPath },
+    capture().stream,
+    controller.signal,
+    cancellationRuntime,
+  ), { code: 'JOB_CANCELLED' });
+  await assert.rejects(access(cancelledPath));
+  assert.deepEqual(cancellation.state.deletedDocuments, [documentId]);
+  assert.equal(cancellationRuntime.emitted.length, 0);
+});
+test('convert-local revokes after postflight emit failure and reports cleanup failure safely', async (context) => {
+  const sourceBytes = sourcePng();
+  const primaryError = Object.assign(new Error('postflight failed'), { code: 'POSTFLIGHT_FAILED' });
+  const cleanupError = Object.assign(new Error('revoke failed'), { code: 'REVOKE_FAILED' });
+  const fixture = fakeApplication(sourceBytes, {
+    deleteDocumentError: cleanupError,
+  });
+  const directory = await mkdtemp(join(tmpdir(), 'platen-cli-convert-postflight-'));
+  context.after(() => rm(directory, { recursive: true, force: true }));
+  const outputPath = join(directory, 'postflight.pdf');
+  const runtime = directConversionRuntime(sourceBytes, fixture, {
+    emitError: primaryError, publishOutput: true,
+  });
+  await assert.rejects(runConversionCommand(
+    fixture.application,
+    { input: 'source.png', output: outputPath },
+    capture().stream,
+    undefined,
+    runtime,
+  ), (error) => {
+    assert.equal(error.code, 'CLI_CONVERSION_CLEANUP_FAILED');
+    assert.equal(error.cause instanceof AggregateError, true);
+    assert.equal(error.cause.errors[0], primaryError);
+    assert.equal(error.cause.errors[1], cleanupError);
+    assert.doesNotMatch(error.message, new RegExp(documentId));
+    return true;
+  });
+  await assert.rejects(access(outputPath));
+  assert.deepEqual(fixture.state.deletedDocuments, [documentId]);
+  assert.equal(runtime.emitted.length, 0);
+});
 test('convert-local publishes one verified private PDF and a bounded receipt', async (context) => {
   const directory = await mkdtemp(join(tmpdir(), 'platen-cli-convert-'));
   context.after(() => rm(directory, { recursive: true, force: true }));
@@ -191,7 +316,6 @@ test('convert-local publishes one verified private PDF and a bounded receipt', a
   assert.equal(second.state.createdInputs, 0);
   assert.equal(second.state.disposed, true);
 });
-
 test('convert-local rejects symlinks, hard links, cancellation, and mismatched evidence without output', async (context) => {
   const directory = await mkdtemp(join(tmpdir(), 'platen-cli-convert-reject-'));
   context.after(() => rm(directory, { recursive: true, force: true }));
@@ -215,7 +339,6 @@ test('convert-local rejects symlinks, hard links, cancellation, and mismatched e
     assert.equal(fixture.state.disposed, true);
     await rm(linkedPath);
   }
-
   const controller = new AbortController();
   const cancelled = fakeApplication(sourceBytes, { abortController: controller });
   const cancelledOutput = join(directory, 'cancelled.pdf');
@@ -249,7 +372,6 @@ test('convert-local rejects symlinks, hard links, cancellation, and mismatched e
     assert.equal(fixture.state.disposed, true);
   }
 });
-
 test('installed ImageMagick and Poppler convert a strict PNG end to end', async (context) => {
   try {
     await Promise.all([

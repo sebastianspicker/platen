@@ -1,3 +1,4 @@
+import { HostError } from './host-error.mjs';
 import { checkPdfKitMutationLimits, DEFAULT_PDFKIT_MUTATION_LIMITS } from './pdfkit-mutation-contract.mjs';
 import { validatePdfKitMutationAdmission } from './pdfkit-mutation-operation-admission.mjs';
 import { executePdfKitMutationOperation } from './pdfkit-mutation-operation-execution.mjs';
@@ -20,6 +21,28 @@ export {
   PDFKIT_TARGETED_PROFILE,
 } from './pdfkit-mutation-contract.mjs';
 
+async function cleanupPdfKitMutation(store, lifecycle) {
+  let cleanupError = null;
+  if (lifecycle.workspace) {
+    try { await store.cleanupJob(lifecycle.workspace); } catch (error) { cleanupError = error; }
+  }
+  let revocationError = null;
+  if (lifecycle.promotedArtifact && (!lifecycle.completed || cleanupError)) {
+    try { await store.deleteArtifact(lifecycle.promotedArtifact.id); } catch (error) { revocationError = error; }
+  }
+  if (cleanupError || revocationError) {
+    throw new HostError(
+      'PDFKIT_MUTATION_CLEANUP_FAILED',
+      'PDFKit mutation could not clean its private workspace or retained artifact.',
+      500,
+      { cause: new AggregateError(
+        [lifecycle.primaryError, cleanupError, revocationError].filter(Boolean),
+        'PDFKit mutation cleanup failed.',
+      ) },
+    );
+  }
+}
+
 export class PdfKitMutationService {
   #store;
   #poppler;
@@ -29,7 +52,7 @@ export class PdfKitMutationService {
   constructor({ store, poppler, adapter, limits } = {}) {
     const storeMethods = [
       'getDocument', 'getSourcePath', 'verifySource', 'createJobWorkspace', 'cleanupJob',
-      'promotePdfArtifact',
+      'promotePdfArtifact', 'deleteArtifact',
     ];
     if (!store || !storeMethods.every((name) => typeof store[name] === 'function')) {
       throw new TypeError('PdfKitMutationService requires a DocumentStore-compatible store.');
@@ -53,36 +76,43 @@ export class PdfKitMutationService {
       store: this.#store, documentId, sourceSha256, profile,
     });
     const job = createPdfKitMutationJob(externalSignal);
-    let workspace = null;
+    const lifecycle = {
+      workspace: null, promotedArtifact: null, completed: false, primaryError: null,
+    };
     try {
       await this.#store.verifySource(documentId);
       const storedSourcePath = this.#store.getSourcePath(documentId);
-      workspace = await this.#store.createJobWorkspace(documentId);
+      lifecycle.workspace = await this.#store.createJobWorkspace(documentId);
       const staged = await stagePdfKitMutationSource({
-        store: this.#store, poppler: this.#poppler, documentId, workspace, job,
+        store: this.#store, poppler: this.#poppler, documentId, workspace: lifecycle.workspace, job,
         limits: this.#limits, source: admission.source, storedSourcePath,
       });
       const validatedRequest = await validatePdfKitMutationOperation({
-        poppler: this.#poppler, workspace, job, limits: this.#limits,
+        poppler: this.#poppler, workspace: lifecycle.workspace, job, limits: this.#limits,
         source: admission.source, profile: admission.profile, mutationInput, ...staged,
       });
       const executed = await executePdfKitMutationOperation({
-        adapter: this.#adapter, workspace, job, limits: this.#limits,
+        adapter: this.#adapter, workspace: lifecycle.workspace, job, limits: this.#limits,
         source: admission.source, ...staged, ...validatedRequest,
       });
       const verified = await verifyPdfKitMutationOperation({
-        poppler: this.#poppler, store: this.#store, documentId, workspace, job,
+        poppler: this.#poppler, store: this.#store, documentId, workspace: lifecycle.workspace, job,
         limits: this.#limits, source: admission.source, ...staged, ...validatedRequest, ...executed,
       });
-      return await promotePdfKitMutationOperation({
+      const promoted = await promotePdfKitMutationOperation({
         store: this.#store, documentId, source: admission.source, job,
         ...staged, ...validatedRequest, ...executed, ...verified,
       });
+      lifecycle.promotedArtifact = promoted.artifact;
+      if (job.signal.aborted) throw job.signal.reason ?? new Error('PDFKit mutation was cancelled after promotion.');
+      lifecycle.completed = true;
+      return promoted;
     } catch (error) {
-      throw translatePdfKitMutationError(error, { job, externalSignal });
+      lifecycle.primaryError = translatePdfKitMutationError(error, { job, externalSignal });
+      throw lifecycle.primaryError;
     } finally {
       job.dispose();
-      if (workspace) await this.#store.cleanupJob(workspace);
+      await cleanupPdfKitMutation(this.#store, lifecycle);
     }
   }
 }

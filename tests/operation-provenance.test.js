@@ -49,6 +49,19 @@ test('operation provenance rejects failed or evidence-free validation', () => {
   );
 });
 
+test('operation provenance requires matching manifest evidence when a manifest is recorded', () => {
+  const manifestSha256 = 'b'.repeat(64);
+  const record = createOperationProvenance(valid({
+    expected: { pageCount: 2, manifestSha256 },
+    validation: { passed: true, validators: ['source-sha256', 'semantic-page-manifest'], manifestSha256 },
+  }));
+  assert.equal(record.expected.manifestSha256, manifestSha256);
+  assert.throws(() => createOperationProvenance(valid({
+    expected: { pageCount: 2, manifestSha256 },
+    validation: { passed: true, validators: ['source-sha256'], manifestSha256: 'c'.repeat(64) },
+  })), { code: 'INVALID_OPERATION_PROVENANCE', status: 500 });
+});
+
 test('operation provenance rejects unsafe JSON and untrusted identifiers', () => {
   assert.throws(
     () => createOperationProvenance(valid({ inputs: [{ documentId: '../source.pdf', sha256, role: 'primary' }] })),

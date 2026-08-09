@@ -31,13 +31,22 @@ function job(status = 'pending', receipt = null) {
     id: 'job_1', type: AUTOMATION_INSPECT_TYPE, payload: {}, status,
     attempts: 0, maxAttempts: 8, createdAt: 1, updatedAt: 1,
     lease: null, retry: null, receipt,
+    transaction: { source: { kind: 'source', id: source.id, sha256: source.sha256, size: 10, sourceId: source.id, sourceSha256 }, output: null },
   };
 }
 
 function setup({ queueOverrides = {}, authority = null, worker = null, sourceOverrides = {}, outputMetadata = null } = {}) {
-  const calls = { authorize: [], opened: 0, enqueued: [], cancelled: [] };
+  const calls = { authorize: [], opened: 0, enqueued: [], cancelled: [], committed: [] };
+  const jobs = new Map();
   const queue = {
-    async enqueue(value) { calls.enqueued.push(value); return { job: job(), idempotent: false }; },
+    async enqueue(value) {
+      calls.enqueued.push(value);
+      const queued = { ...job(), type: value.type, payload: value.payload,
+        transaction: { source: value.transaction, output: null } };
+      jobs.set(value.idempotencyKey, queued);
+      return { job: queued, idempotent: false };
+    },
+    async admission(key) { return { accepting: true, existing: jobs.get(key) ?? null }; },
     async get() { return job(); },
     async cancel(id) { calls.cancelled.push(id); return job('cancelled'); },
     ...queueOverrides,
@@ -52,6 +61,7 @@ function setup({ queueOverrides = {}, authority = null, worker = null, sourceOve
   };
   const sources = {
     async openVerified(id, sha256) { calls.opened += 1; assert.equal(id, source.id); assert.equal(sha256, source.sha256); return { id, sha256, size: 10, stream: Readable.from([]) }; },
+    async commit(value) { calls.committed.push(value); },
     async getOutputMetadata() { return outputMetadata ?? { id: 'output_1', sha256: outputSha256, size: 10, sourceId: source.id, sourceSha256 }; },
     ...sourceOverrides,
   };
@@ -69,7 +79,28 @@ test('automation API submits only an allowlisted operation and returns a redacte
   });
   assert.equal(state.calls.authorize[0].context.capability, 'automation.submit');
   assert.equal(state.calls.enqueued[0].idempotencyKey, 'request-1');
+  assert.deepEqual(state.calls.enqueued[0].transaction, {
+    kind: 'source', id: source.id, sha256: source.sha256, size: 10,
+    sourceId: source.id, sourceSha256: source.sha256,
+  });
+  assert.equal(state.calls.committed.length, 1);
   assert.equal(Object.hasOwn(result.job, 'payload'), false);
+});
+
+test('automation API confirms an ambiguously acknowledged durable admission before committing source', async () => {
+  let stored = null;
+  const state = setup({ queueOverrides: {
+    async enqueue(value) {
+      stored = { ...job(), type: value.type, payload: value.payload,
+        transaction: { source: value.transaction, output: null } };
+      throw new Error('post-write acknowledgement failed');
+    },
+    async admission() { return { accepting: true, existing: stored }; },
+  } });
+  const result = await state.api.submit(request());
+  assert.equal(result.idempotent, true);
+  assert.equal(result.job.id, 'job_1');
+  assert.equal(state.calls.committed.length, 1);
 });
 
 test('automation API rejects proxies, accessors, and extra request fields before authority or source access', async () => {

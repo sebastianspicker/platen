@@ -176,5 +176,23 @@ function proof(sourceBytes, outputBytes, request, state, built) {
 
 export function writePdfAccessibilityTableSemantics(sourceBytes, requestValue) { const request = normalizePdfAccessibilityTableSemantics(requestValue); const state = sourceState(sourceBytes, request); const built = build(sourceBytes, request, state); return Object.freeze({ bytes: built.bytes, proof: proof(sourceBytes, built.bytes, request, state, built) }); }
 export function inspectPdfAccessibilityTableSemantics(sourceBytes, outputBytes, requestValue) { const request = normalizePdfAccessibilityTableSemantics(requestValue); const state = sourceState(sourceBytes, request); const expected = build(sourceBytes, request, state); if (!Buffer.isBuffer(outputBytes) || !outputBytes.equals(expected.bytes)) invalidOutput(); return proof(sourceBytes, outputBytes, request, state, expected); }
+export function inspectPdfAccessibilityTableSemanticsSource(sourceBytes, sourceSha256 = digest(sourceBytes)) {
+  const state = sourceState(sourceBytes, { profile: PDF_ACCESSIBILITY_TABLE_SEMANTICS_PROFILE, sourceSha256 });
+  const cells = state.cells.map((node) => {
+    const row = state.table.children.findIndex((reference) => sameRef(reference, node.parent));
+    const column = state.structs.get(`${node.parent.object}:${node.parent.generation}`).children
+      .findIndex((reference) => sameRef(reference, node.reference));
+    return Object.freeze({
+      structRef: Object.freeze({ object: node.reference.object, generation: node.reference.generation }), role: node.role,
+      row, column, page: node.mcr.page.index,
+      contentRef: Object.freeze({ object: node.mcr.contentRef.object, generation: node.mcr.contentRef.generation }), mcid: node.mcr.mcid,
+      locator: `table ${state.tableRef.object}:${state.tableRef.generation}, row ${row + 1}, column ${column + 1}`,
+    });
+  });
+  return Object.freeze({
+    profile: PDF_ACCESSIBILITY_TABLE_SEMANTICS_PROFILE, sourceSha256,
+    table: Object.freeze({ tableRef: Object.freeze({ object: state.tableRef.object, generation: state.tableRef.generation }), cells: Object.freeze(cells) }),
+  });
+}
 export const preparePdfAccessibilityTableSemantics = writePdfAccessibilityTableSemantics;
 export const verifyPdfAccessibilityTableSemantics = inspectPdfAccessibilityTableSemantics;

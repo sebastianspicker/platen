@@ -1,10 +1,6 @@
 import Foundation
 import PDFKit
-import AppKit
 import Darwin
-import CryptoKit
-import CoreGraphics
-
 private func targetedMutationCanApply(_ mutation: TargetedMutation, document: PDFDocument, sourceDigest: String) -> Bool {
     guard !targetedDocumentContainsUnsafeContent(document) else { return false }
     if let edit = mutation.formFill {
@@ -63,6 +59,9 @@ private func targetedMutationCanApply(_ mutation: TargetedMutation, document: PD
         else { return false }
         return target.annotation.contents != edit.contents || !closeEnough(target.annotation.bounds, cgRect(edit.rect))
     }
+    if let edit = mutation.annotationProperties {
+        return annotationPropertiesCanApply(edit, document: document, sourceDigest: sourceDigest)
+    }
     guard let edit = mutation.annotationRemove,
           !document.isLocked, document.allowsCommenting,
           let target = resolveTargetedAnnotation(
@@ -72,7 +71,6 @@ private func targetedMutationCanApply(_ mutation: TargetedMutation, document: PD
     else { return false }
     return annotationIsInertTarget(target.annotation)
 }
-
 private struct TargetedMutationSnapshot {
     let annotationCounts: [Int]
     let fieldName: String?
@@ -81,8 +79,8 @@ private struct TargetedMutationSnapshot {
     let choiceRenderSHA256: String?
     let radio: RadioMutationSnapshot?
     let annotationSanitization: AnnotationSanitizationSnapshot?
+    var annotationProperties: AnnotationPropertiesSnapshot? = nil
 }
-
 private func targetedMutationSnapshot(
     _ mutation: TargetedMutation,
     document: PDFDocument,
@@ -145,13 +143,22 @@ private func targetedMutationSnapshot(
             radio: nil, annotationSanitization: annotationSanitization
         )
     }
+    if let edit = mutation.annotationProperties {
+        guard let annotationProperties = annotationPropertiesSnapshot(edit, document: document, limits: limits) else { return nil }
+        var snapshot = TargetedMutationSnapshot(
+            annotationCounts: annotationCounts, fieldName: nil, checkboxOnState: nil,
+            checkboxRenderSHA256: nil, choiceRenderSHA256: nil, radio: nil,
+            annotationSanitization: nil
+        )
+        snapshot.annotationProperties = annotationProperties
+        return snapshot
+    }
     return TargetedMutationSnapshot(
         annotationCounts: annotationCounts, fieldName: nil,
         checkboxOnState: nil, checkboxRenderSHA256: nil, choiceRenderSHA256: nil,
         radio: nil, annotationSanitization: nil
     )
 }
-
 private func appliesTargetedMutation(_ mutation: TargetedMutation, document: PDFDocument, sourceDigest: String) -> Bool {
     if let edit = mutation.formFill,
         let target = resolveTargetedAnnotation(
@@ -175,6 +182,9 @@ private func appliesTargetedMutation(_ mutation: TargetedMutation, document: PDF
         target.annotation.removeValue(forAnnotationKey: .appearanceDictionary)
         return true
     }
+    if let edit = mutation.annotationProperties {
+        return applyAnnotationProperties(edit, document: document, sourceDigest: sourceDigest)
+    }
     if let edit = mutation.annotationRemove,
        let target = resolveTargetedAnnotation(
            document: document, sourceDigest: sourceDigest, page: edit.page, annotationIndex: edit.annotationIndex,
@@ -185,7 +195,6 @@ private func appliesTargetedMutation(_ mutation: TargetedMutation, document: PDF
     }
     return false
 }
-
 private func verifiesTargetedMutation(
     _ mutation: TargetedMutation,
     document: PDFDocument,
@@ -249,15 +258,18 @@ private func verifiesTargetedMutation(
         return annotationSubtype(annotation) == edit.subtype && annotation.contents == edit.contents
             && closeEnough(annotation.bounds, cgRect(edit.rect))
     }
+    if let edit = mutation.annotationProperties {
+        guard let annotationProperties = snapshot.annotationProperties else { return false }
+        return verifiesAnnotationProperties(edit, document: document, snapshot: annotationProperties, limits: limits)
+    }
     guard mutation.annotationRemove != nil, let annotationSanitization = snapshot.annotationSanitization else { return false }
     return verifiesAnnotationSanitization(annotationSanitization, document: document, limits: limits)
 }
-
 func targetedMutate(
     _ request: TargetedMutationRequest,
     workspace: URL,
     inputData: Data
-) throws -> MutationResult {
+) throws -> TargetedMutationReceipt {
     let sourceDigest = sha256Hex(inputData)
     guard request.sourceSha256 == sourceDigest,
           let document = PDFDocument(data: inputData),
@@ -268,15 +280,20 @@ func targetedMutate(
           appliesTargetedMutation(request.mutation, document: document, sourceDigest: sourceDigest),
           let outputData = document.dataRepresentation(), outputData.count <= maxOutputBytes
     else { throw InspectionFailure.mutationFailed }
-
     let output = workspace.appendingPathComponent(request.outputFilename)
     try writePrivateOutput(outputData, to: output)
     let reopenedData = try readPrivateInput(output)
     guard let reopened = PDFDocument(data: reopenedData), reopened.pageCount == document.pageCount,
           verifiesTargetedMutation(request.mutation, document: reopened, snapshot: snapshot, limits: request.limits)
     else { throw InspectionFailure.outputInvalid }
-    return MutationResult(
-        appliedEdits: 1,
-        inspection: try inspect(reopened, limits: request.limits, sourceData: reopenedData)
+    let annotationPropertiesVerified = request.mutation.annotationProperties != nil
+    return TargetedMutationReceipt(
+        category: annotationPropertiesVerified ? "annotation-properties" : "targeted-mutation",
+        sourceSha256: sourceDigest, outputSha256: sha256Hex(reopenedData), pageCount: reopened.pageCount,
+        annotationPropertiesGeometryVerified: annotationPropertiesVerified,
+        annotationPropertiesColorVerified: annotationPropertiesVerified,
+        rawAnnotationColorVerified: annotationPropertiesVerified,
+        nonTargetAnnotationsVerified: annotationPropertiesVerified,
+        targetAnnotationPreservationVerified: annotationPropertiesVerified
     )
 }

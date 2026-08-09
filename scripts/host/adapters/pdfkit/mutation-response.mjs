@@ -12,6 +12,22 @@ export function parsePdfkitMutationResponse(stdout) {
   return result;
 }
 
+export function parsePdfkitTargetedMutationResponse(stdout) {
+  const result = parsePdfkitEnvelope(stdout);
+  const propertyKeys = [
+    'annotationPropertiesGeometryVerified', 'annotationPropertiesColorVerified',
+    'rawAnnotationColorVerified', 'nonTargetAnnotationsVerified', 'targetAnnotationPreservationVerified',
+  ];
+  if (!result || typeof result !== 'object' || Array.isArray(result) || Object.keys(result).length !== 14
+    || result.schema !== 'pdfkit-targeted-mutation-receipt-v1' || result.version !== 1
+    || result.operation !== 'targetedMutate' || !['targeted-mutation', 'annotation-properties'].includes(result.category)
+    || !isFingerprint(result.sourceSha256) || !isFingerprint(result.outputSha256)
+    || result.sourceSha256 === result.outputSha256 || !isInteger(result.pageCount, 1, 100)
+    || result.appliedEdits !== 1 || result.reopenVerified !== true
+    || propertyKeys.some((key) => typeof result[key] !== 'boolean')) throw responseError();
+  return result;
+}
+
 function parseAnnotationReceipt(stdout, schema, operation, category, proofKey) {
   const result = parsePdfkitEnvelope(stdout);
   if (!result || typeof result !== 'object' || Array.isArray(result) || Object.keys(result).length !== 13

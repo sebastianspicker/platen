@@ -11,4 +11,9 @@ export const REQUIRED_JAVASCRIPT_FORMS_FILES = Object.freeze([
   'scripts/host/pdf-form-javascript-job.mjs',
   'scripts/host/pdf-form-javascript-service.mjs',
   'scripts/host/pdf-form-javascript.mjs',
+  'scripts/host/pdf-xfa-inspection-contract.mjs',
+  'scripts/host/pdf-xfa-inspection-analyzer.mjs',
+  'scripts/host/pdf-xfa-inspection-job.mjs',
+  'scripts/host/pdf-xfa-inspection-service.mjs',
+  'scripts/host/pdf-xfa-inspection.mjs',
 ]);

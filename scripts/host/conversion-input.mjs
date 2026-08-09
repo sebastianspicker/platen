@@ -37,11 +37,19 @@ async function convertOfficeLike({ asset, input, output, workspace, signal, libr
     await libreOffice.execute(
       'convertOfficeToPdf', { input, output, workspace }, runOptions(signal),
     );
+    return Object.freeze({
+      producerValidator: 'libreoffice-exit-zero',
+      conversionMode: 'libreoffice',
+    });
   } catch (error) {
     if (!canUseTextFallback(asset, error, signal)) throw error;
     const text = await extractFallbackTextFile(input, asset.extension);
     const bytes = createTextPdf({ text, title: asset.displayName });
     await writeFile(output, bytes, { mode: 0o600 });
+    return Object.freeze({
+      producerValidator: 'deterministic-text-fallback',
+      conversionMode: 'text-fallback',
+    });
   }
 }
 
@@ -119,12 +127,17 @@ async function convertByKind({ asset, input, workspace, signal, adapters, prepar
   if (asset.kind === 'office' || asset.kind === 'text'
     || asset.kind === 'html' || asset.kind === 'cad') {
     const output = join(workspace, 'source.pdf');
-    await convertOfficeLike({
+    const officeConversion = await convertOfficeLike({
       asset, input, output, workspace, signal, libreOffice: adapters.libreOffice,
     });
     const operationType = asset.kind === 'html'
       ? 'html-to-pdf' : asset.kind === 'cad' ? 'cad-to-pdf' : 'office-to-pdf';
-    return { operationType, output };
+    return {
+      operationType,
+      output,
+      producerValidator: officeConversion.producerValidator,
+      operationParameters: { conversionMode: officeConversion.conversionMode },
+    };
   }
   if (asset.kind === 'image') {
     if (asset.extension === '.png' && !preparedPng) {
@@ -172,7 +185,11 @@ async function convertByKind({ asset, input, workspace, signal, adapters, prepar
     await adapters.ghostscript.execute(
       operation, { input, output, workspace }, runOptions(signal),
     );
-    return { operationType: 'postscript-to-pdf', output };
+    return {
+      operationType: 'postscript-to-pdf',
+      output,
+      producerValidator: 'ghostscript-exit-zero',
+    };
   }
   throw new HostError(
     'UNSUPPORTED_INPUT_FORMAT', 'No local converter is registered for this input.', 415,
@@ -189,11 +206,17 @@ export async function convertInputAsset({
 }) {
   const asset = inputs.getInput(assetId);
   const input = inputs.getSourcePath(assetId);
+  const owner = Object.freeze({
+    createJobWorkspace: inputs.createJobWorkspace.bind(inputs),
+    cleanupJob: inputs.cleanupJob.bind(inputs),
+    verifySource: inputs.verifyInput.bind(inputs),
+    deleteDocument: documents.deleteDocument.bind(documents),
+  });
   return runConversionJob({
-    owner: inputs,
+    owner,
     resourceId: assetId,
     externalSignal,
-    action: async ({ workspace, signal, checkQuota }) => {
+    action: async ({ workspace, signal, checkQuota, registerPromotedDocument }) => {
       await inputs.verifyInput(assetId);
       if (asset.kind === 'html') assertInlineOnlyHtml(await readFile(input));
       const preparedPng = asset.kind === 'image' && asset.extension === '.png'
@@ -205,7 +228,7 @@ export async function convertInputAsset({
       await checkQuota();
       await inputs.verifyInput(assetId);
       const inspection = await inspectConversionOutput(poppler, converted.output, signal);
-      const operation = createOperationProvenance({
+    const operation = createOperationProvenance({
         type: converted.operationType,
         inputs: [{ assetId, sha256: asset.sha256, role: 'source' }],
         parameters: {
@@ -223,11 +246,13 @@ export async function convertInputAsset({
           pageCount: inspection.pageCount,
         },
       });
-      return documents.createDocument({
+      const document = await documents.createDocument({
         stream: createReadStream(converted.output),
         displayName: `${cleanConversionStem(asset.displayName)}.pdf`,
         operation,
       });
+      registerPromotedDocument(document);
+      return document;
     },
   });
 }

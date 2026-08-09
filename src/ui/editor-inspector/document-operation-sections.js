@@ -52,10 +52,10 @@ export function documentOperationSections(state, analysis, readiness) {
         <h3>Compare local PDFs</h3>
         <label class="field-label" for="comparison-mode">Comparison type</label>
         <select id="comparison-mode" ${ready ? '' : 'disabled'}>
-          ${[['content', 'Extracted text'], ['pixel', 'Selected-page pixels'], ['annotations', 'Local annotations'], ['cross-format', 'Cross-format PDF content'], ['overlay', 'Overlay descriptor'], ['side-by-side', 'Side-by-side descriptor']].map(([value, label]) => `<option value="${value}" ${state.comparisonMode === value ? 'selected' : ''}>${label}</option>`).join('')}
+          ${[['content', 'Extracted text'], ['pixel', 'Selected-page pixels'], ['annotations', 'Local annotations'], ['cross-format', 'Cross-format PDF content'], ['overlay', 'Rendered red/cyan overlay'], ['side-by-side', 'Rendered side-by-side review']].map(([value, label]) => `<option value="${value}" ${state.comparisonMode === value ? 'selected' : ''}>${label}</option>`).join('')}
         </select>
         <button class="button" data-action="choose-comparison-file" ${ready ? '' : 'disabled'}>Choose comparison PDF…</button>
-        <p class="field-help">Content, pixel, and local sidecar-annotation comparisons are computed locally. Overlay and side-by-side modes currently return review-layout descriptors, not rendered composite files.</p>
+        <p class="field-help">Content, pixel, local sidecar-annotation, one-page 72-dpi red/cyan overlay, and one-page 72-dpi side-by-side comparisons are computed locally. Side-by-side renders two independent source panes, primary left and secondary right. It does not synchronize navigation, scale or normalize, align or register pages, retain artifacts, create galleries, convert formats, establish semantic equivalence, or establish conformance.</p>
         ${comparisonResult(state)}
       </section>
       <section class="property-section page-transform-section">

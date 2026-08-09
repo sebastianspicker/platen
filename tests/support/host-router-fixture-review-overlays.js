@@ -1,4 +1,5 @@
 import { HostError } from '../../scripts/host/host-error.mjs';
+import { buildPreflightReport } from '../../scripts/host/preflight-rules.mjs';
 
 function createRedactionPlans() {
   return {
@@ -79,7 +80,7 @@ function createAccessibilityOverlays() {
   return { accessibilityReviews, accessibilityRemediations };
 }
 
-export function createReviewOverlays() {
+export function createReviewOverlays(store) {
   const redactionPlans = createRedactionPlans();
   const redactionPlanReports = createRedactionPlanReports();
   const comparisons = {
@@ -94,7 +95,31 @@ export function createReviewOverlays() {
   const prepress = {
     outputIntentProfileReady: true,
     outputIntentCalls: [],
-    runPreflight: async (documentId, options) => ({ kind: 'preflight-review', documentId, options }),
+    runPreflight: async (documentId, options) => {
+      const document = store.getDocument(documentId);
+      return buildPreflightReport({
+        profile: options.profile,
+        document,
+        inspection: { pageCount: 1, encrypted: 'no', javascript: 'no' },
+        structure: {
+          sourceDigest: document.sha256,
+          pageRange: { firstPage: 1, lastPage: 1, truncated: false },
+          pageBoxes: [{
+            page: 1,
+            widthPoints: 612,
+            heightPoints: 792,
+            boxes: {
+              mediaBox: { left: 0, bottom: 0, right: 612, top: 792 },
+              bleedBox: { left: 9, bottom: 9, right: 603, top: 783 },
+              trimBox: { left: 18, bottom: 18, right: 594, top: 774 },
+            },
+          }],
+          xmpMetadata: { present: true },
+        },
+        fonts: [],
+        images: [],
+      });
+    },
     analyzeInkCoverage: async (documentId, options) => ({ kind: 'ink-coverage', documentId, options }),
     renderSeparations: async (documentId, options) => ({ kind: 'separations', documentId, options }),
     renderOverprintPreview: async (documentId, options) => ({ kind: 'overprint-preview', documentId, options }),

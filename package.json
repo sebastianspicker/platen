@@ -9,6 +9,7 @@
     "dev": "node scripts/serve.mjs",
     "report": "node scripts/capability-report.mjs",
     "report:write": "node scripts/capability-report.mjs --write",
+    "verify:capability-proofs": "node scripts/verify-capability-proofs.mjs",
     "check:professional-clones": "node scripts/check-professional-handler-clones.mjs",
     "native:build:pdfkit": "swift build -c release --package-path native/pdfkit-helper",
     "release:validate": "node scripts/release/validate-current-release.mjs",

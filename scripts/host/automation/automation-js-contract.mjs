@@ -95,6 +95,23 @@ export function normalizeAutomationJsCancelRequest(value) {
   });
 }
 
+export function normalizeAutomationJsReleaseRequest(value) {
+  const item = exact(value, ['executionId', 'grant', 'principal', 'profile'],
+    'automation declarative recipe release request');
+  if (item.profile !== AUTOMATION_JS_PROFILE || !EXECUTION_ID.test(item.executionId ?? '')) {
+    automationJsFail('INVALID_AUTOMATION_JS_REQUEST', 'Declarative recipe release is invalid.');
+  }
+  const base = validatedBase(item.principal, item.grant,
+    { id: 'automation_js_release', sha256: 'a'.repeat(64) }, 'automation-js-release');
+  return Object.freeze({
+    schemaVersion: 1,
+    profile: AUTOMATION_JS_PROFILE,
+    principal: base.principal,
+    grant: base.grant,
+    executionId: item.executionId,
+  });
+}
+
 export function automationJsFingerprint(request) {
   return createHash('sha256').update(JSON.stringify({
     principal: request.principal,

@@ -92,17 +92,24 @@ function validateReceipt(receipt, sourceDigest, pageCount, limits) {
 export function receiptFromOcrLayout(layout, { engineVersion } = {}) {
   if (!layout || layout.kind !== 'ocr-layout-evidence' || layout.sourceDigest === undefined || layout.language !== OCR_EDITABLE_OUTPUT_LANGUAGE || !Array.isArray(layout.records)) fail('OCR_EDITABLE_RECEIPT_INVALID', 'OCR layout evidence cannot be converted into an editable receipt.', 502);
   if (typeof engineVersion !== 'string') fail('OCR_EDITABLE_RECEIPT_INVALID', 'OCR engine version is required for editable output provenance.', 502);
-  const records = [...layout.records].sort((left, right) => left.page - right.page);
-  const pages = records.map((record, index) => {
-    if (record.page !== index + 1) fail('OCR_EDITABLE_RECEIPT_INVALID', 'OCR layout pages must be complete and sequential.', 502);
+  const records = [...layout.records].sort((left, right) => left.page - right.page || String(left.zoneId ?? '').localeCompare(String(right.zoneId ?? '')));
+  const grouped = new Map();
+  for (const record of records) {
+    if (!record || !Number.isSafeInteger(record.page) || record.page < 1) fail('OCR_EDITABLE_RECEIPT_INVALID', 'OCR layout pages are malformed.', 502);
     const words = record.layout?.words;
     const byLine = new Map();
     if (Array.isArray(words)) for (const word of words) {
       if (!word || !Number.isSafeInteger(word.line) || typeof word.text !== 'string') fail('OCR_EDITABLE_RECEIPT_INVALID', 'OCR layout words are malformed.', 502);
       const line = byLine.get(word.line) ?? []; line.push(word); byLine.set(word.line, line);
     }
-    const text = [...byLine.entries()].sort(([left], [right]) => left - right).map(([, line]) => line.sort((left, right) => (left.bounds?.x ?? 0) - (right.bounds?.x ?? 0)).map(({ text }) => text).join(' ')).join('\n');
-    return Object.freeze({ page: record.page, text });
+    const text = [...byLine.entries()].sort(([left], [right]) => left - right)
+      .map(([, line]) => line.sort((left, right) => (left.bounds?.x ?? 0) - (right.bounds?.x ?? 0)).map(({ text }) => text).join(' ')).join('\n');
+    const page = grouped.get(record.page) ?? []; page.push(text); grouped.set(record.page, page);
+  }
+  const pageNumbers = [...grouped.keys()].sort((left, right) => left - right);
+  const pages = pageNumbers.map((page, index) => {
+    if (page !== index + 1) fail('OCR_EDITABLE_RECEIPT_INVALID', 'OCR layout pages must be complete and sequential.', 502);
+    return Object.freeze({ page, text: grouped.get(page).filter(Boolean).join('\n') });
   });
   if (!pages.some(({ text }) => text.length > 0)) fail('OCR_NO_TEXT', 'Tesseract did not recognize text for editable output.', 422);
   return Object.freeze({ schema: 'ocr-editable-text-receipt-v1', version: 1, sourceDigest: layout.sourceDigest, language: OCR_EDITABLE_OUTPUT_LANGUAGE, engine: Object.freeze({ name: 'Tesseract', version: engineVersion }), pageCount: pages.length, pages: Object.freeze(pages) });
@@ -145,4 +152,6 @@ export class OcrEditableOutputService {
     const result = await service.export(documentId, 'word', { sourceSha256, signal });
     return Object.freeze({ kind: 'ocr-editable-output', schemaVersion: 1, format: 'word', extension: result.extension, mediaType: result.mediaType, sourceDigest: result.sourceDigest, pageCount: result.pageCount, language: receipt.language, engine: receipt.engine, artifact: result.artifact, evidence: Object.freeze({ localOnly: true, sourceBound: true, ocrReceipt: true, receiptSha256: receipt.receiptDigest, textOnly: true }), limitations: Object.freeze(['Text-only editable DOCX; OCR recognition requires review. No images, tables, exact layout, fonts, or fidelity claims.']) });
   }
+
+  exportOcrEditable(documentId, options = {}) { return this.export(documentId, options); }
 }

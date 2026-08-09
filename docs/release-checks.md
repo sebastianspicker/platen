@@ -1,11 +1,26 @@
-# Release Checks
+# Release checks
 
+Run candidate checks from a clean, trusted checkout with the intended Node and
+native toolchain versions available:
 
-## Context
-This page tracks expansion decisions for release checks during steady build work.
+```sh
+npm test
+npm run verify
+npm run check:professional-clones
+npm run report
+npm run release:validate
+```
 
-## Usage
-- Made the release assumptions easier to check later.
+`npm run verify` checks required files, JSON catalogs, the dependency-free
+package contract, production-module reachability, native Swift builds on macOS,
+and the complete Node test inventory. `npm run report` must agree with the
+checked-in generated feature-gap report. The clone check rejects repeated
+professional handlers above its configured threshold.
 
-## Scratch Notes
-Early notes are still uneven and may be folded into clearer sections later.
+`npm run release:validate` produces a digest inventory and local validation
+receipt. A passing receipt is not distribution approval. Signing, notarization,
+repository security settings, cross-platform validation, and publication
+authority remain separate evidence.
+
+See [Releasing](RELEASING.md) and [RELEASE_STATUS](../RELEASE_STATUS.md) before
+creating a tag or distribution artifact.

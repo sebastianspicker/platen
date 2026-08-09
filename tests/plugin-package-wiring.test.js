@@ -58,15 +58,16 @@ function routeContext(overrides = {}) {
 }
 
 test('plugin package parser requires explicit roots and action-specific fields', () => {
-  assert.deepEqual(parseCliArguments(['admin.plugin-package', '--action', 'list', '--plugin-root', 'packages', '--trust-root', 'trust']), {
-    command: 'admin.plugin-package', action: 'list', pluginRoot: 'packages', trustRoot: 'trust', output: null,
+  assert.deepEqual(parseCliArguments(['admin.plugin-package', '--action', 'list', '--plugin-root', 'packages', '--trust-root', 'trust', '--policy-root', 'policy']), {
+    command: 'admin.plugin-package', action: 'list', pluginRoot: 'packages', trustRoot: 'trust', policyRoot: 'policy', output: null,
   });
-  assert.deepEqual(parseCliArguments(['admin.plugin-package', '--action', 'install', '--plugin-root', 'packages', '--trust-root', 'trust', '--package', 'package.json']), {
-    command: 'admin.plugin-package', action: 'install', pluginRoot: 'packages', trustRoot: 'trust', packagePath: 'package.json', output: null,
+  assert.deepEqual(parseCliArguments(['admin.plugin-package', '--action', 'install', '--plugin-root', 'packages', '--trust-root', 'trust', '--policy-root', 'policy', '--package', 'package.json']), {
+    command: 'admin.plugin-package', action: 'install', pluginRoot: 'packages', trustRoot: 'trust', policyRoot: 'policy', packagePath: 'package.json', output: null,
   });
-  assert.deepEqual(parseCliArguments(['admin.plugin-package', '--action', 'activate', '--plugin-root', 'packages', '--trust-root', 'trust', '--plugin-id', pluginId, '--version', '1.0.0']).version, '1.0.0');
+  assert.deepEqual(parseCliArguments(['admin.plugin-package', '--action', 'activate', '--plugin-root', 'packages', '--trust-root', 'trust', '--policy-root', 'policy', '--plugin-id', pluginId, '--version', '1.0.0']).version, '1.0.0');
   assert.throws(() => parseCliArguments(['admin.plugin-package', '--action', 'list', '--trust-root', 'trust']), { code: 'CLI_INVALID_OPTION' });
-  assert.throws(() => parseCliArguments(['admin.plugin-package', '--action', 'rollback', '--plugin-root', 'packages', '--trust-root', 'trust', '--plugin-id', pluginId, '--version', '1.0.0']), { code: 'CLI_INVALID_OPTION' });
+  assert.throws(() => parseCliArguments(['admin.plugin-package', '--action', 'list', '--plugin-root', 'packages', '--trust-root', 'trust']), { code: 'CLI_INVALID_OPTION' });
+  assert.throws(() => parseCliArguments(['admin.plugin-package', '--action', 'rollback', '--plugin-root', 'packages', '--trust-root', 'trust', '--policy-root', 'policy', '--plugin-id', pluginId, '--version', '1.0.0']), { code: 'CLI_INVALID_OPTION' });
 });
 
 test('plugin package lifecycle route enforces method/query boundaries and preserves install bytes', async () => {
@@ -145,7 +146,8 @@ test('plugin package client validates lifecycle results and sends exact raw pack
 
 test('plugin package CLI executes list, install, activate, and rollback with cancellation gates', async () => {
   const calls = [];
-  const application = { pluginPackages: {
+  const auditCalls = [];
+  const application = { adminAudit: { append: async (value) => auditCalls.push(value) }, pluginPackages: {
     listPlugins: () => [{ id: pluginId, activeVersion: null, previousVersion: null, versions: [] }],
     install: async (bytes) => { calls.push(['install', bytes.toString()]); return { id: pluginId, version: '1.0.0', digest: 'a'.repeat(64) }; },
     activate: async (id, version) => { calls.push(['activate', id, version]); return { id, activeVersion: version, previousVersion: null, versions: [] }; },
@@ -164,6 +166,10 @@ test('plugin package CLI executes list, install, activate, and rollback with can
   await runPluginPackageCommand(application, { action: 'activate', pluginId, version: '1.0.0' }, null, null, runtime);
   await runPluginPackageCommand(application, { action: 'rollback', pluginId }, null, null, runtime);
   assert.deepEqual(calls.map(([name]) => name), ['install', 'activate', 'rollback']);
+  assert.deepEqual(auditCalls.map(({ action }) => action), [
+    'package.install', 'package.activate', 'package.rollback',
+  ]);
+  assert.equal(auditCalls.every(({ outcome }) => outcome === 'succeeded'), true);
   assert.equal(output.length, 4);
 });
 

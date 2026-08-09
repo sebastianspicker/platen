@@ -10,22 +10,17 @@ import { structuredTextExport } from '../../../src/core/document-analysis.js';
 import { assertInlineOnlyHtml } from '../conversion-admission.mjs';
 import { HostError } from '../host-error.mjs';
 import { extractFallbackText } from '../office-extractor.mjs';
-import { buildPdfCompactRewrite } from '../pdf-compact-rewrite.mjs';
 import { createBlankPdf, createTextPdf, pdfString } from '../pdf-factory.mjs';
 import { buildOoxml } from '../pdf-ooxml-export.mjs';
 import { decodePng, encodeRgbaPng } from '../raster-png-codec.mjs';
-import { cadSourceToPdf } from './cad-geometry.mjs';
 
 export const CREATE_CONVERT_CAPABILITY_IDS = Object.freeze([
   'create.blank-pdf',
   'convert.office-to-pdf',
   'convert.images-to-pdf',
-  'convert.html-to-pdf',
   'create.clipboard-to-pdf',
-  'create.print-to-pdf',
   'create.postscript-to-pdf',
   'create.multiformat-combine',
-  'create.cad-to-pdf',
   'export.word',
   'export.excel',
   'export.powerpoint',
@@ -39,11 +34,51 @@ export const CREATE_CONVERT_CAPABILITY_IDS = Object.freeze([
 
 export const MAX_PAGE_POINTS = 14_400;
 export const MIN_PAGE_POINTS = 72;
-export const MAX_CAD_ENTITIES = 2_000;
 export const MAX_COMBINE_SOURCES = 32;
+const SHA_256_HEX = /^[0-9a-f]{64}$/u;
 
 export function digest(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
+}
+
+function requireNotCancelled(signal) {
+  if (signal?.aborted) {
+    throw new HostError('JOB_CANCELLED', 'Image conversion was cancelled.', 499);
+  }
+}
+
+function requireSourceSha256(value) {
+  if (typeof value !== 'string' || !SHA_256_HEX.test(value)) {
+    throw new HostError('INVALID_CAPABILITY_INPUT', 'sourceSha256 must be a lower-case SHA-256 hex digest.', 400);
+  }
+}
+
+export function requireSourceBoundPngBytes(context, { signal } = {}) {
+  requireNotCancelled(signal);
+  const sourceBytes = requireBuffer(context?.sourceBytes, 'sourceBytes');
+  const sourceSha256 = context?.sourceSha256;
+  requireSourceSha256(sourceSha256);
+  decodePng(sourceBytes); // ensure the payload is a valid bounded PNG.
+  const actualSha256 = digest(sourceBytes);
+  if (sourceSha256 !== actualSha256) {
+    throw new HostError('SOURCE_VERSION_MISMATCH', 'sourceSha256 does not match sourceBytes.', 409);
+  }
+  return Object.freeze({ sourceBytes, sourceSha256 });
+}
+
+export function assertSourceBoundAdapter(document, sourceSha256) {
+  const sourceInputs = Array.isArray(document?.operation?.inputs)
+    ? document.operation.inputs.filter((entry) => entry?.role === 'source')
+    : [];
+  const matched = sourceInputs.find((entry) => entry?.sha256 === sourceSha256);
+  if (!matched) {
+    throw new HostError(
+      'SOURCE_VERSION_MISMATCH',
+      'The adapter output is not bound to the supplied image source digest.',
+      409,
+    );
+  }
+  return true;
 }
 
 export function requireBuffer(value, label) {
@@ -204,68 +239,10 @@ export function pageTextArray(context) {
 
 export function sourcePdfBytes(context, factory) {
   if (Buffer.isBuffer(context?.pdfBytes) && pdfHeaderOk(context.pdfBytes)) return context.pdfBytes;
+  if (Buffer.isBuffer(context?.sourcePdf) && pdfHeaderOk(context.sourcePdf)) return context.sourcePdf;
   if (Buffer.isBuffer(context?.sourceBytes) && pdfHeaderOk(context.sourceBytes)) return context.sourceBytes;
   const pages = pageTextArray(context).map((entry) => entry.text);
   return factory.createTextPdf({ pages, title: context?.title ?? 'Source' });
-}
-
-/**
- * Pure-local linearization for classic single-revision PDFs:
- * rebuild via compact rewrite, then prefix a Linearized dictionary object and
- * rewrite offsets so /L matches the final size (progressive byte-range ready marker set).
- */
-export function linearizeLocalPdf(sourceBytes) {
-  requireBuffer(sourceBytes, 'sourceBytes');
-  if (!pdfHeaderOk(sourceBytes)) {
-    throw new HostError('INVALID_PDF_INPUT', 'Fast web view requires a PDF source.', 415);
-  }
-  const compact = buildPdfCompactRewrite(sourceBytes);
-  const body = compact.bytes;
-  // Insert linearized dict as object immediately after header; renumber is avoided by
-  // emitting a free-standing hint object 0-style linearization header used by readers.
-  const pageCountMatch = /\/Count\s+(\d+)\b/.exec(body.toString('latin1'));
-  const pageCount = pageCountMatch ? Number(pageCountMatch[1]) : 1;
-  const firstPass = Buffer.concat([
-    Buffer.from('%PDF-1.7\n%\xE2\xE3\xCF\xD3\n', 'binary'),
-    Buffer.from('1 0 obj\n<< /Linearized 1.0 /L 0000000000 /O 2 /E 0000000000 /N 00000 /T 0000000000 /H [0 0] >>\nendobj\n', 'binary'),
-    body.subarray(body.indexOf('\n', body.indexOf('%PDF-')) + 1),
-  ]);
-  // Prefer rewriting the original compact body with an injected linearized object at the front.
-  const linearizedHeader = Buffer.from('%PDF-1.7\n%\xE2\xE3\xCF\xD3\n', 'binary');
-  const withoutHeader = (() => {
-    const text = body.toString('binary');
-    const secondLine = text.indexOf('\n', 8);
-    return Buffer.from(text.slice(secondLine + 1), 'binary');
-  })();
-  const placeholder = Buffer.from(
-    `1 0 obj\n<< /Linearized 1.0 /L 0000000000 /O 4 /E 0000000080 /N ${String(pageCount).padStart(5, '0')} /T 0000000000 /H [0 0] >>\nendobj\n`,
-    'binary',
-  );
-  let assembled = Buffer.concat([linearizedHeader, placeholder, withoutHeader]);
-  // Patch /L and /T to the final size / approximate xref.
-  const size = assembled.length;
-  const sizeText = String(size).padStart(10, '0');
-  let latin = assembled.toString('binary');
-  latin = latin.replace(/\/L 0000000000/, `/L ${sizeText}`);
-  latin = latin.replace(/\/T 0000000000/, `/T ${sizeText}`);
-  // Ensure first-page end hint is within bounds.
-  const endFirst = Math.min(size, Math.max(80, Math.floor(size / 2)));
-  latin = latin.replace(/\/E 0000000080/, `/E ${String(endFirst).padStart(10, '0')}`);
-  assembled = Buffer.from(latin, 'binary');
-  if (!pdfHeaderOk(assembled) || !/\/Linearized\s+1/.test(assembled.toString('latin1', 0, 512))) {
-    throw new HostError('INVALID_ENGINE_OUTPUT', 'Local linearization failed.', 502);
-  }
-  void firstPass;
-  return Object.freeze({
-    bytes: assembled,
-    pageCount,
-    size: assembled.length,
-    sha256: digest(assembled),
-    mediaType: 'application/pdf',
-    linearized: true,
-    sourceSha256: digest(sourceBytes),
-    compactReachableObjects: compact.summary.reachableObjectCount,
-  });
 }
 
 export function cropPngRegion(pngBytes, region) {
@@ -308,7 +285,9 @@ export async function convertOfficeLike(context, factory, { kind, title }) {
       mediaType: 'application/pdf',
     });
   }
-  const extension = String(context?.extension ?? (kind === 'html' ? '.html' : '.txt')).toLowerCase();
+  const extension = kind === 'html'
+    ? '.html'
+    : String(context?.extension ?? '.txt').toLowerCase();
   const text = extractFallbackText(source, extension);
   const pdf = pagesFromText(text, { title }, factory);
   return result(context.capabilityId, { ...pdf, extractedTextLength: text.length, path: 'local-text-fallback' });
@@ -342,5 +321,3 @@ export async function exportOoxml(capabilityId, format, context) {
     path: 'local-buildOoxml',
   });
 }
-
-

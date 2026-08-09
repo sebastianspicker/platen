@@ -120,6 +120,18 @@ function inkReceiptValid(context) {
     && result.reopenVerified === true;
 }
 
+function targetedReceiptValid(context) {
+  const { result, source, sourceInspection, normalized } = context;
+  const properties = normalized.objectProperties === true;
+  return result.schema === 'pdfkit-targeted-mutation-receipt-v1'
+    && result.sourceSha256 === source.sha256 && result.pageCount === sourceInspection.pageCount
+    && result.appliedEdits === normalized.editCount && result.reopenVerified === true
+    && result.category === (properties ? 'annotation-properties' : 'targeted-mutation')
+    && [result.annotationPropertiesGeometryVerified, result.annotationPropertiesColorVerified,
+      result.rawAnnotationColorVerified, result.nonTargetAnnotationsVerified,
+      result.targetAnnotationPreservationVerified].every((value) => value === properties);
+}
+
 function generalReceiptValid(context) {
   const { result, source, sourceInspection, normalized, pageBoxEvidence } = context;
   return result.schema === 'pdfkit-mutation-receipt-v1'
@@ -152,6 +164,7 @@ function nativeReceiptValid(context) {
   if (context.normalized.outlineBookmarkRename) return outlineRenameReceiptValid(context);
   if (context.normalized.lineAnnotation) return lineReceiptValid(context);
   if (context.normalized.inkAnnotation) return inkReceiptValid(context);
+  if (context.normalized.targeted) return targetedReceiptValid(context);
   return generalReceiptValid(context);
 }
 

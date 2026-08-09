@@ -7,28 +7,53 @@ import { dirname, join } from 'node:path';
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const readJson = (relativePath) => JSON.parse(readFileSync(join(root, relativePath), 'utf8'));
 const capabilities = readJson('catalog/capabilities.json');
+const proofs = readJson('catalog/capability-proofs/proofs.json');
+const proofById = new Map(proofs.records.map((record) => [record.capabilityId, record]));
 
-test('planned claims carry no implementation evidence', () => {
-  for (const capability of capabilities.filter(({ delivery }) => delivery === 'planned')) {
-    assert.equal(capability.evidence, null, `${capability.id} remains an unimplemented claim`);
+test('catalog delivery is exactly the proof status projection', () => {
+  assert.equal(capabilities.length, 318);
+  assert.equal(proofs.records.length, capabilities.length);
+  for (const capability of capabilities) {
+    const proof = proofById.get(capability.id);
+    assert.ok(proof, `${capability.id} has an authoritative proof record`);
+    assert.equal(capability.delivery, proof.status === 'proven' ? 'implemented' : 'planned');
+    if (proof.status === 'proven') {
+      assert.equal(typeof capability.evidence, 'object', `${capability.id} proven claims retain evidence`);
+    } else {
+      assert.equal(capability.evidence, null, `${capability.id} remains an unimplemented claim`);
+    }
   }
 });
 
-test('sensitive advanced functions are professionally implemented with test evidence', () => {
-  const sensitiveIds = [
-    'sign.electronic', 'sign.certificate', 'sign.routed-workflow',
-    'security.permission-controls', 'security.certificate-encryption',
-    'redaction.apply', 'sanitize.hidden-data', 'ocr.editable-output',
-    'accessibility.remediate-tags', 'standards.pdf-a', 'standards.pdf-x', 'standards.pdf-ua', 'preflight.fixups',
-    'automation.api', 'ai.ask-document', 'aec.measurement',
-    'platform.plugins.install', 'platform.plugins.rpc'
-  ];
-  const byId = new Map(capabilities.map((capability) => [capability.id, capability]));
-  for (const id of sensitiveIds) {
-    assert.equal(byId.get(id)?.delivery, 'implemented', `${id} must be professionally implemented`);
-    assert.equal(byId.get(id)?.evidence?.kind, 'test');
-    assert.match(byId.get(id)?.evidence?.reference ?? '', /\S/);
+test('proven claims retain test-backed evidence and non-proven claims do not', () => {
+  for (const proof of proofs.records) {
+    const capability = capabilities.find(({ id }) => id === proof.capabilityId);
+    if (proof.status !== 'proven') continue;
+    assert.equal(capability.delivery, 'implemented');
+    assert.match(capability.evidence?.kind ?? '', /\S/);
+    assert.match(capability.evidence?.reference ?? '', /\S/);
   }
+});
+
+test('policy and unavailable boundaries are not promoted by a narrower prototype subset', () => {
+  const statusById = new Map(proofs.records.map(({ capabilityId, status }) => [capabilityId, status]));
+  for (const prefix of ['ai.', 'standards.']) {
+    assert.equal([...statusById.entries()].filter(([id]) => id.startsWith(prefix)).every(([, status]) => status === 'false'), true, `${prefix} claims remain false`);
+  }
+  assert.deepEqual(
+    ['sign.electronic', 'sign.certificate', 'sign.validate-certificate'].map((id) => statusById.get(id)),
+    ['proven', 'proven', 'proven'],
+  );
+  assert.equal(
+    [...statusById.entries()]
+      .filter(([id]) => id.startsWith('sign.') && !['sign.electronic', 'sign.certificate', 'sign.validate-certificate'].includes(id))
+      .every(([, status]) => status === 'false'),
+    true,
+    'unsupported signing claims remain false',
+  );
+  assert.equal(statusById.get('platform.plugins.runtime-sandbox'), 'false');
+  assert.equal(statusById.get('export.selected-region'), 'proven');
+  assert.equal(statusById.get('document.article-threads'), 'false');
 });
 
 test('retired umbrella IDs cannot conceal partially implemented functions', () => {

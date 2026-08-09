@@ -12,7 +12,7 @@ export function createAecCalibrationOperations({
   parseAecPoints,
 }) {
   async function createAecCalibration() {
-    if (!state.analysis.documentId || state.domainBusy || state.busyAction) return;
+    if (!state.analysis.documentId || state.host?.aecArtifactsReady === false || state.domainBusy || state.busyAction) return;
     const operation = captureOperation();
     state.domainBusy = true;
     state.domainError = null;
@@ -21,7 +21,7 @@ export function createAecCalibrationOperations({
     try {
       const result = await client.calibrateAec(operation.documentId, {
         schemaVersion: 1,
-        sourceSha256: state.analysis.sha256,
+        sourceSha256: state.analysis.sha256.toLowerCase(),
         expectedRevision: state.domainRevision,
         id: newAecId(cryptoApi, 'calibration'),
         page: state.selectedPage,
@@ -31,6 +31,7 @@ export function createAecCalibrationOperations({
         label: `${state.aecMeasurementLabel} scale`,
       }, { signal: operation.controller.signal });
       if (!operationIsCurrent(operation)) return;
+      if (operation.controller.signal.aborted) throw new Error('AEC calibration was cancelled.');
       state.domainRevision = result.workspaceRevision;
       state.aecLastCalibrationId = result.calibration.id;
       state.domainResult = result;

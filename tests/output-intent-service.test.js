@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { EventEmitter } from 'node:events';
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -10,6 +11,8 @@ import { inspectCmykOutputProfile } from '../scripts/host/icc-profile-provider.m
 import { OUTPUT_INTENT_PROFILE } from '../scripts/host/prepress/output-intent-contract.mjs';
 import { createOutputIntentOperation } from '../scripts/host/prepress/output-intent-service.mjs';
 import { PrepressServiceCore } from '../scripts/host/prepress/prepress-service-core.mjs';
+import { handleOutputIntentRoute } from '../scripts/host/routes/workflow-prepress-route.mjs';
+import { createPrepressEndpoints } from '../src/core/local-host-prepress-endpoints.js';
 import { makeTextPdf } from './pdf-fixture.js';
 
 function cmykProfile(description = 'Fixture CMYK Profile') {
@@ -110,4 +113,24 @@ test('OutputIntent service promotes through the validating store with standard p
   assert.equal(retained.operation.validation.outputSha256, retained.sha256);
   assert.equal(retained.operation.validation.profileSha256, profile.sha256);
   assert.equal(retained.operation.validation.passed, true);
+
+  const response = new EventEmitter();
+  response.destroyed = false;
+  let publicBody = null;
+  await handleOutputIntentRoute({
+    operation: 'prepress/output-intent', request: { method: 'POST' }, response,
+    url: new URL(`http://local/api/documents/${document.id}/prepress/output-intent`),
+    documentId: document.id, processing: { signal: new AbortController().signal }, store,
+    prepress: { assignOutputIntent: async () => result },
+    method: (request, expected) => assert.equal(request.method, expected),
+    readJson: async () => ({ profile: OUTPUT_INTENT_PROFILE, sourceSha256: document.sha256 }),
+    json: (_response, status, body) => { assert.equal(status, 201); publicBody = body; },
+  });
+  assert.equal(Object.hasOwn(publicBody.result.artifact, 'filePath'), false);
+  const endpoints = createPrepressEndpoints({ json: async () => publicBody });
+  const publicResult = await endpoints.assignOutputIntent(document.id, {
+    profile: OUTPUT_INTENT_PROFILE, sourceSha256: document.sha256,
+  });
+  assert.equal(publicResult.artifact.sha256, retained.sha256);
+  assert.equal(Object.isFrozen(publicResult.artifact.operation.validation), true);
 });

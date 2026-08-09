@@ -7,6 +7,8 @@ import {
 } from './parser-foundation.mjs';
 import { AUTOMATION_PRESET_IDS } from '../host/automation/automation-operation-contract.mjs';
 import { AUTOMATION_SEQUENCE_IDS } from '../host/automation/automation-sequence-contract.mjs';
+import { parseAutomationCliBatch } from './parser-automation-batch.mjs';
+import { parseAutomationDeclarative } from './parser-automation-declarative.mjs';
 
 function automationRoot(values) {
   if (!values.has('automation-root')) fail('CLI_INVALID_OPTION', 'Automation commands require --automation-root.');
@@ -29,6 +31,23 @@ function automationOutputDigest(values) {
     fail('CLI_INVALID_OPTION', 'Automation output commands require an exact lowercase --sha256 digest.');
   }
   return digest;
+}
+
+function automationPrincipal(values) {
+  const value = values.get('principal');
+  if (!/^[A-Za-z][A-Za-z0-9_.:-]{0,127}$/u.test(value ?? '')) fail('CLI_INVALID_OPTION', '--principal is required and invalid.');
+  return value;
+}
+
+function automationGrant(values) {
+  const value = values.get('grant-id');
+  if (!/^[A-Za-z0-9_-]{8,128}$/u.test(value ?? '')) fail('CLI_INVALID_OPTION', '--grant-id is required and invalid.');
+  return value;
+}
+
+function nonNegativeInteger(value, label) {
+  if (!/^\d+$/u.test(String(value ?? '')) || !Number.isSafeInteger(Number(value))) fail('CLI_INVALID_OPTION', `${label} must be a non-negative safe integer.`);
+  return Number(value);
 }
 
 function automationRedactionPages(value) {
@@ -56,7 +75,40 @@ function automationRedactionPages(value) {
 }
 
 export function parseAutomation(command, positionals, values, output) {
+  const batch = parseAutomationCliBatch(command, positionals, values, output);
+  if (batch) return batch;
+  const declarative = parseAutomationDeclarative(command, positionals, values, output);
+  if (declarative) return declarative;
   const root = automationRoot(values);
+  if (command === 'automation-schedule-list') {
+    exactPositionals(positionals, 0);
+    return Object.freeze({ command, automationRoot: root, principal: automationPrincipal(values), grantId: automationGrant(values), output });
+  }
+  if (command === 'automation-schedule-tick') {
+    exactPositionals(positionals, 0);
+    const now = values.has('now') ? nonNegativeInteger(values.get('now'), '--now') : null;
+    return Object.freeze({ command, automationRoot: root, principal: automationPrincipal(values), grantId: automationGrant(values), now, output });
+  }
+  if (command === 'automation-schedule-create') {
+    exactPositionals(positionals, 0);
+    const pages = values.get('pages') === undefined || values.get('pages') === 'null' ? null : automationRedactionPages(values.get('pages'));
+    const operationId = values.get('operation-id'); const operationKind = values.get('operation-kind');
+    if (!/^[A-Za-z0-9_.:-]{1,128}$/u.test(operationId ?? '') || !['operation', 'preset', 'sequence'].includes(operationKind)) fail('CLI_INVALID_OPTION', '--operation-id and --operation-kind are required and invalid.');
+    return Object.freeze({ command, automationRoot: root, scheduleId: automationJobId(values.get('schedule-id') ?? ''), principal: automationPrincipal(values), grantId: automationGrant(values), sourceId: automationJobId(values.get('source-id') ?? ''), sha256: automationOutputDigest(values), operationId, operationKind, pages, firstAt: nonNegativeInteger(values.get('first-at'), '--first-at'), intervalMs: values.has('interval-ms') ? nonNegativeInteger(values.get('interval-ms'), '--interval-ms') : null, output });
+  }
+  if (command === 'automation-schedule-cancel') {
+    exactPositionals(positionals, 0);
+    return Object.freeze({ command, automationRoot: root, scheduleId: automationJobId(values.get('schedule-id') ?? ''), principal: automationPrincipal(values), grantId: automationGrant(values), output });
+  }
+  if (command === 'automation-job-status') {
+    exactPositionals(positionals, 0);
+    return Object.freeze({ command, automationRoot: root, principal: automationPrincipal(values), grantId: automationGrant(values), output });
+  }
+  if (command === 'automation-processing-report') {
+    const jobIds = exactPositionals(positionals, 1, 500).map(automationJobId);
+    if (new Set(jobIds).size !== jobIds.length) fail('CLI_INVALID_OPTION', 'Automation processing report job IDs must be unique.');
+    return Object.freeze({ command, automationRoot: root, principal: automationPrincipal(values), grantId: automationGrant(values), jobIds: Object.freeze(jobIds), output });
+  }
   if (command === 'automation-submit-sequence') {
     const [input] = exactPositionals(positionals, 1); const sequence = values.get('sequence') ?? null;
     if (!AUTOMATION_SEQUENCE_IDS.includes(sequence)) fail('CLI_INVALID_OPTION', '--sequence must be an allowlisted automation sequence.');

@@ -3,46 +3,23 @@ import { HostError } from '../host-error.mjs';
 export const DURABLE_LOCAL_JOB_QUEUE_SCHEMA_VERSION = 1;
 
 export const DEFAULT_DURABLE_LOCAL_JOB_QUEUE_LIMITS = Object.freeze({
-  maxJobs: 256,
-  maxPayloadBytes: 64 * 1024,
-  maxResultBytes: 64 * 1024,
-  maxRecordBytes: 128 * 1024,
-  maxJsonDepth: 8,
-  maxJsonItems: 10_000,
-  maxIdempotencyKeyBytes: 256,
-  maxLeaseMs: 10 * 60 * 1000,
-  maxAttempts: 8,
+  maxJobs: 256, maxPayloadBytes: 64 * 1024, maxResultBytes: 64 * 1024,
+  maxRecordBytes: 128 * 1024, maxJsonDepth: 8, maxJsonItems: 10_000,
+  maxIdempotencyKeyBytes: 256, maxLeaseMs: 10 * 60 * 1000, maxAttempts: 8,
 });
 
 const JOB_KEYS = Object.freeze([
-  'attempts',
-  'createdAt',
-  'id',
-  'idempotencyKey',
-  'lease',
-  'maxAttempts',
-  'payload',
-  'receipt',
-  'retry',
-  'schemaVersion',
-  'status',
-  'transaction',
-  'type',
-  'updatedAt',
+  'attempts', 'createdAt', 'id', 'idempotencyKey', 'lease', 'maxAttempts',
+  'payload', 'receipt', 'retry', 'schemaVersion', 'status', 'transaction',
+  'type', 'updatedAt',
 ]);
 const TERMINAL_STATUSES = new Set(['completed', 'failed', 'cancelled']);
 const UNSAFE_JSON_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 const LIMIT_KEYS = Object.freeze(Object.keys(DEFAULT_DURABLE_LOCAL_JOB_QUEUE_LIMITS).sort());
 const MAXIMUM_QUEUE_LIMITS = Object.freeze({
-  maxJobs: 1_024,
-  maxPayloadBytes: 256 * 1024,
-  maxResultBytes: 256 * 1024,
-  maxRecordBytes: 1024 * 1024,
-  maxJsonDepth: 32,
-  maxJsonItems: 100_000,
-  maxIdempotencyKeyBytes: 1_024,
-  maxLeaseMs: 24 * 60 * 60 * 1000,
-  maxAttempts: 32,
+  maxJobs: 1_024, maxPayloadBytes: 256 * 1024, maxResultBytes: 256 * 1024,
+  maxRecordBytes: 1024 * 1024, maxJsonDepth: 32, maxJsonItems: 100_000,
+  maxIdempotencyKeyBytes: 1_024, maxLeaseMs: 24 * 60 * 60 * 1000, maxAttempts: 32,
 });
 const MAX_JOURNAL_BYTES = 64 * 1024 * 1024;
 
@@ -82,27 +59,18 @@ export function normalizeQueueTransaction(value) {
 
 const SHA256 = /^[a-f0-9]{64}$/u;
 
-export function queueFail(code, message, status = 400, cause) {
-  throw new HostError(code, message, status, cause ? { cause } : undefined);
-}
+export function queueFail(code, message, status = 400, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
 
-export function isSafeQueueName(value) {
-  return typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
-}
+export function isSafeQueueName(value) { return typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value); }
 
-export function isQueueTimestamp(value) {
-  return Number.isSafeInteger(value) && value >= 0;
-}
+export function isQueueTimestamp(value) { return Number.isSafeInteger(value) && value >= 0; }
 
-function isPlainObject(value) {
-  return value !== null && Object.getPrototypeOf(value) === Object.prototype;
-}
+function isPlainObject(value) { return value !== null && Object.getPrototypeOf(value) === Object.prototype; }
 
 function hasExactKeys(value, keys) {
   if (!isPlainObject(value)) return false;
   const actual = Object.keys(value).sort();
-  return actual.length === keys.length
-    && actual.every((key, index) => key === keys[index]);
+  return actual.length === keys.length && actual.every((key, index) => key === keys[index]);
 }
 
 export function canonicalQueueJson(value) {
@@ -121,23 +89,23 @@ export function canonicalQueueJson(value) {
   if (!isPlainObject(value)) {
     queueFail('INVALID_QUEUE_RECORD', 'Queue values must be plain JSON objects.');
   }
+  return canonicalQueueObjectJson(value);
+}
+
+function canonicalQueueObjectJson(value) {
   const keys = Object.keys(value);
   if (keys.some((key) => UNSAFE_JSON_KEYS.has(key))) {
     queueFail('INVALID_QUEUE_RECORD', 'Queue values contain an unsafe JSON key.');
   }
-  const fields = keys
-    .sort()
-    .map((key) => `${JSON.stringify(key)}:${canonicalQueueJson(value[key])}`);
+  const fields = keys.sort().map((key) => `${JSON.stringify(key)}:${canonicalQueueJson(value[key])}`);
   return `{${fields.join(',')}}`;
 }
 
 export function frozenQueueCopy(value) {
   if (Array.isArray(value)) return Object.freeze(value.map(frozenQueueCopy));
-  if (value && typeof value === 'object') {
-    return Object.freeze(Object.fromEntries(
-      Object.entries(value).map(([key, item]) => [key, frozenQueueCopy(item)]),
-    ));
-  }
+  if (value && typeof value === 'object') return Object.freeze(Object.fromEntries(
+    Object.entries(value).map(([key, item]) => [key, frozenQueueCopy(item)]),
+  ));
   return value;
 }
 
@@ -205,22 +173,34 @@ export function copyBoundedQueueJson(value, limits, label, maximumBytes) {
 }
 
 export function checkedQueueLimits(input = {}) {
-  if (!isPlainObject(input)
-    || Object.keys(input).some((key) => !LIMIT_KEYS.includes(key))) {
+  if (hasUnsupportedQueueLimitKey(input)) {
     queueFail('INVALID_QUEUE_LIMITS', 'Queue limits contain an unsupported field.');
   }
   const limits = { ...DEFAULT_DURABLE_LOCAL_JOB_QUEUE_LIMITS, ...input };
+  validateQueueLimitBounds(limits);
+  if (exceedsAggregateJournalPolicy(limits)) {
+    queueFail('INVALID_QUEUE_LIMITS', 'Queue limits exceed the aggregate journal policy.');
+  }
+  return Object.freeze(limits);
+}
+
+function hasUnsupportedQueueLimitKey(input) {
+  return !isPlainObject(input)
+    || Object.keys(input).some((key) => !LIMIT_KEYS.includes(key));
+}
+
+function validateQueueLimitBounds(limits) {
   for (const [key, value] of Object.entries(limits)) {
     if (!Number.isSafeInteger(value) || value < 1 || value > MAXIMUM_QUEUE_LIMITS[key]) {
       queueFail('INVALID_QUEUE_LIMITS', `Queue limit ${key} is outside the fixed safety bound.`);
     }
   }
-  if (limits.maxPayloadBytes > limits.maxRecordBytes
+}
+
+function exceedsAggregateJournalPolicy(limits) {
+  return limits.maxPayloadBytes > limits.maxRecordBytes
     || limits.maxResultBytes > limits.maxRecordBytes
-    || limits.maxJobs * limits.maxRecordBytes > MAX_JOURNAL_BYTES) {
-    queueFail('INVALID_QUEUE_LIMITS', 'Queue limits exceed the aggregate journal policy.');
-  }
-  return Object.freeze(limits);
+    || limits.maxJobs * limits.maxRecordBytes > MAX_JOURNAL_BYTES;
 }
 
 export function checkedQueueJobTypes(input) {
@@ -238,9 +218,7 @@ export function checkedQueueJobTypes(input) {
 export function queuePolicySnapshot(allowedJobTypes, limits) {
   return Object.freeze({
     allowedJobTypes: Object.freeze([...allowedJobTypes]),
-    limits: Object.freeze(Object.fromEntries(
-      LIMIT_KEYS.map((key) => [key, limits[key]]),
-    )),
+    limits: Object.freeze(Object.fromEntries(LIMIT_KEYS.map((key) => [key, limits[key]]))),
   });
 }
 
@@ -352,43 +330,69 @@ function validateJob(job, limits) {
 }
 
 export function validateQueueState(state, limits, allowedJobTypes) {
-  if (!hasExactKeys(state, ['jobs', 'policy', 'schemaVersion'])
-    || state.schemaVersion !== DURABLE_LOCAL_JOB_QUEUE_SCHEMA_VERSION
-    || !Array.isArray(state.jobs)
-    || state.jobs.length > limits.maxJobs) {
+  validateQueueStateHeader(state, limits);
+  validateQueuePolicy(state.policy, limits, allowedJobTypes);
+  validateQueueJobs(state.jobs, limits, allowedJobTypes);
+}
+
+function validateQueueStateHeader(state, limits) {
+  if (!hasExactKeys(state, ['jobs', 'policy', 'schemaVersion'])) {
     queueFail('QUEUE_JOURNAL_CORRUPT', 'Queue journal is corrupt.', 500);
   }
+  if (state.schemaVersion !== DURABLE_LOCAL_JOB_QUEUE_SCHEMA_VERSION) {
+    queueFail('QUEUE_JOURNAL_CORRUPT', 'Queue journal is corrupt.', 500);
+  }
+  if (!Array.isArray(state.jobs) || state.jobs.length > limits.maxJobs) {
+    queueFail('QUEUE_JOURNAL_CORRUPT', 'Queue journal is corrupt.', 500);
+  }
+}
+
+function validateQueuePolicy(policy, limits, allowedJobTypes) {
   const expectedPolicy = queuePolicySnapshot(allowedJobTypes, limits);
-  if (canonicalQueueJson(state.policy) !== canonicalQueueJson(expectedPolicy)) {
+  if (canonicalQueueJson(policy) !== canonicalQueueJson(expectedPolicy)) {
     queueFail(
       'QUEUE_POLICY_MISMATCH',
       'Queue journal policy does not match the configured runtime.',
       500,
     );
   }
+}
 
+function validateQueueJobs(jobs, limits, allowedJobTypes) {
   const identifiers = new Set();
   const idempotencyKeys = new Set();
   try {
-    for (const job of state.jobs) {
+    for (const job of jobs) {
       validateJob(job, limits);
-      if (!allowedJobTypes.includes(job.type)) {
-        throw new TypeError('Queue job type is outside the persisted allowlist.');
-      }
-      if (identifiers.has(job.id) || idempotencyKeys.has(job.idempotencyKey)) {
-        throw new TypeError('Duplicate queue identifier.');
-      }
-      identifiers.add(job.id);
-      idempotencyKeys.add(job.idempotencyKey);
+      validateAllowedQueueJobType(job, allowedJobTypes);
+      registerQueueJobIdentifiers(job, identifiers, idempotencyKeys);
     }
-    for (const job of state.jobs) {
-      if (!job.lease) continue;
-      if (identifiers.has(job.lease.token)) throw new TypeError('Duplicate lease token.');
-      identifiers.add(job.lease.token);
+    for (const job of jobs) {
+      registerQueueLeaseToken(job, identifiers);
     }
   } catch {
     queueFail('QUEUE_JOURNAL_CORRUPT', 'Queue journal job record is invalid.', 500);
   }
+}
+
+function validateAllowedQueueJobType(job, allowedJobTypes) {
+  if (!allowedJobTypes.includes(job.type)) {
+    throw new TypeError('Queue job type is outside the persisted allowlist.');
+  }
+}
+
+function registerQueueJobIdentifiers(job, identifiers, idempotencyKeys) {
+  if (identifiers.has(job.id) || idempotencyKeys.has(job.idempotencyKey)) {
+    throw new TypeError('Duplicate queue identifier.');
+  }
+  identifiers.add(job.id);
+  idempotencyKeys.add(job.idempotencyKey);
+}
+
+function registerQueueLeaseToken(job, identifiers) {
+  if (!job.lease) return;
+  if (identifiers.has(job.lease.token)) throw new TypeError('Duplicate lease token.');
+  identifiers.add(job.lease.token);
 }
 
 export function isTerminalQueueStatus(status) {

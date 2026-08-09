@@ -4,6 +4,27 @@ import { scheduleArtifactCleanup } from './artifact-response-lifecycle.mjs';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 
+function publicPrinterMarksResult(result) {
+  const artifact = result.artifact;
+  return {
+    kind: result.kind,
+    sourceDigest: result.sourceDigest,
+    artifact: {
+      id: artifact.id,
+      documentId: artifact.documentId,
+      displayName: artifact.displayName,
+      mediaType: artifact.mediaType,
+      size: artifact.size,
+      sha256: artifact.sha256,
+      operation: artifact.operation,
+      createdAt: artifact.createdAt,
+    },
+    pages: result.pages,
+    evidence: result.evidence,
+    limitations: result.limitations,
+  };
+}
+
 export async function handlePrinterMarksRoute(context) {
   if (context.operation !== 'printer-marks') return false;
   const { request, response, url, documentId, processing, printerMarks, bodyLimit, exactJsonObject, method, readJson, json } = context;
@@ -19,6 +40,6 @@ export async function handlePrinterMarksRoute(context) {
   }
   const result = await printerMarks.create(documentId, { profile: body.profile, sourceSha256: body.sourceSha256, pages: body.pages }, { sourceSha256: body.sourceSha256, signal: processing.signal });
   if (await scheduleArtifactCleanup(context, result.artifact.id)) return true;
-  json(response, 201, { result });
+  json(response, 201, { result: publicPrinterMarksResult(result) });
   return true;
 }

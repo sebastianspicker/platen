@@ -44,6 +44,7 @@ function createPdfKitAnnotationActions({ controllers: { pdfkit } }) {
     'fill-pdfkit-form-field': () => pdfkit.runPdfKitTargetedMutation('form-fill'),
     'create-pdfkit-text-field-widget': pdfkit.runPdfKitTextFieldWidget,
     'update-pdfkit-annotation': () => pdfkit.runPdfKitTargetedMutation('annotation-update'),
+    'update-pdfkit-annotation-properties': () => pdfkit.runPdfKitTargetedMutation('annotation-properties'),
     'remove-pdfkit-annotation': () => pdfkit.runPdfKitTargetedMutation('annotation-remove'),
     'flatten-pdfkit-annotation': pdfkit.runAnnotationFlatten,
   };

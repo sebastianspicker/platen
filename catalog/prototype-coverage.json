@@ -188,8 +188,8 @@
     },
     {
       "id": "create.multiformat-combine",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "create.cad-to-pdf",
@@ -238,8 +238,8 @@
     },
     {
       "id": "optimize.fast-web-view",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "edit.text",
@@ -333,8 +333,8 @@
     },
     {
       "id": "document.flatten-content",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "document.actions-javascript",
@@ -398,8 +398,8 @@
     },
     {
       "id": "pages.resize",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "pages.page-boxes",
@@ -498,8 +498,8 @@
     },
     {
       "id": "review.custom-stamps",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "review.annotation-flatten",
@@ -543,13 +543,13 @@
     },
     {
       "id": "forms.calculate",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "forms.distribute-collect",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "forms.detect-fields",
@@ -568,8 +568,8 @@
     },
     {
       "id": "forms.submit-reset",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "forms.javascript-actions",
@@ -588,8 +588,8 @@
     },
     {
       "id": "forms.flatten",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "forms.xfa-compatibility",
@@ -618,63 +618,63 @@
     },
     {
       "id": "sign.routed-workflow",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "sign.audit-trail",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "sign.timestamp",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "sign.certify-document",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "sign.trust-store",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "sign.revocation-ltv",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "sign.visible-appearance",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "sign.digital-id-management",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "sign.batch-sign-seal",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "sign.identity-verification",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "scan.acquire",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "scan.duplex-feeder",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "service-only"
     },
     {
       "id": "scan.append-to-document",
@@ -718,8 +718,8 @@
     },
     {
       "id": "ocr.user-dictionaries-training",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "ocr.batch-recognition",
@@ -748,13 +748,13 @@
     },
     {
       "id": "security.certificate-encryption",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "security.policy-controls",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "security.remove-protection",
@@ -763,18 +763,18 @@
     },
     {
       "id": "security.security-envelopes",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "security.information-protection-labels",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "security.protected-view",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "security.javascript-controls",
@@ -783,8 +783,8 @@
     },
     {
       "id": "security.encryption-aes",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "redaction.mark",
@@ -868,8 +868,8 @@
     },
     {
       "id": "compare.cross-format",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "compare.batch",
@@ -898,8 +898,8 @@
     },
     {
       "id": "accessibility.auto-tag",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "accessibility.remediate-tags",
@@ -948,8 +948,8 @@
     },
     {
       "id": "accessibility.color-contrast",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "accessibility.font-unicode-mapping",
@@ -963,38 +963,38 @@
     },
     {
       "id": "standards.pdf-a",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "standards.pdf-x",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "standards.pdf-ua",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "standards.pdf-e",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "standards.pdf-vt",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "standards.pdf-two",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "preflight.fixups",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "preflight.profiles",
@@ -1008,8 +1008,8 @@
     },
     {
       "id": "preflight.certified-pdf",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "color.convert",
@@ -1023,28 +1023,28 @@
     },
     {
       "id": "color.spot-colors",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "print.output-preview",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "print.separations",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "print.ink-coverage",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "print.overprint-preview",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "print.transparency-flattening",
@@ -1053,13 +1053,13 @@
     },
     {
       "id": "print.soft-proof",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "print.trapping",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "print.bleed-marks",
@@ -1083,73 +1083,73 @@
     },
     {
       "id": "print.variable-data",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "print.barcode-decoration",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "collaboration.share-links",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "collaboration.real-time-review",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "collaboration.activity-notifications",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "collaboration.access-expiration",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "collaboration.version-history",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "collaboration.projects-workspaces",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "dms.repository-connectors",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "dms.retention-records",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "dms.checkin-checkout",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "dms.offline-sync",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "dms.conflict-resolution",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "dms.document-locking",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "automation.cli-batch",
@@ -1198,8 +1198,8 @@
     },
     {
       "id": "automation.webhooks",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "automation.processing-reports",
@@ -1208,88 +1208,88 @@
     },
     {
       "id": "automation.preflight-server",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "automation.batch-print",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "ai.summarize",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.ask-document",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.extract-structured-data",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.translate",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.rewrite-proofread",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.explain",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.source-citations",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.multi-document-analysis",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.generate-images",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.generate-bookmarks",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.smart-redaction",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.form-extraction",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.accessibility-suggestions",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.annotation-assist",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "ai.provider-policy-controls",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "excluded"
     },
     {
       "id": "aec.measurement",
@@ -1383,53 +1383,53 @@
     },
     {
       "id": "rich-media.audio-video",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "rich-media.playback-controls",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "three-d.import",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "three-d.saved-views-sections",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "three-d.measure-comment",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "portfolios.create",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "portfolios.view-extract",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "portfolios.metadata-search",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "portfolios.custom-layout",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "document.article-threads",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "document.embedded-files",
@@ -1438,58 +1438,58 @@
     },
     {
       "id": "document.optional-content-groups",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "geospatial.inspect-measure-markup",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "integrations.cloud-storage",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "integrations.office-addins",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "integrations.browser-capture",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "integrations.email",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "integrations.cad-bim",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "integrations.esign-providers",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "integrations.sensitivity-labels",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "executable-subset"
     },
     {
       "id": "integrations.events-webhooks",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "admin.identity-roles",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "admin.audit-telemetry",
@@ -1498,23 +1498,23 @@
     },
     {
       "id": "admin.sso-scim",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "admin.deployment-packaging",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "admin.update-management",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "admin.licensing",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "admin.policy-configuration",
@@ -1523,13 +1523,13 @@
     },
     {
       "id": "admin.data-residency",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "admin.usage-reporting",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "admin.plugin-allowlist",
@@ -1543,8 +1543,8 @@
     },
     {
       "id": "platform.plugins.rpc",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "platform.plugins.lifecycle",
@@ -1553,8 +1553,8 @@
     },
     {
       "id": "platform.plugins.permissions",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "platform.plugins.dependency-resolution",
@@ -1573,8 +1573,8 @@
     },
     {
       "id": "platform.plugins.runtime-sandbox",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
+      "delivery": "planned",
+      "tier": "blocked"
     },
     {
       "id": "platform.plugins.capability-conflicts",

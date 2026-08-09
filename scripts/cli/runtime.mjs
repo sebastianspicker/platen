@@ -5,9 +5,8 @@ import { basename, dirname, extname, join, resolve, sep } from 'node:path';
 import {
   emit, emitCompact, outputValue as emitOutputValue, safeBatchStem, waitFor as waitForSignal,
 } from './runtime-emission.mjs';
-
+import { createVerifiedWriter } from './verified-output.mjs';
 export { emit, emitCompact, safeBatchStem };
-
 const MAX_PATH_LENGTH = 4_096;
 
 export function fail(code, message) {
@@ -336,6 +335,7 @@ async function publishTemporary(temp, target, signal) {
 function temporaryOutputPath(target) {
   return join(dirname(target), `.platen-${randomUUID()}.partial`);
 }
+export const writeExclusiveVerified = createVerifiedWriter({ canonicalOutputTarget, cancelled, fail, temporaryOutputPath, publishTemporary, syncDirectory, sanitizeOutputError: throwSanitizedOutputError });
 
 export async function writeExclusive(outputPath, bytes, signal) {
   const target = await canonicalOutputTarget(outputPath);

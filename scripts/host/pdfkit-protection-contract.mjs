@@ -71,8 +71,10 @@ export function serializeProtectionRemovalRequest(sourceSha256, sourceProfile, o
 }
 
 export function protectionReceiptMatches(result, source, normalized) {
-  return result.sourceSha256 === source.sha256 && result.outputSha256 !== source.sha256
+  return result && typeof result === 'object' && !Array.isArray(result)
+    && result.sourceSha256 === source.sha256 && SHA256.test(String(result.outputSha256 ?? '')) && result.outputSha256 !== source.sha256
     && result.profile === normalized.permissionsProfile && result.effectivePermissionMask === normalized.permissions.nativeMask
+    && Array.isArray(result.effectivePermissions)
     && result.effectivePermissions.length === normalized.permissions.effectivePermissions.length
     && result.effectivePermissions.every((entry, index) => entry === normalized.permissions.effectivePermissions[index]);
 }
@@ -89,12 +91,17 @@ export function deriveProtectedArtifactProfile(artifact, document) {
   const validators = operation?.validation?.validators; const expectedPageCount = operation?.expected?.pageCount;
   const validatedPageCount = operation?.validation?.pageCount;
   const ownsSource = Array.isArray(operation?.inputs) && operation.inputs.some((input) => input.documentId === document.id && input.sha256 === document.sha256 && input.role === 'source');
-  if (artifact.documentId !== document.id || artifact.sha256 === document.sha256 || operation?.type !== 'pdfkit-password-protection'
+  if (artifact.documentId !== document.id || artifact.mediaType !== 'application/pdf'
+    || !Number.isSafeInteger(artifact.size) || artifact.size < 64 || !SHA256.test(String(artifact.sha256 ?? '')) || artifact.sha256 === document.sha256
+    || operation?.type !== 'pdfkit-password-protection'
     || operation?.parameters?.profile !== PDFKIT_PROTECTION_PROFILE || !permissions || !ownsSource
+    || Object.keys(operation.parameters).length !== 2
+    || !Array.isArray(operation.inputs) || operation.inputs.length !== 1
     || operation?.validation?.passed !== true || operation.validation.outputSha256 !== artifact.sha256
     || operation.validation.permissionMask !== permissions.nativeMask || !Number.isSafeInteger(expectedPageCount)
     || expectedPageCount < 1 || expectedPageCount > PDFKIT_PROTECTION_LIMITS.maxPages || validatedPageCount !== expectedPageCount
-    || !Array.isArray(validators) || !['native-password-reopen', 'classic-xref-encryption-dictionary', 'artifact-sha256'].every((validator) => validators.includes(validator))) {
+    || !Array.isArray(validators) || validators.length < 3
+    || !['native-password-reopen', 'classic-xref-encryption-dictionary', 'artifact-sha256'].every((validator) => validators.includes(validator))) {
     fail('PDFKIT_PROTECTION_REMOVAL_SOURCE_UNSUPPORTED', 'Protection removal accepts only a retained artifact created by this fixed local protection boundary.', 422);
   }
   return Object.freeze({ profile, permissions, pageCount: expectedPageCount });

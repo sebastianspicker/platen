@@ -24,14 +24,14 @@ function fixture() {
   const operation = { documentId: 'primary', controller: new AbortController() };
   let activeController = operation.controller;
   const client = {
-    async arrangePages(documentId, pages) {
-      calls.push(['arrange', documentId, pages]);
+    async arrangePages(documentId, sourceSha256, pages) {
+      calls.push(['arrange', documentId, sourceSha256, pages]);
       return { id: 'arranged', displayName: 'arranged.pdf' };
     },
     async artifact(id) { calls.push(['artifact', id]); return new Blob(['pdf']); },
     async upload(file) { calls.push(['upload', file.name]); return { id: 'secondary', sha256: 'b'.repeat(64) }; },
-    async mergeDocuments(primary, secondary) {
-      calls.push(['merge', primary, secondary]);
+    async mergeDocuments(primary, primarySha256, secondary, secondarySha256) {
+      calls.push(['merge', primary, primarySha256, secondary, secondarySha256]);
       return { id: 'merged', displayName: 'merged.pdf' };
     },
     async copyPageBetweenDocuments(primary, secondary, request) {
@@ -90,7 +90,7 @@ test('page composition controller owns arrangement transitions and export', asyn
 
   await context.controller.exportArrangement();
   assert.deepEqual(context.calls.find(([name]) => name === 'arrange'), [
-    'arrange', 'primary', [2, 1, 3],
+    'arrange', 'primary', 'a'.repeat(64), [2, 1, 3],
   ]);
   assert.equal(context.downloads[0].fileName, 'arranged.pdf');
 
@@ -106,7 +106,7 @@ test('page composition stages, exports, and cleans the exact secondary document'
   await context.controller.runSecondaryComposition({ name: 'secondary.pdf' }, 'merge');
   assert.deepEqual(context.calls.filter(([name]) => ['upload', 'merge', 'remove'].includes(name)), [
     ['upload', 'secondary.pdf'],
-    ['merge', 'primary', 'secondary'],
+    ['merge', 'primary', 'a'.repeat(64), 'secondary', 'b'.repeat(64)],
     ['remove', 'secondary'],
   ]);
   assert.equal(context.downloads[0].artifact.id, 'merged');

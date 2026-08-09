@@ -6,11 +6,27 @@ import {
 import { HostError } from './host-error.mjs';
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from './private-source-copy.mjs';
 import { cropPngRegion } from './raster-snapshot.mjs';
+import { decodePng } from './raster-png-codec.mjs';
+
+const MAX_OVERLAY_PIXELS = 4_194_304;
 
 function assertPng(bytes, label) {
   if (bytes.length < PNG_SIGNATURE.length || !bytes.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE)) {
     throw new HostError('INVALID_ENGINE_OUTPUT', `Poppler ${label} output is not a PNG image.`, 502);
   }
+}
+
+function overlayDimensions({ widthPoints, heightPoints, rotation }, dpi) {
+  const rotated = rotation === 90 || rotation === 270;
+  const renderedWidth = rotated ? heightPoints : widthPoints;
+  const renderedHeight = rotated ? widthPoints : heightPoints;
+  const bounds = (points) => [Math.floor((points * dpi) / 72), Math.ceil((points * dpi) / 72)];
+  const [minimumWidth, maximumWidth] = bounds(renderedWidth); const [minimumHeight, maximumHeight] = bounds(renderedHeight);
+  if (minimumWidth < 1 || minimumHeight < 1 || maximumWidth > 8192 || maximumHeight > 8192
+    || maximumWidth > Math.floor(MAX_OVERLAY_PIXELS / maximumHeight)) {
+    throw new HostError('OVERLAY_RENDER_LIMIT', 'Exact-DPI overlay rendering exceeds bounded raster dimensions.', 422);
+  }
+  return Object.freeze({ minimumWidth, maximumWidth, minimumHeight, maximumHeight });
 }
 
 export class PdfInspectionRaster {
@@ -26,6 +42,22 @@ export class PdfInspectionRaster {
       await this.#adapter.execute('renderPagePng', { input, outputPrefix, page, maxDimension }, { cwd: workspace, signal, timeoutMs: 30_000, maxStdoutBytes: 64 * 1024, maxStderrBytes: 128 * 1024 });
       const bytes = await readRegularOutput(outputPath, { maximumBytes: MAX_THUMBNAIL_BYTES, label: 'Poppler thumbnail PNG' });
       assertPng(bytes, 'thumbnail');
+      return bytes;
+    } catch (error) { throw mapEngineError(error); } finally { await this.#store.cleanupJob(workspace); }
+  }
+  async renderOverlayPageExactDpi(documentId, { page, dpi = 72, signal } = {}) {
+    const input = this.#store.getSourcePath(documentId);
+    const expected = overlayDimensions(await this.#inspectPage(documentId, page, { signal }), dpi);
+    const workspace = await this.#store.createJobWorkspace(documentId);
+    const outputPrefix = join(workspace, 'overlay-exact-dpi'); const outputPath = `${outputPrefix}.png`;
+    try {
+      await this.#adapter.execute('renderOverlayExactDpiPng', { input, outputPrefix, page, dpi }, { cwd: workspace, signal, timeoutMs: 30_000, maxStdoutBytes: 64 * 1024, maxStderrBytes: 128 * 1024 });
+      const bytes = await readRegularOutput(outputPath, { maximumBytes: MAX_THUMBNAIL_BYTES, label: 'Poppler exact-DPI overlay PNG' });
+      const decoded = decodePng(bytes, MAX_OVERLAY_PIXELS);
+      if (decoded.width < expected.minimumWidth || decoded.width > expected.maximumWidth
+        || decoded.height < expected.minimumHeight || decoded.height > expected.maximumHeight) {
+        throw new HostError('INVALID_ENGINE_OUTPUT', 'Poppler exact-DPI overlay PNG dimensions do not match the inspected page geometry.', 502);
+      }
       return bytes;
     } catch (error) { throw mapEngineError(error); } finally { await this.#store.cleanupJob(workspace); }
   }

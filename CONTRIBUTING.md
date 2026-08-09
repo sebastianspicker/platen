@@ -27,8 +27,9 @@ dependencies. On macOS, build the PDFKit helper before the full suite when
 exercising PDFKit paths; startup still tolerates an absent helper.
 
 `npm run release:validate` is for a trusted, quiescent checkout. It emits a
-local inventory receipt. Signing, notarization, and SBOM remain unchecked, so
-`distributionStatus` stays `not-ready`.
+local inventory receipt with a deterministic source-inventory SBOM. Signing,
+notarization, retained candidate attestation, and distribution trust remain
+unchecked, so `distributionStatus` stays `not-ready`.
 
 `npm run report` prints the feature-gap inventory.
 `npm run report:write` updates `docs/feature-gap-report.md` after intentional

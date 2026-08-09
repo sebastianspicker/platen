@@ -34,7 +34,7 @@ export async function handlePdfkitSplitOutline(context) {
 }
 
 export async function handlePdfkitMutation(context) {
-  const { request, response, url, documentId, processing, pdfkitMutations, mutationBodyLimit, method, readJson, json } = context;
+  const { request, response, url, documentId, processing, store, pdfkitMutations, mutationBodyLimit, method, readJson, json } = context;
   method(request, 'POST');
   rejectQueryParameters(url, 'PDFKit mutation does not accept query parameters.');
   if (!pdfkitMutations) throw new HostError('PDFKIT_MUTATION_UNAVAILABLE', 'The pinned local macOS PDFKit mutation service is unavailable.', 503);
@@ -46,6 +46,7 @@ export async function handlePdfkitMutation(context) {
     throw new HostError('INVALID_PDFKIT_MUTATION_OPTIONS', 'PDFKit mutation requires fixed profile, lowercase source SHA-256, and one bounded mutation.', 400);
   }
   const result = await pdfkitMutations.mutate(documentId, body.mutation, { sourceSha256: body.sourceSha256, signal: processing.signal, profile: body.profile });
+  if (await scheduleArtifactCleanup(context, result.artifact.id)) return;
   json(response, 201, { result });
 }
 
@@ -79,7 +80,9 @@ export async function handlePdfkitProtection(context) {
     || typeof protection.permissionsProfile !== 'string' || typeof protection.ownerPassword !== 'string' || typeof protection.userPassword !== 'string') {
     throw new HostError('INVALID_PDFKIT_PROTECTION_OPTIONS', 'PDFKit protection requires the fixed profile, source digest, and exact password fields.', 400);
   }
-  json(response, 201, { result: await pdfkitProtection.protect(documentId, protection, { sourceSha256: body.sourceSha256, signal: processing.signal }) });
+  const result = await pdfkitProtection.protect(documentId, protection, { sourceSha256: body.sourceSha256, signal: processing.signal });
+  if (await scheduleArtifactCleanup(context, result.artifact.id)) return;
+  json(response, 201, { result });
 }
 
 export async function handlePdfkitSanitization(context) {

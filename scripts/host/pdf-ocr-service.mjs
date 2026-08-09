@@ -3,11 +3,12 @@ import { HostError } from './host-error.mjs';
 import { OcrDocumentPipeline } from './ocr-document-pipeline.mjs';
 import { OcrJobLock, ocrLanguages } from './ocr-job-helpers.mjs';
 import { OcrLayoutPipeline } from './ocr-layout-pipeline.mjs';
+import { OcrLayoutService } from './ocr-layout-service.mjs';
 import { normalizeOcrUserDictionary } from '../../src/core/ocr-contract.js';
 
 // Compatibility facade: document OCR, layout OCR, and batches share one host reservation.
 export class PdfOcrService {
-  #store; #inspection; #ocrAdapter; #lock; #documentPipeline; #layoutPipeline;
+  #store; #inspection; #ocrAdapter; #lock; #documentPipeline; #layoutPipeline; #layoutService;
 
   constructor({ store, adapter, ocrAdapter, ocrImageAdapter, inspection }) {
     this.#store = store;
@@ -17,6 +18,7 @@ export class PdfOcrService {
     const dependencies = { store, adapter, ocrAdapter, ocrImageAdapter, inspection };
     this.#documentPipeline = new OcrDocumentPipeline(dependencies);
     this.#layoutPipeline = new OcrLayoutPipeline(dependencies);
+    this.#layoutService = new OcrLayoutService({ pipeline: this.#layoutPipeline, lock: this.#lock });
   }
 
   async ocrLanguages({ signal } = {}) {
@@ -29,7 +31,7 @@ export class PdfOcrService {
 
   async analyzeOcrLayout(documentId, options = {}) {
     // Layout option validation remains in its pipeline before the shared reservation.
-    return this.#layoutPipeline.analyze(documentId, options, this.#lock);
+    return this.#layoutService.analyzeOcrLayout(documentId, options);
   }
 
   async ocrBatchDocuments(requests, { signal: externalSignal } = {}) {

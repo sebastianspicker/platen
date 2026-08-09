@@ -58,6 +58,7 @@ export function createImpositionOperation(core) {
     core.assertArtifactStack();
     return core.withSource(documentId, signal, async ({
       document, sourcePath, info, workspace, signal: jobSignal, runOptions, checkWorkspace,
+      registerPromotedArtifact,
     }) => {
       core.assertArtifactSource(info);
       const structure = await core.artifactStructure(documentId, info.pageCount, jobSignal);
@@ -123,6 +124,7 @@ export function createImpositionOperation(core) {
         expectedSha256: validation.outputSha256,
         signal: jobSignal,
       });
+      registerPromotedArtifact(artifact);
       if (artifact.sha256 !== validation.outputSha256) {
         fail('PREPRESS_ARTIFACT_CHANGED', 'The retained imposition artifact did not match the validated output.', 500);
       }

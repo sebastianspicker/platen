@@ -1,4 +1,5 @@
 import Foundation
+import LocalAuthentication
 import Security
 
 struct SigningIdentity {
@@ -7,13 +8,19 @@ struct SigningIdentity {
     let certificateBytes: Int
 }
 
-private func identityObjects() throws -> [SecIdentity] {
-    let query: [CFString: Any] = [
+func nonInteractiveIdentityQuery() -> [CFString: Any] {
+    let authenticationContext = LAContext()
+    authenticationContext.interactionNotAllowed = true
+    return [
         kSecClass: kSecClassIdentity,
         kSecMatchLimit: kSecMatchLimitAll,
         kSecReturnRef: true,
-        kSecUseAuthenticationUI: kSecUseAuthenticationUIFail,
+        kSecUseAuthenticationContext: authenticationContext,
     ]
+}
+
+private func identityObjects() throws -> [SecIdentity] {
+    let query = nonInteractiveIdentityQuery()
     var result: CFTypeRef?
     let status = SecItemCopyMatching(query as CFDictionary, &result)
     if status == errSecItemNotFound { return [] }

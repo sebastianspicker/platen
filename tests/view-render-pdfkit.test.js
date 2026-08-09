@@ -24,7 +24,8 @@ test('PDFKit editor exposes each source-bound local action', () => {
     'create-pdfkit-ink-annotation-copy', 'create-pdfkit-local-goto-copy',
     'remove-pdfkit-local-goto-link', 'create-pdfkit-outline-copy',
     'remove-pdfkit-outline-bookmark', 'rename-pdfkit-outline-bookmark',
-    'fill-pdfkit-form-field', 'update-pdfkit-annotation', 'remove-pdfkit-annotation',
+    'fill-pdfkit-form-field', 'update-pdfkit-annotation', 'update-pdfkit-annotation-properties',
+    'remove-pdfkit-annotation',
   ];
   for (const action of actions) assert.match(html, new RegExp(`data-action="${action}"`));
   assert.match(html, /data-action="split-verified-outline" >Split at verified top-level bookmarks \(macOS\)<\/button>/);
@@ -77,10 +78,22 @@ test('PDFKit editor describes derived-edit limits without leaking private values
   assert.match(html, /Fill a source-bound AcroForm field/);
   assert.match(html, /leaving it empty clears only a non-required, single-selection field/);
   assert.match(html, /Update or remove a source-bound annotation/);
+  assert.match(html, /Square border color/);
+  assert.match(html, /Create Square border update/);
   assert.match(html, /Create verified removal copy/);
   assert.match(html, /narrow selective-sanitization subset/);
   assert.match(html, /Raw annotation identity must be unique across the whole document/);
   assert.match(html, /orphan-byte scrubbing/);
+});
+
+test('PDFKit editor enables the border update only for the selected Square annotation', () => {
+  const squareState = fullPdfKitState();
+  squareState.analysis.inspection.form = 'none';
+  squareState.pdfkitInspectionResult.pages[0].annotations[1].subtype = 'square';
+  squareState.pdfkitExistingAnnotationStrokeColor = '#d32f2f';
+  const html = editorView(squareState);
+  assert.match(html, /id="pdfkit-existing-annotation-stroke-color" type="color" value="#d32f2f"/);
+  assert.match(html, /data-action="update-pdfkit-annotation-properties" >Create Square border update<\/button>/);
 });
 
 test('PDFKit editor handles empty and unavailable inspection states honestly', () => {

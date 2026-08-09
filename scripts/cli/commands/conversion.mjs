@@ -71,7 +71,8 @@ function assertConversionProvenance(document, asset, normalized, runtime) {
   }
   const input = operation.inputs[0];
   const parameters = operation.parameters;
-  const valid = document?.origin === 'derived'
+  const valid = OPAQUE_ID.test(document?.id ?? '')
+    && document?.origin === 'derived'
     && document.mediaType === 'application/pdf'
     && Number.isSafeInteger(document.size)
     && document.size >= 64
@@ -92,6 +93,36 @@ function assertConversionProvenance(document, asset, normalized, runtime) {
     && operation.validation.pageCount === 1
     && exactValidators(operation.validation.validators);
   if (!valid) invalid(runtime, 'PNG conversion provenance does not match the fixed local profile.');
+}
+
+function assertPublishedReceipt(receipt, size, sha256, runtime) {
+  const isRecord = receipt !== null && typeof receipt === 'object';
+  const keys = isRecord ? Reflect.ownKeys(receipt) : [];
+  const valid = isRecord
+    && Object.isFrozen(receipt)
+    && (Object.getPrototypeOf(receipt) === Object.prototype
+      || Object.getPrototypeOf(receipt) === null)
+    && keys.length === 2
+    && keys.includes('size')
+    && keys.includes('sha256')
+    && Number.isSafeInteger(receipt.size)
+    && receipt.size === size
+    && receipt.sha256 === sha256;
+  if (!valid) {
+    invalid(runtime, 'The published PDF receipt does not match the validated derived bytes.');
+  }
+}
+
+function conversionCleanupFailure(original, cleanupError) {
+  const error = new Error(
+    'PNG conversion failed and its private derived document could not be revoked.',
+  );
+  error.code = 'CLI_CONVERSION_CLEANUP_FAILED';
+  error.cause = new AggregateError(
+    [original, cleanupError],
+    'PNG conversion and derived document cleanup failed.',
+  );
+  return error;
 }
 
 function assertExportEvidence(evidence, normalized, runtime) {
@@ -141,7 +172,6 @@ export async function runConversionCommand(
     canonicalOutputTarget,
     emit,
     readLocalInputBytes,
-    writeExclusive,
   } = runtime;
   await canonicalOutputTarget(command.output);
   const selected = await readLocalInputBytes(command.input, {
@@ -163,43 +193,63 @@ export async function runConversionCommand(
   assertInputAsset(asset, source, runtime);
   await application.inputs.verifyInput(asset.id);
   cancelled(signal);
-  const document = await application.conversion.convertInput(asset.id, { signal });
-  assertConversionProvenance(document, asset, normalized, runtime);
-  cancelled(signal);
-  const evidence = await application.conversion.preparePngPdfExport(
-    document.id, { signal },
-  );
-  assertExportEvidence(evidence, normalized, runtime);
-  const pdfSha256 = createHash('sha256').update(evidence.bytes).digest('hex');
-  if (evidence.bytes.length !== document.size || pdfSha256 !== document.sha256) {
-    invalid(runtime, 'The exported PDF bytes do not match the derived document record.');
+  let validatedDocumentId = null;
+  try {
+    const document = await application.conversion.convertInput(asset.id, { signal });
+    assertConversionProvenance(document, asset, normalized, runtime);
+    validatedDocumentId = document.id;
+    cancelled(signal);
+    const evidence = await application.conversion.preparePngPdfExport(
+      document.id, { signal },
+    );
+    assertExportEvidence(evidence, normalized, runtime);
+    const pdfSha256 = createHash('sha256').update(evidence.bytes).digest('hex');
+    if (evidence.bytes.length !== document.size || pdfSha256 !== document.sha256) {
+      invalid(runtime, 'The exported PDF bytes do not match the derived document record.');
+    }
+    cancelled(signal);
+    await runtime.writeExclusiveVerified(
+      command.output,
+      evidence.bytes,
+      signal,
+      async (receipt) => {
+        assertPublishedReceipt(receipt, evidence.bytes.length, pdfSha256, runtime);
+        cancelled(signal);
+        await emit(stdout, {
+          kind: 'png-to-pdf',
+          output: basename(command.output),
+          source: {
+            format: 'png',
+            size: source.bytes.length,
+            sha256: source.sha256,
+            width: normalized.width,
+            height: normalized.height,
+          },
+          normalization: {
+            profile: 'bounded-rgba8-metadata-free-v1',
+            size: normalized.bytes.length,
+            sha256: normalized.sha256,
+          },
+          pdf: { pages: 1, size: evidence.bytes.length, sha256: pdfSha256 },
+          validation: {
+            passed: true,
+            popplerIndicators: { encrypted: 'no', javascript: 'no', form: 'none' },
+            textEmpty: true,
+            primaryImageDimensionsMatch: true,
+            sourceIntegrity: 'descriptor-bound-sha256',
+          },
+          limitations: LIMITATIONS,
+          localOnly: true,
+        });
+      },
+    );
+  } catch (error) {
+    if (!validatedDocumentId) throw error;
+    try {
+      await application.store.deleteDocument(validatedDocumentId);
+    } catch (cleanupError) {
+      throw conversionCleanupFailure(error, cleanupError);
+    }
+    throw error;
   }
-  cancelled(signal);
-  await writeExclusive(command.output, evidence.bytes, signal);
-  await emit(stdout, {
-    kind: 'png-to-pdf',
-    output: basename(command.output),
-    source: {
-      format: 'png',
-      size: source.bytes.length,
-      sha256: source.sha256,
-      width: normalized.width,
-      height: normalized.height,
-    },
-    normalization: {
-      profile: 'bounded-rgba8-metadata-free-v1',
-      size: normalized.bytes.length,
-      sha256: normalized.sha256,
-    },
-    pdf: { pages: 1, size: evidence.bytes.length, sha256: pdfSha256 },
-    validation: {
-      passed: true,
-      popplerIndicators: { encrypted: 'no', javascript: 'no', form: 'none' },
-      textEmpty: true,
-      primaryImageDimensionsMatch: true,
-      sourceIntegrity: 'descriptor-bound-sha256',
-    },
-    limitations: LIMITATIONS,
-    localOnly: true,
-  });
 }

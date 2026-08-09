@@ -54,18 +54,20 @@ async function runSecondaryComposition({
       secondary = await client.upload(file, { signal: operation.controller.signal });
       if (!operationIsCurrent(operation)) return;
       const requests = {
-        merge: () => client.mergeDocuments(operation.documentId, secondary.id, {
+        merge: () => client.mergeDocuments(operation.documentId, primarySourceSha256, secondary.id, secondary.sha256, {
           signal: operation.controller.signal,
         }),
-        interleave: () => client.interleaveDocuments(operation.documentId, secondary.id, {
+        interleave: () => client.interleaveDocuments(operation.documentId, primarySourceSha256, secondary.id, secondary.sha256, {
           signal: operation.controller.signal,
         }),
-        insert: () => client.insertDocument(operation.documentId, secondary.id, selectedPage, {
+        insert: () => client.insertDocument(operation.documentId, primarySourceSha256, secondary.id, secondary.sha256, selectedPage, {
           signal: operation.controller.signal,
         }),
         replace: () => client.replacePages(
           operation.documentId,
+          primarySourceSha256,
           secondary.id,
+          secondary.sha256,
           selectedPage,
           selectedPage,
           { signal: operation.controller.signal },

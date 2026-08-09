@@ -34,6 +34,20 @@ function validateArtifact(value) {
   digest(value.sha256, 'OCR artifact digest');
 }
 
+function validateEditableArtifact(value) {
+  exactObject(value, ['id', 'documentId', 'displayName', 'mediaType', 'size', 'sha256', 'operation', 'createdAt'], 'OCR editable artifact');
+  if (typeof value.id !== 'string' || !DOCUMENT_ID.test(value.id)
+    || typeof value.documentId !== 'string' || !DOCUMENT_ID.test(value.documentId)
+    || typeof value.displayName !== 'string' || !value.displayName.endsWith('.docx') || value.displayName.length > 240
+    || value.mediaType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    || !Number.isSafeInteger(value.size) || value.size < 1 || value.size > 64 * 1024 * 1024
+    || !value.operation || typeof value.operation !== 'object' || Array.isArray(value.operation)
+    || typeof value.createdAt !== 'string' || Number.isNaN(Date.parse(value.createdAt))) invalid('OCR editable artifact metadata is invalid.');
+  digest(value.sha256, 'OCR editable artifact digest');
+  if (value.operation.schemaVersion !== 1 || value.operation.type !== 'ocr-editable-output'
+    || !Array.isArray(value.operation.inputs) || !value.operation.inputs.some((input) => input?.documentId === value.documentId && digest(input.sha256, 'OCR editable source digest'))) invalid('OCR editable artifact provenance is invalid.');
+}
+
 function normalizedBounds(value, label, { positive = false } = {}) {
   exactObject(value, ['x', 'y', 'width', 'height'], label);
   if (!['x', 'y', 'width', 'height'].every((key) => Number.isFinite(value[key]))
@@ -205,6 +219,27 @@ export function validateOcrLayoutResult(value) {
     || typeof checked.evidence.reviewRequired !== 'boolean'
     || checked.evidence.reviewRequired !== checked.detectTables
     || checked.evidence.tableMethod !== (checked.detectTables ? 'tesseract-tsv-geometry-heuristic' : null)) invalid('OCR layout evidence is invalid.');
+  return checked;
+}
+
+export function validateOcrEditableOutputResult(value) {
+  const checked = result(value, 'ocr-editable-output', ['kind', 'schemaVersion', 'format', 'extension', 'mediaType', 'sourceDigest', 'pageCount', 'language', 'engine', 'artifact', 'evidence', 'limitations']);
+  digest(checked.sourceDigest, 'OCR editable source digest');
+  if (checked.format !== 'word' || checked.extension !== 'docx'
+    || checked.mediaType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    || checked.language !== 'eng' || !Number.isSafeInteger(checked.pageCount) || checked.pageCount < 1 || checked.pageCount > 10) invalid('OCR editable output metadata is invalid.');
+  exactObject(checked.engine, ['name', 'version'], 'OCR editable engine');
+  if (checked.engine.name !== 'Tesseract' || typeof checked.engine.version !== 'string' || !/^\d+(?:\.\d+){1,3}(?:[-+][A-Za-z0-9.-]+)?$/u.test(checked.engine.version)) invalid('OCR editable engine identity is invalid.');
+  validateEditableArtifact(checked.artifact);
+  if (checked.artifact.documentId !== checked.artifact.operation.inputs.find((input) => input?.documentId === checked.artifact.documentId)?.documentId) invalid('OCR editable artifact ownership is invalid.');
+  exactObject(checked.evidence, ['localOnly', 'sourceBound', 'ocrReceipt', 'receiptSha256', 'textOnly'], 'OCR editable evidence');
+  if (checked.evidence.localOnly !== true || checked.evidence.sourceBound !== true || checked.evidence.ocrReceipt !== true || checked.evidence.textOnly !== true) invalid('OCR editable evidence is invalid.');
+  digest(checked.evidence.receiptSha256, 'OCR editable receipt digest');
+  if (checked.artifact.operation.inputs.some((input) => input.documentId === checked.artifact.documentId && input.sha256 !== checked.sourceDigest)
+    || checked.artifact.operation.parameters?.language !== 'eng'
+    || checked.artifact.operation.parameters?.pageCount !== checked.pageCount
+    || checked.artifact.operation.validation?.passed !== true
+    || checked.artifact.operation.validation?.outputSha256 !== checked.artifact.sha256) invalid('OCR editable provenance is not source-bound.');
   return checked;
 }
 

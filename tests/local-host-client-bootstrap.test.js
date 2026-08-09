@@ -11,6 +11,12 @@ import {
   protectionRemovalResult,
   token,
 } from './support/local-host-client-fixture.js';
+import {
+  archivePreflightReview,
+  PREPRESS_DOCUMENT,
+  PREPRESS_SOURCE,
+  strictPrepressResult,
+} from './support/prepress-fixtures.js';
 
 test('local host client bootstraps and sends authenticated same-origin API requests', async () => {
   const calls = [];
@@ -123,6 +129,16 @@ test('local host client exposes only typed bounded prepress requests', async () 
   const client = new LocalHostClient({ fetchImpl: async (path, options = {}) => {
     calls.push({ path, options });
     if (path === '/api/bootstrap') return new Response(JSON.stringify({ sessionToken: token }), { status: 200 });
+    const request = JSON.parse(options.body);
+    if (request.operation === 'preflight') {
+      return new Response(JSON.stringify({ result: archivePreflightReview() }), { status: 200 });
+    }
+    if (['icc-convert', 'imposition'].includes(request.operation)) {
+      return new Response(JSON.stringify({ result: strictPrepressResult(request.operation) }), { status: 200 });
+    }
+    if (path.endsWith('/prepress/output-intent')) {
+      return new Response(JSON.stringify({ result: strictPrepressResult('output-intent') }), { status: 201 });
+    }
     return new Response(JSON.stringify({ result: { kind: 'separation-preview' } }), { status: 200 });
   } });
   await client.bootstrap();
@@ -133,16 +149,16 @@ test('local host client exposes only typed bounded prepress requests', async () 
   assert.throws(() => client.runPrepress('doc', 'ghostscript', {}), TypeError);
   assert.throws(() => client.runPrepress('doc', 'ink-coverage', { dpi: 144 }), TypeError);
   assert.throws(() => client.runPrepress('doc', 'overprint-preview', { page: 0 }), TypeError);
-  assert.deepEqual(await client.runPrepress('doc', 'preflight', { profile: 'archive-review' }), { kind: 'separation-preview' });
+  assert.deepEqual(await client.runPrepress('doc', 'preflight', { profile: 'archive-review' }), archivePreflightReview());
   assert.deepEqual(JSON.parse(calls.at(-1).options.body), { operation: 'preflight', profile: 'archive-review' });
   assert.throws(() => client.runPrepress('doc', 'preflight', { profile: 'custom' }), TypeError);
   assert.throws(() => client.runPrepress('doc', 'preflight', { dpi: 144 }), TypeError);
-  assert.deepEqual(await client.convertToCmyk('doc'), { kind: 'separation-preview' });
+  assert.equal((await client.convertToCmyk(PREPRESS_DOCUMENT)).kind, 'icc-cmyk-artifact');
   assert.deepEqual(JSON.parse(calls.at(-1).options.body), { operation: 'icc-convert', profile: 'ghostscript-default-cmyk' });
   assert.throws(() => client.convertToCmyk('doc', { profile: 'custom' }), TypeError);
   assert.throws(() => client.convertToCmyk('doc', { profile: 'ghostscript-default-cmyk', layout: '2x1' }), TypeError);
-  assert.deepEqual(await client.createImposition('doc', { layout: '2x2', marks: true }), { kind: 'separation-preview' });
-  assert.deepEqual(JSON.parse(calls.at(-1).options.body), { operation: 'imposition', layout: '2x2', marks: true });
+  assert.equal((await client.createImposition(PREPRESS_DOCUMENT, { layout: '2x2', marks: false })).kind, 'imposition-artifact');
+  assert.deepEqual(JSON.parse(calls.at(-1).options.body), { operation: 'imposition', layout: '2x2', marks: false });
   assert.throws(() => client.createImposition('doc', { layout: '3x1', marks: true }), TypeError);
   assert.deepEqual(await client.runProductionValidation('doc'), { kind: 'separation-preview' });
   assert.deepEqual(JSON.parse(calls.at(-1).options.body), { operation: 'production-validation' });
@@ -153,11 +169,11 @@ test('local host client exposes only typed bounded prepress requests', async () 
   };
   const controller = new AbortController();
   assert.deepEqual(
-    await client.assignOutputIntent('doc', outputIntentRequest, { signal: controller.signal }),
-    { kind: 'separation-preview' },
+    await client.assignOutputIntent(PREPRESS_DOCUMENT, { ...outputIntentRequest, sourceSha256: PREPRESS_SOURCE }, { signal: controller.signal }),
+    strictPrepressResult('output-intent'),
   );
-  assert.equal(calls.at(-1).path, '/api/documents/doc/prepress/output-intent');
-  assert.deepEqual(JSON.parse(calls.at(-1).options.body), outputIntentRequest);
+  assert.equal(calls.at(-1).path, `/api/documents/${PREPRESS_DOCUMENT}/prepress/output-intent`);
+  assert.deepEqual(JSON.parse(calls.at(-1).options.body), { ...outputIntentRequest, sourceSha256: PREPRESS_SOURCE });
   assert.equal(calls.at(-1).options.signal, controller.signal);
   assert.throws(() => client.assignOutputIntent('doc', {
     ...outputIntentRequest, profile: 'custom',
@@ -194,7 +210,7 @@ test('local host client lists privacy-minimal identities and posts fixed certifi
   await client.bootstrap();
   assert.deepEqual(await client.listSigningIdentities(), { identities: [{ certificateSha256: 'a'.repeat(64), certificateBytes: 4 }] });
   const documentId = '123e4567-e89b-12d3-a456-426614174000'; const sourceSha256 = 'b'.repeat(64); const certificateSha256 = 'a'.repeat(64);
-  assert.deepEqual(await client.signCertificate(documentId, { profile: 'local-pdf-signature-container-v1', sourceSha256, certificateSha256, page: 1, fieldName: 'Signature', reason: '', location: '', contact: '', placeholderBytes: 4096 }), { kind: 'pdf-certificate-signature' });
+  assert.deepEqual(await client.signCertificate(documentId, { profile: 'local-pdf-signature-container-v1', sourceSha256, certificateSha256, page: 1, fieldName: 'Signature', reason: '', location: '', contact: '', placeholderBytes: 4096, consent: true }), { kind: 'pdf-certificate-signature' });
   assert.equal(calls[2].path, `/api/documents/${documentId}/certificate-sign`); assert.equal(JSON.parse(calls[2].options.body).certificateSha256, certificateSha256);
 });
 

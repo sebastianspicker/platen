@@ -14,6 +14,11 @@ async function fixture({ failFinalVerification = false } = {}) {
   await Promise.all([...sourcePaths.values()].map((path) => writeFile(path, 'source')));
   const sourcePageCounts = new Map([[primaryId, 3], [secondaryId, 2]]);
   const outputPageCounts = new Map();
+  const filePages = new Map([
+    [sourcePaths.get(primaryId), ['primary:1', 'primary:2', 'primary:3']],
+    [sourcePaths.get(secondaryId), ['secondary:1', 'secondary:2']],
+  ]);
+  const png = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
   const events = [];
   let verificationCount = 0;
   const store = {
@@ -38,15 +43,23 @@ async function fixture({ failFinalVerification = false } = {}) {
         const output = parameters.outputPattern.replace('%d', String(parameters.firstPage));
         events.push(`split:${parameters.input}:${parameters.firstPage}`);
         outputPageCounts.set(output, 1);
+        filePages.set(output, [filePages.get(parameters.input)[parameters.firstPage - 1]]);
         await writeFile(output, `page ${parameters.firstPage}`);
         return { stdout: '' };
       }
       if (operation === 'mergeDocuments') {
         events.push(`merge:${parameters.inputs.length}`);
         outputPageCounts.set(parameters.output, parameters.inputs.reduce((count, input) => count + outputPageCounts.get(input), 0));
+        filePages.set(parameters.output, parameters.inputs.flatMap((input) => filePages.get(input)));
         await writeFile(parameters.output, 'merged');
         return { stdout: '' };
       }
+      if (operation === 'inspectPageBoxes') {
+        const pages = filePages.get(parameters.input);
+        return { stdout: pages.map((_page, index) => `Page ${index + 1} size: 100 x 100 pts\nPage ${index + 1} rot: 0\nPage ${index + 1} MediaBox: 0 0 100 100\nPage ${index + 1} CropBox: 0 0 100 100\n`).join(''), stderr: '' };
+      }
+      if (operation === 'extractText') return { stdout: `${filePages.get(parameters.input).join('\f')}\f`, stderr: '' };
+      if (operation === 'renderPagePng') { await writeFile(`${parameters.outputPrefix}.png`, png); return { stdout: '', stderr: '' }; }
       assert.equal(operation, 'inspect');
       const pages = outputPageCounts.get(parameters.input);
       assert.ok(pages, 'only derived files are inspected by output validation');

@@ -38,6 +38,37 @@ test('PDFKit client accepts an exactly source/request/output-bound BleedBox resu
   assert.equal(result.evidence.allPageValidationRendersMatched, true);
 });
 
+test('PDFKit client requires all receipt proof for Square annotation-property updates', () => {
+  const propertiesContext = {
+    ...context,
+    profile: 'macos-pdfkit-targeted-v1',
+    mutation: {
+      formFill: null,
+      annotationUpdate: null,
+      annotationProperties: {
+        page: 2, annotationIndex: 4, fingerprint: 'a'.repeat(64), subtype: 'square',
+        rect: { x: 12, y: 18, width: 560, height: 740 }, strokeColor: '#d32f2f',
+      },
+      annotationRemove: null,
+    },
+  };
+  const result = pdfKitClientMutationResult(propertiesContext);
+  assert.equal(validatePdfKitMutationResult(result, propertiesContext), result);
+  assert.deepEqual(result.artifact.operation.parameters, {
+    category: 'annotation-properties', page: 2, annotationIndex: 4, subtype: 'square',
+  });
+  assert.deepEqual(result.artifact.operation.validation.validators.slice(-5), [
+    'pdfkit-annotation-geometry-reopen', 'pdfkit-annotation-border-color-reopen',
+    'raw-annotation-c-rgb', 'non-target-annotation-descriptors',
+    'target-annotation-preservation',
+  ]);
+  assert.equal(result.evidence.nonTargetAnnotationDescriptorsVerified, true);
+  assert.equal(result.evidence.targetAnnotationPreservationVerified, true);
+  const missingProof = structuredClone(result);
+  delete missingProof.evidence.rawAnnotationColorVerified;
+  rejected(missingProof);
+});
+
 test('PDFKit client rejects crossed identity, digest, rectangle, validator, and evidence bindings', () => {
   const mutations = [
     (value) => { value.artifact.documentId = '44444444-4444-4444-8444-444444444444'; },

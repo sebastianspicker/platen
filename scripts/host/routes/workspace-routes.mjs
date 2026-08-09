@@ -4,6 +4,8 @@ import {
   PROJECT_BUNDLE_MAX_BYTES,
   PROJECT_BUNDLE_MEDIA_TYPE,
 } from '../project-bundle-service.mjs';
+import { bindSourceBoundAecDomainRequest } from './source-bound-aec-domain.mjs';
+import { bindSourceBoundCollaborationDomainRequest } from './source-bound-collaboration-domain.mjs';
 
 const WORKSPACE_JSON_BODY_LIMIT = 768 * 1024;
 const AEC_JSON_BODY_LIMIT = 8_192;
@@ -63,8 +65,10 @@ export async function handleWorkspaceRoute(context) {
   if (operation === 'domain') {
     if (!domainFacade) throw new HostError('DOMAIN_API_UNAVAILABLE', 'Local workflow domains are unavailable.', 503);
     method(request, 'POST');
-    store.getDocument(documentId);
-    json(response, 200, { result: await domainFacade.execute(documentId, await readJson(request, WORKSPACE_JSON_BODY_LIMIT)) });
+    const body = await readJson(request, WORKSPACE_JSON_BODY_LIMIT);
+    const aecBound = bindSourceBoundAecDomainRequest(documentId, body, workspaceState, store);
+    const bound = bindSourceBoundCollaborationDomainRequest(documentId, aecBound, workspaceState, store);
+    json(response, 200, { result: await domainFacade.execute(documentId, bound) });
     return true;
   }
   const aecMethod = { 'aec-calibration': 'calibrate', 'aec-measurement': 'measure', 'aec-materialization': 'materialize' }[operation];

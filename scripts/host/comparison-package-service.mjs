@@ -68,7 +68,7 @@ export class ComparisonPackageService {
     abort(signal);
     const primary = this.#store.getDocument(primaryDocumentId); const revision = this.#store.getDocument(revisionDocumentId);
     if (values.primarySha256 !== primary.sha256 || values.revisionSha256 !== revision.sha256) fail('COMPARISON_SOURCE_MISMATCH', 'Comparison package source digests do not match the current documents.', 409);
-    await Promise.all([this.#store.verifySource(primary.id), this.#store.verifySource(revision.id)]); abort(signal);
+    await this.#verifyPair(primary, revision); abort(signal);
     const contentReport = await this.#comparison.compareContent(primary.id, revision.id, { signal }); abort(signal);
     const content = contentReceiptBytes(this.#comparison.exportContentReport(contentReport, { format: 'json' }), primary.sha256, revision.sha256);
     let visual = null;
@@ -76,7 +76,7 @@ export class ComparisonPackageService {
       const visualReport = await this.#comparison.comparePixels(primary.id, revision.id, { dpi, signal }); abort(signal);
       visual = visualReceiptEntries(visualReport, primary.sha256, revision.sha256);
     }
-    await Promise.all([this.#store.verifySource(primary.id), this.#store.verifySource(revision.id)]); abort(signal);
+    await this.#verifyPair(primary, revision); abort(signal);
     const built = buildComparisonPackage({ primary, revision, contentReceipt: content, visual });
     try {
       const workspace = await this.#store.createJobWorkspace(primary.id); let promoted = null; let completed = false; let primaryError = null;
@@ -94,7 +94,7 @@ export class ComparisonPackageService {
         abort(signal);
         const candidate = await this.#store.promoteComparisonPackageArtifact(primary.id, revision.id, outputPath, { displayName: `comparison.${COMPARISON_PACKAGE_EXTENSION}`, mediaType: COMPARISON_PACKAGE_MEDIA_TYPE, extension: COMPARISON_PACKAGE_EXTENSION, operation, expectedSha256: built.sha256, signal });
         validatePromotedArtifact(candidate, primary, revision, built.sha256, built.bytes.length); promoted = candidate;
-        await Promise.all([this.#store.verifySource(primary.id), this.#store.verifySource(revision.id)]); abort(signal); completed = true;
+        await this.#verifyPair(primary, revision); abort(signal); completed = true;
         return Object.freeze({ kind: 'comparison-package', schemaVersion: 1, sourceDigests: Object.freeze({ primary: primary.sha256, revision: revision.sha256 }), includeVisual, dpi: includeVisual ? dpi : null, receiptDigests: Object.freeze({ content: contentSha256, visual: visualSha256 }), artifact: promoted, evidence: Object.freeze({ localOnly: true, exactlyTwoSources: true, sourcePdfsIncluded: false, deterministicStoredZip: true }), limitations: Object.freeze(['Contains comparison receipts and optional generated diff PNGs only; source PDF bytes are excluded. Visual and text differences require review.']) });
       } catch (error) {
         primaryError = error; throw error;
@@ -107,6 +107,24 @@ export class ComparisonPackageService {
     } finally {
       built.bytes.fill(0);
       content.fill(0); visual?.receipt.fill(0); for (const image of visual?.images ?? []) image.bytes.fill(0);
+    }
+  }
+
+  async #verifyPair(primary, revision) {
+    const verified = await Promise.all([
+      this.#store.verifySource(primary.id),
+      this.#store.verifySource(revision.id),
+    ]);
+    if (verified.some((value) => value !== true)) {
+      fail('SOURCE_INTEGRITY_FAILED', 'A comparison package source could not be verified as unchanged.', 409);
+    }
+    const rereadPrimary = this.#store.getDocument(primary.id);
+    const rereadRevision = this.#store.getDocument(revision.id);
+    for (const [before, after] of [[primary, rereadPrimary], [revision, rereadRevision]]) {
+      if (!after || after.id !== before.id || after.sha256 !== before.sha256
+        || after.size !== before.size || after.mediaType !== before.mediaType) {
+        fail('SOURCE_VERSION_MISMATCH', 'A comparison package source changed during processing.', 409);
+      }
     }
   }
 }

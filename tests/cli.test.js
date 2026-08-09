@@ -163,6 +163,7 @@ test('CLI preflight writes deterministic private XML without changing the JSON d
     document: { sha256: 'a'.repeat(64) },
     inspection: { pageCount: 1, encrypted: 'no', javascript: 'no' },
     structure: {
+      sourceDigest: 'a'.repeat(64),
       pageRange: { firstPage: 1, lastPage: 1, truncated: false },
       pageBoxes: [{
         page: 1, widthPoints: 612, heightPoints: 792,

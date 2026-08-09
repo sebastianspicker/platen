@@ -21,5 +21,6 @@ export {
 export {
   validateOcrBatchManifest,
   validateOcrDocumentResult,
+  validateOcrEditableOutputResult,
   validateOcrLayoutResult,
 } from './ocr-result-contract.js';

@@ -66,7 +66,7 @@ function fakeAdapter({ cms = CMS, trustStatus = 'passes', trustReason = 'none', 
 test('certificate signature service binds request/input/CMS, independently inspects output, promotes artifact, and cleans workspace', async (t) => {
   let observed; let observedVerify;
   const { store, source, sourceBytes, service } = await setup(t, fakeAdapter({ onCall: (value) => { observed = value; }, onVerify: (value) => { observedVerify = value; } }));
-  const result = await service.sign(source.id, request(sourceBytes), { certificateSha256: CERTIFICATE });
+  const result = await service.sign(source.id, request(sourceBytes), { certificateSha256: CERTIFICATE, consent: true });
   assert.equal(result.artifact.documentId, source.id);
   assert.equal(result.proof.sourcePrefixPreserved, true);
   assert.equal(result.receipt.certificateSha256, CERTIFICATE);
@@ -97,21 +97,29 @@ test('certificate signature service binds request/input/CMS, independently inspe
 });
 
 test('certificate signature service rejects unavailable/helper errors and cancellation with stable host errors', async (t) => {
+  let consentAttempted = false;
+  const consentState = await setup(t, fakeAdapter({ onCall: () => { consentAttempted = true; } }));
+  await assert.rejects(
+    consentState.service.sign(consentState.source.id, request(consentState.sourceBytes), { certificateSha256: CERTIFICATE }),
+    { code: 'CERTIFICATE_SIGN_CONSENT_REQUIRED' },
+  );
+  assert.equal(consentAttempted, false);
+
   const unavailableState = await setup(t, null);
-  await assert.rejects(unavailableState.service.sign(unavailableState.source.id, request(unavailableState.sourceBytes), { certificateSha256: CERTIFICATE }), { code: 'CERTIFICATE_SIGNATURE_ADAPTER_UNAVAILABLE' });
+  await assert.rejects(unavailableState.service.sign(unavailableState.source.id, request(unavailableState.sourceBytes), { certificateSha256: CERTIFICATE, consent: true }), { code: 'CERTIFICATE_SIGNATURE_ADAPTER_UNAVAILABLE' });
 
   const deniedAdapter = { createDetachedCms: async () => { const error = new Error('denied'); error.code = 'SIGNING_IDENTITY_PLATFORM_DENIED'; throw error; }, verifyDetachedCms: async () => { throw new Error('unreachable'); } };
   const deniedState = await setup(t, deniedAdapter);
-  await assert.rejects(deniedState.service.sign(deniedState.source.id, request(deniedState.sourceBytes), { certificateSha256: CERTIFICATE }), { code: 'CERTIFICATE_SIGNATURE_PLATFORM_DENIED' });
+  await assert.rejects(deniedState.service.sign(deniedState.source.id, request(deniedState.sourceBytes), { certificateSha256: CERTIFICATE, consent: true }), { code: 'CERTIFICATE_SIGNATURE_PLATFORM_DENIED' });
 
   const controller = new AbortController(); controller.abort();
   const cancelledState = await setup(t, fakeAdapter());
-  await assert.rejects(cancelledState.service.sign(cancelledState.source.id, request(cancelledState.sourceBytes), { certificateSha256: CERTIFICATE, signal: controller.signal }), { code: 'JOB_CANCELLED' });
+  await assert.rejects(cancelledState.service.sign(cancelledState.source.id, request(cancelledState.sourceBytes), { certificateSha256: CERTIFICATE, consent: true, signal: controller.signal }), { code: 'JOB_CANCELLED' });
 });
 
 test('certificate signature service records an untrusted but cryptographically valid detached CMS', async (t) => {
   const state = await setup(t, fakeAdapter({ trustStatus: 'fails', trustReason: 'expired' }));
-  const result = await state.service.sign(state.source.id, request(state.sourceBytes), { certificateSha256: CERTIFICATE });
+  const result = await state.service.sign(state.source.id, request(state.sourceBytes), { certificateSha256: CERTIFICATE, consent: true });
   assert.equal(result.verificationReceipt.signatureValid, true);
   assert.equal(result.verificationReceipt.trustStatus, 'fails');
   assert.equal(result.artifact.operation.expected.trustValidated, false);
@@ -129,14 +137,14 @@ test('certificate signature service fails closed on verification mismatch, helpe
       } };
     },
   });
-  await assert.rejects(mismatch.service.sign(mismatch.source.id, request(mismatch.sourceBytes), { certificateSha256: CERTIFICATE }), { code: 'CERTIFICATE_SIGNATURE_VERIFICATION_FAILED' });
+  await assert.rejects(mismatch.service.sign(mismatch.source.id, request(mismatch.sourceBytes), { certificateSha256: CERTIFICATE, consent: true }), { code: 'CERTIFICATE_SIGNATURE_VERIFICATION_FAILED' });
   assert.deepEqual(await readdir(join(mismatch.store.root, 'jobs')), []);
 
   const helperError = await setup(t, {
     ...fakeAdapter(),
     async verifyDetachedCms() { const error = new Error('bad CMS'); error.code = 'SIGNING_IDENTITY_CMS_INVALID'; throw error; },
   });
-  await assert.rejects(helperError.service.sign(helperError.source.id, request(helperError.sourceBytes), { certificateSha256: CERTIFICATE }), { code: 'CERTIFICATE_SIGNATURE_VERIFICATION_FAILED' });
+  await assert.rejects(helperError.service.sign(helperError.source.id, request(helperError.sourceBytes), { certificateSha256: CERTIFICATE, consent: true }), { code: 'CERTIFICATE_SIGNATURE_VERIFICATION_FAILED' });
   assert.deepEqual(await readdir(join(helperError.store.root, 'jobs')), []);
 
   const tampered = await setup(t, {
@@ -149,7 +157,7 @@ test('certificate signature service fails closed on verification mismatch, helpe
       } };
     },
   });
-  await assert.rejects(tampered.service.sign(tampered.source.id, request(tampered.sourceBytes), { certificateSha256: CERTIFICATE }), { code: 'CERTIFICATE_SIGNATURE_TAMPERED' });
+  await assert.rejects(tampered.service.sign(tampered.source.id, request(tampered.sourceBytes), { certificateSha256: CERTIFICATE, consent: true }), { code: 'CERTIFICATE_SIGNATURE_TAMPERED' });
   assert.deepEqual(await readdir(join(tampered.store.root, 'jobs')), []);
 
   const controller = new AbortController();
@@ -164,7 +172,7 @@ test('certificate signature service fails closed on verification mismatch, helpe
       } };
     },
   });
-  await assert.rejects(cancelled.service.sign(cancelled.source.id, request(cancelled.sourceBytes), { certificateSha256: CERTIFICATE, signal: controller.signal }), { code: 'JOB_CANCELLED' });
+  await assert.rejects(cancelled.service.sign(cancelled.source.id, request(cancelled.sourceBytes), { certificateSha256: CERTIFICATE, consent: true, signal: controller.signal }), { code: 'JOB_CANCELLED' });
   assert.deepEqual(await readdir(join(cancelled.store.root, 'jobs')), []);
 });
 
@@ -181,12 +189,12 @@ test('certificate signature service detects helper tampering and stale source', 
     },
     async verifyDetachedCms() { throw new Error('unreachable after input tamper'); },
   });
-  await assert.rejects(fixtureState.service.sign(fixtureState.source.id, request(fixtureState.sourceBytes), { certificateSha256: CERTIFICATE }), { code: 'CERTIFICATE_SIGNATURE_TAMPERED' });
+  await assert.rejects(fixtureState.service.sign(fixtureState.source.id, request(fixtureState.sourceBytes), { certificateSha256: CERTIFICATE, consent: true }), { code: 'CERTIFICATE_SIGNATURE_TAMPERED' });
   assert.ok(call);
 
   const stale = await setup(t, fakeAdapter());
   await writeFile(stale.store.getSourcePath(stale.source.id), Buffer.concat([stale.sourceBytes, Buffer.from('\n')]), { mode: 0o600 });
-  await assert.rejects(stale.service.sign(stale.source.id, request(stale.sourceBytes), { certificateSha256: CERTIFICATE }), { code: 'SOURCE_INTEGRITY_FAILED' });
+  await assert.rejects(stale.service.sign(stale.source.id, request(stale.sourceBytes), { certificateSha256: CERTIFICATE, consent: true }), { code: 'SOURCE_INTEGRITY_FAILED' });
   await chmod(stale.store.getSourcePath(stale.source.id), 0o600);
 });
 
@@ -196,7 +204,7 @@ test('certificate signature service enforces the native helper bytes-to-sign bou
   // Replace the fixture document with a separately created bounded oversized source.
   await state.store.deleteDocument(state.source.id);
   const source = await state.store.createDocument({ stream: (async function* () { yield largeBytes; })(), displayName: 'large.pdf' });
-  await assert.rejects(state.service.sign(source.id, request(largeBytes), { certificateSha256: CERTIFICATE }), { code: 'CERTIFICATE_SIGNATURE_INPUT_TOO_LARGE' });
+  await assert.rejects(state.service.sign(source.id, request(largeBytes), { certificateSha256: CERTIFICATE, consent: true }), { code: 'CERTIFICATE_SIGNATURE_INPUT_TOO_LARGE' });
 });
 
 test('certificate signature cleanup surfaces promoted-artifact revocation failures', async () => {

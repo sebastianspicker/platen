@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import test from 'node:test';
+import { HostError } from '../scripts/host/host-error.mjs';
 import { PopplerAdapter } from '../scripts/host/adapters/poppler.mjs';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
 import { EngineRegistry } from '../scripts/host/engine-registry.mjs';
@@ -38,14 +39,18 @@ async function fixture(context, options = {}) {
   const sourcePath = join(root, 'source.pdf');
   await writeFile(sourcePath, source, { mode: 0o600 });
   const proof = expectedProof(source, output);
-  const observed = { deleted: [], promoted: 0, workspaces: 0, outputSwapped: false };
+  const observed = { deleted: [], promoted: 0, workspaces: 0, outputSwapped: false, sourceDrifted: false };
   const controller = options.controller ?? new AbortController();
   const store = {
     getDocument: () => ({ id: documentId, sha256: digest, size: source.length, displayName: 'source.pdf' }),
     getSourcePath: () => sourcePath,
-    verifySource: async () => assert.equal(
-      createHash('sha256').update(await readFile(sourcePath)).digest('hex'), digest,
-    ),
+    verifySource: async () => {
+      const current = createHash('sha256').update(await readFile(sourcePath)).digest('hex');
+      if (options.sourceDrift && current !== digest) {
+        throw new HostError('SOURCE_INTEGRITY_FAILED', 'The immutable source PDF no longer matches its recorded digest.', 500);
+      }
+      assert.equal(current, digest);
+    },
     createJobWorkspace: async () => {
       const path = await mkdtemp(join(root, 'job-'));
       await chmod(path, 0o700); observed.workspaces += 1; return path;
@@ -56,6 +61,18 @@ async function fixture(context, options = {}) {
     },
     promotePdfArtifact: async (_id, _path, promotion) => {
       observed.promoted += 1;
+      if (options.forgedPromotion === 'identity') {
+        return {
+          id: documentId, sha256: promotion.expectedSha256, displayName: 'goto.pdf',
+          operation: promotion.operation,
+        };
+      }
+      if (options.forgedPromotion === 'digest') {
+        return {
+          id: '22222222-2222-4222-8222-222222222222', sha256: '0'.repeat(64),
+          displayName: 'goto.pdf', operation: promotion.operation,
+        };
+      }
       if (options.abortAfterPromotion) controller.abort(new Error('cancelled after promotion'));
       return {
         id: '22222222-2222-4222-8222-222222222222',
@@ -70,6 +87,10 @@ async function fixture(context, options = {}) {
   };
   const png = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
   const poppler = { execute: async (operation, parameters) => {
+    if (options.sourceDrift && !observed.sourceDrifted && operation === 'inspect') {
+      observed.sourceDrifted = true;
+      await writeFile(sourcePath, Buffer.from('%PDF-1.4\nsource-drift\nstartxref\n10\n%%EOF\n', 'latin1'));
+    }
     if (operation === 'inspect') return { stdout: 'Pages: 1\nEncrypted: no\nForm: none\nJavaScript: no\n', stderr: '' };
     if (['inspectMetadata', 'inspectCustomMetadata'].includes(operation)) return { stdout: '', stderr: '' };
     if (operation === 'listAttachments') return { stdout: '0 embedded files\n', stderr: '' };
@@ -131,6 +152,38 @@ test('GoTo-link service revokes promotion after cancellation or cleanup failure'
   await assert.rejects(cleanup.service.update(documentId, request, {
     sourceSha256: cleanup.digest,
   }), { code: 'INCREMENTAL_GOTO_LINK_CLEANUP_FAILED' });
+  assert.deepEqual(cleanup.observed.deleted, ['22222222-2222-4222-8222-222222222222']);
+});
+
+test('GoTo-link service rejects retained/forged promotion identities and artifacts', async (context) => {
+  const forgedIdentity = await fixture(context, { forgedPromotion: 'identity' });
+  await assert.rejects(forgedIdentity.service.update(documentId, request, {
+    sourceSha256: forgedIdentity.digest,
+  }), { code: 'INCREMENTAL_GOTO_LINK_OUTPUT_INVALID' });
+  assert.deepEqual(forgedIdentity.observed.deleted, [documentId]);
+
+  const forgedDigest = await fixture(context, { forgedPromotion: 'digest' });
+  await assert.rejects(forgedDigest.service.update(documentId, request, {
+    sourceSha256: forgedDigest.digest,
+  }), { code: 'INCREMENTAL_GOTO_LINK_OUTPUT_INVALID' });
+  assert.deepEqual(forgedDigest.observed.deleted, ['22222222-2222-4222-8222-222222222222']);
+});
+
+test('GoTo-link service treats drifted source during processing as integrity failure', async (context) => {
+  const drift = await fixture(context, { sourceDrift: true });
+  await assert.rejects(drift.service.update(documentId, request, {
+    sourceSha256: drift.digest,
+  }), { code: 'SOURCE_INTEGRITY_FAILED' });
+  assert.equal(drift.observed.promoted, 0);
+  assert.deepEqual(drift.observed.deleted, []);
+});
+
+test('GoTo-link service exposes cleanup failure when workspace cleanup and artifact revocation both fail', async (context) => {
+  const cleanup = await fixture(context, { cleanupFailure: true, deleteFailure: true });
+  await assert.rejects(cleanup.service.update(documentId, request, {
+    sourceSha256: cleanup.digest,
+  }), { code: 'INCREMENTAL_GOTO_LINK_CLEANUP_FAILED' });
+  assert.equal(cleanup.observed.promoted, 1);
   assert.deepEqual(cleanup.observed.deleted, ['22222222-2222-4222-8222-222222222222']);
 });
 

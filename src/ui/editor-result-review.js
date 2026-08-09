@@ -6,20 +6,36 @@ export function fullPageRedactionResult(state) {
   return `<div class="comparison-result" role="status"><strong>Object-level full-page redaction PDF created</strong><span>${escapeHtml(result.artifact?.displayName ?? 'Full-page redaction PDF')} · page ${escapeHtml(result.redaction?.page ?? '')} · closed compact rewrite</span><span>Target page content and reachable resources were removed from the closed output; non-target text and renders were independently preserved.</span><span>This is full-page-only object redaction, not region redaction or whole-document sanitization. The immutable source remains unchanged.</span>${(result.limitations ?? []).map((limitation) => `<span>${escapeHtml(limitation)}</span>`).join('')}</div>`;
 }
 
+function base64PngData(image) {
+  return image?.mediaType === 'image/png' && image?.encoding === 'base64'
+    && /^[A-Za-z0-9+/=]+$/u.test(image.data ?? '') ? image.data : null;
+}
+
+function sideBySidePanes(report) {
+  if (report?.kind !== 'side-by-side' || !Array.isArray(report.panes)) return '';
+  const labels = ['Primary PDF · left pane', 'Secondary PDF · right pane'];
+  const panes = report.panes.slice(0, 2).map((pane, index) => {
+    const data = base64PngData(pane);
+    if (!data || pane.role !== (index === 0 ? 'primary' : 'secondary')) return '';
+    return `<figure class="comparison-difference"><img src="data:image/png;base64,${data}" alt="${labels[index]} for page ${escapeHtml(report.page)}" /><figcaption>${labels[index]} · page ${escapeHtml(report.page)}</figcaption></figure>`;
+  });
+  return panes.every(Boolean) ? `<div class="comparison-images">${panes.join('')}</div>` : '';
+}
+
+function comparisonSummary(report, effective) {
+  const stats = effective?.stats ?? {};
+  if (report.kind === 'side-by-side') return 'Two independent local page panes rendered for review.';
+  if (effective?.kind === 'pixel') return `${stats.changedPixels ?? 0} changed of ${stats.comparedPixels ?? 0} compared pixels`;
+  if (effective?.kind === 'content') return `${stats.added ?? 0} added · ${stats.deleted ?? 0} deleted · ${stats.unchanged ?? 0} unchanged tokens`;
+  if (effective?.kind === 'annotations') return `${stats.added ?? 0} added · ${stats.deleted ?? 0} deleted · ${stats.changed ?? 0} changed annotations`;
+  return 'Local comparison report ready.';
+}
+
 export function comparisonResult(state) {
   const report = state.comparisonReport;
   if (!report) return '';
   const effective = report.kind === 'cross-format' ? report.content : report;
-  const stats = effective?.stats ?? {};
-  const summary = effective?.kind === 'pixel'
-    ? `${stats.changedPixels ?? 0} changed of ${stats.comparedPixels ?? 0} compared pixels`
-    : effective?.kind === 'content'
-      ? `${stats.added ?? 0} added · ${stats.deleted ?? 0} deleted · ${stats.unchanged ?? 0} unchanged tokens`
-      : effective?.kind === 'annotations'
-        ? `${stats.added ?? 0} added · ${stats.deleted ?? 0} deleted · ${stats.changed ?? 0} changed annotations`
-        : report.status === 'descriptor-only'
-          ? 'Review layout descriptor created; no pixels were rendered.'
-          : 'Local comparison report ready.';
+  const summary = comparisonSummary(report, effective);
   const images = (effective?.pages ?? [])
     .filter((page) => page?.differenceImage?.encoding === 'base64'
       && /^[A-Za-z0-9+/=]+$/.test(page.differenceImage.data ?? ''))
@@ -29,6 +45,7 @@ export function comparisonResult(state) {
   return `<div class="comparison-result" role="status">
     <strong>${escapeHtml(state.comparisonFileName ?? 'Comparison PDF')}</strong>
     <span>${escapeHtml(summary)}</span>
+    ${sideBySidePanes(report)}
     ${images ? `<div class="comparison-images">${images}</div>` : ''}
     <div class="button-row"><button class="button" data-action="export-comparison-json">Export JSON</button><button class="button" data-action="export-comparison-csv">Export CSV</button></div>
   </div>`;

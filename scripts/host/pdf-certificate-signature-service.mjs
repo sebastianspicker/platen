@@ -15,8 +15,11 @@ export class PdfCertificateSignatureService {
     this.#store = store; this.#adapter = adapter;
   }
 
-  async sign(documentId, request, { certificateSha256, signal } = {}) {
+  async sign(documentId, request, { certificateSha256, consent, signal } = {}) {
     if (signal !== undefined && !(signal instanceof AbortSignal)) throw new TypeError('signal must be an AbortSignal.');
+    if (consent !== true) {
+      throw host('CERTIFICATE_SIGN_CONSENT_REQUIRED', 'Explicit user consent is required before the local host accesses a signing identity.', 400);
+    }
     if (!SHA256.test(String(certificateSha256 ?? ''))) throw host('INVALID_CERTIFICATE_SHA256', 'certificateSha256 must be a lowercase SHA-256 digest.', 400);
     if (!request || typeof request !== 'object' || Array.isArray(request)) throw host('INVALID_CERTIFICATE_SIGNATURE_REQUEST', 'A source-bound PDF signature-container request is required.', 400);
     const source = this.#store.getDocument(documentId);

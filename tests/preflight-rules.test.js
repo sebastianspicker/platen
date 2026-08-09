@@ -12,6 +12,7 @@ function evidence(overrides = {}) {
     document: { sha256: 'a'.repeat(64) },
     inspection: { pageCount: 1, encrypted: 'no', javascript: 'no', pdfVersion: '1.7' },
     structure: {
+      sourceDigest: 'a'.repeat(64),
       pageRange: { firstPage: 1, lastPage: 1, truncated: false },
       pageBoxes: [{
         page: 1, widthPoints: 612, heightPoints: 792,
@@ -23,8 +24,8 @@ function evidence(overrides = {}) {
       }],
       xmpMetadata: { present: true },
     },
-    fonts: [{ name: 'Embedded', embedded: 'yes', unicode: 'yes' }],
-    images: [{ width: 600, height: 400, color: 'rgb', bitsPerComponent: 8, encoding: 'jpeg', xPpi: 300, yPpi: 300 }],
+    fonts: [{ name: 'Embedded', embedded: 'yes', unicode: 'yes', sourceSha256: 'a'.repeat(64) }],
+    images: [{ width: 600, height: 400, color: 'rgb', bitsPerComponent: 8, encoding: 'jpeg', xPpi: 300, yPpi: 300, sourceSha256: 'a'.repeat(64) }],
     ...overrides,
   };
 }
@@ -54,9 +55,10 @@ test('preflight fails known defects and keeps unavailable semantics explicitly u
   const report = buildPreflightReport(evidence({
     profile: 'archive-review',
     inspection: { pageCount: 2, encrypted: 'yes', javascript: 'yes' },
-    fonts: [{ name: 'Missing', embedded: 'no', unicode: 'no' }],
+    fonts: [{ name: 'Missing', embedded: 'no', unicode: 'no', sourceSha256: 'a'.repeat(64) }],
     images: [],
     structure: {
+      sourceDigest: 'a'.repeat(64),
       pageRange: { firstPage: 1, lastPage: 1, truncated: true },
       pageBoxes: [{ page: 1, widthPoints: 612, heightPoints: 792, boxes: { mediaBox: { left: 0, bottom: 0, right: 612, top: 792 } } }],
       xmpMetadata: { present: false },
@@ -77,7 +79,7 @@ test('preflight rejects arbitrary profiles and unbounded resource inventories', 
 
 test('preflight XML is deterministic, complete, escaped, and explicitly non-authoritative', () => {
   const report = buildPreflightReport(evidence({
-    fonts: [{ name: 'A&B<review>\'"', embedded: 'no', unicode: 'yes' }],
+    fonts: [{ name: 'A&B<review>\'"', embedded: 'no', unicode: 'yes', sourceSha256: 'a'.repeat(64) }],
   }));
   const first = serializePreflightReportXml(report);
   const second = serializePreflightReportXml(report);
@@ -93,6 +95,18 @@ test('preflight XML is deterministic, complete, escaped, and explicitly non-auth
   assert.match(first, /\\&quot;/u);
   assert.match(first, /<limitations count="2">/u);
   assert.equal(first.endsWith('</preflight-review>\n'), true);
+});
+
+test('preflight rejects inventories bound to a different source', () => {
+  assert.throws(() => buildPreflightReport(evidence({
+    structure: { ...evidence().structure, sourceDigest: 'b'.repeat(64) },
+  })), { code: 'INVALID_PREFLIGHT_INPUT' });
+  assert.throws(() => buildPreflightReport(evidence({
+    fonts: [{ ...evidence().fonts[0], sourceSha256: 'b'.repeat(64) }],
+  })), { code: 'INVALID_PREFLIGHT_INPUT' });
+  assert.throws(() => buildPreflightReport(evidence({
+    images: [{ ...evidence().images[0], sourceSha256: 'b'.repeat(64) }],
+  })), { code: 'INVALID_PREFLIGHT_INPUT' });
 });
 
 test('preflight XML rejects altered reports before serialization', () => {

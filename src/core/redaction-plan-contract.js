@@ -28,7 +28,7 @@ function revision(value) {
 }
 
 function opaqueId(value, label) {
-  if (!OPAQUE_ID.test(value ?? '')) throw new TypeError(`${label} is invalid.`);
+  if (typeof value !== 'string' || !OPAQUE_ID.test(value)) throw new TypeError(`${label} is invalid.`);
   return value;
 }
 

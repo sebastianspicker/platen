@@ -1,15 +1,150 @@
 import { createHash } from 'node:crypto';
-import { createTextPdf } from '../pdf-factory.mjs';
+import { isDeepStrictEqual } from 'node:util';
+import { PDF_ACCESSIBILITY_LINKS_BOOKMARKS_PROFILE } from '../pdf-accessibility-links-bookmarks-contract.mjs';
+import {
+  inspectPdfAccessibilityLinksBookmarks,
+  inspectPdfAccessibilityLinksBookmarksSource,
+  writePdfAccessibilityLinksBookmarks,
+} from '../pdf-accessibility-links-bookmarks-writer.mjs';
 import { result, fail, requireString, requireBytes, sha256 } from './support.mjs';
 import { writeTaggedPdfRemediation, inspectTaggedPdfRemediation } from '../pdf-tagged-remediation-writer.mjs';
 import { TAGGED_PDF_REMEDIATION_PROFILE } from '../pdf-tagged-remediation-contract.mjs';
+export {
+  accessibilityFontUnicodeMapping,
+  accessibilityScreenReaderPermissions,
+} from './accessibility-font-permissions.mjs';
 
-function tryWriter(fn, source, request) {
-  try {
-    return fn(source, request);
-  } catch {
-    return null;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
+
+function linksProductionInput(ctx) {
+  if (ctx.sourcePdf === undefined && ctx.sourceBytes === undefined) {
+    fail('ACCESSIBILITY_LINKS_SOURCE_REQUIRED', 'Accessible links/bookmarks repair requires explicit source PDF bytes.', 400);
   }
+  const source = requireBytes(ctx.sourcePdf ?? ctx.sourceBytes, 'sourcePdf', { max: 128 * 1024 * 1024 });
+  const sourceSha256 = sha256(source);
+  if (ctx.sourceSha256 !== sourceSha256) {
+    fail('SOURCE_VERSION_MISMATCH', 'The supplied links/bookmarks source digest does not match the source PDF.', 409);
+  }
+  if (typeof ctx.documentId !== 'string' || ctx.documentId.length < 1) {
+    fail('ACCESSIBILITY_LINKS_DOCUMENT_REQUIRED', 'Accessible links/bookmarks repair requires an explicit document identity.', 400);
+  }
+  if (!ctx.linksRequest || typeof ctx.linksRequest !== 'object' || Array.isArray(ctx.linksRequest)) {
+    fail('ACCESSIBILITY_LINKS_REQUEST_REQUIRED', 'Accessible links/bookmarks repair requires the exact source-bound linksRequest.', 400);
+  }
+  if (ctx.linksRequest.sourceSha256 !== sourceSha256) {
+    fail('SOURCE_VERSION_MISMATCH', 'The links/bookmarks request is not bound to the supplied source PDF.', 409);
+  }
+  const service = ctx.accessibilityLinksBookmarks;
+  if (!service || typeof service.update !== 'function') {
+    fail('ACCESSIBILITY_LINKS_SERVICE_UNAVAILABLE', 'The production accessibility links/bookmarks service is unavailable.', 503);
+  }
+  const readArtifact = typeof ctx.readArtifact === 'function'
+    ? ctx.readArtifact
+    : typeof service.readArtifact === 'function' ? service.readArtifact.bind(service) : null;
+  if (!readArtifact) {
+    fail('ACCESSIBILITY_LINKS_ARTIFACT_READBACK_REQUIRED', 'Accessible links/bookmarks repair requires an explicit artifact reread authority.', 503);
+  }
+  return { source, sourceSha256, service, readArtifact, request: ctx.linksRequest };
+}
+
+function validateLinksArtifact(receipt, { documentId, sourceSha256, artifactBytes }) {
+  const artifact = receipt?.artifact;
+  const outputSha256 = sha256(artifactBytes);
+  const operation = artifact?.operation;
+  if (receipt?.kind !== 'pdf-accessibility-links-bookmarks' || receipt.sourceDigest !== sourceSha256
+    || !receipt.evidence || receipt.evidence.localOnly !== true
+    || receipt.evidence.sourceUnchanged !== true || receipt.evidence.artifactDigestBound !== true
+    || !Array.isArray(receipt.limitations) || receipt.limitations.length < 1
+    || !artifact || !UUID.test(String(artifact.id ?? '')) || artifact.documentId !== documentId
+    || artifact.mediaType !== 'application/pdf' || artifact.size !== artifactBytes.length
+    || artifact.sha256 !== outputSha256 || outputSha256 === sourceSha256
+    || operation?.type !== 'pdf-accessibility-links-bookmarks'
+    || operation?.validation?.passed !== true || operation.validation.outputSha256 !== outputSha256
+    || !Array.isArray(operation.inputs)
+    || !operation.inputs.some((input) => input.documentId === documentId
+      && input.sha256 === sourceSha256 && input.role === 'source')
+    || !isDeepStrictEqual(receipt.operation, operation)) {
+    fail('ACCESSIBILITY_LINKS_RECEIPT_INVALID', 'The links/bookmarks receipt is not bound to the requested source and reread artifact.', 502);
+  }
+  return outputSha256;
+}
+
+async function productionLinksBookmarks(ctx) {
+  const boundary = linksProductionInput(ctx);
+  let receipt;
+  try {
+    receipt = await boundary.service.update(ctx.documentId, boundary.request, {
+      sourceSha256: boundary.sourceSha256,
+      signal: ctx.signal,
+    });
+  } catch (error) {
+    if (error?.code) throw error;
+    fail('ACCESSIBILITY_LINKS_SERVICE_FAILED', 'The production accessibility links/bookmarks service failed.', 502);
+  }
+  let artifactBytes;
+  try {
+    artifactBytes = requireBytes(await boundary.readArtifact(receipt?.artifact), 'accessibleLinksArtifact', { max: 192 * 1024 * 1024 });
+  } catch (error) {
+    if (error?.code === 'INVALID_PROFESSIONAL_INPUT') {
+      fail('ACCESSIBILITY_LINKS_RECEIPT_INVALID', 'The links/bookmarks artifact reread authority did not return bounded PDF bytes.', 502);
+    }
+    fail('ACCESSIBILITY_LINKS_ARTIFACT_READBACK_FAILED', 'The links/bookmarks artifact could not be reread.', 502);
+  }
+  const outputSha256 = validateLinksArtifact(receipt, {
+    documentId: ctx.documentId,
+    sourceSha256: boundary.sourceSha256,
+    artifactBytes,
+  });
+  let proof;
+  try {
+    proof = inspectPdfAccessibilityLinksBookmarks(boundary.source, artifactBytes, boundary.request);
+  } catch {
+    fail('ACCESSIBILITY_LINKS_OUTPUT_INVALID', 'Independent links/bookmarks inspection rejected the reread artifact.', 502);
+  }
+  return result('accessibility.links-bookmarks', {
+    method: 'production-accessibility-links-bookmarks-service',
+    serviceReceipt: receipt,
+    artifact: receipt.artifact,
+    limitations: receipt.limitations,
+    links: Object.freeze(proof.links.map((link) => Object.freeze({ ...link }))),
+    bookmarks: Object.freeze(proof.bookmarks.map((bookmark) => Object.freeze({ ...bookmark }))),
+    linkCount: proof.links.length,
+    bookmarkCount: proof.bookmarks.length,
+    pdf: artifactBytes,
+    bytes: artifactBytes.length,
+    outputSha256,
+    sourceSha256: boundary.sourceSha256,
+    applied: true,
+    proof,
+    demoFixtureUsed: false,
+    professionalProof: true,
+    trustBoundary: Object.freeze({
+      productionService: true,
+      immutableSourceDigest: true,
+      artifactReread: true,
+      independentSemanticInspection: true,
+    }),
+  });
+}
+
+function explicitRepairInput(ctx, requestKey, createDemo) {
+  const supplied = ctx.sourcePdf !== undefined || ctx.sourceBytes !== undefined;
+  const request = ctx[requestKey];
+  if (supplied) {
+    if (!request || typeof request !== 'object' || Array.isArray(request)) {
+      fail('ACCESSIBILITY_REPAIR_REQUEST_REQUIRED', `Supplied sourcePdf requires ${requestKey}.`, 422);
+    }
+    return Object.freeze({
+      source: requireBytes(ctx.sourcePdf ?? ctx.sourceBytes, 'sourcePdf'),
+      request,
+      demoFixtureUsed: false,
+    });
+  }
+  if (request !== undefined || ctx.demoFixture !== true) {
+    fail('ACCESSIBILITY_REPAIR_SOURCE_REQUIRED', `Accessibility repair requires sourcePdf and ${requestKey}.`, 422);
+  }
+  const demo = createDemo();
+  return Object.freeze({ ...demo, demoFixtureUsed: true });
 }
 
 function tableMatrix(headers, rows) {
@@ -51,20 +186,55 @@ function tableMatrix(headers, rows) {
   });
 }
 
+function passiveLinksBookmarksPdf(linkCount, bookmarkCount, pageCount) {
+  const firstPageObject = 3;
+  const linkStart = firstPageObject + pageCount;
+  const outlineRootObject = linkStart + linkCount;
+  const outlineStart = outlineRootObject + 1;
+  const pageReferences = Array.from({ length: pageCount }, (_, index) => firstPageObject + index);
+  const linkReferences = Array.from({ length: linkCount }, (_, index) => linkStart + index);
+  const outlineReferences = Array.from({ length: bookmarkCount }, (_, index) => outlineStart + index);
+  const objects = [
+    `<< /Type /Catalog /Pages 2 0 R${bookmarkCount ? ` /Outlines ${outlineRootObject} 0 R` : ''} >>`,
+    `<< /Type /Pages /Count ${pageCount} /Kids [${pageReferences.map((object) => `${object} 0 R`).join(' ')}] >>`,
+    ...pageReferences.map((object, index) => `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /CropBox [0 0 100 100]${index === 0 && linkCount ? ` /Annots [${linkReferences.map((link) => `${link} 0 R`).join(' ')}]` : ''} >>`),
+    ...linkReferences.map((_, index) => `<< /Type /Annot /Subtype /Link /Rect [0 ${index * 2} 10 ${index * 2 + 1}] /Dest [${pageReferences[Math.min(1, pageReferences.length - 1)]} 0 R /Fit] >>`),
+    ...(bookmarkCount ? [
+      `<< /Type /Outlines /First ${outlineReferences[0]} 0 R /Last ${outlineReferences.at(-1)} 0 R /Count ${bookmarkCount} >>`,
+      ...outlineReferences.map((object, index) => `<< /Type /Outlines /Parent ${outlineRootObject} 0 R /Title (Bookmark ${index + 1}) /Dest [${pageReferences[0]} 0 R /Fit]${index ? ` /Prev ${outlineReferences[index - 1]} 0 R` : ''}${index + 1 < bookmarkCount ? ` /Next ${outlineReferences[index + 1]} 0 R` : ''} >>`),
+    ] : []),
+  ];
+  let body = '%PDF-1.4\n';
+  const offsets = [0];
+  for (const [index, object] of objects.entries()) {
+    offsets.push(Buffer.byteLength(body, 'latin1'));
+    body += `${index + 1} 0 obj\n${object}\nendobj\n`;
+  }
+  const xrefOffset = Buffer.byteLength(body, 'latin1');
+  body += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (const offset of offsets.slice(1)) body += `${String(offset).padStart(10, '0')} 00000 n \n`;
+  body += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+  return Buffer.from(body, 'latin1');
+}
+
 export async function accessibilityLinksBookmarks(ctx = {}) {
+  if (ctx.demoFixture !== true || ctx.sourcePdf !== undefined || ctx.sourceBytes !== undefined
+    || ctx.linksRequest !== undefined || ctx.accessibilityLinksBookmarks !== undefined) {
+    return productionLinksBookmarks(ctx);
+  }
   const links = Array.isArray(ctx.links)
     ? ctx.links
     : [{ text: 'Contents', page: 2, purpose: 'Internal navigation' }];
   const bookmarks = Array.isArray(ctx.bookmarks)
     ? ctx.bookmarks
     : [{ title: 'Start', page: 1 }];
-  const normalizedLinks = links.slice(0, 100).map((link, i) => Object.freeze({
+  const normalizedLinks = links.slice(0, 64).map((link, i) => Object.freeze({
     id: `link-${i + 1}`,
     text: String(link?.text ?? link?.purpose ?? `Link ${i + 1}`).slice(0, 120),
     page: Number.isSafeInteger(link?.page) ? link.page : 1,
     purpose: String(link?.purpose ?? link?.text ?? 'Navigate').slice(0, 120),
   }));
-  const normalizedBookmarks = bookmarks.slice(0, 100).map((bm, i) => Object.freeze({
+  const normalizedBookmarks = bookmarks.slice(0, 64).map((bm, i) => Object.freeze({
     id: `bm-${i + 1}`,
     title: String(bm?.title ?? `Bookmark ${i + 1}`).slice(0, 120),
     page: Number.isSafeInteger(bm?.page) ? bm.page : i + 1,
@@ -76,32 +246,37 @@ export async function accessibilityLinksBookmarks(ctx = {}) {
       ...normalizedBookmarks.map((b) => `B:${b.page}:${b.title}`),
     ].join('\n'))
     .digest('hex');
-  let pdf = createTextPdf({
-    text: [
-      'Links and bookmarks',
-      ...normalizedBookmarks.map((b) => `${'  '.repeat(b.depth)}* ${b.title} -> p${b.page}`),
-      ...normalizedLinks.map((l) => `-> ${l.text} (p${l.page})`),
-    ].join('\n'),
-    title: 'Links bookmarks',
+  const requestedPages = [...normalizedLinks, ...normalizedBookmarks].map((entry) => entry.page);
+  if (requestedPages.some((page) => page < 1 || page > 100)) fail('INVALID_LINK_TARGET', 'Link and bookmark target pages must be from 1 through 100.', 400);
+  const pageCount = Math.max(2, ...requestedPages);
+  const repair = explicitRepairInput(ctx, 'linksRequest', () => {
+    const source = passiveLinksBookmarksPdf(normalizedLinks.length, normalizedBookmarks.length, pageCount);
+    const sourceSha256 = sha256(source);
+    const inventory = inspectPdfAccessibilityLinksBookmarksSource(source, sourceSha256);
+    return {
+      source,
+      request: {
+        profile: PDF_ACCESSIBILITY_LINKS_BOOKMARKS_PROFILE,
+        sourceSha256,
+        links: normalizedLinks.map((link, index) => ({
+          locator: { fingerprint: inventory.links[index].fingerprint },
+          purpose: link.purpose,
+          targetPage: link.page,
+        })),
+        bookmarks: normalizedBookmarks.map((bookmark, index) => ({
+          locator: { fingerprint: inventory.bookmarks[index].fingerprint },
+          title: bookmark.title,
+          targetPage: bookmark.page,
+        })),
+      },
+    };
   });
-  let applied = false;
-  let proof = null;
-  if ((ctx.sourcePdf || ctx.sourceBytes) && ctx.linksRequest && typeof ctx.linksRequest === 'object') {
-    try {
-      const source = requireBytes(ctx.sourcePdf ?? ctx.sourceBytes, 'sourcePdf');
-      const { writePdfAccessibilityLinksBookmarks } = await import('../pdf-accessibility-links-bookmarks-writer.mjs');
-      const written = tryWriter(writePdfAccessibilityLinksBookmarks, source, ctx.linksRequest);
-      if (written?.bytes) {
-        pdf = written.bytes;
-        proof = written.proof ?? null;
-        applied = true;
-      }
-    } catch {
-      // inventory twin
-    }
-  }
+  const { source, request } = repair;
+  const written = writePdfAccessibilityLinksBookmarks(source, request);
+  const proof = inspectPdfAccessibilityLinksBookmarks(source, written.bytes, request);
+  const pdf = written.bytes;
   return result('accessibility.links-bookmarks', {
-    method: 'local-a11y-links-bookmarks-map',
+    method: 'local-accessibility-links-bookmarks-repair',
     links: Object.freeze(normalizedLinks),
     bookmarks: Object.freeze(normalizedBookmarks),
     linkCount: normalizedLinks.length,
@@ -110,8 +285,13 @@ export async function accessibilityLinksBookmarks(ctx = {}) {
     pdf,
     bytes: pdf.length,
     outputSha256: sha256(pdf),
-    applied,
+    applied: true,
     proof,
+    sourceSha256: sha256(source),
+    demoFixtureUsed: repair.demoFixtureUsed,
+    sourceByteLength: source.length,
+    repairRequest: request,
+    professionalProof: false,
   });
 }
 
@@ -153,21 +333,27 @@ export function accessibilityArtifactManagement(ctx = {}) {
     });
   });
   if (normalized.length < 1) fail('INVALID_ARTIFACTS', 'artifacts required', 400);
-  // Apply first artifact as PDF structure Artifact via production tagged writer.
-  const source = remediableArtifactPdf();
-  const sourceSha256 = createHash('sha256').update(source).digest('hex');
-  const request = {
-    profile: TAGGED_PDF_REMEDIATION_PROFILE,
-    sourceSha256,
-    plan: {
-      id: 'document',
-      role: 'Document',
-      children: [{ id: 'artifact-1', role: 'Artifact', page: 1, contentIndex: 0 }],
-    },
-    language: 'en-US',
-    title: 'Artifact-managed',
-    roleMap: {},
-  };
+  const repair = explicitRepairInput(ctx, 'taggedRequest', () => {
+    const source = remediableArtifactPdf();
+    const sourceSha256 = createHash('sha256').update(source).digest('hex');
+    return {
+      source,
+      request: {
+        profile: TAGGED_PDF_REMEDIATION_PROFILE,
+        sourceSha256,
+        plan: {
+          id: 'document',
+          role: 'Document',
+          children: [{ id: 'artifact-1', role: 'Artifact', page: 1, contentIndex: 0 }],
+        },
+        language: 'en-US',
+        title: 'Artifact-managed',
+        roleMap: {},
+      },
+    };
+  });
+  const { source, request } = repair;
+  const sourceSha256 = sha256(source);
   const written = writeTaggedPdfRemediation(source, request);
   const proof = inspectTaggedPdfRemediation(source, written.bytes, request);
   if (!written.bytes.toString('latin1').includes('/Artifact') && !written.bytes.toString('latin1').includes('Artifact')) {
@@ -192,138 +378,8 @@ export function accessibilityArtifactManagement(ctx = {}) {
     pdf: written.bytes,
     bytes: written.bytes.length,
     proof,
-  });
-}
-
-
-export function accessibilityFontUnicodeMapping(ctx = {}) {
-  let fonts = Array.isArray(ctx.fonts) ? ctx.fonts : null;
-  if (!fonts) {
-    // Deterministic review inventory always includes one known Unicode gap.
-    fonts = [
-      { name: 'Helvetica', embedded: false, unicode: true, subset: false },
-      { name: 'Custom', embedded: true, unicode: false, subset: false },
-    ];
-    if (ctx.sourcePdf || ctx.sourceBytes) {
-      try {
-        const source = requireBytes(ctx.sourcePdf ?? ctx.sourceBytes, 'sourcePdf');
-        const latin1 = source.toString('latin1');
-        const names = new Set();
-        const re = /\/BaseFont\s*\/([A-Za-z0-9+_-]+)/g;
-        let match;
-        while ((match = re.exec(latin1)) && names.size < 40) names.add(match[1]);
-        for (const name of names) {
-          if (fonts.some((font) => font.name === name)) continue;
-          const subset = /^[A-Z]{6}\+/.test(name);
-          const standard = /Helvetica|Times|Courier|Symbol|ZapfDingbats/i.test(name);
-          fonts.push({
-            name,
-            embedded: subset || !standard,
-            unicode: standard || latin1.includes('/ToUnicode'),
-            subset,
-          });
-        }
-      } catch {
-        // keep baseline inventory
-      }
-    }
-  }
-  const normalized = fonts.slice(0, 100).map((font, i) => Object.freeze({
-    name: String(font?.name ?? `Font${i + 1}`).slice(0, 80),
-    embedded: font?.embedded !== false,
-    unicode: font?.unicode !== false,
-    subset: font?.subset === true,
-  }));
-  const issues = normalized
-    .filter((font) => font.unicode === false)
-    .map((font) => Object.freeze({ font: font.name, issue: 'missing-to-unicode' }));
-  for (const font of normalized) {
-    if (font.subset && font.unicode === false) {
-      issues.push(Object.freeze({ font: font.name, issue: 'subset-without-tounicode' }));
-    }
-  }
-  const reviewSha256 = createHash('sha256')
-    .update(normalized.map((f) => `${f.name}:${f.unicode ? 1 : 0}`).join('|'))
-    .digest('hex');
-  const pdf = createTextPdf({
-    text: [
-      'Font Unicode mapping review',
-      ...normalized.map((f) => `${f.name} embedded=${f.embedded} unicode=${f.unicode}`),
-      ...issues.map((issue) => `ISSUE ${issue.font}: ${issue.issue}`),
-    ].join('\n'),
-    title: 'Font unicode',
-  });
-  return result('accessibility.font-unicode-mapping', {
-    method: 'local-a11y-font-unicode-review',
-    fonts: Object.freeze(normalized),
-    issues: Object.freeze(issues),
-    issueCount: issues.length,
-    fontCount: normalized.length,
-    reviewSha256,
-    pdf,
-    bytes: pdf.length,
-    outputSha256: sha256(pdf),
-  });
-}
-
-export function accessibilityScreenReaderPermissions(ctx = {}) {
-  let extractText = ctx.extractText !== false;
-  let accessibility = ctx.accessibility !== false;
-  let copy = Boolean(ctx.copy);
-  let print = Boolean(ctx.print);
-  let encrypted = false;
-  let sourceSha256 = null;
-  if (ctx.sourcePdf || ctx.sourceBytes) {
-    try {
-      const source = requireBytes(ctx.sourcePdf ?? ctx.sourceBytes, 'sourcePdf');
-      sourceSha256 = sha256(source);
-      const latin1 = source.toString('latin1');
-      encrypted = latin1.includes('/Encrypt');
-      // /P permission flags (PDF bit 5 = extract, bit 10 = accessibility extract)
-      const pMatch = /\/P\s+(-?\d+)/.exec(latin1);
-      if (encrypted && pMatch) {
-        const flags = Number(pMatch[1]) | 0;
-        // PDF permission bits are inverted in practice for encryption; use explicit bits when present.
-        extractText = (flags & 16) !== 0 || ctx.extractText === true;
-        accessibility = (flags & 512) !== 0 || ctx.accessibility === true;
-        print = (flags & 4) !== 0 || ctx.print === true;
-        copy = (flags & 16) !== 0 || ctx.copy === true;
-      } else if (!encrypted) {
-        extractText = ctx.extractText !== false;
-        accessibility = ctx.accessibility !== false;
-      }
-    } catch {
-      // keep defaults
-    }
-  }
-  const permissions = Object.freeze({
-    extractText,
-    accessibility,
-    copy,
-    print,
-    encrypted,
-  });
-  const screenReaderFriendly = permissions.extractText && permissions.accessibility && !permissions.encrypted
-    || permissions.extractText && permissions.accessibility;
-  const pdf = createTextPdf({
-    text: [
-      'Screen reader permissions',
-      `extractText=${permissions.extractText}`,
-      `accessibility=${permissions.accessibility}`,
-      `copy=${permissions.copy}`,
-      `print=${permissions.print}`,
-      `encrypted=${permissions.encrypted}`,
-      `screenReaderFriendly=${screenReaderFriendly}`,
-    ].join('\n'),
-    title: 'SR permissions',
-  });
-  return result('accessibility.screen-reader-permissions', {
-    method: 'local-a11y-screen-reader-permission-map',
-    permissions,
-    screenReaderFriendly: Boolean(screenReaderFriendly),
-    sourceSha256,
-    pdf,
-    bytes: pdf.length,
-    outputSha256: sha256(pdf),
+    demoFixtureUsed: repair.demoFixtureUsed,
+    sourceByteLength: source.length,
+    repairRequest: request,
   });
 }

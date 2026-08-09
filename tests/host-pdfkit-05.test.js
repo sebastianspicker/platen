@@ -164,7 +164,7 @@ test('installed PDFKit helper applies one bounded page-box or annotation mutatio
   assert.equal(response.ok, true);
   assert.equal(response.result.appliedEdits, 1);
   assert.deepEqual(response.result.inspection.pages[0].boxes.crop, { x: 10, y: 10, width: 500, height: 700 });
-  for (const subtype of ['text', 'freeText', 'square', 'circle', 'highlight']) {
+  for (const subtype of ['text', 'freeText', 'square', 'circle', 'highlight', 'underline']) {
     const annotationWorkspace = await mkdtemp(join(tmpdir(), 'pdfkit-helper-mutate-'));
     const annotationSource = makeTextPdf('annotation source');
     await writeFile(join(annotationWorkspace, 'input.pdf'), annotationSource, { mode: 0o600 });
@@ -189,6 +189,27 @@ test('installed PDFKit helper applies one bounded page-box or annotation mutatio
     assert.deepEqual(reopened.response.result.pages[0].annotations, annotations, subtype);
     assert.doesNotMatch(JSON.stringify(annotationResponse), new RegExp(`private-${subtype}`));
     assert.deepEqual(await readFile(join(annotationWorkspace, 'input.pdf')), annotationSource, subtype);
+  }
+
+  const rejectedAnnotations = [
+    ...['strikeOut', 'squiggly', 'stamp', 'ink', 'line', 'unknown'].map((subtype) => ({ subtype })),
+    { extra: true }, { contents: '' }, { contents: null }, { contents: 'x'.repeat(1_025) },
+    { rect: { x: 20, y: 100, width: 0, height: 20 } }, { rect: { x: 20, y: 100, width: 30, height: 0 } },
+    { rect: { x: 20, y: 100, width: 30, height: 20, extra: true } },
+  ];
+  for (const overrides of rejectedAnnotations) {
+    const rejectedWorkspace = await mkdtemp(join(tmpdir(), 'pdfkit-helper-mutate-reject-'));
+    const rejectedSource = makeTextPdf('annotation rejection source');
+    await writeFile(join(rejectedWorkspace, 'input.pdf'), rejectedSource, { mode: 0o600 });
+    await chmod(rejectedWorkspace, 0o700);
+    const annotation = { page: 1, subtype: 'underline', contents: 'private-underline', rect: { x: 20, y: 100, width: 30, height: 20 }, ...overrides };
+    const rejectedResponse = await runMutation(rejectedWorkspace, {
+      ...emptyMutation(), annotations: [annotation],
+    });
+    const expectedCode = overrides.contents === '' ? 'MUTATION_FAILED' : 'INVALID_REQUEST';
+    assert.deepEqual(rejectedResponse, { version: 1, ok: false, error: { code: expectedCode } });
+    assert.deepEqual(await readFile(join(rejectedWorkspace, 'input.pdf')), rejectedSource);
+    await assert.rejects(readFile(join(rejectedWorkspace, 'output.pdf')), { code: 'ENOENT' });
   }
 
   const boundedWorkspace = await mkdtemp(join(tmpdir(), 'pdfkit-helper-mutate-'));

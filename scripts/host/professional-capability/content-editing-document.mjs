@@ -15,8 +15,13 @@ import {
 } from './document-author-pdf.mjs';
 import { createPdfPortfolio } from './portfolio-pdf.mjs';
 import { writeInertPageAnnotation } from './inert-annotation-writer.mjs';
-
+import {
+  executeRetainedMetadataEdit,
+  metadataRequest,
+  requestRequiresProductionMetadata,
+} from './content-editing-metadata-retained-boundary.mjs';
 const FAMILY = 'content-editing';
+
 
 export function documentWatermarks(ctx = {}) {
   const mark = requireString(ctx.watermark ?? ctx.mark ?? 'CONFIDENTIAL', 'watermark', { min: 1, max: 80 });
@@ -169,9 +174,21 @@ export function documentLayersManage(ctx = {}) {
 }
 
 export function documentMetadataEdit(ctx = {}) {
-  const title = requireString(ctx.title ?? 'Edited Title', 'title', { min: 1, max: 120 });
-  const author = requireString(ctx.author ?? 'Local author', 'author', { min: 1, max: 80 });
-  const built = writeClassicMetadataPdf({ title, author, subject: ctx.subject ?? 'Professional metadata' });
+  if (requestRequiresProductionMetadata(ctx)) {
+    const source = requireBytes(ctx.sourcePdf ?? ctx.sourceBytes, 'sourcePdf');
+    const sourceSha256 = sha256(source);
+    if (!/^[0-9a-f]{64}$/u.test(ctx.sourceSha256 ?? '') || ctx.sourceSha256 !== sourceSha256) {
+      fail('SOURCE_VERSION_MISMATCH', 'The supplied metadata source digest does not match the source PDF.', 409);
+    }
+    if (!ctx.documentId || typeof ctx.documentId !== 'string') {
+      fail('METADATA_DOCUMENT_REQUIRED', 'An explicit document identity is required.', 400);
+    }
+    return executeRetainedMetadataEdit(ctx, source, sourceSha256);
+  }
+  const metadata = metadataRequest(ctx, { required: false });
+  const title = requireString(metadata.title ?? 'Edited Title', 'title', { min: 1, max: 120 });
+  const author = requireString(metadata.author ?? 'Local author', 'author', { min: 1, max: 80 });
+  const built = writeClassicMetadataPdf({ title, author, subject: metadata.subject ?? 'Professional metadata' });
   const latin1 = built.bytes.toString('latin1');
   if (!latin1.includes('/Title') || !latin1.includes('/Author')) {
     fail('METADATA_MISSING', 'Metadata Info dictionary missing.', 502);
@@ -179,6 +196,8 @@ export function documentMetadataEdit(ctx = {}) {
   return result('document.metadata-edit', {
     familyId: FAMILY,
     method: 'local-classic-metadata-info',
+    productionMode: false,
+    nonPromotable: true,
     title,
     author,
     outputSha256: built.outputSha256,
@@ -219,14 +238,5 @@ export function documentFlattenContent(ctx = {}) {
     pdf: built.bytes,
     bytes: built.bytes.length,
     flattened: true,
-  });
-}
-
-export function documentActionsJavascript(ctx = {}) {
-  return result('document.actions-javascript', {
-    familyId: FAMILY,
-    method: 'local-document-js-policy',
-    allowExecution: false,
-    allowAuthoring: false,
   });
 }

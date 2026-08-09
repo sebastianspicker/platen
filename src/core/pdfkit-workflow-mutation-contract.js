@@ -5,6 +5,7 @@ import {
   selectedPdfKitInventoryPage,
 } from './pdfkit-workflow-contract-shared.js';
 import { buildStandardMetadataMutation } from './pdf-incremental-metadata-contract.js';
+import { canonicalPdfKitStrokeColor } from './pdfkit-targeted-annotation-properties-contract.js';
 
 const PAGE_BOXES = new Set(['media', 'crop', 'bleed', 'trim', 'art']);
 const INERT_ANNOTATIONS = new Set(['text', 'freeText', 'square', 'circle', 'highlight']);
@@ -73,10 +74,38 @@ export function buildPdfKitMutation(kind, state) {
   throw new Error('Choose a supported PDFKit derived-copy operation.');
 }
 
+function inspectedAnnotationTarget(page, state) {
+  const annotationIndex = Number(state.pdfkitExistingAnnotationIndex);
+  const annotation = page.annotations?.find((entry) => entry.annotationIndex === annotationIndex);
+  if (!annotation || !TARGETABLE_ANNOTATIONS.has(annotation.subtype)
+    || !PDFKIT_WORKFLOW_SHA256.test(annotation.fingerprint ?? '')) {
+    throw new Error('Choose a supported source-bound inert annotation.');
+  }
+  return {
+    page: page.index,
+    annotationIndex: annotation.annotationIndex,
+    fingerprint: annotation.fingerprint,
+    subtype: annotation.subtype,
+  };
+}
+
+function annotationPropertiesMutation(state, target) {
+  if (target.subtype !== 'square') {
+    throw new Error('Choose a source-bound Square annotation to update its bounds and border color.');
+  }
+  return {
+    ...target,
+    rect: boundedPdfKitRectangle(state, state.pdfkitExistingAnnotationRect, 'Square annotation'),
+    strokeColor: canonicalPdfKitStrokeColor(state.pdfkitExistingAnnotationStrokeColor),
+  };
+}
+
 export function buildPdfKitTargetedMutation(kind, state) {
   const page = selectedPdfKitInventoryPage(state);
   if (!page) throw new Error('The selected page is not present in the bound PDFKit inventory.');
-  const mutation = { formFill: null, annotationUpdate: null, annotationRemove: null };
+  const mutation = {
+    formFill: null, annotationUpdate: null, annotationProperties: null, annotationRemove: null,
+  };
   if (kind === 'form-fill') {
     if (!/^\d+$/.test(String(state.pdfkitWidgetIndex ?? ''))) {
       throw new Error('Choose a supported source-bound form field.');
@@ -105,18 +134,7 @@ export function buildPdfKitTargetedMutation(kind, state) {
     };
     return mutation;
   }
-  const annotationIndex = Number(state.pdfkitExistingAnnotationIndex);
-  const annotation = page.annotations?.find((entry) => entry.annotationIndex === annotationIndex);
-  if (!annotation || !TARGETABLE_ANNOTATIONS.has(annotation.subtype)
-    || !PDFKIT_WORKFLOW_SHA256.test(annotation.fingerprint ?? '')) {
-    throw new Error('Choose a supported source-bound inert annotation.');
-  }
-  const target = {
-    page: page.index,
-    annotationIndex: annotation.annotationIndex,
-    fingerprint: annotation.fingerprint,
-    subtype: annotation.subtype,
-  };
+  const target = inspectedAnnotationTarget(page, state);
   if (kind === 'annotation-remove') {
     mutation.annotationRemove = target;
     return mutation;
@@ -134,6 +152,10 @@ export function buildPdfKitTargetedMutation(kind, state) {
         'Updated annotation',
       ),
     };
+    return mutation;
+  }
+  if (kind === 'annotation-properties') {
+    mutation.annotationProperties = annotationPropertiesMutation(state, target);
     return mutation;
   }
   throw new Error('Choose a supported source-bound PDFKit operation.');

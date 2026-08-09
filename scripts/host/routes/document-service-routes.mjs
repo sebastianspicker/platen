@@ -7,7 +7,7 @@ const DOCUMENT_SERVICE_HANDLERS = new Map([
   ['text', handleDocumentReadRoute], ['thumbnail', handleDocumentReadRoute], ['cropbox-raster', handleDocumentReadRoute],
   ['cropbox-snapshot', handleDocumentReadRoute], ['fonts', handleDocumentReadRoute], ['images', handleDocumentReadRoute],
   ['attachments', handleDocumentReadRoute], ['signatures', handleDocumentReadRoute],
-  ['extract', handleDocumentMutationRoute], ['arrange', handleDocumentMutationRoute], ['merge', handleDocumentMutationRoute],
+  ['extract', handleDocumentMutationRoute], ['arrange', handleDocumentMutationRoute], ['delete', handleDocumentMutationRoute], ['merge', handleDocumentMutationRoute],
   ['split', handleDocumentMutationRoute], ['split-rule', handleDocumentMutationRoute], ['duplicate', handleDocumentMutationRoute],
   ['reverse', handleDocumentMutationRoute], ['interleave', handleDocumentMutationRoute], ['insert', handleDocumentMutationRoute],
   ['replace', handleDocumentMutationRoute], ['ocr', handleDocumentOcrRoute], ['ocr-analysis', handleDocumentOcrRoute],

@@ -48,6 +48,10 @@ function targetedParameters(mutation) {
       : fieldType === 'button' && value === 'select' ? 'form-radio-select' : 'form-fill';
     return { category, page, annotationIndex, fieldType };
   }
+  if (mutation.annotationProperties) {
+    const { page, annotationIndex, subtype } = mutation.annotationProperties;
+    return { category: 'annotation-properties', page, annotationIndex, subtype };
+  }
   const targeted = mutation.annotationUpdate ?? mutation.annotationRemove;
   return {
     category: mutation.annotationUpdate ? 'annotation-update' : 'annotation-remove',
@@ -92,15 +96,24 @@ function traits(profile, mutation) {
     radio: profile === PDFKIT_TARGETED_PROFILE
       && mutation.formFill?.fieldType === 'button' && mutation.formFill.value === 'select',
     selectiveRemoval: profile === PDFKIT_TARGETED_PROFILE && mutation.annotationRemove !== null,
+    annotationProperties: profile === PDFKIT_TARGETED_PROFILE
+      && mutation.annotationProperties !== null,
   });
 }
 
 function extraValidators(profile, value) {
-  const { rotation, pageBox, radio, selectiveRemoval } = value;
+  const {
+    rotation, pageBox, radio, selectiveRemoval, annotationProperties,
+  } = value;
   if (profile === PDFKIT_TARGETED_PROFILE) return [
     'source-bound-annotation-locator', 'native-active-content-graph',
     ...(radio ? ['source-bound-radio-group', 'raw-radio-v-as-state', 'radio-render-change'] : []),
     ...(selectiveRemoval ? ['raw-reachable-annotation-delta'] : []),
+    ...(annotationProperties ? [
+      'pdfkit-annotation-geometry-reopen', 'pdfkit-annotation-border-color-reopen',
+      'raw-annotation-c-rgb', 'non-target-annotation-descriptors',
+      'target-annotation-preservation',
+    ] : []),
   ];
   if (profile === PDFKIT_LOCAL_GOTO_PROFILE) return [
     'source-bound-local-goto', 'raw-destination-delta', 'local-goto-action-shape',
@@ -182,6 +195,13 @@ function extraEvidence(profile, value) {
     } : {}),
     ...(value.radio ? { canonicalRadioGroupSelectionVerified: true } : {}),
     ...(value.selectiveRemoval ? { reachableAnnotationRemovalVerified: true } : {}),
+    ...(value.annotationProperties ? {
+      annotationGeometryVerified: true,
+      annotationBorderColorVerified: true,
+      rawAnnotationColorVerified: true,
+      nonTargetAnnotationDescriptorsVerified: true,
+      targetAnnotationPreservationVerified: true,
+    } : {}),
   };
 }
 

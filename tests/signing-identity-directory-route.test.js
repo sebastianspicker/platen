@@ -23,11 +23,11 @@ test('certificate sign route rejects unavailable staged identity before reading 
 
 function certificateContext({ aborted = false } = {}) {
   const response = new EventEmitter(); const controller = new AbortController(); if (aborted) controller.abort(); const calls = []; const deleted = [];
-  const body = { profile: 'local-pdf-signature-container-v1', sourceSha256: 'a'.repeat(64), certificateSha256: 'b'.repeat(64), page: 1, fieldName: 'Signature', reason: '', location: '', contact: '', placeholderBytes: 4096 };
+  const body = { profile: 'local-pdf-signature-container-v1', sourceSha256: 'a'.repeat(64), certificateSha256: 'b'.repeat(64), page: 1, fieldName: 'Signature', reason: '', location: '', contact: '', placeholderBytes: 4096, consent: true };
   return { request: { method: 'POST' }, response, url: new URL('http://local/api/documents/doc/certificate-sign'), documentId: 'doc', operation: 'certificate-sign', processing: { signal: controller.signal }, store: { deleteArtifact: async (id) => deleted.push(id) }, signingIdentityReady: true, certificateSignature: { sign: async (...args) => { calls.push(args); return { artifact: { id: 'signed-artifact' }, limitations: ['no trust claim'] }; } }, bodyLimit: 4096, exactJsonObject: (value, keys) => Boolean(value) && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === keys.length && Object.keys(value).every((key) => keys.includes(key)), method: (request, expected) => assert.equal(request.method, expected), readJson: async () => body, json: (_r, status, value) => { response.status = status; response.value = value; }, calls, deleted };
 }
 
 test('certificate sign route forwards source/certificate/request and revokes on cancellation', async () => {
-  const value = certificateContext(); assert.equal(await handleCertificateSignRoute(value), true); assert.equal(value.response.status, 201); assert.equal(value.calls[0][0], 'doc'); assert.equal(value.calls[0][1].certificateSha256, undefined); assert.equal(value.calls[0][2].certificateSha256, 'b'.repeat(64)); assert.equal(value.calls[0][1].sourceSha256, 'a'.repeat(64));
+  const value = certificateContext(); assert.equal(await handleCertificateSignRoute(value), true); assert.equal(value.response.status, 201); assert.equal(value.calls[0][0], 'doc'); assert.equal(value.calls[0][1].certificateSha256, undefined); assert.equal(value.calls[0][2].certificateSha256, 'b'.repeat(64)); assert.equal(value.calls[0][2].consent, true); assert.equal(value.calls[0][1].sourceSha256, 'a'.repeat(64));
   const cancelled = certificateContext({ aborted: true }); assert.equal(await handleCertificateSignRoute(cancelled), true); assert.deepEqual(cancelled.deleted, ['signed-artifact']);
 });

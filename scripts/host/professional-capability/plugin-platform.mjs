@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { constants as fsConstants } from 'node:fs';
 import { result, fail, requireString } from './support.mjs';
 import { enforceOperationSandbox } from './local-operation-sandbox.mjs';
+import { evaluatePluginVersionCompatibilityPolicy } from '../plugin-version-compatibility-policy.mjs';
 
 function denyExecute(ctx) {
   if (ctx.execute === true) fail('PLUGIN_EXECUTION_DISABLED', 'Third-party plugin code execution remains disabled.', 403);
@@ -189,15 +190,17 @@ export function platformPluginsDependencyResolution(ctx = {}) {
 export function platformPluginsVersionCompatibility(ctx = {}) {
   denyExecute(ctx);
   const packageId = packageIdOf(ctx);
-  const hostVersion = requireString(ctx.hostVersion ?? '0.3.0-alpha.1', 'hostVersion', { min: 1, max: 40 });
-  const minHost = requireString(ctx.minHost ?? '0.3.0', 'minHost', { min: 1, max: 40 });
-  const compatible = hostVersion.startsWith(minHost.slice(0, 3));
+  const hasManifest = Object.hasOwn(ctx, 'manifest') && ctx.manifest !== undefined;
+  const manifestEvaluation = evaluatePluginVersionCompatibilityPolicy(hasManifest ? ctx.manifest : undefined, packageId);
   return result('platform.plugins.version-compatibility', {
-    method: 'local-plugin-version-compat-check',
+    method: 'local-plugin-package-policy-evaluation',
     packageId,
-    hostVersion,
-    minHost,
-    compatible,
+    policy: manifestEvaluation.policy,
+    evaluated: manifestEvaluation.evaluated,
+    compatible: manifestEvaluation.compatible,
+    violations: manifestEvaluation.violations,
+    authorizesInstall: false,
+    authorizesActivation: false,
     executable: false,
   });
 }

@@ -1,6 +1,4 @@
 import Foundation
-
-
 struct MutationRequest: Decodable {
     let version: Int
     let operation: String
@@ -10,7 +8,6 @@ struct MutationRequest: Decodable {
     let limits: Limits
     let mutation: Mutation
 }
-
 struct TargetedMutationRequest: Decodable {
     let version: Int
     let operation: String
@@ -20,7 +17,6 @@ struct TargetedMutationRequest: Decodable {
     let limits: Limits
     let mutation: TargetedMutation
 }
-
 struct LocalGoToRequest: Decodable {
     let version: Int
     let operation: String
@@ -30,7 +26,6 @@ struct LocalGoToRequest: Decodable {
     let limits: Limits
     let link: LocalGoToLink
 }
-
 struct OutlineBookmarkRequest: Decodable {
     let version: Int
     let operation: String
@@ -40,12 +35,10 @@ struct OutlineBookmarkRequest: Decodable {
     let limits: Limits
     let bookmark: OutlineBookmark
 }
-
 struct OutlineBookmark: Decodable {
     let page: Int
     let label: String
 }
-
 struct OutlineBookmarkRemovalRequest: Decodable {
     let version: Int
     let operation: String
@@ -55,12 +48,10 @@ struct OutlineBookmarkRemovalRequest: Decodable {
     let limits: Limits
     let bookmark: OutlineBookmarkRemovalTarget
 }
-
 struct OutlineBookmarkRemovalTarget: Decodable {
     let topLevelIndex: Int
     let fingerprint: String
 }
-
 struct OutlineBookmarkRenameRequest: Decodable {
     let version: Int
     let operation: String
@@ -70,19 +61,16 @@ struct OutlineBookmarkRenameRequest: Decodable {
     let limits: Limits
     let bookmarkRename: OutlineBookmarkRenameTarget
 }
-
 struct OutlineBookmarkRenameTarget: Decodable {
     let topLevelIndex: Int
     let fingerprint: String
     let label: String
 }
-
 struct LocalGoToLink: Decodable {
     let sourcePage: Int
     let targetPage: Int
     let rect: MutationRectangle
 }
-
 struct LocalGoToRemovalRequest: Decodable {
     let version: Int
     let operation: String
@@ -92,13 +80,11 @@ struct LocalGoToRemovalRequest: Decodable {
     let limits: Limits
     let link: LocalGoToRemovalTarget
 }
-
 struct LocalGoToRemovalTarget: Decodable {
     let page: Int
     let annotationIndex: Int
     let fingerprint: String
 }
-
 struct LineAnnotationRequest: Decodable {
     let version: Int
     let operation: String
@@ -237,6 +223,7 @@ struct TargetedMutation: Decodable {
     let formFill: FormFillEdit?
     let annotationUpdate: AnnotationUpdateEdit?
     let annotationRemove: AnnotationRemoveEdit?
+    let annotationProperties: AnnotationPropertiesEdit?
 }
 
 struct FormFillEdit: Decodable {
@@ -261,6 +248,15 @@ struct AnnotationRemoveEdit: Decodable {
     let annotationIndex: Int
     let fingerprint: String
     let subtype: String
+}
+
+struct AnnotationPropertiesEdit: Decodable {
+    let page: Int
+    let annotationIndex: Int
+    let fingerprint: String
+    let subtype: String
+    let rect: MutationRectangle
+    let strokeColor: String
 }
 
 struct Mutation: Decodable {

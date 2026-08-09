@@ -2,6 +2,7 @@ import { createAecCalibrationOperations } from './aec-workflow/calibration-opera
 import { createAecMeasurementOperations } from './aec-workflow/measurement-operations.js';
 import { createAecPublicationOperations } from './aec-workflow/publication-operations.js';
 import { syncAecRecordIds } from './aec-workflow/record-synchronization.js';
+import { validateAecMeasurementLegendResult } from '../core/local-host-aec-measurement-legend-endpoints.js';
 
 export function parseAecPoints(value) {
   if (typeof value !== 'string' || !value.trim()) {
@@ -46,10 +47,18 @@ export function createAecWorkflowController({
   const measurement = createAecMeasurementOperations(dependencies);
   const publication = createAecPublicationOperations(dependencies);
   async function generateAecMeasurementLegend() {
-    if (!state.analysis.documentId || !state.aecMeasurementIds?.length || state.domainBusy || state.busyAction || state.host?.aecMeasurementLegendReady !== true) return;
+    if (!state.analysis.documentId || !Array.isArray(state.aecMeasurementIds) || !state.aecMeasurementIds.length || state.domainBusy || state.busyAction || state.host?.aecMeasurementLegendReady !== true) return;
     const operation = captureOperation(); state.aecLegendStatus = 'loading'; state.aecLegendError = null; state.aecLegendResult = null; render();
     try {
-      const result = await client.generateAecMeasurementLegend(operation.documentId, { sourceSha256: state.analysis.sha256, expectedRevision: state.domainRevision, measurementIds: [...state.aecMeasurementIds] }, { signal: operation.controller.signal });
+      const request = {
+        sourceSha256: state.analysis.sha256,
+        expectedRevision: state.domainRevision,
+        measurementIds: [...state.aecMeasurementIds],
+      };
+      const result = validateAecMeasurementLegendResult(
+        await client.generateAecMeasurementLegend(operation.documentId, request, { signal: operation.controller.signal }),
+        request,
+      );
       if (!operationIsCurrent(operation)) { state.aecLegendStatus = 'idle'; return; }
       state.aecLegendResult = result;
       if (typeof BlobConstructor === 'function') triggerDownload({ blob: new BlobConstructor([JSON.stringify(result, null, 2)], { type: 'application/json' }), fileName: 'aec-measurement-legend.json', message: 'Source-bound AEC measurement legend downloaded.' });

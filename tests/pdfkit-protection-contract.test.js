@@ -45,7 +45,7 @@ test('removal contract binds retained artifact provenance and excludes passwords
   const request = JSON.parse(serializeProtectionRemovalRequest(artifactSha256, 'copy-accessibility', removal.ownerPassword));
   assert.deepEqual(request.removal, { sourceProfile: 'copy-accessibility', ownerPassword: 'Owner-Pass-123' });
   const artifact = {
-    id: artifactId, documentId: 'document-1', sha256: artifactSha256,
+    id: artifactId, documentId: 'document-1', mediaType: 'application/pdf', size: 128, sha256: artifactSha256,
     operation: {
       type: 'pdfkit-password-protection',
       parameters: { profile: PDFKIT_PROTECTION_PROFILE, permissionsProfile: 'copy-accessibility' },

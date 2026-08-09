@@ -6,15 +6,24 @@ import {
   rectangle,
 } from './pdfkit-mutation-contract-shared.mjs';
 
-const TARGETED_MUTATION_KEYS = new Set(['formFill', 'annotationUpdate', 'annotationRemove']);
+const TARGETED_MUTATION_KEYS = new Set(['formFill', 'annotationUpdate', 'annotationRemove', 'annotationProperties']);
 const TARGETABLE_ANNOTATIONS = new Set(['freeText', 'square', 'circle', 'highlight']);
 const FORM_FIELD_TYPES = new Set(['text', 'choice', 'button']);
 
+function strokeColor(value) {
+  if (typeof value !== 'string' || !/^#[0-9a-f]{6}$/.test(value)) {
+    fail('INVALID_PDFKIT_MUTATION', 'mutation.annotationProperties.strokeColor must be lowercase #rrggbb.');
+  }
+  return value;
+}
+
 export function normalizeTargetedMutation(value, sourceInspection) {
+  value = Object.hasOwn(value, 'annotationProperties') ? value : { ...value, annotationProperties: null };
   exactObject(value, TARGETED_MUTATION_KEYS, 'mutation');
   const pageCount = sourceInspection.pageCount;
   const categoryCount = Number(value.formFill !== null)
-    + Number(value.annotationUpdate !== null) + Number(value.annotationRemove !== null);
+    + Number(value.annotationUpdate !== null) + Number(value.annotationRemove !== null)
+    + Number(value.annotationProperties !== null);
   if (categoryCount !== 1) {
     fail('INVALID_PDFKIT_MUTATION', 'Choose exactly one source-bound PDFKit mutation.');
   }
@@ -94,13 +103,32 @@ export function normalizeTargetedMutation(value, sourceInspection) {
     });
   }
 
+  let annotationProperties = null;
+  if (value.annotationProperties !== null) {
+    const target = locator(
+      value.annotationProperties,
+      new Set(['page', 'annotationIndex', 'fingerprint', 'subtype', 'rect', 'strokeColor']),
+      pageCount,
+      'mutation.annotationProperties',
+    );
+    if (value.annotationProperties.subtype !== 'square') {
+      fail('INVALID_PDFKIT_MUTATION', 'mutation.annotationProperties only supports square annotations.');
+    }
+    annotationProperties = Object.freeze({
+      ...target, subtype: 'square',
+      rect: rectangle(value.annotationProperties.rect, 'mutation.annotationProperties.rect'),
+      strokeColor: strokeColor(value.annotationProperties.strokeColor),
+    });
+  }
+
   return Object.freeze({
-    mutation: Object.freeze({ formFill, annotationUpdate, annotationRemove }),
+    mutation: Object.freeze({ formFill, annotationUpdate, annotationRemove, annotationProperties }),
     editCount: 1,
     targeted: true,
     localGoTo: false,
     radioSelection: formFill?.fieldType === 'button' && formFill.value === 'select',
     selectiveSanitization: annotationRemove !== null,
+    objectProperties: annotationProperties !== null,
     expectedForm: formFill ? 'acroform' : 'none',
   });
 }

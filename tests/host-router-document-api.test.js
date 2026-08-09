@@ -132,20 +132,21 @@ test('document arrangement routes return their exact derived-artifact contracts'
   const { document, handler } = await createUploadedRouterFixture(context);
   const arranged = await invoke(handler, {
     method: 'POST', url: `/api/documents/${document.id}/arrange`, headers: jsonHeaders,
-    body: JSON.stringify({ pages: [1] }),
+    body: JSON.stringify({ sourceSha256: document.sha256, pages: [1] }),
   });
   assert.equal(arranged.statusCode, 201);
   assert.deepEqual(JSON.parse(arranged.body).artifact.pages, [1]);
 
   const split = await invoke(handler, {
-    method: 'POST', url: `/api/documents/${document.id}/split`, headers: authenticatedHeaders,
+    method: 'POST', url: `/api/documents/${document.id}/split`, headers: jsonHeaders,
+    body: JSON.stringify({ sourceSha256: document.sha256 }),
   });
   assert.equal(split.statusCode, 201);
   assert.deepEqual(JSON.parse(split.body).artifacts, [{ id: 'split-1' }]);
 
   const splitRule = await invoke(handler, {
     method: 'POST', url: `/api/documents/${document.id}/split-rule`, headers: jsonHeaders,
-    body: JSON.stringify({ pagesPerOutput: 2 }),
+    body: JSON.stringify({ sourceSha256: document.sha256, pagesPerOutput: 2 }),
   });
   assert.equal(splitRule.statusCode, 201);
   assert.deepEqual(JSON.parse(splitRule.body).artifacts, [{
@@ -153,23 +154,45 @@ test('document arrangement routes return their exact derived-artifact contracts'
   }]);
 
   const reverse = await invoke(handler, {
-    method: 'POST', url: `/api/documents/${document.id}/reverse`, headers: authenticatedHeaders,
+    method: 'POST', url: `/api/documents/${document.id}/reverse`, headers: jsonHeaders,
+    body: JSON.stringify({ sourceSha256: document.sha256 }),
   });
   assert.equal(JSON.parse(reverse.body).artifact.id, 'reversed');
+
+  const deleteAll = await invoke(handler, {
+    method: 'POST', url: `/api/documents/${document.id}/delete`, headers: jsonHeaders,
+    body: JSON.stringify({ sourceSha256: document.sha256, pages: [1] }),
+  });
+  assert.equal(deleteAll.statusCode, 400);
+  assert.equal(JSON.parse(deleteAll.body).error.code, 'INVALID_PAGES');
 });
 
 test('document composition routes preserve each bounded request shape', async (context) => {
   const { document, handler } = await createUploadedRouterFixture(context);
+  const secondaryResponse = await invoke(handler, {
+    method: 'POST', url: '/api/documents',
+    headers: { ...authenticatedHeaders, 'content-type': 'application/pdf' },
+    body: makeTextPdf(),
+  });
+  const secondary = JSON.parse(secondaryResponse.body).document;
+  const secondaryRequest = {
+    primarySourceSha256: document.sha256,
+    secondaryDocumentId: secondary.id,
+    secondarySourceSha256: secondary.sha256,
+  };
   const cases = [
-    ['duplicate', { pages: [1] }, { id: 'duplicated', pages: [1] }],
-    ['interleave', { secondaryDocumentId: 'secondary' }, {
-      id: 'interleaved', secondaryDocumentId: 'secondary',
+    ['duplicate', { sourceSha256: document.sha256, pages: [1] }, { id: 'duplicated', pages: [1] }],
+    ['merge', secondaryRequest, {
+      id: 'merged', secondaryDocumentId: secondary.id,
     }],
-    ['insert', { secondaryDocumentId: 'secondary', afterPage: 0 }, {
-      id: 'inserted', secondaryDocumentId: 'secondary', afterPage: 0,
+    ['interleave', secondaryRequest, {
+      id: 'interleaved', secondaryDocumentId: secondary.id,
     }],
-    ['replace', { secondaryDocumentId: 'secondary', startPage: 1, endPage: 1 }, {
-      id: 'replaced', secondaryDocumentId: 'secondary', startPage: 1, endPage: 1,
+    ['insert', { ...secondaryRequest, afterPage: 0 }, {
+      id: 'inserted', secondaryDocumentId: secondary.id, afterPage: 0,
+    }],
+    ['replace', { ...secondaryRequest, startPage: 1, endPage: 1 }, {
+      id: 'replaced', secondaryDocumentId: secondary.id, startPage: 1, endPage: 1,
     }],
     ['copy-page', {
       profile: 'local-copy-one-page-between-documents-v1',

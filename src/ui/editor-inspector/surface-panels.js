@@ -3,6 +3,9 @@ import {
   clipboardTextWritingAvailable,
   pageTextForClipboard,
 } from '../../core/page-text-clipboard.js';
+import { inspectViewerAnalysisBinding, isViewerAnalysisBound } from '../../core/viewer-analysis-binding.js';
+import { isViewerDocumentBound } from '../../core/viewer-grid-overlay.js';
+import { resolveViewerPageLayout } from '../../core/viewer-page-layout.js';
 import { icon } from '../icons.js';
 import { escapeHtml } from '../shared.js';
 
@@ -26,6 +29,7 @@ export function toolbar(state) {
   const analysis = state.analysis ?? emptyAnalysis;
   const disabled = document.isOpen ? '' : 'disabled';
   const engineDisabled = analysis.status === 'ready' ? '' : 'disabled';
+  const sourceReadyDisabled = isViewerAnalysisBound(analysis) ? '' : 'disabled';
   const busyDisabled = state.busyAction ? 'disabled' : '';
   const pageOrder = state.pageOrder ?? [];
   const pageCount = analysis.inspection?.pageCount ?? 0;
@@ -62,16 +66,19 @@ export function toolbar(state) {
         </button>
       </div>
       <div class="toolbar-group toolbar-group-view" role="group" aria-label="View">
-        <button class="tool-button ${state.viewerMode === 'reflow' ? 'is-selected' : ''}" data-action="toggle-reflow" aria-pressed="${state.viewerMode === 'reflow'}" ${engineDisabled} title="Show an accessible extracted-text reflow view">
+        <button class="tool-button ${state.viewerMode === 'reflow' ? 'is-selected' : ''}" data-action="toggle-reflow" aria-pressed="${state.viewerMode === 'reflow'}" ${sourceReadyDisabled} title="Show a source-bound extracted-text reflow view">
           ${icon('file')}<span class="toolbar-label toolbar-label-compact">Reflow</span>
         </button>
-        <button class="tool-button ${state.viewerMode === 'split' ? 'is-selected' : ''}" data-action="toggle-split-view" aria-pressed="${state.viewerMode === 'split'}" ${disabled} title="Compare the native PDF with extracted text reflow">
+        <button class="tool-button ${state.viewerMode === 'split' ? 'is-selected' : ''}" data-action="toggle-split-view" aria-pressed="${state.viewerMode === 'split'}" ${sourceReadyDisabled} title="Compare the native PDF with source-bound extracted text">
           ${icon('layers')}<span class="toolbar-label toolbar-label-compact">Split</span>
         </button>
         <button class="tool-button ${state.viewerMode === 'controlled' ? 'is-selected' : ''}" data-action="toggle-controlled-render" aria-pressed="${state.viewerMode === 'controlled'}" ${engineDisabled} title="Render the selected page as a passive local Poppler image">
           ${icon('image')}<span class="toolbar-label toolbar-label-compact">Safe raster</span>
         </button>
-        <button class="tool-button ${state.showGrid ? 'is-selected' : ''}" data-action="toggle-grid" aria-pressed="${state.showGrid === true}" ${disabled} title="Toggle a local ruler and grid overlay">
+        <button class="tool-button" data-action="cycle-page-layout" ${sourceReadyDisabled} aria-label="Cycle page layout; current layout ${escapeHtml(state.viewerPageLayout ?? 'single')}" title="Cycle single, continuous, facing, and cover-facing layouts">
+          ${icon('pages')}<span class="toolbar-label toolbar-label-compact">Layout</span>
+        </button>
+        <button class="tool-button ${state.showGrid ? 'is-selected' : ''}" data-action="toggle-grid" aria-pressed="${state.showGrid === true}" ${sourceReadyDisabled} title="Toggle a local grid overlay">
           ${icon('grid')}<span class="toolbar-label toolbar-label-compact">Grid</span>
         </button>
       </div>
@@ -149,18 +156,47 @@ function controlledRasterSurface(state, page) {
   return `<div class="controlled-raster-state" role="status"><span class="spinner"></span><span>Rendering page ${page} as a passive local image…</span></div>`;
 }
 
+function pageLayoutSurface(document, selectedPage, state, binding) {
+  let resolved;
+  try {
+    resolved = resolveViewerPageLayout({
+      layout: state.viewerPageLayout ?? 'single',
+      selectedPage,
+      pageCount: binding.pageCount,
+    });
+  } catch {
+    return nativePdf(document, selectedPage);
+  }
+  if (resolved.layout === 'single') return nativePdf(document, selectedPage);
+  const pages = resolved.pages.map((page) => `<article class="page-layout-item" aria-label="Page ${page}">
+    ${nativePdf(document, page, 'layout-native-pdf', false)}
+  </article>`).join('');
+  const notice = resolved.truncated
+    ? '<p class="page-layout-notice" role="status">Continuous view is bounded to the first 32 pages. Select another page to inspect it directly.</p>'
+    : '';
+  return `<section class="page-layout-view layout-${resolved.layout}" aria-label="${escapeHtml(resolved.layout)} page layout">
+    ${pages}${notice}
+  </section>`;
+}
+
 export function documentSurface(document, selectedPage, state) {
   if (!document.isOpen) return placeholderPaper(state);
+  if (!isViewerDocumentBound(document)) {
+    return `<div class="viewer-fallback" role="alert">
+      <h2>Local PDF preview is unavailable</h2>
+      <p>The viewer rejected a source that was not bound to a local document URL.</p>
+    </div>`;
+  }
   const page = Number.isInteger(selectedPage) ? selectedPage : 1;
+  const binding = inspectViewerAnalysisBinding(state.analysis);
   if (state.viewerMode === 'reflow') {
+    if (!binding.ready) return nativePdf(document, page);
     return `<article class="reflow-view" aria-label="Extracted text reflow view">
       ${(state.analysis?.textPages ?? []).map((item) => `<section id="reflow-page-${item.page}"><h2>Page ${item.page}</h2><p>${escapeHtml(item.text || 'No extractable text on this page.')}</p></section>`).join('')}
     </article>`;
   }
   if (state.viewerMode === 'split') {
-    const reportedPageCount = state.analysis?.status === 'ready'
-      ? state.analysis?.inspection?.pageCount
-      : 0;
+    const reportedPageCount = binding.ready ? binding.pageCount : 0;
     if (!Number.isSafeInteger(reportedPageCount) || reportedPageCount < 1) {
       return nativePdf(document, page);
     }
@@ -183,7 +219,7 @@ export function documentSurface(document, selectedPage, state) {
     </div>`;
   }
   if (state.viewerMode === 'controlled') return controlledRasterSurface(state, page);
-  return nativePdf(document, page);
+  return binding.ready ? pageLayoutSurface(document, page, state, binding) : nativePdf(document, page);
 }
 
 function thumbnailList(analysis, selectedPage, pageOrder) {

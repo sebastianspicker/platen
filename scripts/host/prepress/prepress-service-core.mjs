@@ -37,7 +37,8 @@ export class PrepressServiceCore {
       typeof store.getSourcePath !== 'function' ||
       typeof store.verifySource !== 'function' ||
       typeof store.createJobWorkspace !== 'function' ||
-      typeof store.cleanupJob !== 'function') {
+      typeof store.cleanupJob !== 'function' ||
+      typeof store.deleteArtifact !== 'function') {
       throw new TypeError('PrepressService requires a DocumentStore-compatible store.');
     }
     if (!pdfService || typeof pdfService.inspect !== 'function' ||
@@ -86,6 +87,7 @@ export class PrepressServiceCore {
 
   assertArtifactStack({ icc = false } = {}) {
     if (!this.#poppler || typeof this.#store.promotePdfArtifact !== 'function' ||
+      typeof this.#store.deleteArtifact !== 'function' ||
       typeof this.#ghostscript.probe !== 'function' || (icc && !this.#profiles)) {
       fail('PREPRESS_ARTIFACT_UNAVAILABLE', 'Validated local prepress artifact creation is unavailable.', 503);
     }

@@ -76,6 +76,17 @@ test('redaction-plan requests are exact, normalized, bounded, and text-free', ()
   }), /cannot overlap/u);
 });
 
+test('redaction-plan identifiers remain opaque strings', () => {
+  assert.throws(() => createRedactionApplicationRequest({
+    sourceSha256, expectedWorkspaceRevision: 0, planId: 123,
+    planSha256: 'b'.repeat(64), markIds: ['mark-1'],
+  }), /planId is invalid/u);
+  assert.throws(() => createRedactionApplicationRequest({
+    sourceSha256, expectedWorkspaceRevision: 0, planId: 'plan-1',
+    planSha256: 'b'.repeat(64), markIds: [123],
+  }), /markId is invalid/u);
+});
+
 test('only current strict source-bound plans enter immutable browser state', () => {
   assert.equal(isSourceBoundRedactionPlan(plan, sourceSha256), true);
   assert.equal(isSourceBoundRedactionPlan(plan, 'c'.repeat(64)), false);

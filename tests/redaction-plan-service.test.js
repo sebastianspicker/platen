@@ -9,7 +9,7 @@ import { RedactionPlanService } from '../scripts/host/redaction-plan-service.mjs
 import { WorkspaceStateStore } from '../scripts/host/workspace-state.mjs';
 import { makeTextPdf } from './pdf-fixture.js';
 
-async function fixture(context, { idFactory, onRedact } = {}) {
+async function fixture(context, { idFactory, onRedact, cleanupJob, deleteArtifact } = {}) {
   const store = await new DocumentStore({ root: await mkdtemp(join(tmpdir(), 'redaction-plan-')) }).initialize(); context.after(() => store.dispose());
   const workspace = new WorkspaceStateStore(store); let parameters = null;
   const poppler = { async execute(operation) {
@@ -19,6 +19,8 @@ async function fixture(context, { idFactory, onRedact } = {}) {
     assert.fail(`Unexpected Poppler operation ${operation}`);
   } };
   const rasterMutations = { async redact(documentId, request) { parameters = request; await onRedact?.(documentId, request, store); return { id: 'artifact-1', documentId, operation: { parameters: request } }; } };
+  if (cleanupJob) store.cleanupJob = cleanupJob;
+  if (deleteArtifact) store.deleteArtifact = deleteArtifact;
   const service = new RedactionPlanService({ documentStore: store, workspaceStateStore: workspace, poppler, rasterMutations, bindingKey: Buffer.alloc(32, 7), idFactory: idFactory ?? ((prefix) => `${prefix}-id`), clock: () => '2026-07-19T00:00:00.000Z' });
   return { store, workspace, service, getParameters: () => parameters };
 }
@@ -54,6 +56,23 @@ test('plan creation rejects duplicate, full-page-overlap, and invalid generated 
   await assert.rejects(invalidFixture.service.createPlan(invalidSource.id, { ...base, sourceSha256: invalidSource.sha256, targets: [{ page: 1, fullPage: true }] }), { code: 'INVALID_PLAN_ID' });
 });
 
+test('application rejects noncanonical plans and out-of-bound target pages', async (context) => {
+  const { store, workspace, service } = await fixture(context);
+  const source = await store.createDocument({ stream: Readable.from([makeTextPdf('TOP SECRET')]), displayName: 'secret.pdf' });
+  const base = { schemaVersion: 1, profile: 'source-bound-redaction-plan-v1', sourceSha256: source.sha256, expectedWorkspaceRevision: 0 };
+  await assert.rejects(service.createPlan(source.id, { ...base, targets: [{ page: 10_001, fullPage: true }] }), { code: 'INVALID_REDACTION_PLAN' });
+  const created = await service.createPlan(source.id, { ...base, targets: [{ page: 1, fullPage: true }] });
+  const snapshot = structuredClone(workspace.snapshot(source.id));
+  snapshot.namespaces.redactions[0].createdAtLocal = 'July 19, 2026';
+  snapshot.namespaces.redactions[0].planSha256 = '0'.repeat(64);
+  workspace.replaceSnapshot(source.id, snapshot, { expectedRevision: created.revision });
+  await assert.rejects(service.applyPlan(source.id, {
+    schemaVersion: 1, profile: 'source-bound-redaction-application-v1', sourceSha256: source.sha256,
+    expectedWorkspaceRevision: created.revision + 1, planId: created.plan.id, planSha256: '0'.repeat(64),
+    markIds: [created.plan.marks[0].id],
+  }), { code: 'LEGACY_REDACTION_PLAN_REJECTED' });
+});
+
 test('failed post-artifact rollback reports a sanitized typed failure', async (context) => {
   const { store, service } = await fixture(context, { onRedact: async (documentId, _request, documents) => {
     await writeFile(documents.getSourcePath(documentId), makeTextPdf('CHANGED SOURCE'));
@@ -62,4 +81,35 @@ test('failed post-artifact rollback reports a sanitized typed failure', async (c
   const source = await store.createDocument({ stream: Readable.from([makeTextPdf('TOP SECRET')]), displayName: 'secret.pdf' });
   const created = await service.createPlan(source.id, { schemaVersion: 1, profile: 'source-bound-redaction-plan-v1', sourceSha256: source.sha256, expectedWorkspaceRevision: 0, targets: [{ page: 1, fullPage: true }] });
   await assert.rejects(service.applyPlan(source.id, { schemaVersion: 1, profile: 'source-bound-redaction-application-v1', sourceSha256: source.sha256, expectedWorkspaceRevision: created.revision, planId: created.plan.id, planSha256: created.plan.planSha256, markIds: [created.plan.marks[0].id] }), { code: 'REDACTION_ARTIFACT_ROLLBACK_FAILED', status: 500 });
+});
+
+test('plan creation surfaces private workspace cleanup failure', async (context) => {
+  const cleanupFailure = new Error('secret cleanup path');
+  const { store, service } = await fixture(context, { cleanupJob: async () => { throw cleanupFailure; } });
+  const source = await store.createDocument({ stream: Readable.from([makeTextPdf('TOP SECRET')]), displayName: 'secret.pdf' });
+  await assert.rejects(service.createPlan(source.id, { schemaVersion: 1, profile: 'source-bound-redaction-plan-v1', sourceSha256: source.sha256, expectedWorkspaceRevision: 0, targets: [{ page: 1, fullPage: true }] }), (error) => {
+    assert.equal(error.name, 'HostError'); assert.equal(error.code, 'REDACTION_PLAN_CLEANUP_FAILED'); assert.equal(error.status, 500); assert.equal(error.message, 'Redaction plan processing could not clean its private workspace.'); assert.equal(error.cause, cleanupFailure); return true;
+  });
+});
+
+test('application cleanup failure revokes the exact promoted artifact', async (context) => {
+  const revoked = [];
+  let cleanupCalls = 0;
+  const { store, service } = await fixture(context, { cleanupJob: async () => { if (++cleanupCalls === 2) throw new Error('workspace cleanup failed'); }, deleteArtifact: async (id) => { revoked.push(id); } });
+  const source = await store.createDocument({ stream: Readable.from([makeTextPdf('TOP SECRET')]), displayName: 'secret.pdf' });
+  const created = await service.createPlan(source.id, { schemaVersion: 1, profile: 'source-bound-redaction-plan-v1', sourceSha256: source.sha256, expectedWorkspaceRevision: 0, targets: [{ page: 1, fullPage: true }] });
+  await assert.rejects(service.applyPlan(source.id, { schemaVersion: 1, profile: 'source-bound-redaction-application-v1', sourceSha256: source.sha256, expectedWorkspaceRevision: created.revision, planId: created.plan.id, planSha256: created.plan.planSha256, markIds: [created.plan.marks[0].id] }), { code: 'REDACTION_PLAN_CLEANUP_FAILED', status: 500 });
+  assert.deepEqual(revoked, ['artifact-1']);
+});
+
+test('application cleanup and artifact revocation failures are aggregated and sanitized', async (context) => {
+  const cleanupFailure = new Error('workspace cleanup details'); const revokeFailure = new Error('artifact revoke details'); const revoked = [];
+  let cleanupCalls = 0;
+  const { store, service } = await fixture(context, { cleanupJob: async () => { if (++cleanupCalls === 2) throw cleanupFailure; }, deleteArtifact: async (id) => { revoked.push(id); throw revokeFailure; } });
+  const source = await store.createDocument({ stream: Readable.from([makeTextPdf('TOP SECRET')]), displayName: 'secret.pdf' });
+  const created = await service.createPlan(source.id, { schemaVersion: 1, profile: 'source-bound-redaction-plan-v1', sourceSha256: source.sha256, expectedWorkspaceRevision: 0, targets: [{ page: 1, fullPage: true }] });
+  await assert.rejects(service.applyPlan(source.id, { schemaVersion: 1, profile: 'source-bound-redaction-application-v1', sourceSha256: source.sha256, expectedWorkspaceRevision: created.revision, planId: created.plan.id, planSha256: created.plan.planSha256, markIds: [created.plan.marks[0].id] }), (error) => {
+    assert.equal(error.name, 'HostError'); assert.equal(error.code, 'REDACTION_PLAN_CLEANUP_FAILED'); assert.equal(error.status, 500); assert.equal(error.message, 'Redaction application could not clean its private workspace or trusted artifact.'); assert.ok(error.cause instanceof AggregateError); assert.deepEqual(error.cause.errors, [cleanupFailure, revokeFailure]); return true;
+  });
+  assert.deepEqual(revoked, ['artifact-1']);
 });

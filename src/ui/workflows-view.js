@@ -87,18 +87,23 @@ function aecArtifactPanel(state, hasDocument) {
 
 function scannerDiscoveryPanel(state) {
   const ready = state.host?.scannerDiscoveryReady === true;
+  const acquisitionReady = state.host?.scannerAcquisitionReady === true;
   const devices = state.scannerDevices ?? [];
   const status = state.scannerDiscoveryStatus;
   const message = status === 'loading' ? '<p class="field-help" role="status">Checking local scanner discovery…</p>'
     : status === 'cancelled' ? '<p class="field-help" role="status">Scanner discovery cancelled.</p>'
       : status === 'error' ? `<p class="field-help error-text" role="alert">${escapeHtml(state.scannerDiscoveryError ?? 'Scanner discovery failed.')}</p>` : '';
-  const list = status === 'success' ? `<ul class="field-help" aria-label="Discovered scanners">${devices.length ? devices.map((device) => `<li>${escapeHtml(device.name)} <span class="state-pill implemented">Discovery only</span></li>`).join('') : '<li>No scanners were returned by the local discovery API.</li>'}</ul>` : '';
+  const list = status === 'success' ? `<ul class="field-help" aria-label="Discovered scanners">${devices.length ? devices.map((device) => `<li>${escapeHtml(device.name)} ${acquisitionReady ? `<button class="button" data-action="acquire-scanner" data-scanner-device-id="${escapeHtml(device.id)}" ${state.busyAction ? 'disabled' : ''}>Acquire one-page PDF</button>` : '<span class="state-pill implemented">Discovery only</span>'}</li>`).join('') : '<li>No scanners were returned by the local discovery API.</li>'}</ul>` : '';
+  const acquisition = state.scannerAcquisitionStatus === 'loading' ? '<p class="field-help" role="status">Acquiring and validating one flatbed PDF…</p>'
+    : state.scannerAcquisitionStatus === 'cancelled' ? '<p class="field-help" role="status">Scanner acquisition cancelled; the retained scan was revoked before delivery.</p>'
+      : state.scannerAcquisitionStatus === 'error' ? `<p class="field-help error-text" role="alert">${escapeHtml(state.scannerAcquisitionError ?? 'Scanner acquisition failed.')}</p>`
+        : state.scannerAcquisitionStatus === 'success' ? `<p class="field-help" role="status">Retained ${escapeHtml(state.scannerAcquisitionResult?.document?.displayName ?? 'scan.pdf')}: one-page PDF, source-free, digest-bound, and locally validated.</p>` : '';
   return `<section class="workflow-module scanner-discovery-panel" aria-labelledby="scanner-discovery-heading">
     <div class="workflow-module-heading"><h2 id="scanner-discovery-heading">Scanner discovery</h2><span>Image acquisition boundary</span></div>
-    <p>Lists locally discoverable scanner devices through ImageCaptureCore. This is discovery only: scan acquisition, destinations, serials, and raw paths are not exposed.</p>
+    <p>Lists local ImageCaptureCore scanners and, when the bounded helper is ready, acquires one flatbed page as a PDF. Duplex, multi-page capture, destinations, serials, and raw paths are not exposed.</p>
     <button class="button" data-action="discover-scanners" ${ready && !state.busyAction ? '' : 'disabled'}>Discover scanners</button>
-    ${message}${list}
-    <p class="field-help">${ready ? 'No scan or acquisition claim is made.' : 'The pinned scanner discovery helper is unavailable on this host.'}</p>
+    ${message}${list}${acquisition}
+    <p class="field-help">${acquisitionReady ? 'The fixed acquisition profile is flatbed, one page, PDF, color, and 300 dpi. Hardware success remains unverified until run on compatible hardware.' : 'The pinned scanner acquisition helper is unavailable on this host. Hardware success remains unverified until run on compatible hardware.'}</p>
   </section>`;
 }
 function batesPanel(state, hasDocument) {

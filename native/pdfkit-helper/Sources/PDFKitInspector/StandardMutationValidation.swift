@@ -77,7 +77,7 @@ func validPageRotation(_ degrees: Int) -> Bool { [0, 90, 180, 270].contains(degr
 func validBox(_ value: String) -> Bool { ["media", "crop", "bleed", "trim", "art"].contains(value) }
 
 func validAnnotationSubtype(_ value: String) -> Bool {
-    ["text", "freeText", "square", "circle", "highlight"].contains(value)
+    ["text", "freeText", "square", "circle", "highlight", "underline"].contains(value)
 }
 
 func validMutationRectangle(_ value: MutationRectangle) -> Bool {

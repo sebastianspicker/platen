@@ -8,6 +8,7 @@ function fixture() {
   const renders = [];
   const revoked = [];
   const clipboardWrites = [];
+  const spoken = [];
   const state = createAppState({
     documentSnapshot: { isOpen: true, name: 'drawing.pdf' },
     snapshotClipboardReady: false,
@@ -63,7 +64,19 @@ function fixture() {
       documentElement: { lang: 'en' },
       querySelector: () => ({ focus() {} }),
     },
-    window: { Image: class {} },
+    window: {
+      Image: class {},
+      speechSynthesis: {
+        cancel: () => spoken.push({ type: 'cancel' }),
+        speak: (utterance) => spoken.push({ type: 'speak', utterance }),
+      },
+      SpeechSynthesisUtterance: class {
+        constructor(text) {
+          this.text = text;
+          this.lang = '';
+        }
+      },
+    },
     navigator: { clipboard: { writeText: async (text) => clipboardWrites.push(text) } },
     urlApi: {
       createObjectURL: () => 'blob:generated',
@@ -71,7 +84,7 @@ function fixture() {
     },
   });
   return {
-    state, controller, announcements, renders, revoked, clipboardWrites,
+    state, controller, announcements, renders, revoked, clipboardWrites, spoken,
   };
 }
 
@@ -113,6 +126,21 @@ test('viewer controller copies only the current page text after clipboard resolu
   context.state.analysis.documentId = null;
   await context.controller.copySelectedPageText();
   assert.deepEqual(context.clipboardWrites, ['alpha']);
+});
+
+test('viewer controller reads only the ready current page through local speech synthesis', () => {
+  const context = fixture();
+  context.controller.selectPage(2);
+  context.controller.readSelectedPage();
+  assert.deepEqual(context.spoken.map(({ type }) => type), ['cancel', 'speak']);
+  assert.equal(context.spoken[1].utterance.text, 'beta');
+  assert.equal(context.spoken[1].utterance.lang, 'en');
+  assert.match(context.announcements.at(-1), /Reading page 2 aloud/u);
+
+  context.state.analysis.documentId = null;
+  context.controller.readSelectedPage();
+  assert.equal(context.spoken.length, 2);
+  assert.match(context.state.error, /analysis is ready/u);
 });
 
 test('viewer controller suppresses stale page-text clipboard completion announcements', async () => {

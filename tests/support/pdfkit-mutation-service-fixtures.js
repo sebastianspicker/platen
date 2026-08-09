@@ -19,7 +19,7 @@ import {
   sourceDigest,
 } from './pdfkit-mutation-fixture-data.js';
 
-async function fixture(overrides = {}) {
+async function fixture({ abortAfterPromotion, cleanupFailure, deleteFailure, ...overrides } = {}) {
   const options = { ...DEFAULT_PDFKIT_MUTATION_FIXTURE_OPTIONS, ...overrides };
   const root = await mkdtemp(join(tmpdir(), 'pdfkit-mutation-service-'));
   const sourcePath = join(root, 'source.pdf');
@@ -35,6 +35,10 @@ async function fixture(overrides = {}) {
     sourceSwapped: false,
     stagedSourcePath: null,
     sourceCalls: [],
+    deleted: [],
+    abortAfterPromotion,
+    cleanupFailure,
+    deleteFailure,
   };
   const store = createPdfKitMutationFixtureStore(context);
   const poppler = createPdfKitMutationFixturePoppler(context, options);
@@ -51,6 +55,7 @@ async function fixture(overrides = {}) {
       sourceSwapped: context.sourceSwapped,
       sourceCalls: context.sourceCalls,
       stagedSourcePath: context.stagedSourcePath,
+      deleted: context.deleted,
     }),
     dispose: () => rm(root, { recursive: true, force: true }),
   };

@@ -1,9 +1,10 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { chmod, mkdir, mkdtemp, open, rename, rm } from 'node:fs/promises';
+import { chmod, mkdir, mkdtemp, open, readFile, rename, rm } from 'node:fs/promises';
 import { extname, join, resolve, sep } from 'node:path';
 import { cleanDisplayName } from './document-store.mjs';
 import { digestFile } from './document-store.mjs';
 import { HostError } from './host-error.mjs';
+import { isOdtPackage } from './odt-package.mjs';
 
 export const DEFAULT_MAX_INPUT_BYTES = 256 * 1024 * 1024;
 
@@ -149,6 +150,9 @@ export class InputAssetStore {
         throw new HostError('INVALID_INPUT_SIGNATURE', 'The conversion input signature does not match its file extension.', 415);
       }
       await handle.sync();
+      if (descriptor.extension === '.odt' && !isOdtPackage(await readFile(partialPath))) {
+        throw new HostError('INVALID_INPUT_SIGNATURE', 'The conversion input is not a bounded ODT package.', 415);
+      }
       await handle.close();
       handle = null;
       await rename(partialPath, sourcePath);

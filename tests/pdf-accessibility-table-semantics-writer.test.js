@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
-import { inspectPdfAccessibilityTableSemantics, writePdfAccessibilityTableSemantics } from '../scripts/host/pdf-accessibility-table-semantics-writer.mjs';
+import { inspectPdfAccessibilityTableSemantics, inspectPdfAccessibilityTableSemanticsSource, writePdfAccessibilityTableSemantics } from '../scripts/host/pdf-accessibility-table-semantics-writer.mjs';
 import { normalizePdfAccessibilityTableSemantics, PDF_ACCESSIBILITY_TABLE_SEMANTICS_PROFILE } from '../scripts/host/pdf-accessibility-table-semantics-contract.mjs';
 
 function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
@@ -24,6 +24,7 @@ function request(source, cells = null) { const value = { profile: PDF_ACCESSIBIL
 test('table semantics repairs exact scope, headers, and spans append-only', () => {
   const source = fixture(); const value = request(source); const first = writePdfAccessibilityTableSemantics(source, value); const second = writePdfAccessibilityTableSemantics(source, value);
   assert.deepEqual(first.bytes, second.bytes); assert.equal(first.bytes.subarray(0, source.length).equals(source), true); assert.equal(first.proof.cellCount, 4); assert.equal(first.proof.structureLinked, true); assert.deepEqual(inspectPdfAccessibilityTableSemantics(source, first.bytes, value), first.proof);
+  assert.equal(inspectPdfAccessibilityTableSemanticsSource(source).table.cells[0].locator, 'table 8:0, row 1, column 1');
 });
 
 test('table semantics rejects stale, non-rectangular, forged, and hostile requests', () => {

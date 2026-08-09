@@ -31,6 +31,73 @@ import {
 
 const rectangle = { x: 10, y: 20, width: 30, height: 40 };
 
+function assertPdfKitAnnotationPredicates() {
+  const underline = {
+    metadata: null,
+    pageBox: null,
+    rotation: null,
+    annotations: [{ page: 1, subtype: 'underline', contents: 'underline', rect: rectangle }],
+  };
+  assert.equal(validPdfKitMutation(underline), true);
+  for (const subtype of ['strikeOut', 'squiggly', 'stamp', 'ink', 'line', 'unknown']) {
+    assert.equal(validPdfKitMutation({
+      ...underline,
+      annotations: [{ ...underline.annotations[0], subtype }],
+    }), false, subtype);
+  }
+  assert.equal(validPdfKitMutation({
+    ...underline,
+    annotations: [{ ...underline.annotations[0], extra: true }],
+  }), false);
+  assert.equal(validPdfKitMutation({
+    ...underline,
+    annotations: [{ ...underline.annotations[0], contents: '' }],
+  }), false);
+  assert.equal(validPdfKitMutation({
+    ...underline,
+    annotations: [{ ...underline.annotations[0], contents: 'x'.repeat(1_025) }],
+  }), false);
+  for (const malformedRect of [
+    { ...rectangle, width: 0 },
+    { ...rectangle, height: 0 },
+    { ...rectangle, extra: true },
+  ]) {
+    assert.equal(validPdfKitMutation({
+      ...underline,
+      annotations: [{ ...underline.annotations[0], rect: malformedRect }],
+    }), false);
+  }
+
+  const targeted = {
+    formFill: {
+      page: 1, annotationIndex: 0, fingerprint: 'a'.repeat(64), fieldType: 'button', value: 'select',
+    },
+    annotationUpdate: null,
+    annotationProperties: null,
+    annotationRemove: null,
+  };
+  assert.equal(validPdfKitTargetedMutation(targeted), true);
+  assert.equal(validPdfKitTargetedMutation({ ...targeted, unexpected: true }), false);
+  const properties = {
+    formFill: null,
+    annotationUpdate: null,
+    annotationProperties: {
+      page: 1, annotationIndex: 1, fingerprint: 'a'.repeat(64), subtype: 'square',
+      rect: rectangle, strokeColor: '#d32f2f',
+    },
+    annotationRemove: null,
+  };
+  assert.equal(validPdfKitTargetedMutation(properties), true);
+  assert.equal(validPdfKitTargetedMutation({
+    ...properties,
+    annotationProperties: { ...properties.annotationProperties, strokeColor: '#D32F2F' },
+  }), false);
+  assert.equal(validPdfKitTargetedMutation({
+    ...properties,
+    annotationProperties: { ...properties.annotationProperties, subtype: 'circle' },
+  }), false);
+}
+
 test('PDFKit client contract exports the exact fixed request profiles', () => {
   assert.deepEqual([
     PDFKIT_MUTATION_PROFILE,
@@ -74,15 +141,7 @@ test('PDFKit client request predicates retain strict exact-object bounds', () =>
   assert.equal(validPdfKitMutation(rotation), true);
   assert.equal(validPdfKitMutation({ ...rotation, metadata: { title: null, author: null, subject: null, keywords: null } }), false);
 
-  const targeted = {
-    formFill: {
-      page: 1, annotationIndex: 0, fingerprint: 'a'.repeat(64), fieldType: 'button', value: 'select',
-    },
-    annotationUpdate: null,
-    annotationRemove: null,
-  };
-  assert.equal(validPdfKitTargetedMutation(targeted), true);
-  assert.equal(validPdfKitTargetedMutation({ ...targeted, unexpected: true }), false);
+  assertPdfKitAnnotationPredicates();
 
   assert.equal(validPdfKitLocalGoToMutation({
     link: { sourcePage: 1, targetPage: 2, rect: rectangle },

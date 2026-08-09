@@ -39,6 +39,41 @@ async function validateDerivedPdf(adapter, filePath, { expectedPageCount, requir
   } catch (error) { throw mapEngineError(error); }
 }
 
+function promotedArtifactMatches(artifact, { documentId, expectedSha256, expectedSize, operation }) {
+  if (!artifact || typeof artifact !== 'object' || Array.isArray(artifact)) return false;
+  let descriptors;
+  try { descriptors = Object.getOwnPropertyDescriptors(artifact); } catch { return false; }
+  const value = (key) => descriptors[key] && Object.hasOwn(descriptors[key], 'value')
+    ? descriptors[key].value
+    : undefined;
+  return typeof value('id') === 'string'
+    && value('id') !== documentId
+    && value('documentId') === documentId
+    && value('mediaType') === 'application/pdf'
+    && value('sha256') === expectedSha256
+    && value('size') === expectedSize
+    && JSON.stringify(value('operation')) === JSON.stringify(operation);
+}
+
+async function validatePromotedArtifact(store, artifact, expected) {
+  let authoritative = null;
+  try {
+    if (!promotedArtifactMatches(artifact, expected)) throw new Error('returned artifact metadata mismatch');
+    authoritative = store.getArtifact(artifact.id);
+    if (!promotedArtifactMatches(authoritative, expected)) throw new Error('retained artifact metadata mismatch');
+    return artifact;
+  } catch (error) {
+    const id = typeof artifact?.id === 'string' ? artifact.id : null;
+    if (id) {
+      try {
+        authoritative ??= store.getArtifact(id);
+        if (promotedArtifactMatches(authoritative, expected)) await store.deleteArtifact(id);
+      } catch {}
+    }
+    throw new HostError('OCR_ARTIFACT_INVALID', 'The promoted OCR artifact is not bound to the validated output.', 502, { cause: error });
+  }
+}
+
 export class OcrDocumentPipeline {
   #store; #adapter; #ocrAdapter; #ocrImageAdapter; #inspection;
   constructor({ store, adapter, ocrAdapter, ocrImageAdapter, inspection }) { this.#store = store; this.#adapter = adapter; this.#ocrAdapter = ocrAdapter; this.#ocrImageAdapter = ocrImageAdapter; this.#inspection = inspection; }
@@ -95,7 +130,9 @@ export class OcrDocumentPipeline {
         await Promise.all(pagePdfs.filter((filePath) => filePath !== combinedPath).map((filePath) => unlink(filePath).catch(() => {}))); await quota.check(); await this.#store.verifySource(documentId);
         const stem = basename(source.displayName, extname(source.displayName)); const boundedOutput = await openRegularOutput(combinedPath, { maximumBytes: maximumOutputBytes, label: 'Searchable OCR PDF' }); await boundedOutput.handle.close(); const expectedSha256 = await digestFile(combinedPath);
         const userDictionaryEvidence = Object.freeze({ termCount: dictionary?.termCount ?? 0, digest: dictionary?.digest ?? null });
-        const artifact = await this.#store.promotePdfArtifact(documentId, combinedPath, { displayName: `${stem}-searchable-ocr.pdf`, expectedSha256, signal: deadline.signal, operation: createSearchableOcrProvenance({ documentId, sourceSha256: source.sha256, language, pageCount: inspection.pageCount, cleanupPreset, segmentation, userDictionary: userDictionaryEvidence, cleanupReceipts, derivedPageCount: derivedInspection.pageCount, recognizedWordCount, suspectCount: suspects.length }) });
+        const operation = createSearchableOcrProvenance({ documentId, sourceSha256: source.sha256, language, pageCount: inspection.pageCount, cleanupPreset, segmentation, userDictionary: userDictionaryEvidence, cleanupReceipts, derivedPageCount: derivedInspection.pageCount, recognizedWordCount, suspectCount: suspects.length });
+        const promotedArtifact = await this.#store.promotePdfArtifact(documentId, combinedPath, { displayName: `${stem}-searchable-ocr.pdf`, expectedSha256, signal: deadline.signal, operation });
+        const artifact = await validatePromotedArtifact(this.#store, promotedArtifact, { documentId, expectedSha256, expectedSize: boundedOutput.metadata.size, operation });
         return Object.freeze({ kind: 'searchable-ocr-document', schemaVersion: 1, sourceDigest: source.sha256, artifact, result: Object.freeze({ language, pageCount: inspection.pageCount, recognizedWordCount, rasterized: true, cleanupPreset, segmentation, userDictionary: userDictionaryEvidence, suspects: Object.freeze(suspects) }), evidence: Object.freeze({ localOnly: true, sourceBound: true, rasterized: true, reviewRequired: true, engines: Object.freeze(cleanupPreset === 'none' ? ['Poppler', 'Tesseract'] : ['Poppler', 'ImageMagick', 'Tesseract']), cleanupReceipts: Object.freeze(cleanupReceipts) }), limitations: Object.freeze(['Searchable OCR is raster-derived and requires review against the immutable source PDF.']) });
       },
     });

@@ -2,10 +2,13 @@
 
 The local-first PDF workbench.
 
+[Open the static demo](https://sebastianspicker.github.io/platen/). It uses
+sanitized fixture data and marks every command-capable action as simulated.
+
 Platen is a local-first PDF inspection and editing tool with a browser
 GUI, a CLI, and a token-authenticated loopback host. Sources stay immutable.
 Operations write separately validated outputs. Engines are fixed local adapters
-(Poppler, optional Tesseract, ImageMagick, Ghostscript, LibreOffice, and an
+(Poppler, optional Tesseract, ImageMagick, Ghostscript, LibreOffice, qpdf, and an
 optional macOS PDFKit helper).
 
 Version `0.3.0-alpha.1` is a public-alpha candidate. Interfaces, output
@@ -18,18 +21,19 @@ review.
 - Open, view, search, thumbnail, navigate, inspect properties/resources, and
   download the original file.
 - Page composition: split, merge, extract, reorder, crop, rotate, insert,
-  replace, duplicate, reverse/interleave, and related page-tree operations.
+  replace, duplicate, reverse/interleave, and related page-tree operations where
+  the catalog records a proven or partial bounded surface.
 - Bounded OCR, raster conversion, snapshots, text export, comparison,
-  accessibility review, and prepress review subsets.
+  accessibility review, and prepress review subsets. False broad claims remain
+  unavailable.
 - Source-bound metadata, annotation, form, navigation, redaction, encryption,
   and PDFKit mutation profiles with operation-specific validation.
 - A strict CLI with no-clobber output publication.
 - A machine-readable capability catalog under `catalog/` with schema-checked
   claims and test references.
 
-The catalog currently records 318 implemented, test-backed professional claims out of 318 normalized records.
-Prototype coverage separately records 0 narrower executable subsets alongside 0 sidecars, 0 proposals, 0 host-only services, 0 descriptors, 0 blockers, and the 0 excluded AI functions.
-Prototype coverage is a separate ledger and does not weaken professional claims.
+The catalog currently records 210 proven, test-backed professional claims and 108 planned claims out of 318 normalized records. The audit also identifies 19 audited executable/limited partials and 89 false/unavailable broad claims; no capability IDs are unaudited.
+Prototype coverage is a separate, narrower ledger: 210 exact-alpha records, 18 narrower executable subsets alongside 0 sidecars, 0 proposals, 1 host-only service, 0 descriptors, 74 blockers, and 15 excluded AI functions. A planned record can have a narrower prototype subset, but that is not a professional implementation.
 See [capability coverage](docs/capability-coverage.md) and the
 generated [feature-gap report](docs/feature-gap-report.md).
 
@@ -68,6 +72,7 @@ Optional (enable extra operations; missing tools surface explicit unavailability
 - ImageMagick (raster conversion)
 - Ghostscript (PostScript/EPS, rewrites, prepress review)
 - LibreOffice (Office/OpenDocument conversion)
+- qpdf (validated fast-web-view linearization)
 - Swift and Xcode on macOS (PDFKit helper)
 
 There are no npm runtime or development dependencies.

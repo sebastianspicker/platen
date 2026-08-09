@@ -34,6 +34,7 @@ export const POPPLER_OPERATION_TOOLS = Object.freeze({
   extractTextStdin: 'pdftotext',
   extractTextRegion: 'pdftotext',
   renderPagePng: 'pdftocairo',
+  renderOverlayExactDpiPng: 'pdftocairo',
   renderCropBoxPagePng: 'pdftocairo',
   listFonts: 'pdffonts',
   listImages: 'pdfimages',
@@ -148,6 +149,15 @@ export function buildPdftocairoArgs({ input, outputPrefix, page, maxDimension = 
   ]);
 }
 
+export function buildPdftocairoOverlayExactDpiArgs({ input, outputPrefix, page, dpi }) {
+  boundedInteger(page, 'page', 1, 1_000_000);
+  boundedInteger(dpi, 'dpi', 36, 240);
+  return freezeArgs([
+    '-png', '-singlefile', '-f', String(page), '-l', String(page), '-r', String(dpi),
+    absolutePath(input, 'input'), absolutePath(outputPrefix, 'outputPrefix'),
+  ]);
+}
+
 export function buildPdftocairoCropBoxArgs({ input, outputPrefix, page, maxDimension }) {
   boundedInteger(page, 'page', 1, 1_000_000);
   boundedInteger(maxDimension, 'maxDimension', 512, 2_880);
@@ -238,6 +248,7 @@ const builders = Object.freeze({
   extractTextStdin: buildPdftotextStdinArgs,
   extractTextRegion: buildPdftotextRegionArgs,
   renderPagePng: buildPdftocairoArgs,
+  renderOverlayExactDpiPng: buildPdftocairoOverlayExactDpiArgs,
   renderCropBoxPagePng: buildPdftocairoCropBoxArgs,
   listFonts: buildPdffontsArgs,
   listImages: buildPdfimagesListArgs,

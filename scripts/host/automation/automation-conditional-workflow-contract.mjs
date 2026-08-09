@@ -116,6 +116,16 @@ export function normalizeAutomationConditionalCancelRequest(value) {
   return Object.freeze({ schemaVersion: 1, principal: base.principal, grant: base.grant, executionId: item.executionId });
 }
 
+export function normalizeAutomationConditionalReleaseRequest(value) {
+  const item = exact(value, ['executionId', 'grant', 'principal'], 'conditional release request');
+  const base = normalizeAutomationApiSubmitRequest({
+    principal: item.principal, grant: item.grant, source: { id: 'conditional_source', sha256: 'a'.repeat(64) },
+    operation: { kind: 'operation', id: AUTOMATION_INSPECT_TYPE, pages: null }, idempotencyKey: 'conditional-release',
+  });
+  if (typeof item.executionId !== 'string' || !/^cw_[a-f0-9]{32}$/u.test(item.executionId)) conditionalFail('INVALID_AUTOMATION_CONDITIONAL_WORKFLOW', 'Conditional execution ID is invalid.');
+  return Object.freeze({ schemaVersion: 1, principal: base.principal, grant: base.grant, executionId: item.executionId });
+}
+
 export function conditionalWorkflowFingerprint(request) {
   return createHash('sha256').update(JSON.stringify({ principal: request.principal, grant: request.grant, source: request.source, workflow: request.workflow }), 'utf8').digest('hex');
 }

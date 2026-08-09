@@ -7,7 +7,7 @@ import {
 } from './pdfkit-mutation-contract-shared.mjs';
 
 const BOXES = new Set(['media', 'crop', 'bleed', 'trim', 'art']);
-const CREATABLE_ANNOTATIONS = new Set(['text', 'freeText', 'square', 'circle', 'highlight']);
+const CREATABLE_ANNOTATIONS = new Set(['text', 'freeText', 'square', 'circle', 'highlight', 'underline']);
 const MUTATION_KEYS = new Set(['metadata', 'pageBox', 'rotation', 'annotations']);
 
 export function normalizeGeneralMutation(value, sourceInspection) {
@@ -99,7 +99,7 @@ export function normalizeGeneralMutation(value, sourceInspection) {
     editCount: metadata ? 4 : 1,
     targeted: false,
     localGoTo: false,
-    requiresUnsigned: rotation !== null || ['crop', 'bleed'].includes(pageBox?.box),
+    requiresUnsigned: annotations.length === 1 || rotation !== null || ['crop', 'bleed'].includes(pageBox?.box),
     expectedForm: 'none',
   });
 }

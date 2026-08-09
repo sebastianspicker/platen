@@ -27,12 +27,13 @@ test('non-macOS inspection is explicit unavailable evidence', async () => {
 });
 
 test('injected probe evidence never promotes the incomplete profile to osSandbox', async () => {
-  let invocation = 0;
+  let invocation = 0; const timeouts = [];
   const result = await inspectDarwinPluginSandbox({
     platform: 'darwin',
     executableTrust: async () => true,
-    runner: async () => {
+    runner: async ({ timeoutMs }) => {
       invocation += 1;
+      timeouts.push(timeoutMs);
       if (invocation === 3) throw Object.assign(new Error('cpu limit reached'), { signal: 'SIGXCPU' });
       return {
         stdout: JSON.stringify(invocation === 1 ? {
@@ -61,6 +62,7 @@ test('injected probe evidence never promotes the incomplete profile to osSandbox
   assert.equal(result.bestEffort.processForkCanaryDenied, true);
   assert.equal(result.bestEffort.nodePermissionProbe, true);
   assert.equal(result.bestEffort.cpuLimitCanary, true);
+  assert.equal(timeouts[2], 15_000);
   assert.deepEqual(result.gateEvidence, { sandboxBehaviorProbe: true });
   assert.equal(result.hard.noNetwork, false);
   assert.equal(result.hard.processQuota, false);

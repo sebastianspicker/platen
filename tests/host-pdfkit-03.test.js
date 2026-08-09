@@ -34,7 +34,7 @@ test('installed PDFKit helper rejects unsafe, malformed, stale, required, and no
     const choice = (await runInspection(workspace)).response.result.pages[0].widgets.find((widget) => widget.fieldType === 'choice');
     const result = await runTargetedMutation(workspace, targetedMutationRequest(sourceSha256(source), {
       formFill: { page: 1, annotationIndex: choice.annotationIndex, fingerprint: choice.fingerprint, fieldType: 'choice', value: '' },
-      annotationUpdate: null, annotationRemove: null,
+      annotationUpdate: null, annotationRemove: null, annotationProperties: null,
     }));
     assert.deepEqual(result.response, { version: 1, ok: false, error: { code: 'MUTATION_FAILED' } }, JSON.stringify(options));
     assert.deepEqual(await readFile(join(workspace, 'input.pdf')), source);
@@ -47,7 +47,7 @@ test('installed PDFKit helper rejects unsafe, malformed, stale, required, and no
   const choice = (await runInspection(workspace)).response.result.pages[0].widgets.find((widget) => widget.fieldType === 'choice');
   const noOp = await runTargetedMutation(workspace, targetedMutationRequest(sourceSha256(source), {
     formFill: { page: 1, annotationIndex: choice.annotationIndex, fingerprint: choice.fingerprint, fieldType: 'choice', value: '' },
-    annotationUpdate: null, annotationRemove: null,
+    annotationUpdate: null, annotationRemove: null, annotationProperties: null,
   }));
   assert.deepEqual(noOp.response, { version: 1, ok: false, error: { code: 'MUTATION_FAILED' } });
 
@@ -55,7 +55,7 @@ test('installed PDFKit helper rejects unsafe, malformed, stale, required, and no
   await writeFile(join(workspace, 'input.pdf'), changed, { mode: 0o600 });
   const stale = await runTargetedMutation(workspace, targetedMutationRequest(sourceSha256(changed), {
     formFill: { page: 1, annotationIndex: choice.annotationIndex, fingerprint: choice.fingerprint, fieldType: 'choice', value: '' },
-    annotationUpdate: null, annotationRemove: null,
+    annotationUpdate: null, annotationRemove: null, annotationProperties: null,
   }));
   assert.deepEqual(stale.response, { version: 1, ok: false, error: { code: 'MUTATION_FAILED' } });
 });
@@ -65,12 +65,12 @@ test('installed PDFKit helper applies strict source-bound targeted mutations', {
   const textWidget = textFixture.inspection.pages[0].widgets.find((widget) => widget.fieldType === 'text');
   const textRequest = targetedMutationRequest(sourceSha256(textFixture.source), {
     formFill: { page: 1, annotationIndex: textWidget.annotationIndex, fingerprint: textWidget.fingerprint, fieldType: 'text', value: 'new text value' },
-    annotationUpdate: null, annotationRemove: null,
+    annotationUpdate: null, annotationRemove: null, annotationProperties: null,
   });
   const textResult = await runTargetedMutation(textFixture.workspace, textRequest);
   assert.equal(textResult.response.ok, true);
   assert.equal(textResult.response.result.appliedEdits, 1);
-  assert.deepEqual((await runInspection(textFixture.workspace, 'output.pdf')).response.result, textResult.response.result.inspection);
+  assert.equal(Object.hasOwn(textResult.response.result, 'inspection'), false);
   assert.deepEqual(await readFile(join(textFixture.workspace, 'input.pdf')), textFixture.source);
   assert.notDeepEqual(await readFile(join(textFixture.workspace, 'output.pdf')), textFixture.source);
   assert.doesNotMatch(textResult.raw, /new text value/);
@@ -81,11 +81,11 @@ test('installed PDFKit helper applies strict source-bound targeted mutations', {
   const choiceWidget = choiceFixture.inspection.pages[0].widgets.find((widget) => widget.fieldType === 'choice');
   const choiceResult = await runTargetedMutation(choiceFixture.workspace, targetedMutationRequest(sourceSha256(choiceFixture.source), {
     formFill: { page: 1, annotationIndex: choiceWidget.annotationIndex, fingerprint: choiceWidget.fingerprint, fieldType: 'choice', value: 'two' },
-    annotationUpdate: null, annotationRemove: null,
+    annotationUpdate: null, annotationRemove: null, annotationProperties: null,
   }));
   assert.equal(choiceResult.response.ok, true);
   assert.equal(choiceResult.response.result.appliedEdits, 1);
-  assert.deepEqual((await runInspection(choiceFixture.workspace, 'output.pdf')).response.result, choiceResult.response.result.inspection);
+  assert.equal(Object.hasOwn(choiceResult.response.result, 'inspection'), false);
   assert.doesNotMatch(choiceResult.raw, /two/);
 
   const updateFixture = await locatorWorkspace();
@@ -96,11 +96,11 @@ test('installed PDFKit helper applies strict source-bound targeted mutations', {
       page: 1, annotationIndex: freeText.annotationIndex, fingerprint: freeText.fingerprint, subtype: 'freeText',
       contents: 'updated annotation contents must remain private', rect: { x: 100, y: 520, width: 220, height: 50 },
     },
-    annotationRemove: null,
+    annotationRemove: null, annotationProperties: null,
   }));
   assert.equal(updateResult.response.ok, true);
   assert.equal(updateResult.response.result.appliedEdits, 1);
-  assert.deepEqual((await runInspection(updateFixture.workspace, 'output.pdf')).response.result, updateResult.response.result.inspection);
+  assert.equal(Object.hasOwn(updateResult.response.result, 'inspection'), false);
   assert.doesNotMatch(updateResult.raw, /updated annotation contents must remain private/);
 
 });
@@ -120,6 +120,7 @@ test('installed PDFKit helper proves selective annotation removal without emitti
   assert.equal(rawBefore[0][target.annotationIndex].subtype, 'FreeText');
   const result = await runTargetedMutation(workspace, targetedMutationRequest(sourceSha256(source), {
     formFill: null, annotationUpdate: null,
+    annotationProperties: null,
     annotationRemove: {
       page: 1, annotationIndex: target.annotationIndex, fingerprint: target.fingerprint, subtype: 'freeText',
     },
@@ -127,7 +128,9 @@ test('installed PDFKit helper proves selective annotation removal without emitti
 
   assert.equal(result.response.ok, true, result.raw);
   assert.equal(result.response.result.appliedEdits, 1);
-  assert.deepEqual(result.response.result.inspection.pages.map(({ annotations }) => annotations.map(({ subtype }) => subtype)), [
+  assert.equal(Object.hasOwn(result.response.result, 'inspection'), false);
+  const outputInspection = (await runInspection(workspace, 'output.pdf')).response.result;
+  assert.deepEqual(outputInspection.pages.map(({ annotations }) => annotations.map(({ subtype }) => subtype)), [
     ['circle'], ['square'],
   ]);
   const output = await readFile(join(workspace, 'output.pdf'));
@@ -136,7 +139,6 @@ test('installed PDFKit helper proves selective annotation removal without emitti
     pageIndex === 0 ? page.toSpliced(target.annotationIndex, 1) : page
   ));
   assert.deepEqual(rawAfter, expectedRawAfter);
-  assert.deepEqual((await runInspection(workspace, 'output.pdf')).response.result, result.response.result.inspection);
   assert.deepEqual(await readFile(join(workspace, 'input.pdf')), source);
   assert.doesNotMatch(result.raw, /private targeted removal contents|private retained target-page contents|private non-target-page contents/);
 });
@@ -161,6 +163,7 @@ test('installed PDFKit helper rejects unsafe or malformed reachable annotation g
     const target = inspection.response.result.pages[0].annotations.find((annotation) => annotation.subtype === 'freeText');
     const result = await runTargetedMutation(workspace, targetedMutationRequest(sourceSha256(source), {
       formFill: null, annotationUpdate: null,
+      annotationProperties: null,
       annotationRemove: {
         page: 1, annotationIndex: target.annotationIndex, fingerprint: target.fingerprint, subtype: 'freeText',
       },
@@ -176,7 +179,7 @@ test('installed PDFKit helper rejects malformed targeted mutation envelopes and 
   const textWidget = fixture.inspection.pages[0].widgets.find((widget) => widget.fieldType === 'text');
   const validMutation = {
     formFill: { page: 1, annotationIndex: textWidget.annotationIndex, fingerprint: textWidget.fingerprint, fieldType: 'text', value: 'safe' },
-    annotationUpdate: null, annotationRemove: null,
+    annotationUpdate: null, annotationRemove: null, annotationProperties: null,
   };
   const freeText = fixture.inspection.pages[0].annotations.find((annotation) => annotation.subtype === 'freeText');
   const invalidRequests = [
@@ -196,16 +199,16 @@ test('installed PDFKit helper rejects malformed targeted mutation envelopes and 
         page: 1, annotationIndex: freeText.annotationIndex, fingerprint: freeText.fingerprint, subtype: 'text',
         contents: 'must not update sticky notes', rect: { x: 100, y: 520, width: 220, height: 50 },
       },
-      annotationRemove: null,
+      annotationRemove: null, annotationProperties: null,
     } },
     { sourceDigest: sourceSha256(fixture.source), mutation: {
-      formFill: null, annotationUpdate: null,
+      formFill: null, annotationUpdate: null, annotationProperties: null,
       annotationRemove: { page: 1, annotationIndex: freeText.annotationIndex, fingerprint: freeText.fingerprint, subtype: 'text' },
     } },
     { sourceDigest: sourceSha256(fixture.source), mutation: {
       formFill: { ...validMutation.formFill, annotationIndex: 50 },
       annotationUpdate: null,
-      annotationRemove: null,
+      annotationRemove: null, annotationProperties: null,
     } },
   ];
   for (const { sourceDigest, mutation } of invalidRequests) {
@@ -222,7 +225,7 @@ test('installed PDFKit helper rejects changed, action-bearing, and signed target
   const textWidget = fixture.inspection.pages[0].widgets.find((widget) => widget.fieldType === 'text');
   const validMutation = {
     formFill: { page: 1, annotationIndex: textWidget.annotationIndex, fingerprint: textWidget.fingerprint, fieldType: 'text', value: 'safe' },
-    annotationUpdate: null, annotationRemove: null,
+    annotationUpdate: null, annotationRemove: null, annotationProperties: null,
   };
   const changed = Buffer.concat([fixture.source, Buffer.from('% byte-different source\n')]);
   await writeFile(join(fixture.workspace, 'input.pdf'), changed, { mode: 0o600 });
@@ -238,7 +241,7 @@ test('installed PDFKit helper rejects changed, action-bearing, and signed target
     const unsafeWidget = unsafeFixture.inspection.pages[0].widgets.find((widget) => widget.fieldType === 'text');
     const rejected = await runTargetedMutation(unsafeFixture.workspace, targetedMutationRequest(sourceSha256(unsafeFixture.source), {
       formFill: { page: 1, annotationIndex: unsafeWidget.annotationIndex, fingerprint: unsafeWidget.fingerprint, fieldType: 'text', value: 'safe' },
-      annotationUpdate: null, annotationRemove: null,
+      annotationUpdate: null, annotationRemove: null, annotationProperties: null,
     }));
     assert.deepEqual(rejected.response, { version: 1, ok: false, error: { code: 'MUTATION_FAILED' } });
   }
@@ -259,7 +262,7 @@ test('installed PDFKit helper rejects unsupported and ambiguous targeted form wi
     const widget = fixture.inspection.pages[0].widgets.find((entry) => entry.fieldType === fieldType);
     const response = await runTargetedMutation(fixture.workspace, targetedMutationRequest(sourceSha256(fixture.source), {
       formFill: { page: 1, annotationIndex: widget.annotationIndex, fingerprint: widget.fingerprint, fieldType, value },
-      annotationUpdate: null, annotationRemove: null,
+      annotationUpdate: null, annotationRemove: null, annotationProperties: null,
     }));
     assert.deepEqual(response.response, { version: 1, ok: false, error: { code: 'MUTATION_FAILED' } });
   }

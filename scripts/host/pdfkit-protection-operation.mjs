@@ -121,7 +121,10 @@ export async function protectPdfKitDocument({ store, pdfService, poppler, adapte
     if (job.timedOut) throw new HostError('PDFKIT_PROTECTION_TIMEOUT', 'PDFKit password protection exceeded its two-minute deadline.', 504, { cause: error });
     if (externalSignal?.aborted) throw new HostError('JOB_CANCELLED', 'PDFKit password protection was cancelled.', 499, { cause: error });
     if (error instanceof HostError) throw error;
-    if (error?.code === 'INVALID_REQUEST') throw new HostError('INVALID_PDFKIT_PROTECTION_OPTIONS', 'The pinned helper rejected the fixed protection request.', 400, { cause: error });
+    // Do not retain native request errors: helper diagnostics may echo the
+    // serialized credential fields, and credentials never belong in results,
+    // logs, or error causes.
+    if (error?.code === 'INVALID_REQUEST') throw new HostError('INVALID_PDFKIT_PROTECTION_OPTIONS', 'The pinned helper rejected the fixed protection request.', 400);
     if (error?.code === 'MUTATION_FAILED') throw new HostError('PDFKIT_PROTECTION_SOURCE_UNSUPPORTED', 'The pinned helper rejected unsupported source structure.', 422, { cause: error });
     throw new HostError('PDFKIT_PROTECTION_FAILED', 'The pinned local PDFKit helper could not create and validate password protection.', 502, { cause: error });
   } finally {

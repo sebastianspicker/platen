@@ -31,6 +31,7 @@ export const REQUIRED_NATIVE_FILES = Object.freeze([
   'native/pdfkit-helper/Sources/PDFKitInspector/MetadataSanitization.swift',
   'native/pdfkit-helper/Sources/PDFKitInspector/MetadataInfoDictionaryScrubber.swift',
   'native/pdfkit-helper/Sources/PDFKitInspector/TargetedMutation.swift',
+  'native/pdfkit-helper/Sources/PDFKitInspector/TargetedAnnotationProperties.swift',
   'native/pdfkit-helper/Sources/PDFKitInspector/TargetedAnnotationResolution.swift',
   'native/pdfkit-helper/Sources/PDFKitInspector/FormWidgetSupport.swift',
   'native/pdfkit-helper/Sources/PDFKitInspector/RawPdfDictionaryValues.swift',

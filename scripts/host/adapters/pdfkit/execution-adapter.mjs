@@ -1,7 +1,7 @@
 import { runProcess } from '../../process-runner.mjs';
 import { parsePdfkitAecMeasurementResponse } from './aec-response.mjs';
 import { parsePdfkitResponse } from './inspection-response.mjs';
-import { parsePdfkitInkAnnotationResponse, parsePdfkitLineAnnotationResponse, parsePdfkitLocalGoToRemovalResponse, parsePdfkitLocalGoToResponse, parsePdfkitMutationResponse, parsePdfkitOutlineBookmarkRemovalResponse, parsePdfkitOutlineBookmarkRenameResponse, parsePdfkitOutlineBookmarkResponse } from './mutation-response.mjs';
+import { parsePdfkitInkAnnotationResponse, parsePdfkitLineAnnotationResponse, parsePdfkitLocalGoToRemovalResponse, parsePdfkitLocalGoToResponse, parsePdfkitMutationResponse, parsePdfkitOutlineBookmarkRemovalResponse, parsePdfkitOutlineBookmarkRenameResponse, parsePdfkitOutlineBookmarkResponse, parsePdfkitTargetedMutationResponse } from './mutation-response.mjs';
 import { parsePdfkitProtectionRemovalResponse, parsePdfkitProtectionResponse } from './protection-response.mjs';
 import { responseError, PDFKIT_MAX_RESPONSE_BYTES } from './response-common.mjs';
 import { parsePdfkitMetadataSanitizationResponse } from './sanitization-response.mjs';
@@ -40,6 +40,7 @@ export class PDFKitAdapter {
 
   async inspect(input, options = {}) { return this.#run(input, options, parsePdfkitResponse); }
   async mutate(input, options = {}) { return this.#run(input, options, parsePdfkitMutationResponse); }
+  async targetedMutate(input, options = {}) { return this.#run(input, options, parsePdfkitTargetedMutationResponse); }
   async addLocalGoToLink(input, options = {}) { return this.#run(input, options, parsePdfkitLocalGoToResponse); }
   async removeLocalGoToLink(input, options = {}) { return this.#run(input, options, parsePdfkitLocalGoToRemovalResponse); }
   async appendOutlineBookmark(input, options = {}) { return this.#run(input, options, parsePdfkitOutlineBookmarkResponse); }

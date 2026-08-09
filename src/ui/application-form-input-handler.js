@@ -35,6 +35,7 @@ const PDFKIT_TEXT_BINDINGS = Object.freeze({
   '#pdfkit-ink-points': 'pdfkitInkPoints',
   '#pdfkit-form-value': 'pdfkitFormValue',
   '#pdfkit-existing-annotation-contents': 'pdfkitExistingAnnotationContents',
+  '#pdfkit-existing-annotation-stroke-color': 'pdfkitExistingAnnotationStrokeColor',
   '#pdfkit-outline-label': 'pdfkitOutlineLabel',
   '#pdfkit-outline-rename-label': 'pdfkitOutlineRenameLabel',
   '#incremental-named-destination-name': 'incrementalNamedDestinationName',

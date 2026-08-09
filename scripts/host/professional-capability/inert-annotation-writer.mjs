@@ -1,15 +1,14 @@
 /**
  * Append one inert text-markup annotation dictionary to a classic passive PDF page.
  */
-import { createHash } from 'node:crypto';
 import { parsePdfStructure, resolvePdfObject } from '../pdf-classic-structure.mjs';
 import {
-  planClassicObjectTransaction,
   pendingClassicObjectReference,
 } from '../pdf-classic-object-transaction.mjs';
 import { pdfDictionary } from '../pdf-classic-syntax.mjs';
 import { pdfUtf16BeString } from '../pdf-classic-text-string.mjs';
 import { HostError } from '../host-error.mjs';
+import { appendAndVerifyInertAnnotation } from './inert-annotation-writer-extra.mjs';
 
 function fail(code, message, status = 400) {
   throw new HostError(code, message, status);
@@ -30,7 +29,7 @@ function array(values) {
 
 /**
  * @param {Buffer} sourceBytes classic single-revision PDF
- * @param {{ page?: number, subtype?: string, contents?: string, rect?: number[] }} input
+ * @param {{ page?: number, subtype?: string, contents?: string, rect?: number[], name?: string }} input
  */
 export function writeInertPageAnnotation(sourceBytes, input = {}) {
   if (!Buffer.isBuffer(sourceBytes) || sourceBytes.length < 32) fail('INVALID_SOURCE', 'PDF source bytes required.');
@@ -39,6 +38,10 @@ export function writeInertPageAnnotation(sourceBytes, input = {}) {
   if (!allowed.has(subtype)) fail('INVALID_SUBTYPE', 'Unsupported inert annotation subtype.');
   const contents = String(input.contents ?? 'Note').slice(0, 500);
   if (!contents.trim()) fail('INVALID_CONTENTS', 'Annotation contents required.');
+  const annotationName = input.name === undefined ? undefined : String(input.name);
+  if (annotationName !== undefined && (!annotationName || annotationName.length > 128)) {
+    fail('INVALID_ANNOTATION_NAME', 'Annotation name is outside the fixed bound.');
+  }
   const rect = Array.isArray(input.rect) && input.rect.length === 4
     ? input.rect.map(Number)
     : [72, 700, 120, 740];
@@ -78,6 +81,7 @@ export function writeInertPageAnnotation(sourceBytes, input = {}) {
     ['F', number(4)],
     ['C', array([number(1), number(1), number(0)])],
     ['P', pageRef],
+    ...(annotationName === undefined ? [] : [['NM', pdfUtf16BeString(annotationName)]]),
   ]);
 
   const existingAnnots = pageEntries.get('Annots');
@@ -92,50 +96,16 @@ export function writeInertPageAnnotation(sourceBytes, input = {}) {
     fail('UNSUPPORTED_PDF', 'Unsupported Annots type.', 422);
   }
 
-  let transaction;
-  try {
-    transaction = planClassicObjectTransaction({
-      sourceBytes,
-      sourceStructure: structure,
-      updates: [{ reference: pageRef, value: dict([...pageEntries.entries()]) }],
-      additions: [{ id: 'inert-annot', value: annotValue }],
-      info: { kind: 'preserve' },
-      changingId: null,
-    });
-  } catch (error) {
-    fail('ANNOTATION_PLAN_FAILED', error?.message ?? 'Could not plan annotation revision.', 502);
-  }
-
-  const annotRef = transaction.referencesById?.['inert-annot'];
-  if (!annotRef) fail('ANNOTATION_PLAN_FAILED', 'Planner did not allocate annotation reference.', 502);
-
-  const bytes = Buffer.concat([sourceBytes, transaction.revision.bytes]);
-  const out = parsePdfStructure(bytes);
-  const outPage = pdfDictionary(resolvePdfObject(out, pageRef).value);
-  const outAnnots = outPage.get('Annots');
-  if (!outAnnots || outAnnots.type !== 'array' || outAnnots.values.length < 1) {
-    fail('ANNOTATION_OUTPUT_INVALID', 'Annotation was not attached to page.', 502);
-  }
-  const last = outAnnots.values[outAnnots.values.length - 1];
-  if (last.type !== 'ref') fail('ANNOTATION_OUTPUT_INVALID', 'Annotation ref missing.', 502);
-  const annotDict = pdfDictionary(resolvePdfObject(out, last).value);
-  if (annotDict.get('Subtype')?.value !== subtype) {
-    fail('ANNOTATION_OUTPUT_INVALID', 'Annotation subtype missing in output.', 502);
-  }
-  const contentsOut = annotDict.get('Contents');
-  if (!contentsOut?.bytes?.equals(pdfUtf16BeString(contents).bytes)) {
-    fail('ANNOTATION_OUTPUT_INVALID', 'Annotation contents not preserved.', 502);
-  }
-
-  return Object.freeze({
-    bytes,
-    proof: Object.freeze({
-      subtype,
-      page: pageIndex + 1,
-      contentsSha256: createHash('sha256').update(contents).digest('hex'),
-      sourcePrefixPreserved: true,
-      annotationReference: last,
-      outputSha256: createHash('sha256').update(bytes).digest('hex'),
-    }),
+  return appendAndVerifyInertAnnotation({
+    sourceBytes,
+    sourceStructure: structure,
+    pageRef,
+    page: pageIndex + 1,
+    pageEntries,
+    annotValue,
+    subtype,
+    contents,
+    annotationName,
+    rect,
   });
 }

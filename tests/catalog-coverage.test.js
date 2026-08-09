@@ -10,8 +10,10 @@ const readJson = (relativePath) => JSON.parse(readFileSync(join(root, relativePa
 const families = readJson('catalog/families.json');
 const packs = readJson('catalog/packs.json');
 const capabilities = readJson('catalog/capabilities.json');
+const proofs = readJson('catalog/capability-proofs/proofs.json');
 const researchScope = readJson('catalog/research-scope.json');
 const prototypeCoverage = readJson('catalog/prototype-coverage.json');
+const proofById = new Map(proofs.records.map((record) => [record.capabilityId, record]));
 const requiredFamilies = [
   'view-navigation', 'create-convert', 'content-editing', 'page-organization',
   'annotations-review', 'forms', 'signatures', 'scan-ocr', 'security',
@@ -49,16 +51,28 @@ test('versioned research scope closes over the complete capability catalog', () 
   assert.deepEqual(researchScope.requiredCapabilityIds, capabilities.map(({ id }) => id).sort());
 });
 
-test('implemented claims are evidence-backed for the full professional catalog', () => {
+test('catalog delivery follows authoritative proof statuses', () => {
   const implemented = capabilities.filter(({ delivery }) => delivery === 'implemented');
+  const statusCounts = Object.fromEntries(['proven', 'partial', 'false', 'unaudited'].map((status) => [
+    status,
+    proofs.records.filter((record) => record.status === status).length,
+  ]));
   assert.equal(capabilities.length, 318);
-  assert.equal(implemented.length, 318);
-  assert.equal(capabilities.filter(({ delivery }) => delivery === 'planned').length, 0);
-  for (const capability of implemented) {
-    assert.equal(typeof capability.evidence, 'object');
-    assert.match(capability.evidence.kind, /\S/);
-    assert.match(capability.evidence.reference, /\S/);
-    assert.ok(existsSync(join(root, capability.evidence.reference)), `${capability.id} evidence file exists`);
+  assert.equal(proofs.records.length, capabilities.length);
+  assert.deepEqual(statusCounts, { proven: 210, partial: 19, false: 89, unaudited: 0 });
+  assert.equal(implemented.length, statusCounts.proven);
+  for (const capability of capabilities) {
+    const proof = proofById.get(capability.id);
+    assert.ok(proof, `${capability.id} has a proof record`);
+    assert.equal(capability.delivery, proof.status === 'proven' ? 'implemented' : 'planned');
+    if (proof.status === 'proven') {
+      assert.equal(typeof capability.evidence, 'object');
+      assert.match(capability.evidence.kind, /\S/);
+      assert.match(capability.evidence.reference, /\S/);
+      assert.ok(existsSync(join(root, capability.evidence.reference)), `${capability.id} evidence file exists`);
+    } else {
+      assert.equal(capability.evidence, null, `${capability.id} non-proven claim has no implementation evidence`);
+    }
     if (capability.engine !== null) {
       assert.equal(typeof capability.engine, 'object', `${capability.id} engine object`);
       assert.match(capability.engine.provider, /\S/);
@@ -78,21 +92,23 @@ test('checked-in feature-gap report exactly matches the normalized catalog', () 
 
 test('README machine-readable claim totals stay synchronized with both catalogs', () => {
   const readme = readFileSync(join(root, 'README.md'), 'utf8');
-  const implemented = capabilities.filter(({ delivery }) => delivery === 'implemented').length;
+  const planned = capabilities.filter(({ delivery }) => delivery === 'planned').length;
+  const proven = proofs.records.filter(({ status }) => status === 'proven').length;
   const countTier = (tier) => prototypeCoverage.records.filter((record) => record.tier === tier).length;
-  assert.match(readme, new RegExp(`${implemented} implemented, test-backed professional claims out of ${capabilities.length} normalized records`));
-  assert.match(readme, new RegExp(`${countTier('executable-subset')} narrower executable subsets alongside ${countTier('sidecar')} sidecars, ${countTier('proposal')}\\s+proposals, ${countTier('service-only')} host-only services, ${countTier('descriptor')} descriptors, ${countTier('blocked')} blockers, and the ${countTier('excluded')}\\s+excluded AI functions`));
+  const countLabel = (tier, singular, plural = `${singular}s`) => `${countTier(tier)} ${countTier(tier) === 1 ? singular : plural}`;
+  assert.match(readme, new RegExp(`${proven} proven, test-backed professional claims and ${planned} planned claims out of ${capabilities.length} normalized records`));
+  assert.match(readme, new RegExp(`${countLabel('executable-subset', 'narrower executable subset')} alongside ${countLabel('sidecar', 'sidecar')}, ${countLabel('proposal', 'proposal')}, ${countLabel('service-only', 'host-only service')}, ${countLabel('descriptor', 'descriptor')}, ${countLabel('blocked', 'blocker')}, and ${countLabel('excluded', 'excluded AI function')}`));
 });
 
-test('professional planned totals are zero after full professional promotion', () => {
-  const planned = capabilities.filter(({ delivery }) => delivery === 'planned');
-  assert.equal(planned.length, 0);
+test('planned skeleton records remain planned until their proof status is proven', () => {
   const skeletonIds = new Set(['ocr', 'signing', 'redaction', 'accessibility-remediation', 'ai', 'aec', 'prepress']
     .flatMap((slug) => readJson(`plugins/skeletons/${slug}/plugin.template.json`).capabilityIds));
   assert.equal(skeletonIds.size > 0, true);
   for (const id of skeletonIds) {
     const capability = capabilities.find((entry) => entry.id === id);
-    assert.equal(capability?.delivery, 'implemented', `${id} skeleton capability implemented`);
+    const proof = proofById.get(id);
+    assert.ok(capability && proof, `${id} skeleton capability has catalog and proof records`);
+    assert.equal(capability.delivery, proof.status === 'proven' ? 'implemented' : 'planned');
   }
 });
 

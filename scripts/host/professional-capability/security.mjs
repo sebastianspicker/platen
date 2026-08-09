@@ -1,33 +1,68 @@
 import { result, requireString, requireBytes, sha256, fail } from './support.mjs';
 import { createTextPdf, createBlankPdf } from '../pdf-factory.mjs';
 import { opSecurityEncryptionAes, opSanitizeHiddenData } from './real-ops.mjs';
-import { buildPdfJavaScriptRemoval } from '../pdf-javascript-removal-writer.mjs';
+import { buildPdfJavaScriptRemoval, inspectPdfJavaScriptRemoval } from '../pdf-javascript-removal-writer.mjs';
 import { PDF_JAVASCRIPT_REMOVAL_PROFILE } from '../pdf-javascript-removal-contract.mjs';
-import { createHash, createDecipheriv } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { writeInertPageAnnotation } from './inert-annotation-writer.mjs';
 import { assemblePageOpsPdf } from './page-ops-pdf.mjs';
 
 const FAMILY = 'security';
+const SHA256 = /^[0-9a-f]{64}$/u;
+
+function authority(ctx, key, methods, code) {
+  const service = ctx[key];
+  if (!service || methods.some((method) => typeof service[method] !== 'function')) {
+    fail(code, 'The required local security authority is unavailable.', 503);
+  }
+  return service;
+}
+
+function documentId(ctx) {
+  if (typeof ctx.documentId !== 'string' || ctx.documentId.trim().length < 1) {
+    fail('SECURITY_DOCUMENT_REQUIRED', 'Security operations require an explicit document identity.', 400);
+  }
+  return ctx.documentId;
+}
+
+function sourceDigest(ctx) {
+  if (!SHA256.test(String(ctx.sourceSha256 ?? ''))) {
+    fail('SECURITY_SOURCE_DIGEST_REQUIRED', 'Security operations require the current lowercase source SHA-256.', 400);
+  }
+  return ctx.sourceSha256;
+}
+
+function credential(value, label) {
+  try { return requireString(value, label, { min: 1, max: 128 }); } catch { fail('INVALID_SECURITY_CREDENTIAL', 'Security credentials are required and must be bounded strings.', 400); }
+}
+
+function receiptResult(capabilityId, receipt, expectedKind, expectedSourceDigest) {
+  if (!receipt || typeof receipt !== 'object' || receipt.kind !== expectedKind
+    || receipt.sourceDigest !== expectedSourceDigest || !receipt.artifact
+    || typeof receipt.artifact.id !== 'string' || !SHA256.test(String(receipt.artifact.sha256 ?? ''))
+    || receipt.artifact.sha256 === expectedSourceDigest || !receipt.evidence
+    || receipt.evidence.artifactDigestBound !== true) {
+    fail('SECURITY_RECEIPT_INVALID', 'The local security authority returned an invalid retained artifact receipt.', 502);
+  }
+  return result(capabilityId, {
+    familyId: FAMILY,
+    method: `production-${expectedKind}-service`,
+    serviceReceipt: receipt,
+    artifact: receipt.artifact,
+    sourceSha256: expectedSourceDigest,
+    outputSha256: receipt.artifact.sha256,
+  });
+}
 
 export const handlers = Object.freeze({
   async 'security.permission-controls'(ctx = {}) {
-    const profile = requireString(ctx.profile ?? 'deny-all', 'profile', { min: 1, max: 40 });
-    const allowed = new Set(['deny-all', 'accessibility-only', 'print-only', 'copy-accessibility']);
-    if (!allowed.has(profile)) fail('INVALID_PERMISSION_PROFILE', 'Unknown permission profile.', 400);
-    // Four closed advisory masks matching the product's professional open-password presets.
-    const masks = {
-      'deny-all': { print: false, copy: false, accessibility: false, modify: false },
-      'accessibility-only': { print: false, copy: false, accessibility: true, modify: false },
-      'print-only': { print: true, copy: false, accessibility: false, modify: false },
-      'copy-accessibility': { print: false, copy: true, accessibility: true, modify: false },
-    };
-    return result('security.permission-controls', {
-      familyId: FAMILY,
-      method: 'local-closed-permission-presets',
-      profile,
-      permissions: masks[profile],
-      advisory: true,
-    });
+    const service = authority(ctx, 'pdfkitProtection', ['protect'], 'SECURITY_PERMISSION_CONTROLS_UNAVAILABLE');
+    const id = documentId(ctx); const sourceSha256 = sourceDigest(ctx);
+    const permissionsProfile = credential(ctx.profile, 'permissionsProfile');
+    const ownerPassword = credential(ctx.ownerPassword, 'ownerPassword');
+    const userPassword = credential(ctx.userPassword ?? ctx.openPassword, 'userPassword');
+    const receipt = await service.protect(id, { permissionsProfile, ownerPassword, userPassword }, { sourceSha256, signal: ctx.signal });
+    return receiptResult('security.permission-controls', receipt, 'pdfkit-password-protection', sourceSha256);
   },
 
   async 'security.certificate-encryption'(ctx = {}) {
@@ -62,48 +97,14 @@ export const handlers = Object.freeze({
   },
 
   async 'security.remove-protection'(ctx = {}) {
-    // Only removes this product's sealed AES package (not arbitrary PDF encryption).
-    let sealed = ctx.sealedPdf ?? null;
-    if (!sealed) {
-      const candidate = ctx.sourcePdf ?? ctx.sourceBytes;
-      if (candidate && Buffer.isBuffer(candidate) && candidate.subarray(0, 25).toString('utf8').startsWith('%PLATEN-AES128-V1')) {
-        sealed = candidate;
-      } else {
-        // Seal then open in one professional path when caller supplies a plaintext source.
-        const made = opSecurityEncryptionAes({
-          ...ctx,
-          sourcePdf: candidate ?? undefined,
-          userPassword: ctx.userPassword ?? ctx.openPassword ?? 'UserPass12!abc',
-          ownerPassword: ctx.ownerPassword ?? 'OwnerPass12!xyz',
-        });
-        sealed = made.pdf;
-      }
-    }
-    const bytes = requireBytes(sealed, 'sealedPdf');
-    const headerBytes = Buffer.from('%PLATEN-AES128-V1\n', 'utf8');
-    if (!bytes.subarray(0, headerBytes.length).equals(headerBytes)) {
-      fail('NOT_LOCAL_AES_PACKAGE', 'Only local AES sealed packages can be opened by this path.', 422);
-    }
-    const userPassword = requireString(ctx.userPassword ?? ctx.openPassword ?? 'UserPass12!abc', 'userPassword', { min: 12, max: 32 });
-    const ownerPassword = requireString(ctx.ownerPassword ?? 'OwnerPass12!xyz', 'ownerPassword', { min: 12, max: 32 });
-    const key = createHash('sha256').update(`v1|${userPassword}|${ownerPassword}`).digest().subarray(0, 16);
-    const iv = bytes.subarray(headerBytes.length, headerBytes.length + 16);
-    const ciphertext = bytes.subarray(headerBytes.length + 16);
-    try {
-      const decipher = createDecipheriv('aes-128-cbc', key, iv);
-      const opened = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
-      if (!opened.subarray(0, 5).equals(Buffer.from('%PDF-'))) fail('OPEN_FAILED', 'Opened payload is not a PDF.', 422);
-      return result('security.remove-protection', {
-        method: 'local-aes-package-open',
-        outputSha256: sha256(opened),
-        pdf: opened,
-        bytes: opened.length,
-        opened: true,
-      });
-    } catch (error) {
-      if (error?.code === 'OPEN_FAILED' || error?.code === 'INVALID_PROFESSIONAL_INPUT') throw error;
-      fail('BAD_PASSWORD', 'Password did not open the sealed package.', 403);
-    }
+    const service = authority(ctx, 'pdfkitProtection', ['removeProtection'], 'SECURITY_PROTECTION_REMOVAL_UNAVAILABLE');
+    const id = documentId(ctx); const sourceSha256 = sourceDigest(ctx);
+    const artifactId = credential(ctx.artifactId, 'artifactId');
+    const artifactSha256 = ctx.artifactSha256;
+    if (!SHA256.test(String(artifactSha256 ?? ''))) fail('SECURITY_ARTIFACT_DIGEST_REQUIRED', 'Protection removal requires the retained artifact SHA-256.', 400);
+    const ownerPassword = credential(ctx.ownerPassword, 'ownerPassword');
+    const receipt = await service.removeProtection(id, { artifactId, artifactSha256, ownerPassword }, { sourceSha256, signal: ctx.signal });
+    return receiptResult('security.remove-protection', receipt, 'pdfkit-protection-removal', artifactSha256);
   },
 
   async 'security.security-envelopes'(ctx = {}) {
@@ -172,34 +173,11 @@ export const handlers = Object.freeze({
   },
 
   async 'security.javascript-controls'(ctx = {}) {
-    // Prefer real JS removal writer when source admits; otherwise inventory fail-closed.
-    const source = ctx.sourcePdf ?? ctx.sourceBytes;
-    if (source) {
-      try {
-        const built = buildPdfJavaScriptRemoval(requireBytes(source, 'sourcePdf'), {
-          profile: PDF_JAVASCRIPT_REMOVAL_PROFILE,
-          sourceSha256: sha256(requireBytes(source, 'sourcePdf')),
-        });
-        return result('security.javascript-controls', {
-          method: 'local-javascript-removal-writer',
-          outputSha256: sha256(built.bytes),
-          pdf: built.bytes,
-          bytes: built.bytes.length,
-          proof: built.proof,
-        });
-      } catch (error) {
-        return result('security.javascript-controls', {
-          method: 'local-javascript-controls',
-          failedClosed: true,
-          code: error?.code ?? 'JS_CONTROL_REJECTED',
-          message: error?.message ?? 'JavaScript control rejected source',
-        });
-      }
-    }
-    return result('security.javascript-controls', {
-      method: 'local-javascript-controls',
-      policy: { allowExecution: false, allowAuthoring: false },
-    });
+    const service = authority(ctx, 'javascriptRemoval', ['remove'], 'SECURITY_JAVASCRIPT_CONTROLS_UNAVAILABLE');
+    const id = documentId(ctx); const sourceSha256 = sourceDigest(ctx);
+    if (ctx.profile !== PDF_JAVASCRIPT_REMOVAL_PROFILE) fail('INVALID_JAVASCRIPT_CONTROLS_OPTIONS', 'JavaScript controls require the fixed removal profile.', 400);
+    const receipt = await service.remove(id, { profile: ctx.profile }, { sourceSha256, signal: ctx.signal });
+    return receiptResult('security.javascript-controls', receipt, 'pdf-javascript-removal', sourceSha256);
   },
 
   async 'security.encryption-aes'(ctx = {}) {
@@ -207,11 +185,12 @@ export const handlers = Object.freeze({
   },
 
   async 'security.open-password'(ctx = {}) {
-    const sealed = opSecurityEncryptionAes({
-      ...ctx,
-      userPassword: ctx.openPassword ?? ctx.userPassword ?? 'OpenPass12!abc',
-      ownerPassword: ctx.ownerPassword ?? 'OwnerPass12!xyz',
-    });
-    return result('security.open-password', { ...sealed, capabilityId: 'security.open-password' });
+    const service = authority(ctx, 'pdfkitProtection', ['protect'], 'SECURITY_OPEN_PASSWORD_UNAVAILABLE');
+    const id = documentId(ctx); const sourceSha256 = sourceDigest(ctx);
+    const permissionsProfile = credential(ctx.permissionsProfile ?? ctx.profile, 'permissionsProfile');
+    const ownerPassword = credential(ctx.ownerPassword, 'ownerPassword');
+    const userPassword = credential(ctx.userPassword ?? ctx.openPassword, 'userPassword');
+    const receipt = await service.protect(id, { permissionsProfile, ownerPassword, userPassword }, { sourceSha256, signal: ctx.signal });
+    return receiptResult('security.open-password', receipt, 'pdfkit-password-protection', sourceSha256);
   },
 });

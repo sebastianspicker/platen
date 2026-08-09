@@ -12,12 +12,15 @@ import {
   state,
 } from './support/view-render-fixture.js';
 
+const SOURCE_ID = '123e4567-e89b-42d3-a456-426614174000';
+const SOURCE_SHA256 = 'a'.repeat(64);
+
 test('loupe keeps the native full-page context and exposes bounded accessible states', () => {
   const base = {
     document: { isOpen: true, name: 'loupe.pdf', size: 4096, type: 'application/pdf', objectUrl: 'blob:source', modified: false },
     host: { status: 'ready', engines: [{ name: 'pdftocairo', available: true }] },
     analysis: {
-      status: 'ready', documentId: 'doc', inspection: { pageCount: 1, form: 'none' }, structure: null,
+      status: 'ready', documentId: SOURCE_ID, sha256: SOURCE_SHA256, inspection: { pageCount: 1, form: 'none' }, structure: null,
       textPages: [], thumbnails: [], fonts: [], images: [], attachments: [],
       signatures: { status: 'unsigned', count: 0, signatureCount: 0 },
     },
@@ -70,7 +73,7 @@ test('editor proof desk keeps source evidence, page switching, and inspector gro
   const ready = editorView(state({
     document: { isOpen: true, name: 'proof.pdf', size: 4096, type: 'application/pdf', objectUrl: 'blob:proof', modified: false },
     analysis: {
-      status: 'ready', documentId: 'doc', inspection: { pageCount: 3 },
+      status: 'ready', documentId: SOURCE_ID, sha256: SOURCE_SHA256, inspection: { pageCount: 3 },
       textPages: [{ page: 1, text: 'one' }], thumbnails: [], fonts: [], images: [], attachments: [], signatures: { count: 0 },
     },
     selectedPage: 2,
@@ -90,7 +93,7 @@ test('editor proof desk keeps source evidence, page switching, and inspector gro
   const toolbar = ready.slice(ready.indexOf('<div class="toolbar"'), ready.indexOf('</div>\n    <main class="workspace"'));
   assert.doesNotMatch(toolbar, /show-plugins|show-workflows|PDF content editing needs a plugin engine/);
   assert.equal((toolbar.match(/class="toolbar-label"/g) ?? []).length, 2);
-  assert.equal((toolbar.match(/toolbar-label toolbar-label-compact/g) ?? []).length, 11);
+  assert.equal((toolbar.match(/toolbar-label toolbar-label-compact/g) ?? []).length, 12);
   assert.match(ready, /class="rail-button [^"]*"[^>]+data-action="show-workflows"/);
 });
 
@@ -108,7 +111,7 @@ test('editor view exposes advanced navigation, controlled raster, reflow, split,
   const base = {
     document: { isOpen: true, name: 'viewer.pdf', size: 4096, type: 'application/pdf', objectUrl: 'blob:viewer', modified: false },
     analysis: {
-      status: 'ready', documentId: 'doc', progress: null, inspection: { pageCount: 2 },
+      status: 'ready', documentId: SOURCE_ID, sha256: SOURCE_SHA256, progress: null, inspection: { pageCount: 2 },
       textPages: [{ page: 1, text: 'Page one text' }, { page: 2, text: 'Page two text' }],
       thumbnails: [], fonts: [], images: [], attachments: [], signatures: { count: 0 },
     },
@@ -119,7 +122,7 @@ test('editor view exposes advanced navigation, controlled raster, reflow, split,
     searchWholeWord: true,
   };
   const native = editorView(state(base));
-  for (const action of ['toggle-controlled-render', 'toggle-reflow', 'toggle-split-view', 'toggle-grid', 'history-back', 'history-forward', 'read-selected-page', 'presentation-mode']) {
+  for (const action of ['toggle-controlled-render', 'toggle-reflow', 'toggle-split-view', 'cycle-page-layout', 'toggle-grid', 'history-back', 'history-forward', 'read-selected-page', 'presentation-mode']) {
     assert.match(native, new RegExp(`data-action="${action}"`));
   }
   for (const action of ['toggle-controlled-render', 'toggle-reflow', 'toggle-split-view']) {

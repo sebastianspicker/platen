@@ -160,6 +160,33 @@
     linear-gradient(90deg, #cbd1d8 1px, transparent 1px);
   background-size: 20px 20px;
 }
+.page-layout-view {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+  align-items: start;
+}
+.page-layout-view.layout-facing,
+.page-layout-view.layout-cover-facing {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.page-layout-item {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.page-layout-item .native-pdf {
+  width: 100%;
+  min-height: 70vh;
+}
+.page-layout-notice {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
 .drop-overlay {
   position: absolute;
   z-index: 10;

@@ -6,6 +6,7 @@ import {
   automationJsFingerprint,
   normalizeAutomationJsCancelRequest,
   normalizeAutomationJsExecuteRequest,
+  normalizeAutomationJsReleaseRequest,
 } from './automation-js-contract.mjs';
 import { AutomationJsRecipeRegistry } from './automation-js-registry.mjs';
 import { executeAutomationJsRecipe } from './automation-js-runtime.mjs';
@@ -182,7 +183,6 @@ export class AutomationJsService {
 
   async cancel(value) {
     const request = normalizeAutomationJsCancelRequest(value);
-    await this.#authorize(request, 'cancel');
     const record = [...this.#executions.values()].find((item) => (
       item.executionId === request.executionId && item.principal === request.principal
       && item.grant.grantId === request.grant.grantId
@@ -194,6 +194,26 @@ export class AutomationJsService {
     await this.#cleanupRecord(record);
     return Object.freeze({ schemaVersion: 1, executionId: request.executionId,
       cancelled: true, javascriptExecuted: false });
+  }
+
+  async release(value) {
+    if (this.#closed) automationJsFail('AUTOMATION_JS_CLOSED',
+      'Declarative automation recipe service is closed.', 409);
+    const request = normalizeAutomationJsReleaseRequest(value);
+    const match = [...this.#executions.entries()].find(([, item]) => (
+      item.executionId === request.executionId && item.principal === request.principal
+      && item.grant.grantId === request.grant.grantId
+    ));
+    if (!match) automationJsFail('AUTOMATION_JS_NOT_FOUND',
+      'Declarative recipe execution was not found.', 404);
+    const [key, record] = match;
+    await this.#authorize({ ...request, source: record.source, recipe: record.recipe }, 'release');
+    await record.promise;
+    if (this.#executions.get(key) !== record) automationJsFail('AUTOMATION_JS_NOT_FOUND',
+      'Declarative recipe execution was not found.', 404);
+    this.#executions.delete(key);
+    return Object.freeze({ schemaVersion: 1, executionId: request.executionId,
+      released: true, javascriptExecuted: false, localOnly: true });
   }
 
   async close() {

@@ -143,11 +143,21 @@ export function parsePageDimensions(output, page) {
   const match = text.match(pagePattern) ?? text.match(/Page size:\s*([0-9.]+)\s+x\s+([0-9.]+)\s+pts/i);
   const widthPoints = Number.parseFloat(match?.[1] ?? '');
   const heightPoints = Number.parseFloat(match?.[2] ?? '');
+  const rotationPattern = new RegExp(`Page\\s+${page}\\s+rot:\\s*(-?\\d+)`, 'i');
+  const rotationMatch = text.match(rotationPattern) ?? text.match(/Page rot:\s*(-?\d+)/i);
+  const reportedRotation = rotationMatch ? Number.parseInt(rotationMatch[1], 10) : 0;
   assertPageDimension(widthPoints, heightPoints, `Poppler did not report valid geometry for page ${page}.`);
   if (widthPoints > MAX_RENDER_PAGE_POINTS || heightPoints > MAX_RENDER_PAGE_POINTS) {
     throw new HostError('PAGE_GEOMETRY_LIMIT', `Page ${page} exceeds the ${MAX_RENDER_PAGE_POINTS}-point render limit.`, 422);
   }
-  return Object.freeze({ page, widthPoints, heightPoints });
+  if (!Number.isSafeInteger(reportedRotation) || reportedRotation % 90 !== 0 || Math.abs(reportedRotation) > 360) {
+    throw invalidOutput(`Poppler did not report a valid rotation for page ${page}.`);
+  }
+  return Object.freeze(Object.defineProperty(
+    { page, widthPoints, heightPoints }, 'rotation', {
+      value: ((reportedRotation % 360) + 360) % 360,
+    },
+  ));
 }
 
 export function parsePageBoxes(output, { firstPage = 1, lastPage = firstPage } = {}) {

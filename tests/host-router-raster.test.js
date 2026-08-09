@@ -2,7 +2,6 @@ import test from 'node:test';
 import {
   ACCESSIBILITY_REMEDIATION_MEDIA_TYPE,
   assert,
-  createHash,
   createOperationProvenance,
   fixture,
   invoke,
@@ -13,6 +12,7 @@ import {
   Readable,
   writeFile,
 } from './support/host-router-fixture.js';
+import { OUTPUT_INTENT_PROFILE, outputIntentResult } from './support/prepress-fixtures.js';
 
 test('prepress endpoint reports unavailable service without widening fallback behavior', async (context) => {
   const { handler, store } = await fixture(context, { prepressEnabled: false });
@@ -30,6 +30,12 @@ test('OutputIntent endpoint is authenticated, exact, query-free, and source-boun
     stream: Readable.from([makeTextPdf('OUTPUT INTENT')]),
     displayName: 'output-intent.pdf',
   });
+  const createdAt = '2026-08-03T00:00:00.000Z';
+  const outputIntent = outputIntentResult({ documentId: document.id, sourceSha256: document.sha256, createdAt });
+  prepress.assignOutputIntent = async function assignOutputIntent(documentId, body, options) {
+    this.outputIntentCalls.push({ documentId, request: body, options });
+    return outputIntent;
+  };
   const url = `/api/documents/${document.id}/prepress/output-intent`;
   const headers = {
     origin: 'http://127.0.0.1:4173',
@@ -37,7 +43,7 @@ test('OutputIntent endpoint is authenticated, exact, query-free, and source-boun
     'x-platen-token': 'test-session-token',
   };
   const request = {
-    profile: 'local-ghostscript-default-cmyk-output-intent-v1',
+    profile: OUTPUT_INTENT_PROFILE,
     sourceSha256: document.sha256,
   };
 
@@ -52,7 +58,10 @@ test('OutputIntent endpoint is authenticated, exact, query-free, and source-boun
     method: 'POST', url, headers, body: JSON.stringify(request),
   });
   assert.equal(response.statusCode, 201);
-  assert.equal(JSON.parse(response.body).result.kind, 'output-intent-artifact');
+  const publicResult = JSON.parse(response.body).result;
+  assert.deepEqual(publicResult, outputIntent);
+  assert.equal(publicResult.documentId, undefined);
+  assert.equal(publicResult.artifact.filePath, undefined);
   assert.deepEqual(prepress.outputIntentCalls.map(({ documentId, request: body }) => (
     { documentId, body }
   )), [{ documentId: document.id, body: request }]);
@@ -327,26 +336,27 @@ test('authenticated raster redaction route admits only exact boolean target shap
 
 test('authenticated comparison routes expose only local comparison modes', async (context) => {
   const { handler, documentId } = await uploadedRasterFixture(context);
+  const secondaryDocumentId = '22222222-2222-4222-8222-222222222222';
   const comparison = await invoke(handler, {
     method: 'POST', url: `/api/documents/${documentId}/compare`, headers: rasterHeaders,
-    body: JSON.stringify({ secondaryDocumentId: 'secondary', mode: 'pixel', options: { pages: [1], dpi: 96 } }),
+    body: JSON.stringify({ secondaryDocumentId, mode: 'pixel', options: { pages: [1], dpi: 96 } }),
   });
   assert.equal(comparison.statusCode, 200);
   const report = JSON.parse(comparison.body).report;
   assert.equal(report.kind, 'pixel');
-  assert.equal(report.secondaryDocumentId, 'secondary');
+  assert.equal(report.secondaryDocumentId, secondaryDocumentId);
   assert.deepEqual(report.options.pages, [1]);
 
   const batch = await invoke(handler, {
     method: 'POST', url: '/api/comparisons/batch', headers: rasterHeaders,
-    body: JSON.stringify({ mode: 'content', pairs: [{ primaryDocumentId: documentId, secondaryDocumentId: 'secondary' }] }),
+    body: JSON.stringify({ mode: 'content', pairs: [{ primaryDocumentId: documentId, secondaryDocumentId }] }),
   });
   assert.equal(batch.statusCode, 200);
   assert.equal(JSON.parse(batch.body).report.kind, 'batch');
 
   const rejectedComparison = await invoke(handler, {
     method: 'POST', url: `/api/documents/${documentId}/compare`, headers: rasterHeaders,
-    body: JSON.stringify({ secondaryDocumentId: 'secondary', mode: 'remote', options: {} }),
+    body: JSON.stringify({ secondaryDocumentId, mode: 'remote', options: {} }),
   });
   assert.equal(rejectedComparison.statusCode, 400);
   assert.equal(JSON.parse(rejectedComparison.body).error.code, 'UNSUPPORTED_COMPARISON_MODE');

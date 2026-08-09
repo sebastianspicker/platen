@@ -68,7 +68,7 @@ async function fixture(context, {
   const domainFacade = new DomainFacade(workspaceState);
   const projectBundles = new ProjectBundleService(store, workspaceState);
   const document = createDocumentOverlays();
-  const review = createReviewOverlays();
+  const review = createReviewOverlays(store);
   const platform = createPlatformOverlays();
   const options = {
     prepressEnabled, pdfkitEnabled, pdfkitMutationEnabled, pdfkitProtectionEnabled,

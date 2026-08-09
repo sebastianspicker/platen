@@ -2,7 +2,7 @@
 
 Candidate: `0.3.0-alpha.1`
 
-Status date: 2026-07-24
+Status date: 2026-08-09
 
 The tree is a public-alpha candidate. It is not a published release. Local
 validation does not authorize a tag, GitHub release, or distribution package.
@@ -30,10 +30,19 @@ validation does not authorize a tag, GitHub release, or distribution package.
 - Browser-native PDF rendering varies by browser.
 - Third-party plugin installation and execution remain disabled.
 - Catalog `ai.*` entries remain excluded from implementation.
-- Local release validation reports `distributionStatus: not-ready` until
-  signing, notarization, and SBOM evidence exist.
+- Local release validation generates a deterministic source-inventory SBOM but
+  reports `distributionStatus: not-ready`. Release authority must still choose
+  source-only or packaged-macOS distribution and retain the corresponding
+  provenance, signing, and notarization evidence or explicit not-applicable
+  decision.
 
 ## Current local evidence
+
+The authoritative capability proof ledger covers 318 audited IDs: 210 proven
+professional claims, 19 audited executable/limited partials, and 89
+false/unavailable broad claims. No IDs are unaudited. Planned claims may expose
+narrow prototype subsets, but those subsets are not professional
+implementations.
 
 Run from a trusted checkout:
 

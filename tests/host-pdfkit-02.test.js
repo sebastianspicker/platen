@@ -261,11 +261,11 @@ test('installed PDFKit helper applies and privately proves custom checkbox off-t
     const checkbox = inspection.response.result.pages[0].widgets[0];
     const result = await runTargetedMutation(workspace, targetedMutationRequest(sourceSha256(source), {
       formFill: { page: 1, annotationIndex: checkbox.annotationIndex, fingerprint: checkbox.fingerprint, fieldType: 'button', value },
-      annotationUpdate: null, annotationRemove: null,
+      annotationUpdate: null, annotationRemove: null, annotationProperties: null,
     }));
     assert.equal(result.response.ok, true, result.raw);
     assert.equal(result.response.result.appliedEdits, 1);
-    assert.deepEqual((await runInspection(workspace, 'output.pdf')).response.result, result.response.result.inspection);
+    assert.equal(Object.hasOwn(result.response.result, 'inspection'), false);
     assert.doesNotMatch(result.raw, /CheckedCustom|\/Off|\/AS|\/AP/);
     assert.deepEqual(await readFile(join(workspace, 'input.pdf')), source);
     const output = (await readFile(join(workspace, 'output.pdf'))).toString('latin1');
@@ -296,7 +296,7 @@ test('installed PDFKit helper rejects unsafe, ambiguous, malformed, and no-op ch
     const checkbox = inspection.response.result.pages[0].widgets[0];
     const result = await runTargetedMutation(workspace, targetedMutationRequest(sourceSha256(source), {
       formFill: { page: 1, annotationIndex: checkbox.annotationIndex, fingerprint: checkbox.fingerprint, fieldType: 'button', value: 'on' },
-      annotationUpdate: null, annotationRemove: null,
+      annotationUpdate: null, annotationRemove: null, annotationProperties: null,
     }));
     assert.deepEqual(result.response, { version: 1, ok: false, error: { code: 'MUTATION_FAILED' } }, JSON.stringify(options));
     assert.deepEqual(await readFile(join(workspace, 'input.pdf')), source);
@@ -311,7 +311,7 @@ test('installed PDFKit helper rejects unsafe, ambiguous, malformed, and no-op ch
   for (const value of ['off', 'enabled', 'CheckedCustom']) {
     const result = await runTargetedMutation(workspace, targetedMutationRequest(sourceSha256(source), {
       formFill: { page: 1, annotationIndex: checkbox.annotationIndex, fingerprint: checkbox.fingerprint, fieldType: 'button', value },
-      annotationUpdate: null, annotationRemove: null,
+      annotationUpdate: null, annotationRemove: null, annotationProperties: null,
     }));
     assert.deepEqual(result.response, { version: 1, ok: false, error: { code: value === 'off' ? 'MUTATION_FAILED' : 'INVALID_REQUEST' } });
   }
@@ -319,7 +319,7 @@ test('installed PDFKit helper rejects unsafe, ambiguous, malformed, and no-op ch
   await writeFile(join(workspace, 'input.pdf'), changed, { mode: 0o600 });
   const stale = await runTargetedMutation(workspace, targetedMutationRequest(sourceSha256(changed), {
     formFill: { page: 1, annotationIndex: checkbox.annotationIndex, fingerprint: checkbox.fingerprint, fieldType: 'button', value: 'on' },
-    annotationUpdate: null, annotationRemove: null,
+    annotationUpdate: null, annotationRemove: null, annotationProperties: null,
   }));
   assert.deepEqual(stale.response, { version: 1, ok: false, error: { code: 'MUTATION_FAILED' } });
 });
@@ -345,12 +345,12 @@ test('installed PDFKit helper canonically selects first, middle, and last radio 
     assert.ok(radio, JSON.stringify(options));
     const result = await runTargetedMutation(workspace, targetedMutationRequest(sourceSha256(source), {
       formFill: { page: options.targetPages[options.targetIndex], annotationIndex: radio.annotationIndex, fingerprint: radio.fingerprint, fieldType: 'button', value: 'select' },
-      annotationUpdate: null, annotationRemove: null,
+      annotationUpdate: null, annotationRemove: null, annotationProperties: null,
     }));
     assert.equal(result.response.ok, true, `${JSON.stringify(options)} ${result.raw}`);
     assert.equal(result.response.result.appliedEdits, 1);
-    assert.deepEqual((await runInspection(workspace, 'output.pdf')).response.result, result.response.result.inspection);
-    assert.match(result.raw, /private-radio-group-name/);
+    assert.equal(Object.hasOwn(result.response.result, 'inspection'), false);
+    assert.doesNotMatch(result.raw, /private-radio-group-name/);
     assert.doesNotMatch(result.raw, /private-radio-(alpha|bravo|charlie)|\/AP|\/AS|\/V/);
     const output = (await readFile(join(workspace, 'output.pdf'))).toString('latin1');
     assert.match(output, new RegExp(`/V\\s*/private-radio-${['alpha', 'bravo', 'charlie'][options.targetIndex]}(?:\\s|/|>)`));
@@ -371,7 +371,7 @@ test('installed PDFKit helper rejects non-canonical, action-bearing, and no-op r
     const target = inspection.response.result.pages[0].widgets.find((widget) => widget.controlKind === 'radio');
     const result = await runTargetedMutation(workspace, targetedMutationRequest(sourceSha256(source), {
       formFill: { page: 1, annotationIndex: target.annotationIndex, fingerprint: target.fingerprint, fieldType: 'button', value: 'select' },
-      annotationUpdate: null, annotationRemove: null,
+      annotationUpdate: null, annotationRemove: null, annotationProperties: null,
     }));
     assert.deepEqual(result.response, { version: 1, ok: false, error: { code: 'MUTATION_FAILED' } }, JSON.stringify(options));
     assert.deepEqual(await readFile(join(workspace, 'input.pdf')), source);
@@ -387,11 +387,11 @@ test('installed PDFKit helper clears a source-bound hand-built choice widget and
   const choice = inspection.response.result.pages[0].widgets.find((widget) => widget.fieldType === 'choice');
   const result = await runTargetedMutation(workspace, targetedMutationRequest(sourceSha256(source), {
     formFill: { page: 1, annotationIndex: choice.annotationIndex, fingerprint: choice.fingerprint, fieldType: 'choice', value: '' },
-    annotationUpdate: null, annotationRemove: null,
+    annotationUpdate: null, annotationRemove: null, annotationProperties: null,
   }));
   assert.equal(result.response.ok, true, result.raw);
   assert.equal(result.response.result.appliedEdits, 1);
-  assert.deepEqual((await runInspection(workspace, 'output.pdf')).response.result, result.response.result.inspection);
+  assert.equal(Object.hasOwn(result.response.result, 'inspection'), false);
   assert.deepEqual(await readFile(join(workspace, 'input.pdf')), source);
   assert.notDeepEqual(await readFile(join(workspace, 'output.pdf')), source);
   assert.doesNotMatch(result.raw, /one|two|\/AP|\/Opt|fixture widget value must remain private/);

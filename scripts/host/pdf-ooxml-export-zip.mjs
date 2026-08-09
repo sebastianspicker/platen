@@ -83,7 +83,11 @@ export function writeStoredZip(entries, limits = OOXML_ZIP_LIMITS) {
     if (!Array.isArray(entry) || entry.length !== 2) invalid(`OOXML ZIP entry ${index} is malformed.`);
     const name = safeEntryName(entry[0]);
     return { name, bytes: entryBytes(entry[1], name) };
-  }).sort((left, right) => left.name.localeCompare(right.name));
+  }).sort((left, right) => {
+    if (left.name === 'mimetype') return -1;
+    if (right.name === 'mimetype') return 1;
+    return left.name.localeCompare(right.name);
+  });
   for (let index = 1; index < normalized.length; index += 1) {
     if (normalized[index - 1].name === normalized[index].name) invalid('OOXML ZIP entries must have unique names.');
   }

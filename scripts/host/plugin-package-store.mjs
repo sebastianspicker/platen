@@ -16,12 +16,17 @@ function compareVersion(a, b) {
   return 0;
 }
 export class PluginPackageStore {
-  #root; #trustedPublishers; #installations; #activationTransition; #registry; #initialized = false;
-  constructor({ root, trustedPublishers, activationTransition = async ({ commit }) => commit() }) {
+  #root; #trustedPublishers; #installations; #activationTransition; #administrationPolicy; #registry; #initialized = false;
+  constructor({ root, trustedPublishers, activationTransition = async ({ commit }) => commit(), administrationPolicy = null }) {
     if (typeof root !== 'string' || !root) throw new TypeError('Plugin package store root is required.');
     if (typeof activationTransition !== 'function') throw new TypeError('activationTransition must be callable.');
+    if (administrationPolicy !== null
+      && typeof administrationPolicy?.authorizePluginPackageMutation !== 'function') {
+      throw new TypeError('administrationPolicy must expose authorizePluginPackageMutation.');
+    }
     this.#root = root; this.#trustedPublishers = trustedPublishers;
     this.#activationTransition = activationTransition;
+    this.#administrationPolicy = administrationPolicy;
     this.#installations = new PluginPackageInstallationIntegrity({ root, trustedPublishers });
     this.#registry = new PluginPackageRegistry({ root });
   }
@@ -35,7 +40,7 @@ export class PluginPackageStore {
     this.#initialized = true; return this;
   }
   async install(input) {
-    this.#assertReady(); return this.#registry.update(async () => {
+    this.#assertReady(); await this.#authorizeAdministration('install'); return this.#registry.update(async () => {
       const verified = verifyPluginPackage(input, this.#trustedPublishers);
       await this.#installations.ensureInstallation(verified);
       await this.#installations.verifyInstallation(verified.digest);
@@ -49,7 +54,7 @@ export class PluginPackageStore {
     });
   }
   async activate(id, version) {
-    this.#assertReady(); return this.#registry.update(async () => {
+    this.#assertReady(); await this.#authorizeAdministration('activate'); return this.#registry.update(async () => {
       const plugin = this.#existingPlugin(id); const next = plugin.versions[version];
       if (!next) fail('PACKAGE_NOT_INSTALLED', 'Plugin version is not installed.', 404);
       if (plugin.active && compareVersion(version, plugin.active.version) < 0) fail('PACKAGE_DOWNGRADE_REJECTED', 'Downgrades require the controlled rollback operation.', 409);
@@ -67,7 +72,7 @@ export class PluginPackageStore {
     });
   }
   async rollback(id) {
-    this.#assertReady(); return this.#registry.update(async () => {
+    this.#assertReady(); await this.#authorizeAdministration('rollback'); return this.#registry.update(async () => {
       const plugin = this.#existingPlugin(id);
       if (!plugin.active || !plugin.previous) fail('PACKAGE_ROLLBACK_UNAVAILABLE', 'No previous plugin version is available for rollback.', 409);
       const prior = plugin.previous; await this.#verifyRegistered(id, prior.version, prior.digest);
@@ -133,6 +138,11 @@ export class PluginPackageStore {
       id, activeVersion: plugin.active?.version ?? null, previousVersion: plugin.previous?.version ?? null,
       versions: Object.freeze(Object.entries(plugin.versions).sort(([left], [right]) => compareVersion(left, right)).map(([version, record]) => Object.freeze({ version, digest: record.digest }))),
     });
+  }
+  async #authorizeAdministration(action) {
+    if (this.#administrationPolicy) {
+      await this.#administrationPolicy.authorizePluginPackageMutation(action);
+    }
   }
   async #verifyRegistered(id, version, digest) {
     const verified = await this.#installations.verifyInstallation(digest);

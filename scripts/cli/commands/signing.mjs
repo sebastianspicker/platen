@@ -17,7 +17,8 @@ export async function runCertificateSignCommand(application, command, document, 
     location: command.location,
     contact: command.contact,
     placeholderBytes: command.placeholderBytes,
-  }, { certificateSha256: command.certificateSha256, signal });
+    consent: true,
+  }, { certificateSha256: command.certificateSha256, consent: true, signal });
   runtime.cancelled(signal);
   const artifact = application.store.getArtifact(result.artifact.id);
   await runtime.copyExclusive(artifact.filePath, command.output);

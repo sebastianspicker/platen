@@ -33,8 +33,13 @@ let package = Package(
             name: "PDFSigningIdentity",
             linkerSettings: [
                 .linkedFramework("Foundation"),
+                .linkedFramework("LocalAuthentication"),
                 .linkedFramework("Security"),
             ]
+        ),
+        .testTarget(
+            name: "PDFSigningIdentityTests",
+            dependencies: ["PDFSigningIdentity"]
         ),
         .testTarget(
             name: "PDFScannerAcquisitionCoreTests",

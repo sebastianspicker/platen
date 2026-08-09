@@ -42,6 +42,7 @@ function workflowState(overrides = {}) {
         annotations: [
           { annotationIndex: 0, subtype: 'link', fingerprint: linkFingerprint },
           { annotationIndex: 7, subtype: 'freeText', fingerprint: annotationFingerprint },
+          { annotationIndex: 8, subtype: 'square', fingerprint: annotationFingerprint },
         ],
         annotationsTruncated: false,
         links: [{
@@ -71,6 +72,7 @@ function workflowState(overrides = {}) {
     pdfkitExistingAnnotationIndex: '7',
     pdfkitExistingAnnotationContents: 'Updated note',
     pdfkitExistingAnnotationRect: { x: 40, y: 45, width: 170, height: 70 },
+    pdfkitExistingAnnotationStrokeColor: '#d32f2f',
     pdfkitLinkTargetPage: '2',
     pdfkitLocalLinkRemovalIndex: '0',
     pdfkitLinkRect: { x: 30, y: 40, width: 140, height: 24 },
@@ -117,7 +119,6 @@ test('derived PDFKit builders return the exact metadata, page-box, rotation, and
     }],
   });
 });
-
 test('derived PDFKit builders retain exact bounded input errors', () => {
   assert.throws(
     () => buildPdfKitMutation('metadata', workflowState({ pdfkitMetadata: { title: 'x'.repeat(1_025) } })),
@@ -154,7 +155,6 @@ test('derived PDFKit builders retain exact bounded input errors', () => {
     { message: 'Annotation contents must contain 1 through 1,024 UTF-8 bytes.' },
   );
 });
-
 test('targeted PDFKit builder binds form values to inspected widget identity', () => {
   const text = buildPdfKitTargetedMutation('form-fill', workflowState());
   assert.deepEqual(text, {
@@ -162,6 +162,7 @@ test('targeted PDFKit builder binds form values to inspected widget identity', (
       page: 1, annotationIndex: 3, fingerprint: widgetFingerprint, fieldType: 'text', value: 'Approved',
     },
     annotationUpdate: null,
+    annotationProperties: null,
     annotationRemove: null,
   });
   const checkbox = buildPdfKitTargetedMutation('form-fill', workflowState({
@@ -185,14 +186,27 @@ test('targeted annotation update and removal retain exact source locators', () =
       contents: 'Updated note',
       rect: { x: 40, y: 45, width: 170, height: 70 },
     },
+    annotationProperties: null,
     annotationRemove: null,
   });
   assert.deepEqual(buildPdfKitTargetedMutation('annotation-remove', state), {
     formFill: null,
     annotationUpdate: null,
+    annotationProperties: null,
     annotationRemove: {
       page: 1, annotationIndex: 7, fingerprint: annotationFingerprint, subtype: 'freeText',
     },
+  });
+  assert.deepEqual(buildPdfKitTargetedMutation('annotation-properties', workflowState({
+    pdfkitExistingAnnotationIndex: '8',
+  })), {
+    formFill: null,
+    annotationUpdate: null,
+    annotationProperties: {
+      page: 1, annotationIndex: 8, fingerprint: annotationFingerprint, subtype: 'square',
+      rect: { x: 40, y: 45, width: 170, height: 70 }, strokeColor: '#d32f2f',
+    },
+    annotationRemove: null,
   });
 });
 
@@ -200,6 +214,16 @@ test('targeted builder rejects stale inventory locators and invalid checkbox val
   assert.throws(
     () => buildPdfKitTargetedMutation('form-fill', workflowState({ pdfkitWidgetIndex: '99' })),
     { message: 'Choose a supported source-bound text, choice, checkbox, or radio field.' },
+  );
+  assert.throws(
+    () => buildPdfKitTargetedMutation('annotation-properties', workflowState()),
+    { message: 'Choose a source-bound Square annotation to update its bounds and border color.' },
+  );
+  assert.throws(
+    () => buildPdfKitTargetedMutation('annotation-properties', workflowState({
+      pdfkitExistingAnnotationIndex: '8', pdfkitExistingAnnotationStrokeColor: '#D32F2F',
+    })),
+    { message: 'Choose a lowercase #rrggbb stroke color.' },
   );
   assert.throws(
     () => buildPdfKitTargetedMutation('form-fill', workflowState({
@@ -325,7 +349,6 @@ test('local geometry builders preserve exact page and path validation failures',
     { message: 'Ink point 2 must lie inside the inspected CropBox for page 1.' },
   );
 });
-
 test('password protection normalization accepts only the fixed profiles and distinct confirmed secrets', () => {
   for (const permissionsProfile of [
     'accessibility-only', 'copy-accessibility', 'deny-all', 'print-only',

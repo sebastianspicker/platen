@@ -13,6 +13,7 @@ import { PdfIncrementalMetadataService } from '../scripts/host/pdf-incremental-m
 import { createProcessLimiter } from '../scripts/host/process-runner.mjs';
 import { scheduleArtifactCleanup } from '../scripts/host/routes/artifact-response-lifecycle.mjs';
 import { makeTextPdf } from './pdf-fixture.js';
+import { MAX_INCREMENTAL_METADATA_SOURCE_BYTES } from '../scripts/host/pdf-incremental-metadata-validation.mjs';
 
 const documentId = '11111111-1111-4111-8111-111111111111';
 const artifactId = '22222222-2222-4222-8222-222222222222';
@@ -96,6 +97,8 @@ async function fixture({
   sourceSigned = false, sourceXmp = '', outputXmp = '', outputCustom = 'Department: Archive\n',
   warningOperation = null, warningOnOutput = false, partialRenderFailure = false, sourceMatches = false,
   independentProof = proof(), cleanupFailureCall = null, mutateBeforePromotion = false,
+  onExecute = null, sourceSize = sourceBytes.length, sourceSha = sourceSha256,
+  mutateSourceAfterVerifiedStage = null,
 } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'pdf-incremental-metadata-'));
   const sourcePath = join(root, 'source.pdf');
@@ -103,9 +106,15 @@ async function fixture({
   let cleaned = 0; let verified = 0; let promoted = null; let deleted = null;
   let writerCalls = 0; let inspectorCalls = 0; const renderCalls = []; const cleanupEntries = [];
   const store = {
-    getDocument: () => ({ id: documentId, sha256: sourceSha256, size: sourceBytes.length, displayName: 'source.pdf', mediaType: 'application/pdf' }),
+    getDocument: () => ({ id: documentId, sha256: sourceSha, size: sourceSize, displayName: 'source.pdf', mediaType: 'application/pdf' }),
     getSourcePath: () => sourcePath,
-    verifySource: async () => { verified += 1; assert.equal(createHash('sha256').update(await readFile(sourcePath)).digest('hex'), sourceSha256); },
+    verifySource: async () => {
+      verified += 1;
+      if (verified === 2 && mutateSourceAfterVerifiedStage) {
+        await mutateSourceAfterVerifiedStage({ sourcePath, sourceSha });
+      }
+      assert.equal(createHash('sha256').update(await readFile(sourcePath)).digest('hex'), sourceSha);
+    },
     createJobWorkspace: async () => { const path = await mkdtemp(join(root, 'job-')); await chmod(path, 0o700); return path; },
     cleanupJob: async (path) => { const call = ++cleaned; cleanupEntries.push(await readdir(path)); await rm(path, { recursive: true, force: true }); if (call === cleanupFailureCall) throw new Error('private cleanup failure'); },
     promotePdfArtifact: async (_id, path, options) => {
@@ -125,6 +134,7 @@ async function fixture({
   const poppler = { async execute(operation, parameters) {
     const output = parameters.input?.endsWith('output.pdf') ?? false;
     const stderr = operation === warningOperation && (!warningOnOutput || output) ? 'Syntax Warning: repaired PDF\n' : '';
+    if (onExecute) await onExecute({ operation, parameters });
     if (operation === 'inspect') return { stdout: pdfInfo(output, sourceMatches), stderr };
     if (operation === 'inspectMetadata') return { stdout: output ? outputXmp : sourceXmp, stderr };
     if (operation === 'inspectCustomMetadata') return { stdout: output ? outputCustom : 'Department: Archive\n', stderr };
@@ -142,7 +152,7 @@ async function fixture({
     inspectIncrementalPdfMetadata: (source, output, value) => { inspectorCalls += 1; assert(source.equals(sourceBytes)); assert(output.equals(outputBytes)); assert.deepEqual(value, metadata); return independentProof; },
   };
   return {
-    root, service: new PdfIncrementalMetadataService({ store, poppler, core }),
+    root, sourcePath, service: new PdfIncrementalMetadataService({ store, poppler, core }),
     state: () => ({ cleaned, verified, promoted, deleted, writerCalls, inspectorCalls, renderCalls, cleanupEntries }),
     dispose: () => rm(root, { recursive: true, force: true }),
   };
@@ -172,6 +182,66 @@ test('incremental metadata service rejects stale digests, signatures, and XMP be
     await assert.rejects(setup.service.update(documentId, metadata, { sourceSha256 }), { code: 'INCREMENTAL_METADATA_SOURCE_UNSUPPORTED', status: 422 });
     assert.equal(setup.state().writerCalls, 0); assert.equal(setup.state().cleaned, 2); assert.equal(setup.state().promoted, null);
   }
+});
+
+test('incremental metadata service enforces source bounds before staging and promotion', async (context) => {
+  const setup = await fixture({ sourceSize: MAX_INCREMENTAL_METADATA_SOURCE_BYTES + 1 }); context.after(setup.dispose);
+  await assert.rejects(setup.service.update(documentId, metadata, { sourceSha256 }), {
+    code: 'INCREMENTAL_METADATA_INPUT_TOO_LARGE', status: 413,
+  });
+  const state = setup.state();
+  assert.equal(state.promoted, null);
+  assert.equal(state.writerCalls, 0);
+  assert.equal(state.inspectorCalls, 0);
+  assert.equal(state.renderCalls.length, 0);
+  assert.equal(state.verified, 0);
+  assert.equal(state.cleaned, 0);
+});
+
+test('incremental metadata service rejects drifted source after private staging without artifact promotion', async (context) => {
+  const setup = await fixture({
+    mutateSourceAfterVerifiedStage: async ({ sourcePath: stagedSource }) => {
+      await writeFile(stagedSource, '%PDF-1.4\nmutated after staging\n%%EOF\n', 'latin1');
+    },
+  });
+  context.after(setup.dispose);
+  await assert.rejects(setup.service.update(documentId, metadata, { sourceSha256 }), {
+    code: 'INCREMENTAL_METADATA_FAILED', status: 502,
+  });
+  const state = setup.state();
+  assert.equal(state.promoted, null);
+  assert.equal(state.deleted, null);
+  assert.equal(state.writerCalls, 1);
+  assert.equal(state.inspectorCalls, 1);
+  assert.equal(state.verified, 2);
+  assert.equal(state.renderCalls.length, 4);
+  assert.equal(state.cleaned, 2);
+  assert.equal(state.cleanupEntries.flat().some((name) => name.endsWith('.png')), false);
+});
+
+test('incremental metadata service cancels in-flight work with workspace cleanup and without promotion', async (context) => {
+  const controller = new AbortController();
+  let aborted = false;
+  const setup = await fixture({
+    onExecute: ({ operation }) => {
+      if (operation === 'renderPagePng' && !aborted) {
+        aborted = true;
+        controller.abort(new Error('cancelled'));
+      }
+    },
+  }); context.after(setup.dispose);
+  await assert.rejects(setup.service.update(documentId, metadata, { sourceSha256, signal: controller.signal }), {
+    code: 'JOB_CANCELLED',
+    status: 499,
+  });
+  const state = setup.state();
+  assert.equal(state.promoted, null);
+  assert.equal(state.deleted, null);
+  assert.equal(state.writerCalls, 1);
+  assert.equal(state.inspectorCalls, 1);
+  assert.equal(state.renderCalls.length, 4);
+  assert.equal(state.cleaned, 2);
+  assert.equal(state.cleanupEntries.flat().some((name) => name.endsWith('.png')), false);
 });
 
 test('incremental metadata service rejects a semantic no-op before raw writing', async (context) => {

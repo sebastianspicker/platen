@@ -40,34 +40,83 @@ export function scanPdfJavaScriptRemovalValue(value, { allowLocus = false } = {}
   }
 }
 
-export function classifyPdfJavaScriptRemovalLocus(catalog, resolve) {
-  if (catalog?.type !== 'dict' || catalog.entries.get('Type')?.type !== 'name'
-    || catalog.entries.get('Type').value !== 'Catalog' || catalog.entries.get('Pages')?.type !== 'ref') throw invalid();
-  const hasOpenAction = catalog.entries.has('OpenAction'); const hasNames = catalog.entries.has('Names');
-  if (hasOpenAction === hasNames) throw invalid();
-  for (const key of catalog.entries.keys()) if (!['Type', 'Pages', 'OpenAction', 'Names'].includes(key)) throw invalid();
-  if (hasOpenAction) {
-    const actionReference = reference(catalog.entries.get('OpenAction')); const action = resolve(actionReference);
-    if (action.stream || action.compressed || action.value?.type !== 'dict' || action.value.entries.size !== 2
-      || action.value.entries.get('S')?.type !== 'name' || action.value.entries.get('S').value !== 'JavaScript'
-      || action.value.entries.get('JS')?.type !== 'string'
-      || action.value.entries.get('JS').bytes.length < 1
-      || action.value.entries.get('JS').bytes.length > MAX_SCRIPT_BYTES) throw invalid();
-    return Object.freeze({ kind: 'open-action', actionReference, deletionReferences: Object.freeze([actionReference]) });
+function namedValue(value, expected) {
+  return value?.type === 'name' && value.value === expected;
+}
+
+function boundedBytes(bytes, maximum) {
+  return bytes.length >= 1 && bytes.length <= maximum;
+}
+
+function supportedCatalog(catalog) {
+  return catalog?.type === 'dict'
+    && namedValue(catalog.entries.get('Type'), 'Catalog')
+    && catalog.entries.get('Pages')?.type === 'ref';
+}
+
+function hasOnlyLocusCatalogKeys(catalog) {
+  for (const key of catalog.entries.keys()) {
+    if (!['Type', 'Pages', 'OpenAction', 'Names'].includes(key)) return false;
   }
-  const names = catalog.entries.get('Names');
-  if (names?.type !== 'dict' || names.entries.size !== 1 || names.entries.get('JavaScript')?.type !== 'ref') throw invalid();
-  const namesReference = reference(names.entries.get('JavaScript')); const nameTree = resolve(namesReference);
-  if (nameTree.stream || nameTree.compressed || nameTree.value?.type !== 'dict' || nameTree.value.entries.size !== 1) throw invalid();
+  return true;
+}
+
+function javascriptAction(action) {
+  return !action.stream
+    && !action.compressed
+    && action.value?.type === 'dict'
+    && action.value.entries.size === 2
+    && namedValue(action.value.entries.get('S'), 'JavaScript')
+    && action.value.entries.get('JS')?.type === 'string'
+    && boundedBytes(action.value.entries.get('JS').bytes, MAX_SCRIPT_BYTES);
+}
+
+function flatJavaScriptNameTree(nameTree) {
+  return !nameTree.stream
+    && !nameTree.compressed
+    && nameTree.value?.type === 'dict'
+    && nameTree.value.entries.size === 1;
+}
+
+function javascriptNamePair(nameTree) {
   const pair = nameTree.value.entries.get('Names');
   if (pair?.type !== 'array' || pair.values.length !== 2 || pair.values[0]?.type !== 'string'
-    || pair.values[0].bytes.length < 1 || pair.values[0].bytes.length > MAX_NAME_BYTES) throw invalid();
-  const actionReference = reference(pair.values[1]); const action = resolve(actionReference);
-  if (action.stream || action.compressed || action.value?.type !== 'dict' || action.value.entries.size !== 2
-    || action.value.entries.get('S')?.type !== 'name' || action.value.entries.get('S').value !== 'JavaScript'
-    || action.value.entries.get('JS')?.type !== 'string'
-    || action.value.entries.get('JS').bytes.length < 1
-    || action.value.entries.get('JS').bytes.length > MAX_SCRIPT_BYTES) throw invalid();
-  if (same(namesReference, actionReference)) throw invalid();
-  return Object.freeze({ kind: 'names', namesReference, actionReference, deletionReferences: Object.freeze([namesReference, actionReference]) });
+    || !boundedBytes(pair.values[0].bytes, MAX_NAME_BYTES)) throw invalid();
+  return pair;
+}
+
+function openActionLocus(catalog, resolve) {
+  const actionReference = reference(catalog.entries.get('OpenAction'));
+  const action = resolve(actionReference);
+  if (!javascriptAction(action)) throw invalid();
+  return Object.freeze({
+    kind: 'open-action', actionReference, deletionReferences: Object.freeze([actionReference]),
+  });
+}
+
+function namesLocus(catalog, resolve) {
+  const names = catalog.entries.get('Names');
+  if (names?.type !== 'dict' || names.entries.size !== 1 || names.entries.get('JavaScript')?.type !== 'ref') {
+    throw invalid();
+  }
+  const namesReference = reference(names.entries.get('JavaScript'));
+  const nameTree = resolve(namesReference);
+  if (!flatJavaScriptNameTree(nameTree)) throw invalid();
+  const pair = javascriptNamePair(nameTree);
+  const actionReference = reference(pair.values[1]);
+  const action = resolve(actionReference);
+  if (!javascriptAction(action) || same(namesReference, actionReference)) throw invalid();
+  return Object.freeze({
+    kind: 'names', namesReference, actionReference,
+    deletionReferences: Object.freeze([namesReference, actionReference]),
+  });
+}
+
+export function classifyPdfJavaScriptRemovalLocus(catalog, resolve) {
+  if (!supportedCatalog(catalog)) throw invalid();
+  const hasOpenAction = catalog.entries.has('OpenAction');
+  const hasNames = catalog.entries.has('Names');
+  if (hasOpenAction === hasNames) throw invalid();
+  if (!hasOnlyLocusCatalogKeys(catalog)) throw invalid();
+  return hasOpenAction ? openActionLocus(catalog, resolve) : namesLocus(catalog, resolve);
 }

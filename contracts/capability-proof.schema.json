@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/capability-proof.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "records"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "records": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/proofRecord" }
+    }
+  },
+  "$defs": {
+    "repositoryReference": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assessment", "evidenceRefs"],
+      "properties": {
+        "assessment": {
+          "enum": ["verified", "partial", "absent", "not-applicable", "not-audited"]
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/repositoryReference" }
+        }
+      }
+    },
+    "proofRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capabilityId", "audited", "status", "shippedSurface", "sourceBinding",
+        "failureEvidence", "trustBoundary", "independentValidation", "evidenceRefs", "rationale"
+      ],
+      "properties": {
+        "capabilityId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*(?:[.][a-z][a-z0-9-]*)+$"
+        },
+        "audited": { "type": "boolean" },
+        "status": { "enum": ["proven", "partial", "false", "unaudited"] },
+        "shippedSurface": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "reference"],
+          "properties": {
+            "kind": { "enum": ["entrypoint", "route", "command", "ui", "none"] },
+            "reference": {
+              "oneOf": [
+                { "$ref": "#/$defs/repositoryReference" },
+                { "type": "null" }
+              ]
+            }
+          }
+        },
+        "sourceBinding": { "$ref": "#/$defs/assessment" },
+        "failureEvidence": { "$ref": "#/$defs/assessment" },
+        "trustBoundary": { "$ref": "#/$defs/assessment" },
+        "independentValidation": { "$ref": "#/$defs/assessment" },
+        "evidenceRefs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/repositoryReference" }
+        },
+        "rationale": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "audited": { "const": false } }, "required": ["audited"] },
+          "then": {
+            "properties": {
+              "status": { "const": "unaudited" },
+              "shippedSurface": {
+                "properties": { "kind": { "const": "none" }, "reference": { "type": "null" } }
+              },
+              "sourceBinding": { "properties": { "assessment": { "const": "not-audited" }, "evidenceRefs": { "maxItems": 0 } } },
+              "failureEvidence": { "properties": { "assessment": { "const": "not-audited" }, "evidenceRefs": { "maxItems": 0 } } },
+              "trustBoundary": { "properties": { "assessment": { "const": "not-audited" }, "evidenceRefs": { "maxItems": 0 } } },
+              "independentValidation": { "properties": { "assessment": { "const": "not-audited" }, "evidenceRefs": { "maxItems": 0 } } },
+              "evidenceRefs": { "maxItems": 0 }
+            }
+          },
+          "else": {
+            "properties": {
+              "status": { "enum": ["proven", "partial", "false"] },
+              "shippedSurface": {
+                "properties": {
+                  "kind": { "enum": ["entrypoint", "route", "command", "ui"] },
+                  "reference": { "$ref": "#/$defs/repositoryReference" }
+                }
+              },
+              "sourceBinding": { "properties": { "assessment": { "enum": ["verified", "partial", "absent", "not-applicable"] }, "evidenceRefs": { "minItems": 1 } } },
+              "failureEvidence": { "properties": { "assessment": { "enum": ["verified", "partial", "absent", "not-applicable"] }, "evidenceRefs": { "minItems": 1 } } },
+              "trustBoundary": { "properties": { "assessment": { "enum": ["verified", "partial", "absent", "not-applicable"] }, "evidenceRefs": { "minItems": 1 } } },
+              "independentValidation": { "properties": { "assessment": { "enum": ["verified", "partial", "absent", "not-applicable"] }, "evidenceRefs": { "minItems": 1 } } },
+              "evidenceRefs": { "minItems": 2 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "proven" } }, "required": ["status"] },
+          "then": {
+            "properties": {
+              "sourceBinding": { "properties": { "assessment": { "const": "verified" } } },
+              "failureEvidence": { "properties": { "assessment": { "enum": ["verified", "not-applicable"] } } },
+              "trustBoundary": { "properties": { "assessment": { "const": "verified" } } },
+              "independentValidation": { "properties": { "assessment": { "const": "verified" } } }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

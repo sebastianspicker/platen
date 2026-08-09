@@ -25,9 +25,11 @@ npm run release:validate
 npm run report
 ```
 
-A passing `release:validate` receipt is local inventory evidence only.
-`distributionStatus` remains `not-ready` until signing, notarization, and SBOM
-checks are supplied by a future release lane.
+A passing `release:validate` receipt includes a deterministic local
+source-inventory SBOM, but it remains local evidence only. `distributionStatus`
+stays `not-ready` until release authority selects source-only or packaged-macOS
+distribution and retains candidate provenance plus the applicable signing and
+notarization evidence or explicit not-applicable decision.
 
 ## Publication checklist
 

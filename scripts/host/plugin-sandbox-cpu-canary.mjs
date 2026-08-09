@@ -1,5 +1,7 @@
 import { darwinProbeEnvironment } from './plugin-sandbox-darwin-contract.mjs';
 
+const CPU_CANARY_TIMEOUT_MS = 15_000;
+
 export async function runDarwinCpuLimitCanary({
   runner,
   resolvedNode,
@@ -17,7 +19,7 @@ export async function runDarwinCpuLimitCanary({
       ],
       cwd: workspace,
       signal,
-      timeoutMs: 4_000,
+      timeoutMs: CPU_CANARY_TIMEOUT_MS,
       maxStdoutBytes: 1024,
       maxStderrBytes: 1024,
       environment: darwinProbeEnvironment(workspace),

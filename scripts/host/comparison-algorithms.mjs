@@ -129,6 +129,63 @@ export function comparePixels(leftPng, rightPng, limits = DEFAULT_COMPARISON_LIM
   });
 }
 
+function overlayInkAlpha(pixels, offset, opacity) {
+  const luminance = ((pixels[offset] * 299) + (pixels[offset + 1] * 587)
+    + (pixels[offset + 2] * 114)) / 1000;
+  return Math.round((pixels[offset + 3] * (255 - luminance) * opacity) / 255);
+}
+
+function compositeColor(output, offset, color, alpha) {
+  const inverseAlpha = 255 - alpha;
+  output[offset] = Math.round(((color[0] * alpha) + (output[offset] * inverseAlpha)) / 255);
+  output[offset + 1] = Math.round(((color[1] * alpha) + (output[offset + 1] * inverseAlpha)) / 255);
+  output[offset + 2] = Math.round(((color[2] * alpha) + (output[offset + 2] * inverseAlpha)) / 255);
+}
+
+function requireOverlayDimensions(left, right) {
+  if (left.width !== right.width || left.height !== right.height) {
+    fail(
+      'OVERLAY_DIMENSION_MISMATCH',
+      'Rendered comparison pages must have identical raster dimensions for an overlay.',
+      422,
+    );
+  }
+}
+
+/**
+ * Produces a deterministic white-background overlay: primary ink is red and
+ * secondary ink is cyan at the requested opacity. Both source PNGs are fully
+ * decoded before composition, and the produced PNG is decoded again before it
+ * is returned to the caller.
+ */
+export function renderRedCyanOverlay(
+  leftPng,
+  rightPng,
+  opacity,
+  limits = DEFAULT_COMPARISON_LIMITS,
+) {
+  if (typeof opacity !== 'number' || !Number.isFinite(opacity) || opacity <= 0 || opacity >= 1) {
+    fail('INVALID_PARAMETER', 'Overlay opacity must be greater than zero and less than one.');
+  }
+  const left = decodePng(leftPng, limits.maxPixelsPerPage);
+  const right = decodePng(rightPng, limits.maxPixelsPerPage);
+  requireOverlayDimensions(left, right);
+  const pixels = Buffer.alloc(left.pixels.length, 255);
+  for (let offset = 0; offset < pixels.length; offset += 4) {
+    compositeColor(pixels, offset, [255, 0, 0], overlayInkAlpha(left.pixels, offset, 1));
+    compositeColor(pixels, offset, [0, 255, 255], overlayInkAlpha(right.pixels, offset, opacity));
+  }
+  const overlayPng = encodeRgbaPng({ width: left.width, height: left.height, pixels });
+  if (overlayPng.length > limits.maxDifferenceImageBytes) {
+    fail('OVERLAY_IMAGE_LIMIT', 'The rendered overlay exceeds the local output limit.', 413);
+  }
+  const decoded = decodePng(overlayPng, limits.maxPixelsPerPage);
+  if (decoded.width !== left.width || decoded.height !== left.height || !decoded.pixels.equals(pixels)) {
+    fail('OVERLAY_VALIDATION_FAILED', 'The rendered overlay did not pass local PNG validation.', 502);
+  }
+  return Object.freeze({ width: left.width, height: left.height, overlayPng });
+}
+
 function stable(value) {
   if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`;
   if (!value || typeof value !== 'object') return JSON.stringify(value);

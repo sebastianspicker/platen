@@ -16,7 +16,7 @@ const {
   validateOcrLayoutResult, validatePages, verifyStagedSignatureTrustHelper, writeFile,
 } = fixture;
 
-test('installed Poppler performs inspect, text, thumbnail, font and derived-page operations', async (context) => {
+test('installed Poppler performs inspect, text, thumbnail, font, image, and derived-page operations', async (context) => {
   try {
     await Promise.all(['/opt/homebrew/bin/pdfinfo', '/opt/homebrew/bin/pdftotext', '/opt/homebrew/bin/pdftocairo', '/opt/homebrew/bin/pdffonts', '/opt/homebrew/bin/pdfdetach', '/opt/homebrew/bin/pdfseparate', '/opt/homebrew/bin/pdfsig'].map((path) => access(path)));
   } catch {
@@ -49,6 +49,9 @@ test('installed Poppler performs inspect, text, thumbnail, font and derived-page
   const fonts = await service.listFonts(document.id);
   assert.equal(fonts.some(({ name }) => /Helvetica/.test(name)), true);
 
+  const images = await service.listImages(document.id);
+  assert.deepEqual(images, []);
+
   const attachments = await service.listAttachments(document.id);
   assert.deepEqual(attachments.map(({ name }) => name), ['note.txt']);
 
@@ -62,6 +65,58 @@ test('installed Poppler performs inspect, text, thumbnail, font and derived-page
   assert.equal(artifact.operation.type, 'extract-pages');
   assert.equal(artifact.documentId, document.id);
   assert.equal(await store.verifySource(document.id), true);
+});
+
+test('exact-DPI overlay rendering forwards DPI and rejects a geometry-mismatched engine raster', async (context) => {
+  const root = await mkdtemp(join(tmpdir(), 'platen-overlay-dpi-test-'));
+  const store = await new DocumentStore({ root }).initialize();
+  context.after(() => store.dispose());
+  const document = await store.createDocument({ stream: Readable.from([makeTextPdf('OVERLAY DPI')]), displayName: 'source.pdf' });
+  const raster = encodeRgbaPng({ width: 612, height: 792, pixels: Buffer.alloc(612 * 792 * 4, 255) });
+  let engineRaster = raster;
+  const calls = [];
+  const adapter = {
+    async execute(operation, parameters) {
+      calls.push({ operation, parameters });
+      if (operation === 'inspectPage') return { stdout: 'Page size: 612 x 792 pts\n' };
+      assert.equal(operation, 'renderOverlayExactDpiPng');
+      await writeFile(`${parameters.outputPrefix}.png`, engineRaster);
+      return { stdout: '' };
+    },
+  };
+  const service = new PdfService({ store, registry: {}, adapter });
+  const output = await service.renderOverlayPageExactDpi(document.id, { page: 1, dpi: 72 });
+  assert.deepEqual({ width: decodePng(output).width, height: decodePng(output).height }, { width: 612, height: 792 });
+  assert.equal(calls[1].parameters.dpi, 72);
+  assert.equal(calls[1].operation, 'renderOverlayExactDpiPng');
+  engineRaster = encodeRgbaPng({ width: 1, height: 1, pixels: Buffer.alloc(4, 255) });
+  await assert.rejects(
+    service.renderOverlayPageExactDpi(document.id, { page: 1, dpi: 72 }),
+    { code: 'INVALID_ENGINE_OUTPUT', status: 502 },
+  );
+});
+
+test('exact-DPI overlay rendering uses rotated page geometry for 90-degree pages', async (context) => {
+  const root = await mkdtemp(join(tmpdir(), 'platen-overlay-rotation-test-'));
+  const store = await new DocumentStore({ root }).initialize();
+  context.after(() => store.dispose());
+  const document = await store.createDocument({ stream: Readable.from([makeTextPdf('ROTATED OVERLAY')]), displayName: 'source.pdf' });
+  const raster = encodeRgbaPng({ width: 792, height: 612, pixels: Buffer.alloc(792 * 612 * 4, 255) });
+  let rotation = 90;
+  const adapter = {
+    async execute(operation, parameters) {
+      if (operation === 'inspectPage') return { stdout: `Page size: 612 x 792 pts\nPage rot: ${rotation}\n` };
+      assert.equal(operation, 'renderOverlayExactDpiPng');
+      await writeFile(`${parameters.outputPrefix}.png`, raster);
+      return { stdout: '' };
+    },
+  };
+  const service = new PdfService({ store, registry: {}, adapter });
+  const output = decodePng(await service.renderOverlayPageExactDpi(document.id, { page: 1, dpi: 72 }));
+  assert.deepEqual({ width: output.width, height: output.height }, { width: 792, height: 612 });
+  rotation = 270;
+  const counterRotated = decodePng(await service.renderOverlayPageExactDpi(document.id, { page: 1, dpi: 72 }));
+  assert.deepEqual({ width: counterRotated.width, height: counterRotated.height }, { width: 792, height: 612 });
 });
 
 test('CropBox rendering keeps every native source read on one immutable staged copy across a store-path swap', async (context) => {
@@ -129,4 +184,3 @@ test('CropBox snapshot crops the source-bound passive page raster without reopen
   assert.deepEqual(calls, ['inspect', 'renderCropBoxPagePng']);
   assert.equal(await store.verifySource(document.id), true);
 });
-

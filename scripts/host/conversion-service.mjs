@@ -1,6 +1,14 @@
 import { createBlankDocument, createTextDocument } from './conversion-document-factory.mjs';
 import { prepareBlankDocumentExport } from './conversion-blank-export.mjs';
 import { preparePngPdfDocumentExport } from './conversion-png-export.mjs';
+import { prepareOfficePdfDocumentExport } from './conversion-office-export.mjs';
+import { prepareHtmlPdfDocumentExport } from './conversion-html-export.mjs';
+import { preparePostScriptPdfDocumentExport } from './conversion-postscript-export.mjs';
+import { prepareOptimizePdfExport } from './conversion-optimize-export.mjs';
+import {
+  createCadPdfDocument,
+  prepareCadPdfDocumentExport,
+} from './cad-to-pdf-service.mjs';
 import { convertInputAsset } from './conversion-input.mjs';
 import { rewritePdfDocument } from './conversion-rewrite.mjs';
 
@@ -16,7 +24,7 @@ export class ConversionService {
   #imageMagick;
 
   constructor({ documents, inputs, poppler, ghostscript, libreOffice, imageMagick }) {
-    if (!documents || !inputs || !poppler || !ghostscript || !libreOffice || !imageMagick) {
+    if (!documents || typeof documents.deleteDocument !== 'function' || !inputs || !poppler || !ghostscript || !libreOffice || !imageMagick) {
       throw new TypeError(
         'ConversionService requires document/input stores and four local engine adapters.',
       );
@@ -45,6 +53,61 @@ export class ConversionService {
 
   preparePngPdfExport(documentId, { signal } = {}) {
     return preparePngPdfDocumentExport({
+      documents: this.#documents,
+      poppler: this.#poppler,
+      documentId,
+      externalSignal: signal,
+    });
+  }
+
+  prepareOfficePdfExport(documentId, { signal } = {}) {
+    return prepareOfficePdfDocumentExport({
+      documents: this.#documents,
+      poppler: this.#poppler,
+      documentId,
+      externalSignal: signal,
+    });
+  }
+
+  prepareHtmlPdfExport(documentId, { signal } = {}) {
+    return prepareHtmlPdfDocumentExport({
+      documents: this.#documents,
+      poppler: this.#poppler,
+      documentId,
+      externalSignal: signal,
+    });
+  }
+
+  preparePostScriptPdfExport(documentId, { signal } = {}) {
+    return preparePostScriptPdfDocumentExport({
+      documents: this.#documents,
+      poppler: this.#poppler,
+      documentId,
+      externalSignal: signal,
+    });
+  }
+
+  prepareOptimizePdfExport(documentId, { signal } = {}) {
+    return prepareOptimizePdfExport({
+      documents: this.#documents,
+      poppler: this.#poppler,
+      documentId,
+      externalSignal: signal,
+    });
+  }
+
+  convertCadInput(assetId, { signal } = {}) {
+    return createCadPdfDocument({
+      inputs: this.#inputs,
+      documents: this.#documents,
+      poppler: this.#poppler,
+      assetId,
+      externalSignal: signal,
+    });
+  }
+
+  prepareCadPdfExport(documentId, { signal } = {}) {
+    return prepareCadPdfDocumentExport({
       documents: this.#documents,
       poppler: this.#poppler,
       documentId,

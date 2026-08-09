@@ -20,6 +20,12 @@ function exact(value, keys) {
     && Object.values(Object.getOwnPropertyDescriptors(value)).every((descriptor) => Object.hasOwn(descriptor, 'value') && descriptor.enumerable === true);
 }
 function sameRect(left, right) { return exact(left, ['x', 'y', 'width', 'height']) && left.x === right.x && left.y === right.y && left.width === right.width && left.height === right.height; }
+function validReference(reference) {
+  const keys = Object.hasOwn(reference ?? {}, 'type') ? ['type', 'object', 'generation'] : ['object', 'generation'];
+  return exact(reference, keys) && (reference.type === undefined || reference.type === 'ref')
+    && Number.isSafeInteger(reference.object) && reference.object > 0
+    && Number.isSafeInteger(reference.generation) && reference.generation >= 0;
+}
 function freeze(value) { if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value; for (const child of Object.values(value)) freeze(child); return Object.freeze(value); }
 function plainArray(value) {
   if (!Array.isArray(value) || Object.getOwnPropertySymbols(value).length || Object.keys(value).length !== value.length) return false;
@@ -61,7 +67,7 @@ function validateResult(value, context) {
     || !SHA256.test(result.proof.fieldNameSha256 ?? '') || result.proof.fieldNameSha256 !== result.artifact.operation.parameters.fieldNameSha256 || !sameRect(result.proof.rect, context.request.rect) || !sameRect(result.proof.rect, result.artifact.operation.parameters.rect)
     || result.proof.sourcePrefixPreserved !== true || result.proof.defaultEmpty !== true || result.proof.objectCount !== 4
     || !exact(result.proof.references, ['appearance', 'font', 'widget', 'acroForm'])
-    || !Object.values(result.proof.references).every((reference) => exact(reference, ['object', 'generation']) && Number.isSafeInteger(reference.object) && reference.object > 0 && Number.isSafeInteger(reference.generation) && reference.generation >= 0)
+    || !Object.values(result.proof.references).every(validReference)
     || new Set(Object.values(result.proof.references).map((reference) => `${reference.object}:${reference.generation}`)).size !== 4
     || result.proof.otherPagesContentResourcesPreserved !== true || !plainArray(result.limitations)
     || JSON.stringify(result.limitations) !== JSON.stringify(LIMITATIONS)) throw new TypeError('AcroForm text-field result is invalid.');

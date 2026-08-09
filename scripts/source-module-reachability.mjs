@@ -30,7 +30,6 @@ export const INTENTIONALLY_UNSHIPPED_MODULES = Object.freeze([
   'scripts/host/plugin-native-supervisor-loader.mjs',
   'scripts/host/plugin-native-supervisor-process.mjs',
   'scripts/host/plugin-native-supervisor.mjs',
-  'scripts/host/plugin-operation-session-contract.mjs',
   'scripts/host/plugin-operation-session-lifecycle.mjs',
   'scripts/host/plugin-operation-session.mjs',
   'scripts/host/plugin-rpc-broker.mjs',

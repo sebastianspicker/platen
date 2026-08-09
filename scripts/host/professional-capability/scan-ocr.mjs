@@ -1,132 +1,176 @@
-import { createHash } from 'node:crypto';
-import { createBlankPdf, createTextPdf } from '../pdf-factory.mjs';
-import { result, fail, requireString, requireBytes, sha256 } from './support.mjs';
+import {
+  scanAcquire as scannerAcquire,
+  scanDuplexFeeder as scannerDuplexFeeder,
+  scanAppendToDocument as scannerAppendToDocument,
+} from './scan-ocr-scanner.mjs';
+import {
+  ocrRecognizeText,
+  ocrCleanup,
+  ocrEditableOutput,
+  ocrSuspectReview,
+  ocrLanguageDetectionSelection,
+  ocrZonesLayout,
+  ocrTableRecognition,
+  ocrUserDictionariesTraining,
+  ocrBatchRecognition,
+  ocrExportLayoutPreserving,
+  ocrScreenshotCapture,
+} from './scan-ocr-ocr.mjs';
+import { readFileSync } from 'node:fs';
+import { OPAQUE_ID } from '../document-store-contract.mjs';
+import { validateOperationProvenance } from '../operation-provenance.mjs';
+import { SCANNER_DUPLEX_MAX_PAGES } from '../scanner-duplex-contract.mjs';
+import { PDF_COPY_PAGE_VALIDATORS, PDF_COPY_PAGE_PROFILE } from '../pdf-copy-page-contract.mjs';
+import { fail, sha256 } from './support.mjs';
 
-export function scanAcquire(ctx = {}) {
+const DIGEST = /^[0-9a-f]{64}$/u;
+
+function duplexInput(ctx) {
+  if (ctx.sides !== undefined && ctx.sides !== 'duplex') {
+    fail('INVALID_DUPLEX_SIDES', 'scan.duplex-feeder accepts duplex sides only.', 400);
+  }
+  const sheets = ctx.sheets === undefined ? 1 : ctx.sheets;
+  if (!Number.isSafeInteger(sheets) || sheets < 1 || sheets > SCANNER_DUPLEX_MAX_PAGES / 2) {
+    fail('INVALID_SHEETS', `sheets 1..${SCANNER_DUPLEX_MAX_PAGES / 2}`, 400);
+  }
   if (ctx.network === true) fail('NETWORK_FORBIDDEN', 'Scanner acquisition is local-only.', 403);
-  const devices = Array.isArray(ctx.devices) ? ctx.devices.slice(0, 20) : [{ id: 'local-scanner-0', duplex: true, feeder: true }];
-  if (devices.length < 1) fail('NO_SCANNER', 'No local scanner devices available.', 404);
-  const pages = Number.isSafeInteger(ctx.pages) ? ctx.pages : 1;
-  if (pages < 1 || pages > 100) fail('INVALID_PAGE_COUNT', 'pages 1..100', 400);
-  const deviceId = String(devices[0].id ?? 'local-scanner-0');
-  // Deterministic multi-page PDF with structural page tree (not a bare byte receipt).
-  const pdf = createBlankPdf({ pages, title: `SCAN_ACQUIRE:${deviceId}` });
-  const latin1 = pdf.toString('latin1');
-  if (!latin1.includes('/Type /Page') && !latin1.includes('/Type/Page')) {
-    fail('SCAN_PAGE_STRUCTURE_MISSING', 'Acquired PDF missing /Type /Page.', 502);
+  return Object.freeze({ sheets, pageCount: sheets * 2 });
+}
+
+function documentRecord(store, id, role) {
+  if (!OPAQUE_ID.test(String(id ?? ''))) {
+    fail('SCAN_APPEND_CONTEXT_INVALID', `${role} source document identifier is invalid.`, 400);
   }
-  if (!latin1.includes('/MediaBox')) {
-    fail('SCAN_PAGE_STRUCTURE_MISSING', 'Acquired PDF missing /MediaBox.', 502);
+  let record;
+  try { record = store.getDocument(id); }
+  catch (error) {
+    if (error?.code === 'DOCUMENT_NOT_FOUND') {
+      fail('SCAN_APPEND_CONTEXT_INVALID', `${role} source document was not found in the local store.`, 400);
+    }
+    fail('SCAN_APPEND_OUTPUT_INVALID', `Could not read ${role.toLowerCase()} source document binding.`, 502);
   }
-  const countMatch = latin1.match(/\/Count\s+(\d+)/);
-  const structuralCount = countMatch ? Number(countMatch[1]) : -1;
-  if (structuralCount !== pages) {
-    fail(
-      'SCAN_PAGE_COUNT_MISMATCH',
-      `Acquired PDF /Count ${structuralCount} does not match pageCount ${pages}.`,
-      502,
-    );
+  if (!record || record.id !== id || record.mediaType !== 'application/pdf'
+    || !Number.isSafeInteger(record.size) || record.size < 1 || !DIGEST.test(record.sha256 ?? '')) {
+    fail('SCAN_APPEND_CONTEXT_INVALID', `${role} source document binding is malformed.`, 400);
   }
-  if (!latin1.includes('SCAN_ACQUIRE:')) {
-    fail('SCAN_TITLE_MARKER_MISSING', 'Acquired PDF missing SCAN_ACQUIRE title marker.', 502);
+  return record;
+}
+
+async function verifyAppendSources(ctx) {
+  if (!ctx.store || typeof ctx.store.getDocument !== 'function'
+    || typeof ctx.store.verifySource !== 'function' || typeof ctx.store.getSourcePath !== 'function') {
+    fail('SCAN_APPEND_SERVICE_UNAVAILABLE', 'scan.append-to-document requires a source-bound document store.', 503);
   }
-  return result('scan.acquire', {
-    method: 'local-scanner-acquire-pages',
-    devices,
-    count: devices.length,
-    ready: true,
-    pageCount: pages,
-    structuralPageCount: structuralCount,
-    deviceId,
-    outputSha256: sha256(pdf),
-    pdf,
-    bytes: pdf.length,
-    acquired: true,
-  });
+  const primaryId = typeof ctx.documentId === 'string' ? ctx.documentId : '';
+  const secondaryId = typeof ctx.scanDocumentId === 'string' ? ctx.scanDocumentId : '';
+  const primary = documentRecord(ctx.store, primaryId, 'Primary');
+  const secondary = documentRecord(ctx.store, secondaryId, 'Scanned');
+  try {
+    await ctx.store.verifySource(primary.id);
+    await ctx.store.verifySource(secondary.id);
+    ctx.store.getSourcePath(primary.id);
+    ctx.store.getSourcePath(secondary.id);
+  } catch (error) {
+    if (error?.code === 'SOURCE_INTEGRITY_FAILED') {
+      fail('SCAN_APPEND_OUTPUT_INVALID', 'A source document drifted before append composition.', 502);
+    }
+    fail('SCAN_APPEND_CONTEXT_INVALID', 'The append source documents could not be verified.', 400);
+  }
+  return { primary, secondary };
 }
-export function scanDuplexFeeder(ctx = {}) {
-  if (ctx.network === true) fail('NETWORK_FORBIDDEN', 'Scanner acquisition is local-only.', 403);
-  const sides = ctx.sides === 'simplex' ? 'simplex' : 'duplex';
-  const sheets = Number.isSafeInteger(ctx.sheets) ? ctx.sheets : 2;
-  if (sheets < 1 || sheets > 500) fail('INVALID_SHEETS', 'sheets 1..500', 400);
-  const pageCount = sides === 'duplex' ? sheets * 2 : sheets;
-  const pdf = createBlankPdf({ pages: pageCount, title: 'duplex-scan' });
-  return result('scan.duplex-feeder', { method: 'local-scanner-duplex-feeder', sides, sheets, pageCount, outputSha256: sha256(pdf), pdf, bytes: pdf.length });
-}
-export function scanAppendToDocument(ctx = {}) {
-  if (ctx.network === true) fail('NETWORK_FORBIDDEN', 'Scanner acquisition is local-only.', 403);
-  const base = requireBytes(ctx.sourcePdf ?? createBlankPdf({ pages: 1, title: 'base' }), 'sourcePdf');
-  const scanned = createBlankPdf({ pages: 1, title: 'scanned-page' });
-  const pdf = createTextPdf({ pages: [`Base ${sha256(base).slice(0, 12)}`, `Scan ${sha256(scanned).slice(0, 12)}`], title: 'Appended scan' });
-  return result('scan.append-to-document', { method: 'local-scan-append-pages', baseSha256: sha256(base), outputSha256: sha256(pdf), pdf, bytes: pdf.length, appendedPages: 1 });
-}
-export function ocrRecognizeText(ctx = {}) {
-  const text = requireString(ctx.text ?? 'OCR recognized line', 'text', { min: 1, max: 200000 });
-  const pdf = createTextPdf({ text, title: 'OCR searchable' });
-  return result('ocr.recognize-text', { method: 'local-ocr-searchable-pdf', textSha256: createHash('sha256').update(text).digest('hex'), outputSha256: sha256(pdf), pdf, bytes: pdf.length, searchable: true });
-}
-export function ocrCleanup(ctx = {}) {
-  const raw = requireString(ctx.text ?? '  noisy   OCR  line\n\n', 'text', { min: 1, max: 200000 });
-  const cleaned = raw.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
-  const pdf = createTextPdf({ text: cleaned, title: 'OCR cleaned' });
-  return result('ocr.cleanup', { method: 'local-ocr-cleanup-presets', originalLength: raw.length, cleanedLength: cleaned.length, outputSha256: sha256(pdf), pdf, bytes: pdf.length });
-}
-export function ocrEditableOutput(ctx = {}) {
-  const text = requireString(ctx.text ?? 'Editable OCR body', 'text', { min: 1, max: 200000 });
-  const pdf = createTextPdf({ text, title: 'OCR editable' });
-  return result('ocr.editable-output', { method: 'local-ocr-editable-text-pdf', textSha256: createHash('sha256').update(text).digest('hex'), outputSha256: sha256(pdf), pdf, bytes: pdf.length, editable: true });
-}
-export function ocrSuspectReview(ctx = {}) {
-  const text = requireString(ctx.text ?? 'suspect word confidance', 'text', { min: 1, max: 200000 });
-  const suspects = text.split(/\s+/).filter((w) => w.length > 6).slice(0, 50).map((word, i) => ({
-    id: `s${i}`, word, confidence: 0.55, page: 1,
-  }));
-  return result('ocr.suspect-review', { method: 'local-ocr-suspect-list', suspects, count: suspects.length, textSha256: createHash('sha256').update(text).digest('hex') });
-}
-export function ocrLanguageDetectionSelection(ctx = {}) {
-  const text = requireString(ctx.text ?? 'The quick brown fox', 'text', { min: 1, max: 200000 });
-  const lang = requireString(ctx.lang ?? 'eng', 'lang', { min: 2, max: 16 });
-  if (!/^[a-z]{2,3}(?:\+[a-z]{2,3})*$/.test(lang)) fail('INVALID_LANG', 'lang code', 400);
-  return result('ocr.language-detection-selection', { method: 'local-ocr-language-select', lang, sampleSha256: createHash('sha256').update(text).digest('hex'), detectedHint: lang });
-}
-export function ocrZonesLayout(ctx = {}) {
-  const zones = Array.isArray(ctx.zones) ? ctx.zones.slice(0, 50) : [
-    { id: 'z1', type: 'text', rect: { x: 72, y: 700, w: 400, h: 40 } },
-    { id: 'z2', type: 'table', rect: { x: 72, y: 400, w: 400, h: 200 } },
+
+function exactAppendProvenance(operation, { primary, secondary }, afterPage) {
+  let checked;
+  try { checked = validateOperationProvenance(operation); }
+  catch { fail('SCAN_APPEND_OPERATION_INVALID', 'scan.append-to-document operation provenance is malformed.', 502); }
+  if (checked.type !== 'copy-page-between-documents'
+    || JSON.stringify(checked.inputs) !== JSON.stringify([
+      { documentId: primary.id, sha256: primary.sha256, role: 'primary' },
+      { documentId: secondary.id, sha256: secondary.sha256, role: 'secondary' },
+    ])) {
+    fail('SCAN_APPEND_OPERATION_INVALID', 'scan.append-to-document source provenance is invalid.', 502);
+  }
+  const parameters = checked.parameters;
+  if (parameters?.profile !== PDF_COPY_PAGE_PROFILE || parameters.sourcePage !== 1
+    || parameters.afterPage !== afterPage || !Array.isArray(parameters.selections)) {
+    fail('SCAN_APPEND_OPERATION_INVALID', 'scan.append-to-document selection provenance is invalid.', 502);
+  }
+  const expectedSelections = [
+    ...Array.from({ length: afterPage }, (_, index) => ({ input: 0, page: index + 1 })),
+    { input: 1, page: 1 },
+    ...Array.from({ length: Math.max(0, checked.expected.pageCount - afterPage - 1) }, (_, index) => ({ input: 0, page: afterPage + index + 1 })),
   ];
-  return result('ocr.zones-layout', { method: 'local-ocr-typed-zones', zones, count: zones.length });
+  if (JSON.stringify(parameters.selections) !== JSON.stringify(expectedSelections)
+    || !Number.isSafeInteger(checked.expected.pageCount)
+    || checked.expected.pageCount !== expectedSelections.length) {
+    fail('SCAN_APPEND_OPERATION_INVALID', 'scan.append-to-document selection order is invalid.', 502);
+  }
+  if (!DIGEST.test(checked.expected.manifestSha256 ?? '')
+    || checked.expected.manifestSha256 !== checked.validation.manifestSha256
+    || JSON.stringify(checked.validation.validators) !== JSON.stringify(PDF_COPY_PAGE_VALIDATORS)) {
+    fail('SCAN_APPEND_OPERATION_INVALID', 'scan.append-to-document semantic manifest validation is invalid.', 502);
+  }
+  return checked;
 }
-export function ocrTableRecognition(ctx = {}) {
-  const rows = Array.isArray(ctx.rows) ? ctx.rows : [['Name', 'Qty'], ['Bolt', '12'], ['Nut', '24']];
-  if (rows.length < 1 || rows.length > 200) fail('INVALID_TABLE', 'rows', 400);
-  const grid = rows.slice(0, 200).map((r) => (Array.isArray(r) ? r.map(String) : [String(r)]));
-  return result('ocr.table-recognition', { method: 'local-ocr-table-grid', grid, rowCount: grid.length, colCount: Math.max(...grid.map((r) => r.length)) });
+
+async function scanDuplexFeeder(ctx = {}) {
+  duplexInput(ctx);
+  if (ctx.service === undefined || ctx.store === undefined) {
+    // Preserve the service-owned availability error, but only after input validation.
+    return scannerDuplexFeeder(ctx);
+  }
+  const result = await scannerDuplexFeeder(ctx);
+  if (result.receipt?.sha256 && result.outputSha256 !== result.receipt.sha256) {
+    fail('SCAN_DUPLEX_OUTPUT_INVALID', 'scan.duplex-feeder output digest drifted from its document receipt.', 502);
+  }
+  return result;
 }
-export function ocrUserDictionariesTraining(ctx = {}) {
-  const words = Array.isArray(ctx.words) ? ctx.words.map(String).slice(0, 500) : ['workbench', 'redaction', 'AcroForm'];
-  const dictId = createHash('sha256').update(words.join('|')).digest('hex').slice(0, 16);
-  return result('ocr.user-dictionaries-training', { method: 'local-ocr-user-dictionary', dictId, words, count: words.length });
+
+async function scanAppendToDocument(ctx = {}) {
+  if (ctx.network === true) fail('NETWORK_FORBIDDEN', 'Scanner acquisition is local-only.', 403);
+  const sources = await verifyAppendSources(ctx);
+  const afterPage = ctx.afterPage === undefined ? 0 : ctx.afterPage;
+  if (!Number.isSafeInteger(afterPage) || afterPage < 0) {
+    fail('SCAN_APPEND_REQUEST_INVALID', 'afterPage must be non-negative.', 400);
+  }
+  const result = await scannerAppendToDocument(ctx);
+  const operation = exactAppendProvenance(result.operation, sources, afterPage);
+  let artifact;
+  try {
+    artifact = ctx.store.getArtifact(result.artifactId);
+    await ctx.store.verifySource(sources.primary.id);
+    await ctx.store.verifySource(sources.secondary.id);
+  } catch (error) {
+    fail('SCAN_APPEND_OUTPUT_INVALID', 'scan.append-to-document artifact or source could not be reread.', 502);
+  }
+  let bytes;
+  try { bytes = readFileSync(artifact.filePath); }
+  catch { fail('SCAN_APPEND_OUTPUT_INVALID', 'scan.append-to-document artifact bytes could not be reread.', 502); }
+  if (!Buffer.isBuffer(bytes) || sha256(bytes) !== artifact.sha256 || artifact.sha256 !== result.outputSha256
+    || artifact.size !== bytes.length) {
+    fail('SCAN_APPEND_OUTPUT_INVALID', 'scan.append-to-document artifact digest binding is invalid.', 502);
+  }
+  return Object.freeze({ ...result, operation, pdf: bytes, bytes, outputSha256: artifact.sha256, outputDigest: artifact.sha256 });
 }
-export function ocrBatchRecognition(ctx = {}) {
-  const items = Array.isArray(ctx.documents) ? ctx.documents.slice(0, 20) : [{ id: 'd1', text: 'Doc one' }, { id: 'd2', text: 'Doc two' }];
-  const results = items.map((item, i) => {
-    const text = String(item.text ?? `batch-${i}`);
-    return { id: String(item.id ?? `d${i}`), textSha256: createHash('sha256').update(text).digest('hex'), chars: text.length };
-  });
-  return result('ocr.batch-recognition', { method: 'local-ocr-batch-results', results, count: results.length });
-}
-export function ocrExportLayoutPreserving(ctx = {}) {
-  const text = requireString(ctx.text ?? 'Layout export line', 'text', { min: 1, max: 200000 });
-  const blocks = [{ page: 1, x: 72, y: 720, w: 400, h: 14, text }];
-  const payload = JSON.stringify({ kind: 'ocr-layout-export-v1', blocks });
-  return result('ocr.export-layout-preserving', { method: 'local-ocr-layout-export', payload, payloadSha256: createHash('sha256').update(payload).digest('hex'), blockCount: blocks.length });
-}
-export function ocrScreenshotCapture(ctx = {}) {
-  const region = ctx.region ?? { x: 0, y: 0, width: 100, height: 40 };
-  if (!(region.width > 0 && region.height > 0)) fail('INVALID_REGION', 'region size', 400);
-  const text = requireString(ctx.text ?? 'Screenshot OCR', 'text', { min: 1, max: 5000 });
-  return result('ocr.screenshot-capture', { method: 'local-ocr-screenshot-region', region, text, textSha256: createHash('sha256').update(text).digest('hex') });
-}
+
+const scanAcquire = scannerAcquire;
+
+export {
+  scanAcquire,
+  scanDuplexFeeder,
+  scanAppendToDocument,
+  ocrRecognizeText,
+  ocrCleanup,
+  ocrEditableOutput,
+  ocrSuspectReview,
+  ocrLanguageDetectionSelection,
+  ocrZonesLayout,
+  ocrTableRecognition,
+  ocrUserDictionariesTraining,
+  ocrBatchRecognition,
+  ocrExportLayoutPreserving,
+  ocrScreenshotCapture,
+};
 
 export const handlers = Object.freeze({
   async 'scan.acquire'(ctx = {}) { return scanAcquire(ctx); },

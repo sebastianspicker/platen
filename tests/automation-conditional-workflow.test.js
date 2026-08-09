@@ -33,6 +33,10 @@ function request(overrides = {}) {
   return { principal: 'caller.one', grant, source, workflow: workflow(), idempotencyKey: 'conditional-1', ...overrides };
 }
 
+function releaseRequest(value, executionId = conditionalExecutionId(normalizeAutomationConditionalExecuteRequest(value))) {
+  return { principal: value.principal, grant: value.grant, executionId };
+}
+
 function setup({ facts = null, authority = null, submit = null, cancel = null } = {}) {
   const calls = { authorize: [], facts: 0, submit: [], cancel: [] };
   const api = { async submit(value) {
@@ -193,15 +197,19 @@ test('close aborts active executions and cancels all admitted jobs without dupli
   assert.deepEqual(state.calls.cancel, ['job_1', 'job_2']);
 });
 
-test('internal failure cleans prior admissions and preserves cleanup failure with the primary error', async () => {
+test('internal failure retries transient queued-job cleanup on close', async () => {
   const primary = Object.assign(new Error('queue failed'), { code: 'QUEUE_FAILED' });
   const cleanup = Object.assign(new Error('cancel failed'), { code: 'CANCEL_FAILED' });
+  let cancellationAttempts = 0;
   const state = setup({
     submit: async (value, index) => {
       if (index === 2) throw primary;
       return { schemaVersion: 1, idempotent: false, job: { id: 'job_1', type: value.operation.id, status: 'pending' } };
     },
-    cancel: async () => { throw cleanup; },
+    cancel: async () => {
+      cancellationAttempts += 1;
+      if (cancellationAttempts === 1) throw cleanup;
+    },
   });
   const value = request({ workflow: workflow([{ stepId: 'first', condition: { field: 'document.pageCount', operator: 'gte', value: 1 }, trueBranch: op(inspect), falseBranch: empty },
     { stepId: 'second', condition: { field: 'workflow.previousStatus', operator: 'eq', value: 'queued' }, trueBranch: op(inspect), falseBranch: empty }]) });
@@ -213,5 +221,87 @@ test('internal failure cleans prior admissions and preserves cleanup failure wit
   });
   assert.deepEqual(state.calls.cancel, ['job_1']);
   await assert.rejects(state.service.close(), (error) => error === cleanup);
-  assert.deepEqual(state.calls.cancel, ['job_1']);
+  assert.deepEqual(state.calls.cancel, ['job_1', 'job_1']);
+});
+
+test('successful release hands durable jobs off so close does not cancel them', async () => {
+  const state = setup();
+  const value = request({ workflow: workflow([{ stepId: 'one', condition: { field: 'document.pageCount', operator: 'gte', value: 1 }, trueBranch: op(inspect), falseBranch: empty }]) });
+  const result = await state.service.execute(value);
+  const receipt = await state.service.release(releaseRequest(value, result.executionId));
+  assert.deepEqual(receipt, { schemaVersion: 1, executionId: result.executionId, released: true, localOnly: true });
+  assert.equal(Object.isFrozen(receipt), true);
+  assert.deepEqual(Object.keys(receipt).sort(), ['executionId', 'localOnly', 'released', 'schemaVersion']);
+  await state.service.close();
+  assert.deepEqual(state.calls.cancel, []);
+  await assert.rejects(state.service.release(releaseRequest(value, result.executionId)), { code: 'AUTOMATION_CONDITIONAL_CLOSED', status: 409 });
+});
+
+test('unauthorized or mismatched release does not detach the execution', async () => {
+  const mismatched = setup();
+  const value = request({ workflow: workflow([{ stepId: 'one', condition: { field: 'document.pageCount', operator: 'gte', value: 1 }, trueBranch: op(inspect), falseBranch: empty }]) });
+  const result = await mismatched.service.execute(value);
+  await assert.rejects(mismatched.service.release({
+    principal: 'other.caller', grant: { grantId: grant.grantId, principal: 'other.caller' }, executionId: result.executionId,
+  }), { code: 'AUTOMATION_CONDITIONAL_NOT_FOUND', status: 404 });
+  await mismatched.service.release(releaseRequest(value, result.executionId));
+  await mismatched.service.close();
+  assert.deepEqual(mismatched.calls.cancel, []);
+
+  const denied = setup({ authority: {
+    async authorize(_grant, context) {
+      if (context.action === 'conditional.release') return false;
+    },
+  } });
+  const deniedResult = await denied.service.execute(value);
+  await assert.rejects(denied.service.release(releaseRequest(value, deniedResult.executionId)), {
+    code: 'AUTOMATION_CONDITIONAL_CAPABILITY_DENIED', status: 403,
+  });
+  await denied.service.close();
+  assert.deepEqual(denied.calls.cancel, ['job_1']);
+});
+
+test('failed execution cannot be released', async () => {
+  const state = setup({ submit: async () => { throw new Error('queue unavailable'); } });
+  const value = request({ workflow: workflow([{ stepId: 'one', condition: { field: 'document.pageCount', operator: 'gte', value: 1 }, trueBranch: op(inspect), falseBranch: empty }]) });
+  await assert.rejects(state.service.execute(value), /queue unavailable/u);
+  await assert.rejects(state.service.release(releaseRequest(value)), /queue unavailable/u);
+  await state.service.close();
+});
+
+test('replay after release reuses durable API idempotency without widening the workflow', async () => {
+  const durable = new Map();
+  const state = setup({ submit: async (value, index) => {
+    const prior = durable.get(value.idempotencyKey);
+    if (prior) return { ...prior, idempotent: true };
+    const result = { schemaVersion: 1, idempotent: false, job: { id: `job_${index}`, type: value.operation.id, status: 'pending' } };
+    durable.set(value.idempotencyKey, result);
+    return result;
+  } });
+  const value = request({ workflow: workflow([{ stepId: 'one', condition: { field: 'document.pageCount', operator: 'gte', value: 1 }, trueBranch: op(inspect), falseBranch: empty }]) });
+  const first = await state.service.execute(value);
+  await state.service.release(releaseRequest(value, first.executionId));
+  const replay = await state.service.execute(value);
+  assert.deepEqual(replay.steps.flatMap(({ jobs }) => jobs).map(({ id }) => id), first.steps.flatMap(({ jobs }) => jobs).map(({ id }) => id));
+  assert.equal(replay.workflowId, first.workflowId);
+  assert.equal(replay.queuedCount, first.queuedCount);
+  assert.equal(state.calls.submit.length, 2);
+  assert.equal(durable.size, 1);
+  await state.service.release(releaseRequest(value, replay.executionId));
+  await state.service.close();
+  assert.deepEqual(state.calls.cancel, []);
+});
+
+test('cancel authorizes once with the bound source and workflow', async () => {
+  const state = setup();
+  const value = request({ workflow: workflow([{ stepId: 'one', condition: { field: 'document.pageCount', operator: 'gte', value: 1 }, trueBranch: op(inspect), falseBranch: empty }]) });
+  const result = await state.service.execute(value);
+  const before = state.calls.authorize.length;
+  await state.service.cancel(releaseRequest(value, result.executionId));
+  const cancelCalls = state.calls.authorize.slice(before);
+  assert.equal(cancelCalls.length, 1);
+  assert.equal(cancelCalls[0].context.action, 'conditional.cancel');
+  assert.deepEqual(cancelCalls[0].context.source, source);
+  assert.equal(cancelCalls[0].context.workflowId, value.workflow.workflowId);
+  await state.service.close();
 });

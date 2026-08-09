@@ -48,12 +48,16 @@ export class PdfInspectionResources {
   async listImages(documentId, { signal } = {}) { return this.#runListing(documentId, 'listImages', parseImages, 4 * 1024 * 1024, signal); }
   async listAttachments(documentId, { signal } = {}) { return this.#runListing(documentId, 'listAttachments', parseAttachments, 2 * 1024 * 1024, signal); }
   async #runListing(documentId, operation, parser, limit, signal) {
+    const document = this.#store.getDocument(documentId);
+    await this.#store.verifySource(documentId);
     const input = this.#store.getSourcePath(documentId);
     try {
       const result = await this.#adapter.execute(operation, { input }, {
         signal, timeoutMs: 20_000, maxStdoutBytes: limit, maxStderrBytes: 256 * 1024,
       });
-      return parser(`${result.stdout}\n${result.stderr}`);
+      const inventory = parser(result.stdout);
+      await this.#store.verifySource(documentId);
+      return Object.freeze(inventory.map((entry) => Object.freeze({ ...entry, sourceSha256: document.sha256 })));
     } catch (error) { throw mapEngineError(error); }
   }
 }

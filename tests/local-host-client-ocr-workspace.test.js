@@ -78,41 +78,47 @@ test('local host client requests bounded structural evidence', async () => {
 });
 
 test('local host client exposes typed page composition requests', async () => {
+  const primary = '11111111-1111-4111-8111-111111111111';
+  const secondary = '22222222-2222-4222-8222-222222222222';
+  const primarySha256 = 'a'.repeat(64);
+  const secondarySha256 = 'b'.repeat(64);
   const calls = [];
   const fetchImpl = async (path, options = {}) => {
     calls.push({ path, options });
     if (path === '/api/bootstrap') {
       return new Response(JSON.stringify({ sessionToken: token, engines: [] }), { status: 200 });
     }
-    if (path.endsWith('/split') || path.endsWith('/split-rule')) return new Response(JSON.stringify({ artifacts: [{ id: 'one' }] }), { status: 201 });
-    return new Response(JSON.stringify({ artifact: { id: path.split('/').at(-1) } }), { status: 201 });
+    if (path.endsWith('/split') || path.endsWith('/split-rule')) return new Response(JSON.stringify({ artifacts: [{}] }), { status: 201 });
+    return new Response(JSON.stringify({ artifact: {} }), { status: 201 });
   };
   const client = new LocalHostClient({ fetchImpl });
   await client.bootstrap();
 
-  assert.deepEqual(await client.splitDocument('doc'), [{ id: 'one' }]);
-  assert.deepEqual(await client.splitByPageCount('doc', 2), [{ id: 'one' }]);
-  await client.duplicatePages('doc', [2]);
-  await client.reversePages('doc');
-  await client.interleaveDocuments('doc', 'secondary');
-  await client.insertDocument('doc', 'secondary', 2);
-  await client.replacePages('doc', 'secondary', 2, 3);
+  const invalidReceipt = { code: 'INVALID_LOCAL_HOST' };
+  await assert.rejects(client.splitDocument(primary, primarySha256), invalidReceipt);
+  await assert.rejects(client.splitByPageCount(primary, primarySha256, 2), invalidReceipt);
+  await assert.rejects(client.duplicatePages(primary, primarySha256, [2]), invalidReceipt);
+  await assert.rejects(client.reversePages(primary, primarySha256), invalidReceipt);
+  await assert.rejects(client.interleaveDocuments(primary, primarySha256, secondary, secondarySha256), invalidReceipt);
+  await assert.rejects(client.insertDocument(primary, primarySha256, secondary, secondarySha256, 2), invalidReceipt);
+  await assert.rejects(client.replacePages(primary, primarySha256, secondary, secondarySha256, 2, 3), invalidReceipt);
 
   assert.deepEqual(calls.slice(1).map(({ path }) => path), [
-    '/api/documents/doc/split',
-    '/api/documents/doc/split-rule',
-    '/api/documents/doc/duplicate',
-    '/api/documents/doc/reverse',
-    '/api/documents/doc/interleave',
-    '/api/documents/doc/insert',
-    '/api/documents/doc/replace',
+    `/api/documents/${primary}/split`,
+    `/api/documents/${primary}/split-rule`,
+    `/api/documents/${primary}/duplicate`,
+    `/api/documents/${primary}/reverse`,
+    `/api/documents/${primary}/interleave`,
+    `/api/documents/${primary}/insert`,
+    `/api/documents/${primary}/replace`,
   ]);
-  assert.deepEqual(JSON.parse(calls[2].options.body), { pagesPerOutput: 2 });
-  assert.deepEqual(JSON.parse(calls[3].options.body), { pages: [2] });
-  assert.deepEqual(JSON.parse(calls[5].options.body), { secondaryDocumentId: 'secondary' });
-  assert.deepEqual(JSON.parse(calls[6].options.body), { secondaryDocumentId: 'secondary', afterPage: 2 });
+  assert.deepEqual(JSON.parse(calls[1].options.body), { sourceSha256: primarySha256 });
+  assert.deepEqual(JSON.parse(calls[2].options.body), { sourceSha256: primarySha256, pagesPerOutput: 2 });
+  assert.deepEqual(JSON.parse(calls[3].options.body), { sourceSha256: primarySha256, pages: [2] });
+  assert.deepEqual(JSON.parse(calls[5].options.body), { primarySourceSha256: primarySha256, secondaryDocumentId: secondary, secondarySourceSha256: secondarySha256 });
+  assert.deepEqual(JSON.parse(calls[6].options.body), { primarySourceSha256: primarySha256, secondaryDocumentId: secondary, secondarySourceSha256: secondarySha256, afterPage: 2 });
   assert.deepEqual(JSON.parse(calls[7].options.body), {
-    secondaryDocumentId: 'secondary', startPage: 2, endPage: 3,
+    primarySourceSha256: primarySha256, secondaryDocumentId: secondary, secondarySourceSha256: secondarySha256, startPage: 2, endPage: 3,
   });
   assert.equal(calls.slice(1).every(({ options }) => options.headers['X-Platen-Token'] === token), true);
 });

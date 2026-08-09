@@ -111,12 +111,27 @@ test('local host client streams self-contained portable project blobs through fi
 
 test('local host client exposes raster mutation and local comparison requests', async () => {
   const calls = [];
+  const primaryDocumentId = '11111111-1111-4111-8111-111111111111';
+  const secondaryDocumentId = '22222222-2222-4222-8222-222222222222';
+  const contentReport = (primary = primaryDocumentId, secondary = secondaryDocumentId) => ({
+    kind: 'content',
+    inputs: [
+      { documentId: primary, sha256: 'a'.repeat(64), role: 'primary' },
+      { documentId: secondary, sha256: 'b'.repeat(64), role: 'secondary' },
+    ],
+    stats: { added: 0, deleted: 0, unchanged: 1, changed: 0, leftPages: 1, rightPages: 1 },
+    pages: [{
+      page: 1, leftPresent: true, rightPresent: true,
+      runs: [{ kind: 'unchanged', text: 'same', count: 1 }],
+      stats: { added: 0, deleted: 0, unchanged: 1 },
+    }],
+  });
   const client = new LocalHostClient({ fetchImpl: async (path, options = {}) => {
     calls.push({ path, options });
     if (path === '/api/bootstrap') return new Response(JSON.stringify({ sessionToken: token }), { status: 200 });
-    if (path === '/api/comparisons/batch') return new Response(JSON.stringify({ report: { kind: 'batch' } }), { status: 200 });
+    if (path === '/api/comparisons/batch') return new Response(JSON.stringify({ report: { kind: 'batch', mode: 'content', reports: [contentReport()] } }), { status: 200 });
     if (path.endsWith('/mutation')) return new Response(JSON.stringify({ artifact: { id: 'raster' } }), { status: 201 });
-    if (path.endsWith('/compare')) return new Response(JSON.stringify({ report: { kind: 'content' } }), { status: 200 });
+    if (path.endsWith('/compare')) return new Response(JSON.stringify({ report: contentReport() }), { status: 200 });
     throw new Error(`unexpected path ${path}`);
   } });
   await client.bootstrap();
@@ -140,16 +155,16 @@ test('local host client exposes raster mutation and local comparison requests', 
     ...redaction,
     redactions: [{ page: 1, region: { x: 0, y: 0, width: 1, height: 1 }, removedText: 'private', extra: true }],
   }), TypeError);
-  assert.deepEqual(await client.compareDocuments('doc', 'secondary', 'content', { page: 1 }), { kind: 'content' });
-  assert.deepEqual(await client.compareBatch([{ primaryDocumentId: 'doc', secondaryDocumentId: 'secondary' }]), { kind: 'batch' });
+  assert.equal((await client.compareDocuments(primaryDocumentId, secondaryDocumentId, 'content')).kind, 'content');
+  assert.equal((await client.compareBatch([{ primaryDocumentId, secondaryDocumentId }])).kind, 'batch');
 
   assert.deepEqual(calls.slice(1).map(({ path }) => path), [
     '/api/documents/doc/mutation', '/api/documents/doc/mutation',
-    '/api/documents/doc/compare', '/api/comparisons/batch',
+    `/api/documents/${primaryDocumentId}/compare`, '/api/comparisons/batch',
   ]);
   assert.deepEqual(JSON.parse(calls[1].options.body), { operation: 'rotate', parameters: { degrees: 90 } });
   assert.deepEqual(JSON.parse(calls[3].options.body), {
-    secondaryDocumentId: 'secondary', mode: 'content', options: { page: 1 },
+    secondaryDocumentId, mode: 'content', options: {},
   });
   assert.equal(calls.slice(1).every(({ options }) => options.headers['X-Platen-Token'] === token), true);
 });

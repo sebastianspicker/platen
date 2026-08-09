@@ -10,5 +10,15 @@ export function createScannerDiscoveryController({ state, client, captureOperati
     } catch (error) { if (operationIsCurrent(operation)) { state.scannerDiscoveryStatus = error?.code === 'JOB_CANCELLED' || error?.status === 499 ? 'cancelled' : 'error'; state.scannerDiscoveryError = error?.message ?? String(error); } }
     finally { finishOperation(operation); render(); }
   }
-  return Object.freeze({ discoverScanners });
+  async function acquireScanner(deviceId) {
+    if (state.busyAction || state.host?.scannerAcquisitionReady !== true) return;
+    const operation = captureOperation(); state.scannerAcquisitionStatus = 'loading'; state.scannerAcquisitionError = null; state.scannerAcquisitionResult = null; state.scannerAcquisitionEvidence = null; render();
+    try {
+      const result = await client.acquireScanner({ deviceId, color: 'color', dpi: 300, signal: operation.controller.signal });
+      if (!operationIsCurrent(operation)) return;
+      state.scannerAcquisitionResult = result; state.scannerAcquisitionEvidence = result.evidence; state.scannerAcquisitionStatus = 'success'; announce(`Scanner acquisition completed: ${result.document.displayName} retained.`);
+    } catch (error) { if (operationIsCurrent(operation)) { state.scannerAcquisitionStatus = error?.code === 'JOB_CANCELLED' || error?.status === 499 ? 'cancelled' : 'error'; state.scannerAcquisitionError = error?.message ?? String(error); } }
+    finally { finishOperation(operation); render(); }
+  }
+  return Object.freeze({ discoverScanners, acquireScanner });
 }

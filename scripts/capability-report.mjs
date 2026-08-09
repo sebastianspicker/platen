@@ -7,17 +7,26 @@ const readJson = (relative) => JSON.parse(readFileSync(join(root, relative), 'ut
 const families = readJson('catalog/families.json');
 const capabilities = readJson('catalog/capabilities.json');
 const prototypeCoverage = readJson('catalog/prototype-coverage.json');
+const proofManifest = readJson('catalog/capability-proofs/proofs.json');
 const skeletons = ['ocr', 'signing', 'redaction', 'accessibility-remediation', 'ai', 'aec', 'prepress'].map((slug) => ({
   slug,
   manifest: readJson(`plugins/skeletons/${slug}/plugin.template.json`),
 }));
 const byId = new Map(capabilities.map((capability) => [capability.id, capability]));
 const coverageById = new Map(prototypeCoverage.records.map((record) => [record.id, record]));
+const proofById = new Map(proofManifest.records.map((record) => [record.capabilityId, record]));
 const claimedBySkeleton = new Set(skeletons.flatMap(({ manifest }) => manifest.capabilityIds));
 const implemented = capabilities.filter(({ delivery }) => delivery === 'implemented');
 const missing = capabilities.filter(({ delivery }) => delivery === 'planned');
 const missingInSkeletons = missing.filter(({ id }) => claimedBySkeleton.has(id));
 const outsideSkeletons = missing.filter(({ id }) => !claimedBySkeleton.has(id));
+const proofCounts = Object.fromEntries(['proven', 'partial', 'false', 'unaudited'].map((status) => [
+  status,
+  proofManifest.records.filter((record) => record.status === status).length,
+]));
+if (proofManifest.records.length !== capabilities.length || capabilities.some(({ id }) => !proofById.has(id))) {
+  throw new Error('Capability proof manifest must close over the capability catalog before generating the report.');
+}
 const tiers = ['exact-alpha', 'executable-subset', 'sidecar', 'service-only', 'descriptor', 'proposal', 'blocked', 'excluded'];
 const tierTitle = {
   'exact-alpha': 'Exact alpha behavior',
@@ -38,11 +47,12 @@ const lines = [
   '',
   `- Normalized capability records: ${capabilities.length}`,
   `- Professional delivery: ${implemented.length} implemented, ${missing.length} planned`,
+  `- Proof audit: ${proofCounts.proven} proven, ${proofCounts.partial} audited executable/limited partials, ${proofCounts.false} false/unavailable broad claims, ${proofCounts.unaudited} unaudited`,
   `- Prototype coverage records: ${prototypeCoverage.records.length}`,
   `- Planned records assigned to the seven requested skeletons: ${missingInSkeletons.length}`,
   `- Planned records assigned to core or other future packs: ${outsideSkeletons.length}`,
   '',
-  'Professional delivery is the catalog claim. Prototype tier is a separate, deliberately narrower statement of what the local prototype can presently do.',
+  'Professional delivery is the catalog claim. Prototype tier is a separate, deliberately narrower statement of what the local prototype can presently do. Planned records may have a narrower prototype subset, but that is not a professional implementation. No unaudited capability IDs are present.',
   '',
   '## Professional delivery implemented now',
   '',
@@ -57,7 +67,7 @@ for (const tier of tiers) {
   lines.push(`### ${tierTitle[tier]} (${records.length})`, '');
   for (const { id, delivery } of records) {
     const capability = byId.get(id);
-    lines.push(`- \`${id}\`: ${capability?.title ?? 'MISSING CATALOG RECORD'} (professional delivery: ${delivery})`);
+    lines.push(`- \`${id}\`: ${capability?.title ?? 'MISSING CATALOG RECORD'} (professional delivery: ${delivery}; proof: ${proofById.get(id)?.status ?? 'MISSING PROOF RECORD'})`);
   }
   lines.push('');
 }

@@ -18,11 +18,11 @@ function report(profile = 'print-review', sha256 = source.sha256) {
   return buildPreflightReport({
     profile, document: { sha256 },
     inspection: { pageCount: 1, encrypted: 'no', javascript: 'no', pdfVersion: '1.7' },
-    structure: { pageRange: { firstPage: 1, lastPage: 1, truncated: false },
+    structure: { sourceDigest: source.sha256, pageRange: { firstPage: 1, lastPage: 1, truncated: false },
       pageBoxes: [{ page: 1, widthPoints: 612, heightPoints: 792,
         boxes: { mediaBox: { left: 0, bottom: 0, right: 612, top: 792 } } }],
       xmpMetadata: { present: true } },
-    fonts: [{ name: 'Embedded', embedded: 'yes', unicode: 'yes' }], images: [],
+    fonts: [{ name: 'Embedded', embedded: 'yes', unicode: 'yes', sourceSha256: source.sha256 }], images: [],
   });
 }
 
@@ -90,7 +90,7 @@ test('source drift and forged engine evidence fail closed with stream cleanup', 
   await assert.rejects(drift.service.submit(request()), { code: 'AUTOMATION_PREFLIGHT_SERVER_SOURCE_DRIFT', status: 409 });
   assert.equal(drift.calls.run.length, 0); assert.deepEqual(drift.calls.destroy, ['drift']);
   const forged = setup({ run: () => report('print-review', 'b'.repeat(64)) });
-  await assert.rejects(forged.service.submit(request()), { code: 'AUTOMATION_PREFLIGHT_SERVER_RESULT_INVALID', status: 502 });
+  await assert.rejects(forged.service.submit(request()), { code: 'INVALID_PREFLIGHT_INPUT', status: 400 });
   assert.deepEqual(forged.calls.destroy, ['source_1']);
   const malformed = setup({ run: () => ({ kind: 'preflight-review' }) });
   await assert.rejects(malformed.service.submit(request()), { code: 'AUTOMATION_PREFLIGHT_SERVER_RESULT_INVALID', status: 502 });

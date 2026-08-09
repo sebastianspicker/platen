@@ -34,10 +34,11 @@ export function createPdfKitMutationFixtureStore(context) {
     cleanupJob: async (workspace) => {
       context.cleaned = true;
       await rm(workspace, { recursive: true, force: true });
+      if (context.cleanupFailure) throw context.cleanupFailure;
     },
     promotePdfArtifact: async (_id, outputPath, options) => {
       context.promoted = { output: await readFile(outputPath), options };
-      return {
+      const artifact = {
         id: '22222222-2222-4222-8222-222222222222',
         documentId,
         displayName: options.displayName,
@@ -46,6 +47,12 @@ export function createPdfKitMutationFixtureStore(context) {
         sha256: createHash('sha256').update(context.promoted.output).digest('hex'),
         operation: options.operation,
       };
+      context.abortAfterPromotion?.();
+      return artifact;
+    },
+    deleteArtifact: async (id) => {
+      context.deleted.push(id);
+      if (context.deleteFailure) throw context.deleteFailure;
     },
   };
 }

@@ -8,8 +8,50 @@ export class CollaborationDomain extends LocalWorkspaceDomain {
   constructor(workspaceStateStore, options) { super(workspaceStateStore, options, 'collaboration'); }
 
   createProject(documentId, { id: suppliedId, name, offline = true }, options = {}) { if (offline !== true) fail('LOCAL_ONLY', 'Projects in this prototype are local and offline only.'); const record = { id: this.newId('project', suppliedId), type: 'local-project', name: text(name, 'name'), offline: true, createdAt: this.now() }; return this.write(documentId, 'workflowRecords', record, options.expectedRevision); }
-  createRevision(documentId, { id: suppliedId, label }, options = {}) { const record = { id: this.newId('revision', suppliedId), type: 'revision-status', label: text(label, 'label'), status: 'draft', createdAt: this.now() }; return this.write(documentId, 'workflowRecords', record, options.expectedRevision); }
-  transitionRevision(documentId, revisionId, nextStatus, { expectedRevision } = {}) { const record = this.get(documentId, 'workflowRecords', id(revisionId, 'revisionId')); if (record.type !== 'revision-status' || !REVISION_TRANSITIONS[record.status]?.includes(nextStatus)) fail('INVALID_STATUS_TRANSITION', 'This local revision transition is not allowed.', 409); return this.write(documentId, 'workflowRecords', { ...record, status: nextStatus, updatedAt: this.now() }, expectedRevision, 'update'); }
+  createRevision(documentId, { id: suppliedId, label, sourceSha256 }, options = {}) {
+    const record = {
+      id: this.newId('revision', suppliedId),
+      type: 'revision-status',
+      label: text(label, 'label'),
+      status: 'draft',
+      createdAt: this.now(),
+    };
+    if (sourceSha256 !== undefined) {
+      record.sourceSha256 = digest(sourceSha256, 'sourceSha256');
+      if (!Number.isSafeInteger(options.expectedRevision) || options.expectedRevision < 0) {
+        fail('REVISION_CONFLICT', 'Source-bound revision creation requires the current workspace revision.', 409);
+      }
+      if (this.snapshot(documentId).revision !== options.expectedRevision) {
+        fail('REVISION_CONFLICT', 'Source-bound revision creation requires the current workspace revision.', 409);
+      }
+      record.basisRevision = options.expectedRevision;
+    }
+    return this.write(documentId, 'workflowRecords', record, options.expectedRevision);
+  }
+  transitionRevision(documentId, revisionId, nextStatus, { sourceSha256, expectedRevision } = {}) {
+    const sourceBound = sourceSha256 !== undefined;
+    const trustedSource = sourceBound ? digest(sourceSha256, 'sourceSha256') : undefined;
+    if (sourceBound && (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0
+      || this.snapshot(documentId).revision !== expectedRevision)) {
+      fail('REVISION_CONFLICT', 'Source-bound revision transition requires the current workspace revision.', 409);
+    }
+    const record = this.get(documentId, 'workflowRecords', id(revisionId, 'revisionId'));
+    if (sourceBound && record.sourceSha256 !== trustedSource) {
+      fail('SOURCE_VERSION_MISMATCH', 'Collaboration revision source digest does not match the stored source.', 409);
+    }
+    if (record.type !== 'revision-status' || !REVISION_TRANSITIONS[record.status]?.includes(nextStatus)) {
+      fail('INVALID_STATUS_TRANSITION', 'This local revision transition is not allowed.', 409);
+    }
+    if (sourceBound) {
+      return this.write(documentId, 'workflowRecords', {
+        ...record,
+        status: nextStatus,
+        basisRevision: expectedRevision,
+        updatedAt: this.now(),
+      }, expectedRevision, 'update');
+    }
+    return this.write(documentId, 'workflowRecords', { ...record, status: nextStatus, updatedAt: this.now() }, expectedRevision, 'update');
+  }
   createWorkspace(documentId, { id: suppliedId, name }, options = {}) { const record = { id: this.newId('workspace', suppliedId), type: 'local-workspace', name: text(name, 'name'), localOnly: true, createdAt: this.now() }; return this.write(documentId, 'workflowRecords', record, options.expectedRevision); }
   createReviewSession(documentId, { id: suppliedId, workspaceId, participants = [] }, options = {}) { const record = { id: this.newId('review', suppliedId), type: 'review-session', workspaceId: id(workspaceId, 'workspaceId'), participants: list(participants, 'participants', 100).map((participant) => id(participant, 'participant')), createdAt: this.now() }; return this.write(documentId, 'reviewRecords', record, options.expectedRevision); }
   recordParticipant(documentId, { id: suppliedId, name, role }, options = {}) { const record = { id: this.newId('participant', suppliedId), type: 'participant', name: text(name, 'name'), role: text(role, 'role'), createdAt: this.now() }; return this.write(documentId, 'reviewRecords', record, options.expectedRevision); }

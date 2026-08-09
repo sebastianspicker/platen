@@ -72,7 +72,7 @@ export function normalizePdfAccessibilityLinksBookmarks(value) {
     if (!Number.isSafeInteger(targetPage) || targetPage < 1 || targetPage > 100) throw invalid();
     return Object.freeze({ locator: locator(row.locator.value), title: boundedText(row.title.value), targetPage });
   });
-  if (links.length + bookmarks.length < 1) throw invalid('At least one link or bookmark repair is required.');
+  if (links.length + bookmarks.length < 1 || links.length + bookmarks.length > MAX_ITEMS) throw invalid('The repair must select from one through 64 source locators.');
   const fingerprints = [...links, ...bookmarks].map((entry) => entry.locator.fingerprint);
   if (new Set(fingerprints).size !== fingerprints.length) throw invalid('A source locator may be used only once.');
   return Object.freeze({

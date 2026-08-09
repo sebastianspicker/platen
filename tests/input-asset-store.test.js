@@ -6,8 +6,21 @@ import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import test from 'node:test';
 import { InputAssetStore, validateMagic } from '../scripts/host/input-asset-store.mjs';
+import { isOdtPackage } from '../scripts/host/odt-package.mjs';
+import { writeStoredZip } from '../scripts/host/pdf-ooxml-export-zip.mjs';
 
 const png = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0]);
+const odtContent = '<?xml version="1.0" encoding="UTF-8"?><office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" office:version="1.3"><office:body><office:text><text:p>Local ODT</text:p></office:text></office:body></office:document-content>';
+const odtManifest = '<?xml version="1.0" encoding="UTF-8"?><manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.3"><manifest:file-entry manifest:full-path="/" manifest:media-type="application/vnd.oasis.opendocument.text"/><manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/></manifest:manifest>';
+
+function odtBytes(mediaType = 'application/vnd.oasis.opendocument.text', extra = []) {
+  return writeStoredZip([
+    ['mimetype', mediaType],
+    ['content.xml', odtContent],
+    ['META-INF/manifest.xml', odtManifest],
+    ...extra,
+  ]);
+}
 
 async function createStore(options = {}) {
   const root = await mkdtemp(join(tmpdir(), 'platen-input-test-'));
@@ -64,4 +77,31 @@ test('input signature checks cover office, text, HTML, PostScript, and CAD famil
   assert.equal(validateMagic('.ps', Buffer.from('%!PS-Adobe-3.0')), true);
   assert.equal(validateMagic('.dxf', Buffer.from('0\nSECTION\n2\nHEADER')), true);
   assert.equal(validateMagic('.txt', Buffer.from([0, 1, 2])), false);
+});
+
+test('ODT admission requires the exact bounded ODF text package identity', async () => {
+  const valid = odtBytes();
+  assert.equal(isOdtPackage(valid), true);
+  const { store } = await createStore();
+  const asset = await store.createInput({
+    stream: Readable.from([valid]),
+    displayName: 'document.odt',
+    mediaType: 'application/vnd.oasis.opendocument.text',
+  });
+  assert.equal(asset.extension, '.odt');
+  for (const bytes of [
+    Buffer.from('PK\x03\x04arbitrary-zip'),
+    odtBytes('application/vnd.oasis.opendocument.spreadsheet'),
+    odtBytes('application/vnd.oasis.opendocument.presentation'),
+    odtBytes('application/vnd.openxmlformats-officedocument.wordprocessingml.document', [
+      ['[Content_Types].xml', '<Types/>'], ['word/document.xml', '<document/>'],
+    ]),
+  ]) {
+    assert.equal(isOdtPackage(bytes), false);
+    await assert.rejects(store.createInput({
+      stream: Readable.from([bytes]),
+      displayName: 'renamed.odt',
+      mediaType: 'application/vnd.oasis.opendocument.text',
+    }), { code: 'INVALID_INPUT_SIGNATURE', status: 415 });
+  }
 });

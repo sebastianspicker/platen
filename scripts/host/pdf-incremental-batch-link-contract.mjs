@@ -26,6 +26,15 @@ function integer(value, label) {
   return value;
 }
 
+function isWithinPageBounds(sourcePage, targetPage) {
+  return sourcePage >= 1 && targetPage >= 1 && sourcePage <= 100 && targetPage <= 100;
+}
+
+function isValidRectangle(rect) {
+  return Object.values(rect).every((number) => Math.abs(number) <= MAX_COORDINATE)
+    && rect.left < rect.right && rect.bottom < rect.top;
+}
+
 function normalizeLink(value, index) {
   const item = exactObject(value, ['sourcePage', 'targetPage', 'rect'], `links[${index}]`);
   const sourcePage = integer(item.sourcePage.value, `links[${index}].sourcePage`);
@@ -37,9 +46,7 @@ function normalizeLink(value, index) {
     right: integer(rect.right.value, `links[${index}].rect.right`),
     top: integer(rect.top.value, `links[${index}].rect.top`),
   });
-  if (sourcePage < 1 || targetPage < 1 || sourcePage > 100 || targetPage > 100
-    || Object.values(normalizedRect).some((number) => Math.abs(number) > MAX_COORDINATE)
-    || normalizedRect.left >= normalizedRect.right || normalizedRect.bottom >= normalizedRect.top) {
+  if (!isWithinPageBounds(sourcePage, targetPage) || !isValidRectangle(normalizedRect)) {
     throw invalid(`links[${index}] is outside the bounded page or rectangle limits.`);
   }
   return Object.freeze({ sourcePage, targetPage, rect: normalizedRect });
@@ -61,4 +68,3 @@ export function normalizeIncrementalBatchGoToLinks(value) {
   }
   return Object.freeze({ profile: INCREMENTAL_BATCH_LINK_PROFILE, links: Object.freeze(normalized) });
 }
-

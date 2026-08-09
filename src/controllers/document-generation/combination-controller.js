@@ -2,7 +2,7 @@ function isPdf(file) {
   return file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
 }
 
-async function prepareDocuments(context, files, operation, documentIds, inputIds) {
+async function prepareDocuments(context, files, operation, documents, inputIds) {
   const { state, client, operationIsCurrent, render } = context;
   for (const [index, file] of files.entries()) {
     if (!operationIsCurrent(operation)) return false;
@@ -23,21 +23,21 @@ async function prepareDocuments(context, files, operation, documentIds, inputIds
         signal: operation.controller.signal,
       });
     }
-    documentIds.add(hosted.id);
+    documents.set(hosted.id, hosted);
   }
   return true;
 }
 
-async function mergePreparedDocuments(context, operation, documentIds) {
+async function mergePreparedDocuments(context, operation, documents) {
   const { state, client, operationIsCurrent, render, FileCtor } = context;
-  let [combinedId, ...remainingIds] = [...documentIds];
-  for (const [index, secondaryId] of remainingIds.entries()) {
+  let [combined, ...remaining] = [...documents.values()];
+  for (const [index, secondary] of remaining.entries()) {
     if (!operationIsCurrent(operation)) {
       return { stale: true, combinedId: null };
     }
-    state.busyAction = `Combining PDF ${index + 2} of ${documentIds.size}…`;
+    state.busyAction = `Combining PDF ${index + 2} of ${documents.size}…`;
     render();
-    const artifact = await client.mergeDocuments(combinedId, secondaryId, {
+    const artifact = await client.mergeDocuments(combined.id, combined.sha256, secondary.id, secondary.sha256, {
       signal: operation.controller.signal,
     });
     const blob = await client.artifact(artifact.id, {
@@ -51,10 +51,10 @@ async function mergePreparedDocuments(context, operation, documentIds) {
     const hosted = await client.upload(intermediate, {
       signal: operation.controller.signal,
     });
-    documentIds.add(hosted.id);
-    combinedId = hosted.id;
+    documents.set(hosted.id, hosted);
+    combined = hosted;
   }
-  return { stale: false, combinedId };
+  return { stale: false, combinedId: combined.id };
 }
 
 function combinedFile(context, blob) {
@@ -64,10 +64,10 @@ function combinedFile(context, blob) {
   return new FileCtor([blob], `${name}.pdf`, { type: 'application/pdf' });
 }
 
-async function cleanupInputsAndDocuments(context, inputIds, documentIds) {
+async function cleanupInputsAndDocuments(context, inputIds, documents) {
   const { client, removeHostDocument } = context;
   await Promise.all([...inputIds].map((id) => client.deleteInput(id).catch(() => {})));
-  await Promise.all([...documentIds].map((id) => removeHostDocument(id)));
+  await Promise.all([...documents.keys()].map((id) => removeHostDocument(id)));
 }
 
 async function runCombineMixedFiles(context, fileList) {
@@ -95,7 +95,7 @@ async function runCombineMixedFiles(context, fileList) {
   state.busyAction = `Preparing ${files.length} local files for combination…`;
   state.error = null;
   render();
-  const documentIds = new Set();
+  const documents = new Map();
   const inputIds = new Set();
   try {
     await connectLocalHost();
@@ -103,11 +103,11 @@ async function runCombineMixedFiles(context, fileList) {
       context,
       files,
       operation,
-      documentIds,
+      documents,
       inputIds,
     );
     if (!prepared) return;
-    const mergeResult = await mergePreparedDocuments(context, operation, documentIds);
+    const mergeResult = await mergePreparedDocuments(context, operation, documents);
     if (mergeResult.stale) return;
     const { combinedId } = mergeResult;
     const blob = await client.documentSource(combinedId, {
@@ -122,7 +122,7 @@ async function runCombineMixedFiles(context, fileList) {
   } catch (error) {
     reportOperationError(error, operation);
   } finally {
-    await cleanupInputsAndDocuments(context, inputIds, documentIds);
+    await cleanupInputsAndDocuments(context, inputIds, documents);
     const picker = documentApi.querySelector('#combine-picker');
     if (picker) {
       picker.value = '';

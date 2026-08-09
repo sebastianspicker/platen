@@ -1,4 +1,6 @@
 import { icon } from './icons.js';
+import { isViewerAnalysisBound } from '../core/viewer-analysis-binding.js';
+import { deriveViewerGridVisibility, isViewerDocumentBound } from '../core/viewer-grid-overlay.js';
 import { brandAndMenu, errorBanner, escapeHtml, rail } from './shared.js';
 import { documentTabsView } from './document-tabs-view.js';
 import {
@@ -33,9 +35,13 @@ export function editorView(state) {
   const frameClass = document.isOpen
     ? `paper-frame zoom-${Math.round(state.zoom * 10)} rotation-${state.rotation}`
     : 'paper-frame paper-frame-empty';
-  if (document.isOpen && state.viewerMode === 'split' && analysis.status === 'ready') {
+  const sourceReady = isViewerDocumentBound(document) && isViewerAnalysisBound(analysis);
+  if (document.isOpen && state.viewerMode === 'split' && sourceReady) {
     return splitProofEditor(state, analysis, workspaceRelation);
   }
+  const gridVisible = sourceReady && deriveViewerGridVisibility({
+    requested: state.showGrid === true, document, analysis,
+  });
   return `<div class="app-shell ${state.presentationMode ? 'is-presentation' : ''}">
     ${brandAndMenu('editor', {
       context: document.isOpen ? document.name : 'No source open',
@@ -46,7 +52,7 @@ export function editorView(state) {
       <div class="editor-layout">
         ${rail('editor')}
         ${pagesPanel(state)}
-        <section class="document-stage ${state.dragging ? 'is-dragging' : ''} ${state.showGrid ? 'show-grid' : ''}" data-drop-zone aria-label="Document workspace">
+        <section class="document-stage ${state.dragging ? 'is-dragging' : ''} ${gridVisible ? 'show-grid' : ''}" data-drop-zone aria-label="Document workspace">
           <div class="drop-overlay">Drop a local PDF to open it</div>
           ${analysis.status === 'loading' ? `<div class="processing-chip" role="status"><span class="spinner"></span>${escapeHtml(analysis.progress ?? 'Analyzing locally…')}</div>` : ''}
           ${proofStrip(state, analysis)}

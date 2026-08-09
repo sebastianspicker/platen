@@ -11,6 +11,7 @@ import { PopplerAdapter } from '../scripts/host/adapters/poppler.mjs';
 import { ConversionService, assertInlineOnlyHtml } from '../scripts/host/conversion-service.mjs';
 import { prepareBlankDocumentExport } from '../scripts/host/conversion-blank-export.mjs';
 import { preparePngPdfDocumentExport } from '../scripts/host/conversion-png-export.mjs';
+import { runConversionJob } from '../scripts/host/conversion-job-runtime.mjs';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
 import { EngineRegistry } from '../scripts/host/engine-registry.mjs';
 import { InputAssetStore } from '../scripts/host/input-asset-store.mjs';
@@ -53,9 +54,29 @@ async function extractedText(poppler, path) {
 }
 
 test('inline HTML policy rejects active and external content', () => {
-  assert.doesNotThrow(() => assertInlineOnlyHtml(Buffer.from('<!doctype html><p style="color:red">Local</p>')));
-  assert.throws(() => assertInlineOnlyHtml(Buffer.from('<script>alert(1)</script>')), { code: 'HTML_EXTERNAL_CONTENT_FORBIDDEN' });
-  assert.throws(() => assertInlineOnlyHtml(Buffer.from('<img src="https://example.test/a.png">')), { code: 'HTML_EXTERNAL_CONTENT_FORBIDDEN' });
+  assert.doesNotThrow(() => assertInlineOnlyHtml(Buffer.from('<!doctype html><p>Local</p>')));
+  for (const html of ['<script>alert(1)</script>', '<img src="https://example.test/a.png">', '<img src="./a.png">',
+    '<style>p{color:red}</style>', '<p style="color:red">Styled</p>', '<form><input></form>', '<button>Submit</button>', '<p contenteditable>Edit</p>']) {
+    assert.throws(() => assertInlineOnlyHtml(Buffer.from(html)), { code: 'HTML_EXTERNAL_CONTENT_FORBIDDEN' });
+  }
+  for (const bytes of [Buffer.from([0xc3, 0x28]), Buffer.from('<p>bad\0text</p>')]) {
+    assert.throws(() => assertInlineOnlyHtml(bytes), { code: 'HTML_INVALID_ENCODING' }); }
+});
+
+test('conversion revokes a promoted derived document when cancellation arrives after promotion', async (context) => {
+  const root = await mkdtemp(join(tmpdir(), 'platen-conversion-revoke-'));
+  context.after(() => rm(root, { recursive: true, force: true }));
+  const controller = new AbortController(); const deleted = [];
+  const owner = {
+    createJobWorkspace: async () => mkdtemp(join(root, 'job-')),
+    cleanupJob: async (path) => rm(path, { recursive: true, force: true }),
+    verifySource: async () => true,
+    deleteDocument: async (id) => deleted.push(id),
+  };
+  await assert.rejects(runConversionJob({ owner, resourceId: 'source', externalSignal: controller.signal, action: async ({ registerPromotedDocument }) => {
+    registerPromotedDocument({ id: 'derived' }); controller.abort(); return { id: 'derived' };
+  } }), { code: 'JOB_CANCELLED', status: 499 });
+  assert.deepEqual(deleted, ['derived']);
 });
 
 test('local factory creates derived blank and clipboard-style text PDFs', async (context) => {
@@ -193,7 +214,10 @@ test('office/text fallback writes a local PDF when LibreOffice aborts and keeps 
   const text = await inputs.createInput({ stream: Readable.from([Buffer.from('FALLBACK LOCAL TEXT')]), displayName: 'notes.txt', mediaType: 'text/plain' });
   const converted = await service.convertInput(text.id);
   assert.equal(converted.operation.type, 'office-to-pdf');
-  assert.deepEqual(converted.operation.validation.validators, ['source-sha256', 'pdfinfo-page-count']);
+  assert.deepEqual(converted.operation.validation.validators, [
+    'source-sha256', 'deterministic-text-fallback', 'pdfinfo-page-count',
+  ]);
+  assert.equal(converted.operation.parameters.conversionMode, 'text-fallback');
   assert.match((await readFile(documents.getSourcePath(converted.id))).toString('binary'), /FALLBACK LOCAL TEXT/);
 
   const legacy = await inputs.createInput({
@@ -213,6 +237,9 @@ test('LibreOffice or the deterministic text fallback converts text to a validate
   const source = await inputs.createInput({ stream: Readable.from([Buffer.from('LIBREOFFICE LOCAL')]), displayName: 'notes.txt', mediaType: 'text/plain' });
   const officeDocument = await service.convertInput(source.id);
   assert.equal(officeDocument.operation.type, 'office-to-pdf');
+  const validators = officeDocument.operation.validation.validators;
+  assert.notEqual(validators.includes('libreoffice-exit-zero'), validators.includes('deterministic-text-fallback'));
+  assert.equal(officeDocument.operation.parameters.conversionMode, validators.includes('libreoffice-exit-zero') ? 'libreoffice' : 'text-fallback');
   assert.match(await extractedText(poppler, documents.getSourcePath(officeDocument.id)), /LIBREOFFICE LOCAL/);
   assert.equal(await inputs.verifyInput(source.id), true);
 });
@@ -328,8 +355,46 @@ test('installed Ghostscript rewrites a PDF without changing page count or source
     stream: Readable.from([createTextPdf({ pages: ['One', 'Two'] })]), displayName: 'source.pdf',
   });
   const optimized = await service.rewriteDocument(source.id, 'optimize');
+  const flattened = await service.rewriteDocument(source.id, 'flatten-transparency');
   assert.equal(optimized.origin, 'derived');
   assert.equal(optimized.operation.type, 'optimize-pdf');
   assert.equal(optimized.operation.validation.pageCount, 2);
+  assert.equal(flattened.operation.type, 'flatten-transparency');
+  assert.equal(flattened.operation.validation.pageCount, 2);
+  assert.equal(await documents.verifySource(source.id), true);
+});
+
+test('rewrite revokes a promoted document when retained bytes drift after workspace inspection', async (context) => {
+  const root = await mkdtemp(join(tmpdir(), 'platen-rewrite-retained-race-'));
+  const documents = await new DocumentStore({ root }).initialize();
+  const inputs = await new InputAssetStore({ root }).initialize();
+  context.after(() => documents.dispose());
+  const sourceBytes = createTextPdf({ pages: ['Original'] });
+  const replacementBytes = createTextPdf({ pages: ['Replacement one', 'Replacement two'] });
+  const source = await documents.createDocument({ stream: Readable.from([sourceBytes]), displayName: 'source.pdf' });
+  let promoted = null;
+  const createDocument = documents.createDocument.bind(documents);
+  documents.createDocument = async (...args) => (promoted = await createDocument(...args));
+  let inspections = 0;
+  const poppler = {
+    async execute(operation, { input }) {
+      assert.equal(operation, 'inspect');
+      inspections += 1;
+      if (inspections === 2) {
+        await writeFile(input, replacementBytes, { mode: 0o600 });
+        return { stdout: 'Pages: 1\n' };
+      }
+      return { stdout: `Pages: ${inspections >= 3 ? 2 : 1}\n` };
+    },
+  };
+  const service = new ConversionService({ documents, inputs, poppler,
+    ghostscript: { async execute(_operation, { output }) { await writeFile(output, createTextPdf({ pages: ['Workspace one'] }), { mode: 0o600 }); } },
+    libreOffice: { execute: async () => {} },
+    imageMagick: { execute: async () => {} },
+  });
+  await assert.rejects(service.rewriteDocument(source.id, 'flatten-transparency'), { code: 'DERIVED_PAGE_COUNT_MISMATCH', status: 502 });
+  assert.equal(inspections, 3);
+  assert.ok(promoted?.id);
+  assert.throws(() => documents.getDocument(promoted.id), { code: 'DOCUMENT_NOT_FOUND' });
   assert.equal(await documents.verifySource(source.id), true);
 });

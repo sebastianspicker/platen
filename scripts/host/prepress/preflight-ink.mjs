@@ -60,6 +60,12 @@ export function createPreflightInkOperations(core) {
           core.pdf.listImages(documentId, { signal: jobSignal }),
           core.pdf.inspectStructure(documentId, { firstPage: 1, lastPage, signal: jobSignal }),
         ]);
+        const sourceSha256 = core.store.getDocument(documentId).sha256;
+        if (structure?.sourceDigest !== sourceSha256
+          || fonts.some((font) => font?.sourceSha256 !== sourceSha256)
+          || images.some((image) => image?.sourceSha256 !== sourceSha256)) {
+          fail('PREFLIGHT_SOURCE_MISMATCH', 'Preflight resource and structure evidence must match the immutable source digest.', 502);
+        }
         await checkWorkspace();
         await core.assertInventory(workspace, new Set(['source.pdf']));
         const boundedStructure = structure.pageRange?.lastPage < info.pageCount

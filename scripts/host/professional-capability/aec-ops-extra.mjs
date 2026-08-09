@@ -110,15 +110,40 @@ export function aecBatchSlipSheet(ctx = {}) {
       const page = Number.isSafeInteger(s.page) ? s.page : i + 1;
       if (page < 1) fail('INVALID_SLIP', 'page must be ≥ 1.', 400);
       const note = requireString(String(s.note ?? 'Superseded'), 'slip.note', { min: 1, max: 200 });
-      return Object.freeze({ page, note });
+      const markups = (Array.isArray(s.markups) ? s.markups : [])
+        .slice(0, 50)
+        .map((markup) => requireString(
+          String(markup?.text ?? markup?.type ?? markup),
+          'slip.markup',
+          { min: 1, max: 200 },
+        ));
+      return Object.freeze({ page, note, markups: Object.freeze(markups) });
     });
-  const body = slips.map((s) => `p${s.page}: ${s.note}`).join('\n');
-  const pdf = createTextPdf({ text: `Slip sheets\n${body}`, title: 'AEC slip sheets' });
+  if (slips.length < 1 || new Set(slips.map((slip) => slip.page)).size !== slips.length) {
+    fail('INVALID_SLIP', 'Slip-sheet source pages must be non-empty and unique.', 400);
+  }
+  const pages = slips.map((slip) => [
+    'SLIP-SHEET',
+    `SOURCE-PAGE:${slip.page}`,
+    `NOTE:${slip.note}`,
+    ...slip.markups.map((markup) => `CARRIED-MARKUP:${markup}`),
+  ].join('\n'));
+  const pdf = createTextPdf({ pages, title: 'AEC slip sheets' });
+  const replacementPages = Object.freeze(slips.map((slip, index) => Object.freeze({
+    outputPage: index + 1,
+    sourcePage: slip.page,
+    carriedMarkupCount: slip.markups.length,
+  })));
+  const carriedMarkupCount = slips.reduce((total, slip) => total + slip.markups.length, 0);
   return result('aec.batch-slip-sheet', {
     familyId: FAMILY,
-    method: 'local-batch-slip-sheet',
+    method: 'local-batch-slip-sheet-pdf',
     slips,
     count: slips.length,
+    pageCount: pages.length,
+    replacementPages,
+    replacementSheetsCreated: true,
+    carriedMarkupCount,
     pdf,
     outputSha256: sha256(pdf),
     bytes: pdf.length,

@@ -53,5 +53,6 @@ export function pdfKitAppState() {
     pdfkitExistingAnnotationIndex: '',
     pdfkitExistingAnnotationContents: 'Updated review note',
     pdfkitExistingAnnotationRect: { x: 36, y: 36, width: 180, height: 80 },
+    pdfkitExistingAnnotationStrokeColor: '#d32f2f',
   };
 }

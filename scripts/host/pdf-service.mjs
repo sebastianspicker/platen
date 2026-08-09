@@ -24,6 +24,7 @@ export class PdfService {
   inspectStructure(...args) { return this.#inspection.inspectStructure(...args); }
   extractText(...args) { return this.#inspection.extractText(...args); }
   renderThumbnail(...args) { return this.#inspection.renderThumbnail(...args); }
+  renderOverlayPageExactDpi(...args) { return this.#inspection.renderOverlayPageExactDpi(...args); }
   renderCropBoxPage(...args) { return this.#inspection.renderCropBoxPage(...args); }
   renderCropBoxSnapshot(...args) { return this.#inspection.renderCropBoxSnapshot(...args); }
   listFonts(...args) { return this.#inspection.listFonts(...args); }

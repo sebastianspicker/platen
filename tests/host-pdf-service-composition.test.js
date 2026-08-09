@@ -59,6 +59,39 @@ test('installed Poppler preserves requested order for arrangements and merge out
   assert.equal(await store.verifySource(secondary.id), true);
 });
 
+test('semantic composition validation rejects a right-count output with the wrong source-page order before promotion', async (context) => {
+  try {
+    await Promise.all(['/opt/homebrew/bin/pdfinfo', '/opt/homebrew/bin/pdftotext', '/opt/homebrew/bin/pdftocairo', '/opt/homebrew/bin/pdfseparate', '/opt/homebrew/bin/pdfunite'].map((path) => access(path)));
+  } catch {
+    context.skip('Poppler semantic page-manifest tools are not installed in the fixed engine search path.');
+    return;
+  }
+  const root = await mkdtemp(join(tmpdir(), 'platen-compose-adversarial-'));
+  const store = await new DocumentStore({ root }).initialize();
+  context.after(() => store.dispose());
+  let promotions = 0;
+  const promote = store.promotePdfArtifact.bind(store);
+  store.promotePdfArtifact = async (...args) => { promotions += 1; return promote(...args); };
+  const registry = new EngineRegistry();
+  const delegate = new PopplerAdapter({ registry });
+  const adapter = {
+    async execute(operation, parameters, options) {
+      if (operation === 'mergeDocuments' && parameters.inputs.length === 2) {
+        return delegate.execute(operation, { ...parameters, inputs: [...parameters.inputs].reverse() }, options);
+      }
+      return delegate.execute(operation, parameters, options);
+    },
+  };
+  const service = new PdfService({ store, registry, adapter });
+  const primary = await store.createDocument({
+    stream: Readable.from([makeMultiPagePdf(['First', 'Second', 'Third'])]), displayName: 'primary.pdf',
+  });
+  await assert.rejects(service.arrangePages(primary.id, [3, 1]), {
+    code: 'DERIVED_PAGE_MANIFEST_MISMATCH', status: 502,
+  });
+  assert.equal(promotions, 0);
+});
+
 test('installed Poppler copies exactly one staged secondary page at the requested primary position', async (context) => {
   try { await Promise.all(['/opt/homebrew/bin/pdfinfo', '/opt/homebrew/bin/pdftotext', '/opt/homebrew/bin/pdftocairo', '/opt/homebrew/bin/pdfseparate', '/opt/homebrew/bin/pdfunite', '/opt/homebrew/bin/pdfsig'].map((path) => access(path))); } catch { context.skip('Poppler copy-page tools are not installed in the fixed engine search path.'); return; }
   const root = await mkdtemp(join(tmpdir(), 'platen-copy-page-test-'));

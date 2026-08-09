@@ -7,13 +7,17 @@ func strictTargetedMutationRequest(from data: Data) throws -> TargetedMutationRe
           let limits = object["limits"] as? [String: Any],
           exactKeys(limits, ["maxPages", "maxAnnotationsPerPage", "maxWidgetsPerPage", "maxOutlineDepth", "maxOutlineItems"]),
           let mutation = object["mutation"] as? [String: Any],
-          exactKeys(mutation, ["formFill", "annotationUpdate", "annotationRemove"]),
+          exactKeys(mutation, ["formFill", "annotationUpdate", "annotationRemove", "annotationProperties"]),
           exactNullableObject(mutation["formFill"], keys: ["page", "annotationIndex", "fingerprint", "fieldType", "value"]),
           exactNullableObject(mutation["annotationUpdate"], keys: ["page", "annotationIndex", "fingerprint", "subtype", "contents", "rect"]),
-          exactNullableObject(mutation["annotationRemove"], keys: ["page", "annotationIndex", "fingerprint", "subtype"])
+          exactNullableObject(mutation["annotationRemove"], keys: ["page", "annotationIndex", "fingerprint", "subtype"]),
+          exactNullableObject(mutation["annotationProperties"], keys: ["page", "annotationIndex", "fingerprint", "subtype", "rect", "strokeColor"])
     else { throw InspectionFailure.invalidRequest }
 
     if let update = mutation["annotationUpdate"] as? [String: Any], !exactRectangle(update["rect"]) {
+        throw InspectionFailure.invalidRequest
+    }
+    if let properties = mutation["annotationProperties"] as? [String: Any], !exactRectangle(properties["rect"]) {
         throw InspectionFailure.invalidRequest
     }
     let decoder = JSONDecoder()
@@ -48,6 +52,7 @@ func validTargetedAnnotationSubtype(_ value: String) -> Bool {
 func targetedMutationIsBounded(_ mutation: TargetedMutation) -> Bool {
     let categoryCount = (mutation.formFill == nil ? 0 : 1)
         + (mutation.annotationUpdate == nil ? 0 : 1) + (mutation.annotationRemove == nil ? 0 : 1)
+        + (mutation.annotationProperties == nil ? 0 : 1)
     guard categoryCount == 1 else { return false }
     if let edit = mutation.formFill {
         return targetedLocatorIsBounded(page: edit.page, annotationIndex: edit.annotationIndex, fingerprint: edit.fingerprint)
@@ -59,6 +64,11 @@ func targetedMutationIsBounded(_ mutation: TargetedMutation) -> Bool {
             && validTargetedAnnotationSubtype(edit.subtype)
             && isWithin(edit.contents.utf8.count, 1, maximumStringLength)
             && validMutationRectangle(edit.rect)
+    }
+    if let edit = mutation.annotationProperties {
+        return targetedLocatorIsBounded(page: edit.page, annotationIndex: edit.annotationIndex, fingerprint: edit.fingerprint)
+            && edit.subtype == "square" && validMutationRectangle(edit.rect)
+            && annotationPropertiesRGB(edit.strokeColor) != nil
     }
     guard let edit = mutation.annotationRemove else { return false }
     return targetedLocatorIsBounded(page: edit.page, annotationIndex: edit.annotationIndex, fingerprint: edit.fingerprint)

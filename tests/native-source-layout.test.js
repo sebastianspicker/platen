@@ -37,6 +37,7 @@ const responsibilityFiles = [
   'MetadataSanitization.swift',
   'MetadataInfoDictionaryScrubber.swift',
   'TargetedMutation.swift',
+  'TargetedAnnotationProperties.swift',
   'TargetedAnnotationResolution.swift',
   'FormWidgetSupport.swift',
   'RawPdfDictionaryValues.swift',

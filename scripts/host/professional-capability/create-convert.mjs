@@ -2,12 +2,11 @@ import { structuredTextExport } from '../../../src/core/document-analysis.js';
 import { assertInlineOnlyHtml } from '../conversion-admission.mjs';
 import { HostError } from '../host-error.mjs';
 import { extractFallbackText } from '../office-extractor.mjs';
-import { buildPdfCompactRewrite } from '../pdf-compact-rewrite.mjs';
 import { cadSourceToPdf } from './cad-geometry.mjs';
 import { exportImages } from './create-convert-images.mjs';
+import { optimizeCompress, optimizeFastWebView } from './create-convert-optimize.mjs';
 import {
   CREATE_CONVERT_CAPABILITY_IDS,
-  MAX_CAD_ENTITIES,
   MAX_COMBINE_SOURCES,
   MAX_PAGE_POINTS,
   MIN_PAGE_POINTS,
@@ -18,14 +17,14 @@ import {
   exportOoxml,
   extractPostScriptText,
   factoryFromContext,
-  linearizeLocalPdf,
   pageTextArray,
   pagesFromText,
   pdfHeaderOk,
+  requireSourceBoundPngBytes,
+  assertSourceBoundAdapter,
   pngBytesToPdf,
   requireBuffer,
-  result,
-  sourcePdfBytes
+  result
 } from './create-convert-lib.mjs';
 
 const handlers = Object.freeze({
@@ -52,37 +51,61 @@ const handlers = Object.freeze({
 
   async 'convert.office-to-pdf'(context = {}) {
     const factory = factoryFromContext(context);
+    if (context.body !== undefined && typeof context.body !== 'string') {
+      throw new HostError('INVALID_CAPABILITY_INPUT', 'body must be a string.', 400);
+    }
+    const officeContext = context.body === undefined
+      ? context
+      : { ...context, sourceBytes: Buffer.from(context.body, 'utf8'), extension: '.txt' };
     return convertOfficeLike(
-      { ...context, capabilityId: 'convert.office-to-pdf' },
+      { ...officeContext, capabilityId: 'convert.office-to-pdf' },
       factory,
       { kind: 'office', title: context.title ?? 'Office conversion' },
     );
   },
 
   async 'convert.images-to-pdf'(context = {}) {
+    const { sourceBytes, sourceSha256 } = requireSourceBoundPngBytes(context, { signal: context.signal });
     if (typeof context?.conversion?.convertInput === 'function' && context?.assetId) {
+      if (typeof context.conversion.preparePngPdfExport !== 'function') {
+        throw new HostError(
+          'CONVERSION_INSUFFICIENT_SOURCE_BOUND',
+          'convert.images-to-pdf conversion adapter is missing source-bound PNG export evidence.',
+          503,
+        );
+      }
       const document = await context.conversion.convertInput(context.assetId, { signal: context.signal });
+      assertSourceBoundAdapter(document, sourceSha256);
+      const evidence = await context.conversion.preparePngPdfExport(document.id, { signal: context.signal });
+      const pdfBytes = requireBuffer(evidence?.bytes, 'preparePngPdfExport.bytes');
+      if (!pdfHeaderOk(pdfBytes)) {
+        throw new HostError('INVALID_ENGINE_OUTPUT', 'convert.images-to-pdf adapter output is not a valid PDF.', 502);
+      }
+      const outputSha256 = digest(pdfBytes);
+      if (document.sha256 && outputSha256 !== document.sha256) {
+        throw new HostError('CONVERSION_OUTPUT_TAMPERED', 'Adapter output digest does not match the declared document digest.', 502);
+      }
+      const pageCount = Number.isSafeInteger(evidence?.inspection?.pageCount)
+        ? evidence.inspection.pageCount
+        : (Number.isSafeInteger(document?.operation?.validation?.pageCount) ? document.operation.validation.pageCount : 1);
       return result('convert.images-to-pdf', {
         documentId: document.id,
-        pageCount: document.operation?.validation?.pageCount ?? 1,
-        size: document.size,
-        sha256: document.sha256,
-        operationType: document.operation?.type,
+        bytes: pdfBytes,
+        pageCount,
+        size: pdfBytes.length,
+        sourceSha256,
+        sha256: outputSha256,
         mediaType: 'application/pdf',
+        operationType: document.operation?.type,
+        path: 'adapter-png-to-pdf',
       });
     }
-    const source = requireBuffer(context?.sourceBytes ?? context?.pngBytes, 'sourceBytes');
-    const pdf = pngBytesToPdf(source, { title: context.title ?? 'Image conversion' });
-    return result('convert.images-to-pdf', { ...pdf, path: 'local-png-xobject' });
-  },
-
-  async 'convert.html-to-pdf'(context = {}) {
-    const factory = factoryFromContext(context);
-    return convertOfficeLike(
-      { ...context, capabilityId: 'convert.html-to-pdf', extension: context.extension ?? '.html' },
-      factory,
-      { kind: 'html', title: context.title ?? 'HTML conversion' },
-    );
+    const pdf = pngBytesToPdf(sourceBytes, { title: context.title ?? 'Image conversion' });
+    return result('convert.images-to-pdf', {
+      ...pdf,
+      sourceSha256,
+      path: 'local-png-xobject',
+    });
   },
 
   async 'create.clipboard-to-pdf'(context = {}) {
@@ -90,9 +113,10 @@ const handlers = Object.freeze({
     if (context?.consent !== true && context?.consent !== undefined) {
       throw new HostError('CLIPBOARD_CONSENT_REQUIRED', 'Clipboard-to-PDF requires explicit local consent.', 403);
     }
-    if (typeof context?.conversion?.createText === 'function' && context?.text != null) {
+    const clipboardText = String(context?.clipboardText ?? context?.text ?? '');
+    if (typeof context?.conversion?.createText === 'function' && (context?.clipboardText != null || context?.text != null)) {
       const document = await context.conversion.createText({
-        text: String(context.text),
+        text: clipboardText,
         title: context.title ?? 'Clipboard',
       });
       return result('create.clipboard-to-pdf', {
@@ -103,41 +127,8 @@ const handlers = Object.freeze({
         mediaType: 'application/pdf',
       });
     }
-    const text = String(context?.text ?? context?.clipboardText ?? '');
-    const pdf = pagesFromText(text, { title: context.title ?? 'Clipboard' }, factory);
+    const pdf = pagesFromText(clipboardText, { title: context.title ?? 'Clipboard' }, factory);
     return result('create.clipboard-to-pdf', { ...pdf, consent: context?.consent !== false });
-  },
-
-  async 'create.print-to-pdf'(context = {}) {
-    const factory = factoryFromContext(context);
-    // Local print integration: accepted payload is page text (or prebuilt PDF bytes).
-    if (Buffer.isBuffer(context?.pdfBytes) && pdfHeaderOk(context.pdfBytes)) {
-      return result('create.print-to-pdf', {
-        bytes: context.pdfBytes,
-        pageCount: context.pageCount ?? 1,
-        size: context.pdfBytes.length,
-        sha256: digest(context.pdfBytes),
-        mediaType: 'application/pdf',
-        path: 'print-spool-pdf',
-      });
-    }
-    const pages = Array.isArray(context?.pages)
-      ? context.pages.map((page) => String(page?.text ?? page ?? ''))
-      : [String(context?.text ?? 'Local print output')];
-    const bytes = factory.createTextPdf({
-      pages,
-      title: context.title ?? 'Print to PDF',
-      widthPoints: context.widthPoints ?? 612,
-      heightPoints: context.heightPoints ?? 792,
-    });
-    return result('create.print-to-pdf', {
-      bytes,
-      pageCount: pages.length,
-      size: bytes.length,
-      sha256: digest(bytes),
-      mediaType: 'application/pdf',
-      path: 'local-print-payload',
-    });
   },
 
   async 'create.postscript-to-pdf'(context = {}) {
@@ -216,35 +207,6 @@ const handlers = Object.freeze({
       sourceCount: sources.length,
       path: 'local-multiformat-pages',
     });
-  },
-
-  async 'create.cad-to-pdf'(context = {}) {
-    if (typeof context?.conversion?.convertInput === 'function' && context?.assetId) {
-      try {
-        const document = await context.conversion.convertInput(context.assetId, { signal: context.signal });
-        return result('create.cad-to-pdf', {
-          documentId: document.id,
-          pageCount: document.operation?.validation?.pageCount ?? 1,
-          size: document.size,
-          sha256: document.sha256,
-          operationType: document.operation?.type,
-          mediaType: 'application/pdf',
-        });
-      } catch (error) {
-        if (error?.code === 'ENGINE_NOT_FOUND' || error?.code === 'ENGINE_UNKNOWN') {
-          // Fall through to pure local CAD subset.
-        } else {
-          throw error;
-        }
-      }
-    }
-    const source = requireBuffer(context?.sourceBytes ?? context?.inputBytes, 'sourceBytes');
-    const pdf = cadSourceToPdf(source, {
-      title: context.title ?? 'CAD conversion',
-      widthPoints: context.widthPoints,
-      heightPoints: context.heightPoints,
-    });
-    return result('create.cad-to-pdf', { ...pdf, path: 'local-cad-subset' });
   },
 
   async 'export.word'(context = {}) {
@@ -329,53 +291,9 @@ const handlers = Object.freeze({
     });
   },
 
-  async 'optimize.compress'(context = {}) {
-    const factory = factoryFromContext(context);
-    if (typeof context?.conversion?.rewriteDocument === 'function' && context?.documentId) {
-      const document = await context.conversion.rewriteDocument(context.documentId, 'optimize', {
-        signal: context.signal,
-      });
-      return result('optimize.compress', {
-        documentId: document.id,
-        pageCount: document.operation?.validation?.pageCount,
-        size: document.size,
-        sha256: document.sha256,
-        operationType: document.operation?.type,
-        mediaType: 'application/pdf',
-      });
-    }
-    const source = sourcePdfBytes(context, factory);
-    const rewritten = buildPdfCompactRewrite(source);
-    return result('optimize.compress', {
-      bytes: rewritten.bytes,
-      size: rewritten.bytes.length,
-      sha256: digest(rewritten.bytes),
-      pageCount: context.pageCount ?? 1,
-      mediaType: 'application/pdf',
-      reachableObjectCount: rewritten.summary.reachableObjectCount,
-      sourceSha256: digest(source),
-      path: 'buildPdfCompactRewrite',
-    });
-  },
+  async 'optimize.compress'(context = {}) { return optimizeCompress(context); },
 
-  async 'optimize.fast-web-view'(context = {}) {
-    const factory = factoryFromContext(context);
-    if (typeof context?.fastWebView?.linearize === 'function' && context?.documentId && context?.sourceSha256) {
-      const linearized = await context.fastWebView.linearize(context.documentId, {
-        profile: 'local-pdf-fast-web-view-v1',
-      }, { sourceSha256: context.sourceSha256, signal: context.signal });
-      return result('optimize.fast-web-view', {
-        artifactId: linearized.artifact?.id ?? null,
-        sourceDigest: linearized.sourceDigest,
-        engine: linearized.engine,
-        linearized: true,
-        mediaType: 'application/pdf',
-      });
-    }
-    const source = sourcePdfBytes(context, factory);
-    const linearized = linearizeLocalPdf(source);
-    return result('optimize.fast-web-view', { ...linearized, path: 'local-linearize' });
-  },
+  async 'optimize.fast-web-view'(context = {}) { return optimizeFastWebView(context); },
 });
 
 export { handlers };
