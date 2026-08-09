@@ -1,0 +1,25 @@
+name: Capability request
+description: Propose a bounded, evidence-backed improvement to Platen.
+title: "[Request]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include private documents, extracted text, credentials, or vulnerability details. Capability claims require runtime behavior, deterministic evidence, and a failing-closed boundary."
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or workflow gap
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed bounded behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and constraints
+      description: Include relevant document formats, expected output, and failure behavior.

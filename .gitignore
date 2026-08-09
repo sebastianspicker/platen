@@ -59,6 +59,7 @@ Thumbs.db
 .continue/
 .windsurf/
 .aider*
+/.repowise/
 AGENTS.md
 CLAUDE.md
 .cursorignore
@@ -68,3 +69,4 @@ CLAUDE.md
 /.screenshots/
 /screenshots-local/
 /recordings/
+/WIP.md
