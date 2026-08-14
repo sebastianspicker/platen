@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/accessibility-review.schema.json",
+  "title": "Source-bound local accessibility review",
+  "description": "Strict version-3 read-only accessibility evidence report. It is not a PDF/UA conformance result.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "profile", "sourceDigest", "pageCount", "status", "counts", "checks", "evidence", "remediationPlan", "limitations", "reportSha256"],
+  "properties": {
+    "kind": {"const": "accessibility-review"},
+    "profile": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "title", "version"],
+      "properties": {
+        "id": {"const": "basic-local-review"},
+        "title": {"const": "Basic local accessibility review"},
+        "version": {"const": 3}
+      }
+    },
+    "sourceDigest": {"$ref": "#/$defs/sha256"},
+    "pageCount": {"type": "integer", "minimum": 1, "maximum": 200},
+    "status": {"enum": ["fail", "review-required"]},
+    "counts": {"$ref": "#/$defs/counts"},
+    "checks": {
+      "type": "array", "minItems": 19, "maxItems": 19,
+      "items": {"$ref": "#/$defs/check"}
+    },
+    "evidence": {"$ref": "#/$defs/evidence"},
+    "remediationPlan": {"$ref": "#/$defs/plan"},
+    "limitations": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "items": {"type": "string", "minLength": 1, "maxLength": 240}
+    },
+    "reportSha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "count": {"type": "integer", "minimum": 0, "maximum": 50000},
+    "counts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["pass", "warning", "fail", "not-checked"],
+      "properties": {
+        "pass": {"type": "integer", "minimum": 0, "maximum": 19},
+        "warning": {"type": "integer", "minimum": 0, "maximum": 19},
+        "fail": {"type": "integer", "minimum": 0, "maximum": 19},
+        "not-checked": {"type": "integer", "minimum": 0, "maximum": 19}
+      }
+    },
+    "check": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "status", "summary", "evidenceRefs"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$"},
+        "status": {"enum": ["pass", "warning", "fail", "not-checked"]},
+        "summary": {"type": "string", "minLength": 1, "maxLength": 240},
+        "evidenceRefs": {
+          "type": "array", "minItems": 1, "maxItems": 2, "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[a-z][a-z0-9.-]{0,79}$"}
+        }
+      }
+    },
+    "tagRoles": {
+      "type": "object", "additionalProperties": false,
+      "required": ["recordCount", "roleCounts", "unknownRoleCount", "hierarchyCoverage", "malformedDepthTransitionCount", "headingCount", "headingSequenceViolation", "invalidListRelationshipCount", "unknownListRelationshipCount", "invalidTableRelationshipCount", "unknownTableRelationshipCount"],
+      "properties": {
+        "recordCount": {"$ref": "#/$defs/count"},
+        "roleCounts": {
+          "type": "object", "maxProperties": 64,
+          "propertyNames": {"pattern": "^[A-Za-z][A-Za-z0-9]{0,31}$"},
+          "additionalProperties": {"$ref": "#/$defs/count"}
+        },
+        "unknownRoleCount": {"$ref": "#/$defs/count"},
+        "hierarchyCoverage": {"enum": ["complete", "unknown"]},
+        "malformedDepthTransitionCount": {"$ref": "#/$defs/count"},
+        "headingCount": {"$ref": "#/$defs/count"},
+        "headingSequenceViolation": {"type": "boolean"},
+        "invalidListRelationshipCount": {"$ref": "#/$defs/count"},
+        "unknownListRelationshipCount": {"$ref": "#/$defs/count"},
+        "invalidTableRelationshipCount": {"$ref": "#/$defs/count"},
+        "unknownTableRelationshipCount": {"$ref": "#/$defs/count"}
+      }
+    },
+    "optionalPdfKit": {
+      "type": "object", "additionalProperties": false,
+      "required": ["attempted", "available"],
+      "properties": {
+        "attempted": {"type": "boolean"},
+        "available": {"type": "boolean"},
+        "unavailableReason": {"const": "document-unsupported"},
+        "contentAccessibility": {"type": ["boolean", "null"]},
+        "permissionStatus": {"enum": ["none", "user", "owner", "unknown"]},
+        "widgetCount": {"type": "integer", "minimum": 0, "maximum": 5000},
+        "unnamedWidgetCount": {"type": "integer", "minimum": 0, "maximum": 5000},
+        "widgetsTruncated": {"type": "boolean"},
+        "outlineItemCount": {"type": "integer", "minimum": 0, "maximum": 200},
+        "outlineTruncated": {"type": "boolean"}
+      }
+    },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "version", "versionStatus"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9.-]{0,79}$"},
+        "version": {"type": ["string", "null"], "maxLength": 32},
+        "versionStatus": {"enum": ["recorded", "not-recorded-in-report", "helper-version-not-recorded-in-report"]}
+      }
+    },
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["fonts", "images", "urls", "imageTargets", "unicodeFonts", "nonUnicodeFonts", "unknownUnicodeFonts", "embeddedFonts", "nonEmbeddedFonts", "unknownEmbeddedFonts", "emptyExtractedTextPages", "tagRoles", "optionalPdfKit", "sources"],
+      "properties": {
+        "fonts": {"$ref": "#/$defs/count"},
+        "images": {"$ref": "#/$defs/count"},
+        "urls": {"$ref": "#/$defs/count"},
+        "imageTargets": {"type": "array", "maxItems": 128, "items": {"$ref": "#/$defs/candidateTarget"}},
+        "unicodeFonts": {"$ref": "#/$defs/count"},
+        "nonUnicodeFonts": {"$ref": "#/$defs/count"},
+        "unknownUnicodeFonts": {"$ref": "#/$defs/count"},
+        "embeddedFonts": {"$ref": "#/$defs/count"},
+        "nonEmbeddedFonts": {"$ref": "#/$defs/count"},
+        "unknownEmbeddedFonts": {"$ref": "#/$defs/count"},
+        "emptyExtractedTextPages": {"type": "integer", "minimum": 0, "maximum": 200},
+        "tagRoles": {"$ref": "#/$defs/tagRoles"},
+        "optionalPdfKit": {"$ref": "#/$defs/optionalPdfKit"},
+        "sources": {"type": "array", "minItems": 9, "maxItems": 12, "items": {"$ref": "#/$defs/source"}}
+      }
+    },
+    "candidateTarget": {
+      "type": "object", "additionalProperties": false,
+      "required": ["page", "imageNumber", "locator"],
+      "properties": {
+        "page": {"type": ["integer", "null"], "minimum": 1, "maximum": 200},
+        "imageNumber": {"type": ["integer", "null"], "minimum": 0, "maximum": 50000},
+        "locator": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "candidate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "action", "reason", "status", "requires"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^candidate-[1-9][0-9]{0,2}$"},
+        "action": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$"},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 240},
+        "status": {"const": "proposed-not-applied"},
+        "requires": {"const": "human-review-and-approved-tagged-pdf-writer"},
+        "target": {"$ref": "#/$defs/candidateTarget"}
+      }
+    },
+    "plan": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "schemaVersion", "profile", "sourceSha256", "status", "candidateCount", "truncated", "candidates", "tagRoleEvidenceDigest", "reviewEvidenceSha256"],
+      "properties": {
+        "kind": {"const": "accessibility-remediation-plan"},
+        "schemaVersion": {"const": 1},
+        "profile": {"const": "source-bound-proposal-v1"},
+        "sourceSha256": {"$ref": "#/$defs/sha256"},
+        "status": {"const": "proposal-only"},
+        "candidateCount": {"type": "integer", "minimum": 0, "maximum": 128},
+        "truncated": {"type": "boolean"},
+        "candidates": {"type": "array", "maxItems": 128, "items": {"$ref": "#/$defs/candidate"}},
+        "tagRoleEvidenceDigest": {"$ref": "#/$defs/sha256"},
+        "reviewEvidenceSha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

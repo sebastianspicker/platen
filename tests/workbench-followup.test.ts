@@ -10,4 +10,3 @@ describe("workbench", () => {
 it("keeps workbench stable", () => {
   expect("workbench").toContain("workbench");
 });
-

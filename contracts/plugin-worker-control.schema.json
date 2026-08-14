@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/plugin-worker-control.schema.json",
+  "title": "Strict one-shot local plugin worker-control envelope",
+  "description": "A transport-neutral non-execution contract. It exposes only a bound opaque document handle; paths, source or document identifiers, environment values, and executable fields are absent.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol", "pluginId", "version", "packageHash", "activationId", "operationId", "nonce", "type"],
+  "properties": {
+    "protocol": {"const": 1},
+    "pluginId": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:[.][a-z0-9-]+)+$"},
+    "version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)$"},
+    "packageHash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "activationId": {"type": "string", "pattern": "^[A-Za-z0-9_-]{16,128}$"},
+    "operationId": {"type": "string", "pattern": "^[A-Za-z0-9_-]{16,128}$"},
+    "nonce": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "type": {"enum": ["invoke", "completion", "failure", "cancellation"]},
+    "capability": {"type": "string", "pattern": "^[a-z][a-z0-9-]*(?:[.][a-z0-9-]+)+$"},
+    "documentHandle": {"type": "string", "pattern": "^pdfh_[0-9a-f]{64}$"},
+    "input": {},
+    "result": {},
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {"const": "PLUGIN_WORKER_FAILED"},
+        "message": {"const": "The plugin operation could not be completed."}
+      }
+    }
+  },
+  "oneOf": [
+    {"properties": {"type": {"const": "invoke"}}, "required": ["capability", "documentHandle", "input"], "not": {"anyOf": [{"required": ["result"]}, {"required": ["failure"]}]}},
+    {"properties": {"type": {"const": "completion"}}, "required": ["result"], "not": {"anyOf": [{"required": ["capability"]}, {"required": ["documentHandle"]}, {"required": ["input"]}, {"required": ["failure"]}]}},
+    {"properties": {"type": {"const": "failure"}}, "required": ["failure"], "not": {"anyOf": [{"required": ["capability"]}, {"required": ["documentHandle"]}, {"required": ["input"]}, {"required": ["result"]}]}},
+    {"properties": {"type": {"const": "cancellation"}}, "not": {"anyOf": [{"required": ["capability"]}, {"required": ["documentHandle"]}, {"required": ["input"]}, {"required": ["result"]}, {"required": ["failure"]}]}}
+  ]
+}

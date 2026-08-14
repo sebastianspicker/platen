@@ -1,0 +1,44 @@
+import { createHash } from 'node:crypto';
+import { constants as fsConstants } from 'node:fs';
+import { lstat, open, readdir } from 'node:fs/promises';
+import { join } from 'node:path';
+import { HostError } from './host-error.mjs';
+import { createOperationProvenance } from './operation-provenance.mjs';
+import { assertPrivateSourceCopy, stagePrivateSourceCopy } from './private-source-copy.mjs';
+import { inspectPdfAcroFormTextField, PDF_ACROFORM_TEXT_FIELD_PROFILE, preparePdfAcroFormTextField } from './pdf-acroform-text-field-writer.mjs';
+
+export const MAX_PDF_ACROFORM_TEXT_FIELD_JOB_MS = 120_000;
+export const MAX_PDF_ACROFORM_TEXT_FIELD_SOURCE_BYTES = 32 * 1024 * 1024;
+export const MAX_PDF_ACROFORM_TEXT_FIELD_OUTPUT_BYTES = MAX_PDF_ACROFORM_TEXT_FIELD_SOURCE_BYTES + 512 * 1024;
+const SOURCE_MODE = 0o400; const OUTPUT_MODE = 0o600;
+function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
+function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
+function identity(a, b) { return ['dev', 'ino', 'nlink', 'size', 'mode', 'mtimeNs', 'ctimeNs'].every((key) => a[key] === b[key]); }
+function abort(signal) { if (signal?.aborted) fail('JOB_CANCELLED', 'AcroForm text-field processing was cancelled.', 499, signal.reason); }
+async function workspace(path, expected) { const stat = await lstat(path); if (!stat.isDirectory() || stat.isSymbolicLink() || (stat.mode & 0o777) !== 0o700) fail('ACROFORM_TEXT_FIELD_TAMPERED', 'The private text-field workspace is unsafe.'); const files = (await readdir(path)).sort(); const wanted = [...expected].sort(); if (files.length !== wanted.length || files.some((value, index) => value !== wanted[index])) fail('ACROFORM_TEXT_FIELD_TAMPERED', 'The private text-field workspace contains unexpected files.'); }
+async function readPrivate(path, size, mode, maximum) { if (!Number.isSafeInteger(size) || size < 1 || size > maximum) fail('ACROFORM_TEXT_FIELD_INPUT_TOO_LARGE', 'The private text-field file exceeds its fixed bound.', 413); const handle = await open(path, fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0)); try { const before = await handle.stat({ bigint: true }); if (!before.isFile() || before.nlink !== 1n || before.size !== BigInt(size) || (before.mode & 0o777n) !== BigInt(mode)) fail('ACROFORM_TEXT_FIELD_TAMPERED', 'The private text-field file metadata is unsafe.'); const bytes = await handle.readFile(); const after = await handle.stat({ bigint: true }); if (bytes.length !== size || !identity(before, after)) fail('ACROFORM_TEXT_FIELD_TAMPERED', 'The private text-field file changed while reading.'); return { bytes, identity: before }; } finally { await handle.close(); } }
+async function writePrivate(path, bytes) { const handle = await open(path, 'wx', OUTPUT_MODE); try { let offset = 0; while (offset < bytes.length) { const result = await handle.write(bytes, offset, bytes.length - offset, offset); if (result.bytesWritten < 1) throw new Error('short write'); offset += result.bytesWritten; } await handle.sync(); await handle.chmod(OUTPUT_MODE); } finally { await handle.close(); } }
+
+export async function runAcroFormTextFieldJob({ store, documentId, source, request, deadline, lifecycle }) {
+  let built = null; let sourceRead = null; let sourceAgain = null; let outputRead = null; let before = null;
+  try {
+    abort(deadline.signal); await store.verifySource(documentId); const directory = await store.createJobWorkspace(documentId); lifecycle.workspace = directory; await workspace(directory, []);
+    const sourcePath = join(directory, 'source.pdf'); const sourceIdentity = await stagePrivateSourceCopy({ sourcePath: store.getSourcePath(documentId), targetPath: sourcePath, expectedSha256: source.sha256, expectedSize: source.size, maximumBytes: MAX_PDF_ACROFORM_TEXT_FIELD_SOURCE_BYTES, signal: deadline.signal });
+    await workspace(directory, ['source.pdf']); sourceRead = await readPrivate(sourcePath, source.size, SOURCE_MODE, MAX_PDF_ACROFORM_TEXT_FIELD_SOURCE_BYTES); await assertPrivateSourceCopy({ path: sourcePath, identity: sourceIdentity, expectedSha256: source.sha256, expectedSize: source.size, maximumBytes: MAX_PDF_ACROFORM_TEXT_FIELD_SOURCE_BYTES }); abort(deadline.signal);
+    try { built = preparePdfAcroFormTextField(sourceRead.bytes, request); } catch (error) { throw error; } if (!built?.proof || !Buffer.isBuffer(built.bytes) || built.bytes.length > MAX_PDF_ACROFORM_TEXT_FIELD_OUTPUT_BYTES) fail('ACROFORM_TEXT_FIELD_OUTPUT_INVALID', 'The text-field core returned an invalid bounded output.');
+    const outputPath = join(directory, 'output.pdf'); await writePrivate(outputPath, built.bytes); await workspace(directory, ['output.pdf', 'source.pdf']); outputRead = await readPrivate(outputPath, built.bytes.length, OUTPUT_MODE, MAX_PDF_ACROFORM_TEXT_FIELD_OUTPUT_BYTES); if (!outputRead.bytes.equals(built.bytes)) fail('ACROFORM_TEXT_FIELD_TAMPERED', 'The text-field output changed before inspection.');
+    let inspected; try { inspected = inspectPdfAcroFormTextField(sourceRead.bytes, outputRead.bytes, request); } catch (error) { fail('ACROFORM_TEXT_FIELD_OUTPUT_INVALID', 'Independent text-field inspection rejected the output.', 502, error); }
+    if (JSON.stringify(inspected) !== JSON.stringify({ ...built.proof, otherPagesContentResourcesPreserved: true })) fail('ACROFORM_TEXT_FIELD_OUTPUT_INVALID', 'Independent text-field inspection disagreed with the proof.');
+    await assertPrivateSourceCopy({ path: sourcePath, identity: sourceIdentity, expectedSha256: source.sha256, expectedSize: source.size, maximumBytes: MAX_PDF_ACROFORM_TEXT_FIELD_SOURCE_BYTES }); sourceAgain = await readPrivate(sourcePath, source.size, SOURCE_MODE, MAX_PDF_ACROFORM_TEXT_FIELD_SOURCE_BYTES); if (!sourceAgain.bytes.equals(sourceRead.bytes)) fail('ACROFORM_TEXT_FIELD_SOURCE_TAMPERED', 'The staged immutable source changed during text-field authoring.', 500);
+    await store.verifySource(documentId); abort(deadline.signal); const outputSha256 = digest(outputRead.bytes);
+    const provenance = createOperationProvenance({ type: 'pdf-acroform-text-field', inputs: [{ documentId, sha256: source.sha256, role: 'source' }], parameters: { profile: PDF_ACROFORM_TEXT_FIELD_PROFILE, fieldNameSha256: built.proof.fieldNameSha256, page: built.proof.page, rect: built.proof.rect }, expected: { outputSha256, sourcePrefixPreserved: true, defaultEmpty: true, signaturePreservation: false }, validation: { passed: true, validators: ['source-sha256', 'private-source-copy', 'bounded-acroform-text-field-core', 'independent-text-field-reinspection', 'output-sha256'], outputSha256 } });
+    before = await readPrivate(outputPath, built.bytes.length, OUTPUT_MODE, MAX_PDF_ACROFORM_TEXT_FIELD_OUTPUT_BYTES); if (!before.bytes.equals(outputRead.bytes) || !identity(before.identity, outputRead.identity) || digest(before.bytes) !== outputSha256) fail('ACROFORM_TEXT_FIELD_TAMPERED', 'The text-field output changed before promotion.');
+    lifecycle.promotedArtifact = await store.promotePdfArtifact(documentId, outputPath, { displayName: 'text-field-form.pdf', operation: provenance, expectedSha256: outputSha256, signal: deadline.signal }); if (lifecycle.promotedArtifact.sha256 !== outputSha256 || lifecycle.promotedArtifact.id === source.id) fail('ACROFORM_TEXT_FIELD_OUTPUT_INVALID', 'The promoted text-field artifact does not match the inspected output.');
+    abort(deadline.signal); lifecycle.completed = true;
+    return Object.freeze({ artifact: lifecycle.promotedArtifact, proof: inspected, limitations: Object.freeze(['One empty passive terminal text field only; existing forms, widgets, signatures, encryption, tags, layers, actions, JavaScript, calculations, XFA, and unsupported PDF graphs are rejected.', 'The source document is preserved; no signature-preservation, PDF/A, or PDF/UA claim is made.']) });
+  } finally {
+    for (const value of [built?.bytes, sourceRead?.bytes, sourceAgain?.bytes, outputRead?.bytes, before?.bytes]) if (Buffer.isBuffer(value)) value.fill(0);
+  }
+}
+
+export async function cleanupAcroFormTextFieldJob({ store, lifecycle }) { let workspaceError = null; let artifactError = null; if (lifecycle.workspace) { try { await store.cleanupJob(lifecycle.workspace); } catch (error) { workspaceError = error; } } if ((!lifecycle.completed || workspaceError) && lifecycle.promotedArtifact?.id) { try { await store.deleteArtifact(lifecycle.promotedArtifact.id); } catch (error) { artifactError = error; } } if (workspaceError || artifactError) fail('ACROFORM_TEXT_FIELD_CLEANUP_FAILED', 'AcroForm text-field processing could not clean its workspace or revoke its artifact.', 500, workspaceError ?? artifactError); }

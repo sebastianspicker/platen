@@ -1,0 +1,21 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://pdf.local/contracts/capability.schema.json",
+  "type":"object",
+  "additionalProperties":false,
+  "required":["id","familyId","owner","delivery","title","description","engine","evidence"],
+  "properties":{
+    "id":{"type":"string","pattern":"^[a-z][a-z0-9-]*(?:[.][a-z][a-z0-9-]*)+$"},
+    "familyId":{"type":"string","pattern":"^[a-z][a-z0-9-]*$"},
+    "owner":{"type":"string","pattern":"^[a-z][a-z0-9-]*$"},
+    "delivery":{"enum":["implemented","planned"]},
+    "title":{"type":"string","minLength":1},
+    "description":{"type":"string","minLength":1},
+    "engine":{"type":["null","object"],"additionalProperties":false,"required":["provider","operation"],"properties":{"provider":{"type":"string","minLength":1},"operation":{"type":"string","minLength":1}}},
+    "evidence":{"type":["null","object"],"additionalProperties":false,"required":["kind","reference"],"properties":{"kind":{"type":"string","minLength":1},"reference":{"type":"string","minLength":1}}}
+  },
+  "allOf":[
+    {"if":{"properties":{"delivery":{"const":"implemented"}},"required":["delivery"]},"then":{"properties":{"evidence":{"type":"object"}}}},
+    {"if":{"properties":{"delivery":{"const":"planned"}},"required":["delivery"]},"then":{"properties":{"evidence":{"const":null}}}}
+  ]
+}

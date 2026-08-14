@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "snapshotDate": "2026-07-18",
+  "evidencePurpose": "market-research-provenance",
+  "notImplementationEvidence": true,
+  "methodology": "Verified official headings or PDF pages establish why each professional feature family is in the research scope. This file does not claim per-command product support or implementation evidence.",
+  "sources": [
+    {
+      "id": "adobe-acrobat-tools",
+      "product": "Adobe Acrobat Pro",
+      "url": "https://helpx.adobe.com/acrobat/using/explore-acrobat-tools.html",
+      "reviewedDate": "2026-07-18"
+    },
+    {
+      "id": "foxit-pdf-editor",
+      "product": "Foxit PDF Editor",
+      "url": "https://www.foxit.com/pdf-editor/pricing/",
+      "reviewedDate": "2026-07-18"
+    },
+    {
+      "id": "nitro-pdf-pro-guide",
+      "product": "Nitro PDF Pro",
+      "url": "https://www.gonitro.com/user-guide/nitro-pdf-for-windows",
+      "reviewedDate": "2026-07-18"
+    },
+    {
+      "id": "pdf-xchange-comparison",
+      "product": "PDF-XChange Editor Plus",
+      "url": "https://cdn.pdf-xchange.com/pdf-xchange-products-comparison-chart",
+      "reviewedDate": "2026-07-18"
+    },
+    {
+      "id": "abbyy-finereader-pdf",
+      "product": "ABBYY FineReader PDF",
+      "url": "https://pdf.abbyy.com/media/uicccm1b/brochure-finereaderpdf-full-feature-list-en.pdf",
+      "reviewedDate": "2026-07-18"
+    },
+    {
+      "id": "bluebeam-revu",
+      "product": "Bluebeam Revu",
+      "url": "https://support.bluebeam.com/revu/subscription/subscription-features.html",
+      "reviewedDate": "2026-07-18"
+    },
+    {
+      "id": "callas-pdftoolbox",
+      "product": "callas pdfToolbox",
+      "url": "https://callassoftware.com/products/pdftoolbox/",
+      "reviewedDate": "2026-07-18"
+    },
+    {
+      "id": "enfocus-pitstop-pro",
+      "product": "Enfocus PitStop Pro",
+      "url": "https://www.enfocus.com/en/pitstop-pro",
+      "reviewedDate": "2026-07-18"
+    },
+    {
+      "id": "pdf-expert",
+      "product": "PDF Expert",
+      "url": "https://pdfexpert.com/features",
+      "reviewedDate": "2026-07-18"
+    },
+    {
+      "id": "qoppa-pdf-studio",
+      "product": "Qoppa PDF Studio",
+      "url": "https://www.qoppa.com/pdfstudio/features/",
+      "reviewedDate": "2026-07-18"
+    },
+    {
+      "id": "wondershare-pdfelement",
+      "product": "Wondershare PDFelement",
+      "url": "https://pdf.wondershare.com/tech-spec.html",
+      "reviewedDate": "2026-07-18"
+    },
+    {
+      "id": "tungsten-power-pdf",
+      "product": "Tungsten Power PDF",
+      "url": "https://docshield.tungstenautomation.com/PowerPDF/en_US/2025.3-jlrwz2ja2j/help/PowerPDF_help/PowerPDF_help/c_introduction.html",
+      "reviewedDate": "2026-07-18"
+    }
+  ],
+  "families": [
+    {
+      "familyId": "view-navigation",
+      "sourceIds": ["abbyy-finereader-pdf", "adobe-acrobat-tools"],
+      "evidenceGranularity": "feature-family",
+      "locator": "ABBYY feature list pages 1-2: Edit, protect, and collaborate on PDFs > Viewing; Adobe: Searching and indexing"
+    },
+    {
+      "familyId": "create-convert",
+      "sourceIds": ["foxit-pdf-editor", "adobe-acrobat-tools"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Foxit Compare Features > Create & Convert PDFs; Adobe > Saving and exporting PDFs"
+    },
+    {
+      "familyId": "content-editing",
+      "sourceIds": ["foxit-pdf-editor", "adobe-acrobat-tools"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Foxit Compare Features > Core PDF Editing; Adobe > Modify your content with the Edit tools"
+    },
+    {
+      "familyId": "page-organization",
+      "sourceIds": ["foxit-pdf-editor", "adobe-acrobat-tools"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Foxit Compare Features > Core PDF Editing (add, delete, reorder, merge, split, rotate, crop); Adobe > Edit PDFs"
+    },
+    {
+      "familyId": "annotations-review",
+      "sourceIds": ["foxit-pdf-editor", "adobe-acrobat-tools"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Foxit Compare Features > Collaboration & Commenting; Adobe > Sharing, reviews, and commenting"
+    },
+    {
+      "familyId": "forms",
+      "sourceIds": ["foxit-pdf-editor", "adobe-acrobat-tools"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Foxit Compare Features > Forms & Signatures; Adobe > Forms"
+    },
+    {
+      "familyId": "signatures",
+      "sourceIds": ["adobe-acrobat-tools", "abbyy-finereader-pdf"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Adobe > Electronic signatures; ABBYY feature list page 4: Protect and sign PDFs"
+    },
+    {
+      "familyId": "scan-ocr",
+      "sourceIds": ["abbyy-finereader-pdf", "foxit-pdf-editor"],
+      "evidenceGranularity": "feature-family",
+      "locator": "ABBYY feature list pages 6-10: Digitize documents and scans with Optical Character Recognition (OCR); Foxit > Scan & OCR"
+    },
+    {
+      "familyId": "security",
+      "sourceIds": ["adobe-acrobat-tools", "abbyy-finereader-pdf"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Adobe > Security; ABBYY feature list page 4: Protect and sign PDFs"
+    },
+    {
+      "familyId": "redaction-sanitization",
+      "sourceIds": ["foxit-pdf-editor", "abbyy-finereader-pdf"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Foxit Compare Features > Security & Protection; ABBYY feature list page 4: redaction and hidden-information removal"
+    },
+    {
+      "familyId": "comparison",
+      "sourceIds": ["abbyy-finereader-pdf", "foxit-pdf-editor"],
+      "evidenceGranularity": "feature-family",
+      "locator": "ABBYY feature list pages 5-6: Compare documents in different formats; Foxit Compare Features > Core PDF Editing > Compare PDF versions"
+    },
+    {
+      "familyId": "accessibility",
+      "sourceIds": ["adobe-acrobat-tools", "foxit-pdf-editor"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Adobe > Accessibility, tags, and reflow; Foxit Compare Features > Accessibility validation"
+    },
+    {
+      "familyId": "standards-preflight-print",
+      "sourceIds": ["adobe-acrobat-tools", "callas-pdftoolbox", "enfocus-pitstop-pro"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Adobe > Print production tools and Preflight; callas > Conditional processing and more; Enfocus > Preflight: Automatically check and fix your PDFs before they go to print"
+    },
+    {
+      "familyId": "collaboration-dms",
+      "sourceIds": ["bluebeam-revu", "foxit-pdf-editor"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Bluebeam subscription features > Studio and Integrations; Foxit Compare Features > Collaboration & Commenting and DMS"
+    },
+    {
+      "familyId": "automation-headless",
+      "sourceIds": ["callas-pdftoolbox", "abbyy-finereader-pdf"],
+      "evidenceGranularity": "feature-family",
+      "locator": "callas > Conditional processing and more, Variants: Desktop, Server, CLI, SDK; ABBYY feature list page 10: Automate digitization, conversion, and comparison routines"
+    },
+    {
+      "familyId": "ai",
+      "sourceIds": ["adobe-acrobat-tools", "foxit-pdf-editor"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Adobe > Interact with documents using AI Assistant; Foxit Compare Features > AI Assistant"
+    },
+    {
+      "familyId": "aec",
+      "sourceIds": ["bluebeam-revu"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Bluebeam subscription features > Measurements, Markups List, and Studio and Integrations"
+    },
+    {
+      "familyId": "rich-media-3d-portfolios",
+      "sourceIds": ["adobe-acrobat-tools", "bluebeam-revu"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Adobe > Multimedia and 3D models and Edit PDFs > PDF Portfolios; Bluebeam > capture media and manipulate 3D PDFs"
+    },
+    {
+      "familyId": "integrations-admin",
+      "sourceIds": ["foxit-pdf-editor", "bluebeam-revu"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Foxit Compare Features > Platform & Integrations and FAQ > enterprise admin console; Bluebeam > Plugins and Apps"
+    },
+    {
+      "familyId": "plugin-platform",
+      "sourceIds": ["bluebeam-revu", "foxit-pdf-editor"],
+      "evidenceGranularity": "feature-family",
+      "locator": "Bluebeam subscription features > Plugins and Apps; Foxit Compare Features > Platform & Integrations (extension-ecosystem evidence only, not runtime sandbox or RPC proof)"
+    }
+  ]
+}

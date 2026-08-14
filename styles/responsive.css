@@ -1,0 +1,150 @@
+@media (max-width: 1240px) {
+  .split-proof-layout {
+    grid-template-columns: var(--rail-width) 154px minmax(430px, 1fr);
+  }
+
+  .inspection-evidence {
+    display: none;
+  }
+
+  .plugin-layout {
+    grid-template-columns: var(--rail-width) 196px minmax(380px, 1fr);
+  }
+
+  .plugin-detail {
+    display: none;
+  }
+}
+
+@media (max-width: 1080px) {
+  :root {
+    --pages-width: 184px;
+    --inspector-width: 316px;
+  }
+
+  .editor-layout {
+    grid-template-columns: var(--rail-width) var(--pages-width) minmax(360px, 1fr);
+  }
+
+  .editor-layout > .inspector {
+    display: none;
+  }
+
+  .toolbar-label,
+  .toolbar-label-compact {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .workflow-layout {
+    grid-template-columns: var(--rail-width) minmax(420px, 1fr) 340px;
+  }
+
+  .workflow-main {
+    padding-inline: 24px;
+  }
+
+  .trust-facts,
+  .trust-limit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 880px) {
+  .route-context small,
+  .local-only-state small {
+    display: none;
+  }
+
+  .editor-layout {
+    grid-template-columns: var(--rail-width) minmax(0, 1fr);
+    grid-template-rows: minmax(520px, 1fr) auto;
+    overflow: auto;
+  }
+
+  .pages-panel {
+    display: none;
+  }
+
+  .editor-layout > .tool-rail {
+    grid-row: 1 / -1;
+  }
+
+  .editor-layout > .document-stage {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .editor-layout > .inspector {
+    display: block;
+    grid-column: 2;
+    grid-row: 2;
+    max-height: none;
+    overflow: visible;
+    border-top: 1px solid var(--border-strong);
+    border-left: 0;
+  }
+
+  .inspector-group > summary {
+    position: static;
+  }
+
+  .split-proof-layout {
+    grid-template-columns: var(--rail-width) minmax(0, 1fr);
+  }
+
+  .split-pages-rail {
+    display: none;
+  }
+
+  .workflow-shell,
+  .trust-shell {
+    grid-template-rows: var(--menu-height) 52px minmax(0, 1fr) var(--status-height);
+  }
+
+  .workflow-proof-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+  }
+
+  .workflow-proof-bar > span:nth-of-type(3) {
+    display: none;
+  }
+
+  .workflow-layout {
+    grid-template-columns: var(--rail-width) minmax(0, 1fr);
+    overflow: auto;
+  }
+
+  .workflow-main {
+    grid-column: 2;
+    min-height: 600px;
+    overflow: visible;
+  }
+
+  .workflow-runner {
+    grid-column: 2;
+    border-top: 1px solid var(--border-strong);
+    border-left: 0;
+  }
+
+  .plugin-layout {
+    grid-template-columns: var(--rail-width) 176px minmax(0, 1fr);
+  }
+
+  .trust-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .trust-proof {
+    border-top: 1px solid var(--border-strong);
+    border-left: 0;
+  }
+}
+

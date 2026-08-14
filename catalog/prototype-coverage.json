@@ -1,0 +1,1595 @@
+{
+  "schemaVersion": 1,
+  "records": [
+    {
+      "id": "document.open.local",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "document.open.drag-drop",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "document.close",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "document.download.original",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.native.render",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.zoom.preview",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.rotate.preview",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.fullscreen",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "platform.plugins.catalog",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "platform.plugins.sandbox-probe",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.thumbnails",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.search",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.advanced-search",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.bookmarks",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.page-layouts",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.multidocument-tabs",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.split-view",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.reflow",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.read-aloud",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.attachments",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.layers",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.destinations",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.page-labels",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.document-properties",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.select-copy",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.loupe",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.snapshot",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.rulers-grid",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.presentation-mode",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "viewer.navigation-history",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "create.blank-pdf",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "convert.office-to-pdf",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "convert.images-to-pdf",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "convert.html-to-pdf",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "create.clipboard-to-pdf",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "create.print-to-pdf",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "create.postscript-to-pdf",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "create.multiformat-combine",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "create.cad-to-pdf",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "export.word",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "export.excel",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "export.powerpoint",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "export.text-rtf",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "export.html-xml",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "export.images",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "export.selected-region",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "optimize.compress",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "optimize.fast-web-view",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "edit.text",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "edit.add-text",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "edit.text-reflow",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "edit.images",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "edit.links",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "edit.headers-footers",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "edit.vector-objects",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "edit.object-properties",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "edit.find-replace",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "edit.spellcheck",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "document.watermarks",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "document.backgrounds",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "document.bates-numbering",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "document.bookmarks-author",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "document.destinations-author",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "document.attachments-manage",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "document.layers-manage",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "document.metadata-edit",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "document.flatten-content",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "document.actions-javascript",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.merge",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.split",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.extract",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.reorder",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.delete",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.crop",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.rotate",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.insert",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.replace",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.duplicate",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.copy-between-documents",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.resize",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "pages.page-boxes",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.labels-numbering",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.reverse-interleave",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.insert-blank",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.transitions",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "pages.split-by-rule",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.comments",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.markup-tools",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.shared-review",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.text-markup",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.drawing-markup",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.text-notes-callouts",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.file-audio-attachments",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.measurements",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.annotation-properties",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.annotation-import-export",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.comment-summary",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.statuses",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.filter-sort",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.custom-stamps",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "review.annotation-flatten",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.review-tracking",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.notifications-mentions",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "review.comments-to-office",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "forms.fill-save",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "forms.source-bound-acroform-fill-save",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "forms.author",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "forms.validate",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "forms.calculate",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "forms.distribute-collect",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "forms.detect-fields",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "forms.static-to-fillable",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "forms.import-export-data",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "forms.submit-reset",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "forms.javascript-actions",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "forms.tab-order-tooltips",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "forms.barcode-fields",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "forms.flatten",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "forms.xfa-compatibility",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "forms.signature-fields",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "sign.electronic",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "sign.certificate",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "sign.validate-certificate",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "sign.routed-workflow",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "sign.audit-trail",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "sign.timestamp",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "sign.certify-document",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "sign.trust-store",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "sign.revocation-ltv",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "sign.visible-appearance",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "sign.digital-id-management",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "sign.batch-sign-seal",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "sign.identity-verification",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "scan.acquire",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "scan.duplex-feeder",
+      "delivery": "planned",
+      "tier": "service-only"
+    },
+    {
+      "id": "scan.append-to-document",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "ocr.recognize-text",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "ocr.cleanup",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "ocr.editable-output",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "ocr.suspect-review",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "ocr.language-detection-selection",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "ocr.zones-layout",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "ocr.table-recognition",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "ocr.user-dictionaries-training",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "ocr.batch-recognition",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "ocr.export-layout-preserving",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "ocr.screenshot-capture",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "security.open-password",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "security.permission-controls",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "security.certificate-encryption",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "security.policy-controls",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "security.remove-protection",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "security.security-envelopes",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "security.information-protection-labels",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "security.protected-view",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "security.javascript-controls",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "security.encryption-aes",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "redaction.mark",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "redaction.preview",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "redaction.apply",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "redaction.find-patterns",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "redaction.overlay-labels",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "redaction.full-page",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "redaction.batch",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "redaction.report",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "sanitize.hidden-data",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "sanitize.metadata",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "sanitize.selective-content",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "compare.content",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "compare.pixel",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "compare.overlay",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "compare.side-by-side",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "compare.annotations",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "compare.cross-format",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "compare.batch",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "compare.report-export",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "compare.package",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "accessibility.check",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "accessibility.report-export",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "accessibility.auto-tag",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "accessibility.remediate-tags",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "accessibility.reading-order",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "accessibility.heading-list-structure",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "accessibility.table-semantics",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "accessibility.form-semantics",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "accessibility.links-bookmarks",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "accessibility.artifact-management",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "accessibility.alt-text",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "accessibility.document-language-title",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "accessibility.color-contrast",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "accessibility.font-unicode-mapping",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "accessibility.screen-reader-permissions",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "standards.pdf-a",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "standards.pdf-x",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "standards.pdf-ua",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "standards.pdf-e",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "standards.pdf-vt",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "standards.pdf-two",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "preflight.fixups",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "preflight.profiles",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "preflight.reports",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "preflight.certified-pdf",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "color.convert",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "color.output-intents",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "color.spot-colors",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "print.output-preview",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "print.separations",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "print.ink-coverage",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "print.overprint-preview",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "print.transparency-flattening",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "print.soft-proof",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "print.trapping",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "print.bleed-marks",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "print.imposition",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "print.font-inspection-embedding",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "print.image-resolution-compression",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "print.variable-data",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "print.barcode-decoration",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "collaboration.share-links",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "collaboration.real-time-review",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "collaboration.activity-notifications",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "collaboration.access-expiration",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "collaboration.version-history",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "collaboration.projects-workspaces",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "dms.repository-connectors",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "dms.retention-records",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "dms.checkin-checkout",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "dms.offline-sync",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "dms.conflict-resolution",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "dms.document-locking",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "automation.cli-batch",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "automation.api",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "automation.watch-folders",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "automation.action-sequences",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "automation.javascript",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "automation.scheduled-jobs",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "automation.conditional-workflows",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "automation.variables-presets",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "automation.job-queue-retry",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "automation.webhooks",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "automation.processing-reports",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "automation.preflight-server",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "automation.batch-print",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "ai.summarize",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.ask-document",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.extract-structured-data",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.translate",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.rewrite-proofread",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.explain",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.source-citations",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.multi-document-analysis",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.generate-images",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.generate-bookmarks",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.smart-redaction",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.form-extraction",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.accessibility-suggestions",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.annotation-assist",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "ai.provider-policy-controls",
+      "delivery": "planned",
+      "tier": "excluded"
+    },
+    {
+      "id": "aec.measurement",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.takeoff",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.collaborative-review-sessions",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.scale-calibration",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.measurement-toolset",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.markup-toolsets",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.markups-list",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.custom-columns-formulas",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.spaces-regions",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.sets-drawing-log",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.sheet-metadata-tags",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.revision-overlay",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.batch-slip-sheet",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.batch-link",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.legends",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.offline-projects",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.revision-status-workflows",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "aec.geospatial-documents",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "rich-media.audio-video",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "rich-media.playback-controls",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "three-d.import",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "three-d.saved-views-sections",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "three-d.measure-comment",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "portfolios.create",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "portfolios.view-extract",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "portfolios.metadata-search",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "portfolios.custom-layout",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "document.article-threads",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "document.embedded-files",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "document.optional-content-groups",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "geospatial.inspect-measure-markup",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "integrations.cloud-storage",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "integrations.office-addins",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "integrations.browser-capture",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "integrations.email",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "integrations.cad-bim",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "integrations.esign-providers",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "integrations.sensitivity-labels",
+      "delivery": "planned",
+      "tier": "executable-subset"
+    },
+    {
+      "id": "integrations.events-webhooks",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "admin.identity-roles",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "admin.audit-telemetry",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "admin.sso-scim",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "admin.deployment-packaging",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "admin.update-management",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "admin.licensing",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "admin.policy-configuration",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "admin.data-residency",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "admin.usage-reporting",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "admin.plugin-allowlist",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "platform.plugins.install",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "platform.plugins.rpc",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "platform.plugins.lifecycle",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "platform.plugins.permissions",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "platform.plugins.dependency-resolution",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "platform.plugins.version-compatibility",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "platform.plugins.package-verification",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "platform.plugins.runtime-sandbox",
+      "delivery": "planned",
+      "tier": "blocked"
+    },
+    {
+      "id": "platform.plugins.capability-conflicts",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "platform.plugins.upgrade-rollback",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    },
+    {
+      "id": "platform.plugins.registry",
+      "delivery": "implemented",
+      "tier": "exact-alpha"
+    }
+  ]
+}

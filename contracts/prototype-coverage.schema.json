@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/prototype-coverage.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "records"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "delivery", "tier"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(?:[.][a-z][a-z0-9-]*)+$" },
+          "delivery": { "enum": ["implemented", "planned"] },
+          "tier": { "enum": ["exact-alpha", "executable-subset", "sidecar", "proposal", "descriptor", "service-only", "blocked", "excluded"] }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://pdf.local/contracts/pack.schema.json",
+  "type":"object",
+  "additionalProperties":false,
+  "required":["id","title","description","maintainer"],
+  "properties":{
+    "id":{"type":"string","pattern":"^[a-z][a-z0-9-]*$"},
+    "title":{"type":"string","minLength":1},
+    "description":{"type":"string","minLength":1},
+    "maintainer":{"type":"string","pattern":"^[a-z][a-z0-9-]*$"}
+  }
+}

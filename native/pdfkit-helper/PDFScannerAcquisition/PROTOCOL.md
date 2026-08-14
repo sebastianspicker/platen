@@ -1,0 +1,11 @@
+# PDFScannerAcquisition protocol
+
+`pdf-scanner-acquisition` reads one UTF-8 JSON object per stdin line and writes one JSON response per line. Requests are exact and bounded.
+
+`list` accepts `{"version":1,"operation":"list"}` and reports opaque scanner IDs derived from the persistent device identity digest, sanitized display names, discovery-only capabilities, and `liveVerification:false` evidence. Device serials, paths, and other private identifiers are never emitted.
+
+`scan` accepts `version`, `operation`, `deviceId`, an already-existing absolute `destination` workspace, `page` (1..1000), `maxBytes` (1..64 MiB), `deadlineMs` (1..120000), `format` (`PDF`), `source` (`flatbed`), `duplex` (`false`), `color` (`bw`, `gray`, or `color`), `dpi` (150, 300, or 600), and `pageCount` (`1`). The workspace must be a private mode-0700 non-symlink directory. On macOS with an ImageCaptureCore scanner that exposes a persistent identity and the requested resolution, the helper acquires one flatbed page through a file-based JPEG transfer, converts that page to a single-page PDF, re-reads the private output, and returns its size and SHA-256 digest. TIFF and JPEG output are intentionally not claimed.
+
+`scanDuplex` is a distinct exact request. It accepts the same identity, destination, byte, deadline, color, DPI, and PDF fields plus `source` (`feeder`), `duplex` (`true`), `pageCount` (an even value from 2 through 50), and `maxPixels` (1 through 500,000,000). The helper opens the exact persistent scanner identity, selects its advertised document-feeder functional unit, and proceeds only when ImageCaptureCore reports duplex support, forward feeder order, loaded documents, and the requested resolution and bit depth. It rejects incomplete, excessive, reordered-by-device, differently sized, over-pixel, or over-byte transfers. Success writes only `duplex-scan.pdf` and reports callback-order front/back metadata for diagnostics. The host treats that per-page metadata as an unvalidated helper report; it independently inspects and reinspects the retained PDF structure and exact page count before returning success.
+
+Errors contain only a stable code, bounded reason, and capability evidence. Cancellation and deadlines are fail-closed; callers must treat an unsupported or unavailable response as non-success.

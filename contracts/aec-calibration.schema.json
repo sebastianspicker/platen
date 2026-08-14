@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/aec-calibration.schema.json",
+  "title": "Source-bound AEC scale calibration result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "schemaVersion", "sourceDigest", "workspaceRevision", "calibration"],
+  "properties": {
+    "kind": {"const": "source-bound-aec-calibration"},
+    "schemaVersion": {"const": 1},
+    "sourceDigest": {"$ref": "#/$defs/sha256"},
+    "workspaceRevision": {"type": "integer", "minimum": 1, "maximum": 1000000},
+    "calibration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "id", "type", "source", "segment", "knownLength", "metersPerPdfPoint", "label", "createdAt"],
+      "properties": {
+        "schemaVersion": {"const": 2},
+        "id": {"$ref": "#/$defs/id"},
+        "type": {"const": "scale-calibration"},
+        "source": {"$ref": "#/$defs/source"},
+        "segment": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/point"}},
+        "knownLength": {
+          "type": "object", "additionalProperties": false, "required": ["value", "unit"],
+          "properties": {"value": {"type": "number", "exclusiveMinimum": 0}, "unit": {"enum": ["mm", "cm", "m", "in", "ft"]}}
+        },
+        "metersPerPdfPoint": {"type": "number", "exclusiveMinimum": 0},
+        "label": {"type": "string", "minLength": 1, "maxLength": 160},
+        "createdAt": {"type": "string", "format": "date-time"}
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "point": {
+      "type": "object", "additionalProperties": false, "required": ["x", "y"],
+      "properties": {"x": {"type": "number", "minimum": -1000000, "maximum": 1000000}, "y": {"type": "number", "minimum": -1000000, "maximum": 1000000}}
+    },
+    "box": {
+      "type": "object", "additionalProperties": false, "required": ["left", "bottom", "right", "top"],
+      "properties": {"left": {"type": "number"}, "bottom": {"type": "number"}, "right": {"type": "number"}, "top": {"type": "number"}}
+    },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sha256", "page", "displayBox", "box", "rotation", "geometrySha256"],
+      "properties": {
+        "sha256": {"$ref": "#/$defs/sha256"}, "page": {"type": "integer", "minimum": 1, "maximum": 100000},
+        "displayBox": {"const": "crop"}, "box": {"$ref": "#/$defs/box"},
+        "rotation": {"enum": [0, 90, 180, 270]}, "geometrySha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

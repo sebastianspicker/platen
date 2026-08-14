@@ -1,28 +1,49 @@
-// platen file
+// swift-tools-version: 5.9
+import PackageDescription
 
-// inspection: validation
-
-// operations: validation
-
-// operations: validation
-
-// workbench: release
-
-// verification: baseline
-
-// operations: validation
-
-// release: maintenance
-
-// workbench: release
-
-// workbench: release
-
-// release: maintenance
-
-// packaging: checks
-
-// release: maintenance
-
-// packaging: checks
-
+let package = Package(
+    name: "PDFKitInspector",
+    platforms: [.macOS(.v13)],
+    products: [
+        .executable(name: "pdfkit-inspect", targets: ["PDFKitInspector"]),
+        .executable(name: "pdf-signature-trust", targets: ["PDFSignatureTrust"]),
+        .executable(name: "pdf-signing-identity", targets: ["PDFSigningIdentity"]),
+        .executable(name: "pdf-scanner-acquisition", targets: ["PDFScannerAcquisition"]),
+    ],
+    targets: [
+        .target(name: "PDFScannerAcquisitionCore"),
+        .executableTarget(
+            name: "PDFScannerAcquisition",
+            dependencies: ["PDFScannerAcquisitionCore"],
+            linkerSettings: [
+                .linkedFramework("ImageCaptureCore"),
+                .linkedFramework("ImageIO"),
+                .linkedFramework("CoreGraphics"),
+            ]
+        ),
+        .executableTarget(
+            name: "PDFKitInspector",
+            linkerSettings: [.linkedFramework("PDFKit")]
+        ),
+        .executableTarget(
+            name: "PDFSignatureTrust",
+            linkerSettings: [.linkedFramework("Security")]
+        ),
+        .executableTarget(
+            name: "PDFSigningIdentity",
+            linkerSettings: [
+                .linkedFramework("Foundation"),
+                .linkedFramework("LocalAuthentication"),
+                .linkedFramework("Security"),
+            ]
+        ),
+        .testTarget(
+            name: "PDFSigningIdentityTests",
+            dependencies: ["PDFSigningIdentity"]
+        ),
+        .testTarget(
+            name: "PDFScannerAcquisitionCoreTests",
+            dependencies: ["PDFScannerAcquisitionCore"]
+        ),
+    ]
+)

@@ -5,7 +5,6 @@
     "strict": true
   },
   "_kilo_change_markers": [
-    "release: docs"
+    "forced-release-1:docs"
   ]
 }
-

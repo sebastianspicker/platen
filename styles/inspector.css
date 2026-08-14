@@ -1,0 +1,321 @@
+.inspector {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  background: var(--surface);
+  border-left: 1px solid var(--border-strong);
+}
+
+.inspector-group {
+  border-bottom: 1px solid var(--border);
+}
+
+.inspector-group > summary {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  padding: 0 16px;
+  color: var(--ink-soft);
+  background: var(--surface-raised);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  list-style-position: inside;
+  text-transform: uppercase;
+}
+
+.inspector-group[open] > summary {
+  color: var(--ink);
+  border-bottom: 1px solid var(--border);
+}
+
+.inspector-group > summary span {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 550;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.inspector-group-content {
+  padding: 4px 16px 18px;
+}
+
+.property-section,
+.creation-section,
+.export-section,
+.snapshot-section,
+.raster-section,
+.prepress-section,
+.standards-section,
+.comparison-section,
+.pdfkit-mutation-section,
+.pdfkit-protection-section,
+.pdfkit-layer-section,
+.accessibility-section,
+.ocr-section,
+.acroform-section,
+.loupe-section,
+.page-transform-section {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.inspector-group-content > :last-child {
+  border-bottom: 0;
+}
+
+.inspector h3,
+.inspector h4 {
+  margin: 0 0 9px;
+  color: var(--ink);
+  font-size: 12px;
+  letter-spacing: -0.01em;
+}
+
+.inspector h4 {
+  color: var(--ink-soft);
+  font-size: 11px;
+}
+
+.inspector p {
+  margin-bottom: 9px;
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.property-row,
+.evidence-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.8fr) minmax(0, 1.2fr);
+  gap: 12px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.property-row:last-child,
+.evidence-row:last-child {
+  border-bottom: 0;
+}
+
+.property-value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-align: right;
+}
+
+.disclosure {
+  border-bottom: 1px solid var(--border);
+}
+
+.disclosure > summary {
+  padding: 9px 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.nested-control-group,
+.redaction-controls,
+.redaction-plan-controls,
+.prepress-production-controls,
+.page-arrange-controls,
+.ocr-layout-controls {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 11px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.page-transform-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.inline-rule-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 88px;
+  gap: 8px;
+}
+
+.comparison-result,
+.preflight-result,
+.ocr-result,
+.controlled-raster-state,
+.loupe-state,
+.aec-artifact-panel,
+.ocr-layout-result,
+.ocr-suspect-review-state {
+  margin-top: 10px;
+  padding: 10px 11px;
+  color: var(--ink-soft);
+  background: var(--surface-muted);
+  border-left: 3px solid var(--border-strong);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 10.5px;
+}
+
+.comparison-result.is-complete,
+.preflight-result.is-complete,
+.ocr-result.is-complete {
+  background: var(--success-soft);
+  border-left-color: var(--success);
+}
+
+.comparison-result.is-blocked,
+.preflight-result.is-blocked,
+.ocr-result.is-blocked {
+  background: var(--warning-soft);
+  border-left-color: var(--warning);
+}
+
+.table-scroll {
+  max-width: 100%;
+  overflow: auto;
+  border: 1px solid var(--border);
+}
+
+.inspector table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+  text-align: left;
+}
+
+.inspector th,
+.inspector td {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.inspector th {
+  color: var(--muted);
+  background: var(--surface-muted);
+  font-weight: 700;
+}
+
+.inspector tr:last-child td {
+  border-bottom: 0;
+}
+
+.preflight-checks,
+.layer-list,
+.ocr-word-preview,
+.ocr-radio-options,
+.acroform-radio-options {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  list-style: none;
+}
+
+.layer-row,
+.acroform-radio-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 10.5px;
+}
+
+.ocr-word-preview {
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+}
+
+.ocr-word-chip {
+  overflow: hidden;
+  padding: 5px 7px;
+  color: var(--ink-soft);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font: 9.5px/1.25 var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comparison-images {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.comparison-images figure,
+.loupe-view {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.comparison-images img,
+.loupe-view img,
+.controlled-raster-view img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.comparison-images figcaption {
+  padding: 6px;
+  color: var(--muted);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  font-size: 9px;
+}
+
+.comparison-difference {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.scanner-discovery-panel,
+.domain-payload {
+  margin-top: 10px;
+  padding: 10px;
+  overflow: auto;
+  color: var(--ink-soft);
+  background: #f6f7f9;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font: 10px/1.5 var(--font-mono);
+  white-space: pre-wrap;
+}
+
+.analysis-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.engine-notice {
+  padding: 9px 10px;
+  color: var(--info);
+  background: var(--info-soft);
+  border: 1px solid #aecbe1;
+  border-radius: var(--radius-sm);
+  font-size: 10.5px;
+}

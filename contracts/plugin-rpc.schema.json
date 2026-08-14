@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf.local/contracts/plugin-rpc.schema.json",
+  "title": "Bound local plugin RPC message",
+  "description": "Decoded payload carried only by a private length-prefixed broker channel. This schema does not authorize execution or transport creation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol", "nonce", "pluginId", "version", "packageHash", "activationId", "type", "id", "sequence"],
+  "properties": {
+    "protocol": {"const": 1},
+    "nonce": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "pluginId": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:[.][a-z0-9-]+)+$"},
+    "version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)$"},
+    "packageHash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "activationId": {"type": "string", "pattern": "^[A-Za-z0-9_-]{16,128}$"},
+    "type": {"enum": ["request", "cancel"]},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,128}$"},
+    "sequence": {"type": "integer", "minimum": 1},
+    "method": {"enum": ["document.getMetadata", "document.readRange"]},
+    "params": {"type": "object"},
+    "targetId": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,128}$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"type": {"const": "request"}}, "required": ["type"]},
+      "then": {"required": ["method", "params"], "properties": {"targetId": false}},
+      "else": {"required": ["targetId"], "properties": {"method": false, "params": false}}
+    }
+  ]
+}

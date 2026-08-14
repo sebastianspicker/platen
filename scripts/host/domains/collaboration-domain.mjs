@@ -1,0 +1,67 @@
+import { LocalWorkspaceDomain, digest, fail, id, list, number, text } from './aec-collaboration-support.mjs';
+
+const RESOLUTIONS = new Set(['keep-local', 'keep-incoming', 'manual-review']);
+const REVISION_TRANSITIONS = Object.freeze({ draft: ['issued'], issued: ['superseded'], superseded: [] });
+
+/** Offline-only project, review, sharing, retention, lock, and sync records. */
+export class CollaborationDomain extends LocalWorkspaceDomain {
+  constructor(workspaceStateStore, options) { super(workspaceStateStore, options, 'collaboration'); }
+
+  createProject(documentId, { id: suppliedId, name, offline = true }, options = {}) { if (offline !== true) fail('LOCAL_ONLY', 'Projects in this prototype are local and offline only.'); const record = { id: this.newId('project', suppliedId), type: 'local-project', name: text(name, 'name'), offline: true, createdAt: this.now() }; return this.write(documentId, 'workflowRecords', record, options.expectedRevision); }
+  createRevision(documentId, { id: suppliedId, label, sourceSha256 }, options = {}) {
+    const record = {
+      id: this.newId('revision', suppliedId),
+      type: 'revision-status',
+      label: text(label, 'label'),
+      status: 'draft',
+      createdAt: this.now(),
+    };
+    if (sourceSha256 !== undefined) {
+      record.sourceSha256 = digest(sourceSha256, 'sourceSha256');
+      if (!Number.isSafeInteger(options.expectedRevision) || options.expectedRevision < 0) {
+        fail('REVISION_CONFLICT', 'Source-bound revision creation requires the current workspace revision.', 409);
+      }
+      if (this.snapshot(documentId).revision !== options.expectedRevision) {
+        fail('REVISION_CONFLICT', 'Source-bound revision creation requires the current workspace revision.', 409);
+      }
+      record.basisRevision = options.expectedRevision;
+    }
+    return this.write(documentId, 'workflowRecords', record, options.expectedRevision);
+  }
+  transitionRevision(documentId, revisionId, nextStatus, { sourceSha256, expectedRevision } = {}) {
+    const sourceBound = sourceSha256 !== undefined;
+    const trustedSource = sourceBound ? digest(sourceSha256, 'sourceSha256') : undefined;
+    if (sourceBound && (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0
+      || this.snapshot(documentId).revision !== expectedRevision)) {
+      fail('REVISION_CONFLICT', 'Source-bound revision transition requires the current workspace revision.', 409);
+    }
+    const record = this.get(documentId, 'workflowRecords', id(revisionId, 'revisionId'));
+    if (sourceBound && record.sourceSha256 !== trustedSource) {
+      fail('SOURCE_VERSION_MISMATCH', 'Collaboration revision source digest does not match the stored source.', 409);
+    }
+    if (record.type !== 'revision-status' || !REVISION_TRANSITIONS[record.status]?.includes(nextStatus)) {
+      fail('INVALID_STATUS_TRANSITION', 'This local revision transition is not allowed.', 409);
+    }
+    if (sourceBound) {
+      return this.write(documentId, 'workflowRecords', {
+        ...record,
+        status: nextStatus,
+        basisRevision: expectedRevision,
+        updatedAt: this.now(),
+      }, expectedRevision, 'update');
+    }
+    return this.write(documentId, 'workflowRecords', { ...record, status: nextStatus, updatedAt: this.now() }, expectedRevision, 'update');
+  }
+  createWorkspace(documentId, { id: suppliedId, name }, options = {}) { const record = { id: this.newId('workspace', suppliedId), type: 'local-workspace', name: text(name, 'name'), localOnly: true, createdAt: this.now() }; return this.write(documentId, 'workflowRecords', record, options.expectedRevision); }
+  createReviewSession(documentId, { id: suppliedId, workspaceId, participants = [] }, options = {}) { const record = { id: this.newId('review', suppliedId), type: 'review-session', workspaceId: id(workspaceId, 'workspaceId'), participants: list(participants, 'participants', 100).map((participant) => id(participant, 'participant')), createdAt: this.now() }; return this.write(documentId, 'reviewRecords', record, options.expectedRevision); }
+  recordParticipant(documentId, { id: suppliedId, name, role }, options = {}) { const record = { id: this.newId('participant', suppliedId), type: 'participant', name: text(name, 'name'), role: text(role, 'role'), createdAt: this.now() }; return this.write(documentId, 'reviewRecords', record, options.expectedRevision); }
+  recordActivity(documentId, { id: suppliedId, kind, subjectId }, options = {}) { const record = { id: this.newId('activity', suppliedId), type: 'activity', kind: text(kind, 'kind'), subjectId: id(subjectId, 'subjectId'), at: this.now() }; return this.write(documentId, 'reviewRecords', record, options.expectedRevision); }
+  createNotification(documentId, { id: suppliedId, recipientId, message }, options = {}) { const record = { id: this.newId('notification', suppliedId), type: 'notification', recipientId: id(recipientId, 'recipientId'), message: text(message, 'message', 1000), localOnly: true, createdAt: this.now() }; return this.write(documentId, 'reviewRecords', record, options.expectedRevision); }
+  createSharePackage(documentId, { id: suppliedId, documentDigest, expiresAt }, options = {}) { const expiry = text(expiresAt, 'expiresAt', 64); if (Number.isNaN(Date.parse(expiry)) || Date.parse(expiry) <= Date.parse(this.now())) fail('INVALID_EXPIRY', 'Share package expiry must be in the future.'); const record = { id: this.newId('package', suppliedId), type: 'local-share-package', documentDigest: digest(documentDigest), expiresAt: expiry, localOnly: true, networkLink: null, createdAt: this.now() }; return this.write(documentId, 'workflowRecords', record, options.expectedRevision); }
+  recordVersion(documentId, { id: suppliedId, documentDigest, parentDigest }, options = {}) { const record = { id: this.newId('version', suppliedId), type: 'version-history', documentDigest: digest(documentDigest), parentDigest: parentDigest ? digest(parentDigest, 'parentDigest') : null, createdAt: this.now() }; return this.write(documentId, 'workflowRecords', record, options.expectedRevision); }
+  createRepositoryConnector(documentId, { id: suppliedId, name, kind }, options = {}) { const record = { id: this.newId('connector', suppliedId), type: 'repository-connector', name: text(name, 'name'), kind: text(kind, 'kind'), auth: 'not-configured', remoteAccess: false, createdAt: this.now() }; return this.write(documentId, 'integrationSettings', record, options.expectedRevision); }
+  createRetentionRule(documentId, { id: suppliedId, name, days }, options = {}) { const record = { id: this.newId('retention', suppliedId), type: 'retention-rule', name: text(name, 'name'), days: number(days, 'days', { min: 1, max: 36500, positive: true }), localOnly: true, createdAt: this.now() }; return this.write(documentId, 'policies', record, options.expectedRevision); }
+  checkout(documentId, { id: suppliedId, documentDigest, ownerId }, options = {}) { const safeDigest = digest(documentDigest); const existing = this.records(documentId, 'workflowRecords', 'document-lock').find((item) => item.documentDigest === safeDigest); if (existing && existing.ownerId !== ownerId) fail('DOCUMENT_LOCKED', 'Document is checked out by another local participant.', 409); const record = { id: existing?.id ?? this.newId('lock', suppliedId), type: 'document-lock', documentDigest: safeDigest, ownerId: id(ownerId, 'ownerId'), status: 'checked-out', updatedAt: this.now() }; return this.write(documentId, 'workflowRecords', record, options.expectedRevision, existing ? 'update' : 'create'); }
+  checkin(documentId, lockId, ownerId, { expectedRevision } = {}) { const record = this.get(documentId, 'workflowRecords', id(lockId, 'lockId')); if (record.type !== 'document-lock' || record.ownerId !== id(ownerId, 'ownerId')) fail('LOCK_CONFLICT', 'Only the local lock owner may check in.', 409); return this.write(documentId, 'workflowRecords', { ...record, status: 'checked-in', releasedAt: this.now() }, expectedRevision, 'update'); }
+  appendSyncJournal(documentId, { id: suppliedId, operation, conflict = false, resolution = 'manual-review' }, options = {}) { if (!RESOLUTIONS.has(resolution)) fail('INVALID_RESOLUTION', 'Unsupported deterministic conflict resolution.'); const record = { id: this.newId('sync', suppliedId), type: 'offline-sync-journal', operation: text(operation, 'operation'), conflict: Boolean(conflict), resolution, localOnly: true, at: this.now() }; return this.write(documentId, 'workflowRecords', record, options.expectedRevision); }
+}

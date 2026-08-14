@@ -1,0 +1,22 @@
+[
+  {"id":"view-navigation","title":"View and navigation","description":"Open, render, inspect, navigate, and present PDF documents."},
+  {"id":"create-convert","title":"Create and convert","description":"Create PDFs and convert documents, images, and web content."},
+  {"id":"content-editing","title":"Content editing","description":"Edit text, images, objects, links, and document structure."},
+  {"id":"page-organization","title":"Page organization","description":"Arrange, extract, split, merge, crop, and transform pages."},
+  {"id":"annotations-review","title":"Annotations and review","description":"Mark up documents and manage review workflows."},
+  {"id":"forms","title":"Forms","description":"Create, fill, validate, distribute, and collect interactive forms."},
+  {"id":"signatures","title":"Electronic, certificate, and routed signatures","description":"Apply electronic and certificate signatures and collect routed approvals."},
+  {"id":"scan-ocr","title":"Scan and OCR","description":"Acquire scans, recognize text, and improve scan quality."},
+  {"id":"security","title":"Passwords and certificate security","description":"Protect documents, permissions, certificates, and policies."},
+  {"id":"redaction-sanitization","title":"Redaction and sanitization","description":"Permanently remove sensitive content and hidden metadata."},
+  {"id":"comparison","title":"Comparison variants","description":"Compare text, graphics, pages, versions, and packages."},
+  {"id":"accessibility","title":"Accessibility","description":"Inspect and remediate tagged-PDF accessibility requirements."},
+  {"id":"standards-preflight-print","title":"PDF standards, preflight, and print","description":"Validate archival, exchange, production, and print requirements."},
+  {"id":"collaboration-dms","title":"Collaboration and DMS","description":"Share, review, retain, and manage PDF content in repositories."},
+  {"id":"automation-headless","title":"Automation and headless","description":"Automate PDF processing through scripts, APIs, batch jobs, and CLI."},
+  {"id":"ai","title":"AI","description":"Use assistive AI for document understanding and transformation."},
+  {"id":"aec","title":"Construction and AEC","description":"Support drawing review, measurement, takeoff, and field workflows."},
+  {"id":"rich-media-3d-portfolios","title":"Rich media, 3D, and portfolios","description":"Package interactive media, 3D content, and document collections."},
+  {"id":"integrations-admin","title":"Integrations and administration","description":"Integrate enterprise systems and administer users, policy, and telemetry."},
+  {"id":"plugin-platform","title":"Plugin platform","description":"Discover, constrain, and operate optional capability extensions."}
+]

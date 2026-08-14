@@ -6,4 +6,3 @@ export function createReleaseSummary() {
 export function releaseTask() {
   return { scope: "release", status: "ready" };
 }
-

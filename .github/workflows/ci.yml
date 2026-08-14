@@ -1,12 +1,58 @@
-name: verify
+name: CI
+
 on:
   push:
-    branches: [dev]
-jobs:
-  verify:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: git status --short
-verification: expansion
+  pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node:
+    name: Node ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['20', '24']
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          package-manager-cache: false
+      - name: Verify repository
+        run: npm run verify
+      - name: Validate local release inventory
+        if: matrix.node-version == '24'
+        run: npm run release:validate
+
+  native:
+    name: Native macOS
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Verify repository with native helpers
+        run: npm run verify
+      - name: Test PDFKit helper
+        run: swift test --package-path native/pdfkit-helper
+      - name: Test plugin worker
+        run: swift test --package-path native/plugin-worker

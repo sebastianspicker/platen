@@ -1,0 +1,9 @@
+import { HostError } from '../host-error.mjs';
+import { PDF_JPEG_IMAGE_REPLACEMENT_PROFILE } from '../pdf-jpeg-image-replacement-writer.mjs';
+import { scheduleArtifactCleanup } from './artifact-response-lifecycle.mjs';
+function validResult(value) { return value && typeof value === 'object' && value.kind === 'pdf-jpeg-image-replacement' && value.artifact && typeof value.artifact.id === 'string' && (value.artifact.sha256 === undefined || typeof value.artifact.sha256 === 'string'); }
+export async function handleJpegImageReplacementRoute({ request, response, url, documentId, operation, processing, store, jpegImageReplacement, jpegImageReplacementReady, bodyLimit, exactJsonObject, method, readJson, json }) {
+  if (operation !== 'replace-jpeg') return false; method(request, 'POST'); if ([...url.searchParams].length) throw new HostError('INVALID_PARAMETER', 'JPEG image replacement does not accept query parameters.', 400); if (!jpegImageReplacementReady || !jpegImageReplacement) throw new HostError('PDF_JPEG_IMAGE_REPLACEMENT_UNAVAILABLE', 'JPEG image replacement is unavailable.', 503);
+  const body = await readJson(request, bodyLimit); const keys = ['profile', 'sourceSha256', 'inputId', 'inputSha256', 'page', 'resourceName']; if (!exactJsonObject(body, keys) || body.profile !== PDF_JPEG_IMAGE_REPLACEMENT_PROFILE) throw new HostError('INVALID_PDF_JPEG_IMAGE_REPLACEMENT_OPTIONS', 'JPEG replacement requires the fixed profile and explicit source/input digests.', 400);
+  const result = await jpegImageReplacement.replace(documentId, body, { signal: processing.signal }); if (!validResult(result)) throw new HostError('PDF_JPEG_IMAGE_REPLACEMENT_RESULT_INVALID', 'JPEG replacement returned an invalid artifact result.', 502); if (await scheduleArtifactCleanup({ processing, response, store }, result.artifact.id)) return true; json(response, 201, { result }); return true;
+}

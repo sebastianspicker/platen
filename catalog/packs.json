@@ -1,0 +1,9 @@
+[
+  {"id":"core-shell","title":"Core shell","description":"Local viewer and document lifecycle shell maintained in this repository.","maintainer":"core"},
+  {"id":"document-services","title":"Document services","description":"Planned document authoring and transformation services.","maintainer":"document-services"},
+  {"id":"trust-services","title":"Trust services","description":"Planned signing, security, and redaction services.","maintainer":"trust-services"},
+  {"id":"quality-services","title":"Quality services","description":"Planned OCR, accessibility, standards, and print services.","maintainer":"quality-services"},
+  {"id":"workflow-services","title":"Workflow services","description":"Planned collaboration, automation, and administration services.","maintainer":"workflow-services"},
+  {"id":"industry-extensions","title":"Industry extensions","description":"Planned AI, AEC, and rich-content extensions.","maintainer":"extensions"},
+  {"id":"plugin-platform","title":"Plugin platform","description":"Plugin discovery and sandbox-boundary ownership.","maintainer":"platform"}
+]
