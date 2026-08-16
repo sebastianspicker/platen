@@ -32,6 +32,20 @@ test('qpdf arguments confine output to the private workspace and reject hostile 
   assert.throws(() => buildQpdfLinearizeArgs({ input: '/private/docs/source.pdf\0', output: `${workspace}/x.pdf`, workspace }), /without NUL/);
 });
 
+test('qpdf adapter rejects inherited operation names before probing or running', async () => {
+  let probes = 0; let runs = 0;
+  const adapter = new QpdfAdapter({
+    registry: { probe: async () => { probes += 1; return { executable: '/engines/qpdf' }; } },
+    runner: async () => { runs += 1; },
+  });
+  for (const operation of ['toString', 'constructor', '__proto__']) {
+    await assert.rejects(adapter.execute(operation, {}), /Unknown qpdf operation/);
+  }
+  await adapter.execute('checkLinearization', { input: '/private/jobs/one/linearized.pdf' });
+  assert.equal(probes, 1);
+  assert.equal(runs, 1);
+});
+
 test('fast-web-view request normalization rejects accessors and extra keys', () => {
   assert.deepEqual(normalizePdfFastWebView({ profile: PDF_FAST_WEB_VIEW_PROFILE }), { profile: PDF_FAST_WEB_VIEW_PROFILE });
   assert.throws(() => normalizePdfFastWebView({ profile: PDF_FAST_WEB_VIEW_PROFILE, extra: true }), { code: 'INVALID_PDF_FAST_WEB_VIEW' });

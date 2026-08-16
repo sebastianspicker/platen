@@ -145,6 +145,19 @@ test('application click router owns delegated selection and command dispatch', a
     },
   });
   assert.deepEqual(calls.find(([name]) => name === 'sandbox-probe'), ['sandbox-probe']);
+
+  for (const inheritedAction of ['toString', 'constructor', '__proto__']) {
+    await click({
+      target: {
+        closest(selector) {
+          return selector === '[data-action]'
+            ? { dataset: { action: inheritedAction } }
+            : null;
+        },
+      },
+    });
+  }
+  assert.equal(calls.filter(([name]) => name === 'sandbox-probe').length, 1);
   unbind();
   assert.equal(root.listeners.has('click'), false);
 });

@@ -98,6 +98,30 @@ test('plugin manager disables a duplicate diagnostic request while checking', ()
   assert.match(html, /executable plugin gate remains closed/);
 });
 
+test('plugin manager ignores inherited prototype coverage and sandbox evidence while retaining safe fallbacks', () => {
+  const [inheritedTier, unknownTier] = registry.capabilitiesForFamily('scan-ocr');
+  const html = pluginsView(state({
+    familyFilter: 'scan-ocr',
+    selectedPlugin: 'skeleton:ocr',
+    prototypeCoverage: {
+      [inheritedTier.id]: Object.create({ tier: 'exact-alpha' }),
+      [unknownTier.id]: { tier: 'constructor' },
+    },
+    pluginSandboxStatus: {
+      reasonCode: 'constructor',
+      observedAtLocal: '2026-08-15T00:00:00.000Z',
+      hardControls: Object.create({ osSandbox: true }),
+      bestEffortEvidence: Object.create({ sandboxBehaviorProbe: true }),
+    },
+  }));
+  assert.match(html, /<dt>Diagnostic canaries<\/dt><dd>0 \/ 8<\/dd>/);
+  assert.match(html, /state-pill constructor">constructor<\/span>/);
+  assert.match(html, /state-pill blocked">Blocked<\/span>/);
+  assert.match(html, /Diagnostic reason unavailable\. Production containment remains unavailable\./);
+  assert.doesNotMatch(html, /undefined/);
+  assert.doesNotMatch(html, /function Object\(\)/);
+});
+
 test('responsive source defines desktop and mobile workspace breakpoints', () => {
   const css = readCssSources();
   assert.match(css, /@media \(max-width: 1240px\)/);

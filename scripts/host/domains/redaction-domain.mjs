@@ -1,4 +1,5 @@
 import { boundedString, createServiceOptions, requireObject, requireWorkspace } from './trust-accessibility-support.mjs';
+import { compileBoundedRegex } from '../bounded-regex.mjs';
 
 const MAX_PAGES = 200;
 const MAX_TEXT_LENGTH = 100_000;
@@ -39,8 +40,14 @@ function safeCustomPatterns(patterns) {
     const label = boundedString(entry.label ?? `custom-${index + 1}`, 'custom pattern label', 80);
     const source = boundedString(entry.pattern ?? entry.literal ?? '', 'custom pattern', 128);
     const regex = entry.regex === true;
-    if (regex && (!SAFE_REGEX.test(source) || /\([^)]*[+*][^)]*\)[+*?]/.test(source) || /\.\*[+*?]/.test(source))) throw new TypeError('Custom regular expressions use a restricted bounded syntax.');
-    return { label, regex: regex ? new RegExp(source, 'gi') : null, literal: regex ? null : source };
+    let compiled = null;
+    if (regex) {
+      try {
+        if (!SAFE_REGEX.test(source)) throw new TypeError('restricted syntax');
+        compiled = compileBoundedRegex(source, { maximum: 128, ignoreCase: true });
+      } catch { throw new TypeError('Custom regular expressions use a restricted bounded syntax.'); }
+    }
+    return { label, regex: compiled, literal: regex ? null : source };
   });
 }
 
@@ -50,11 +57,21 @@ function matchRecord(page, start, end, kind, label, rectangle) {
 
 function collectMatches(page, regex, kind, label, predicate = () => true) {
   const matches = [];
-  regex.lastIndex = 0;
-  let result;
-  while ((result = regex.exec(page.text)) && matches.length < MAX_MATCHES) {
-    if (predicate(result[0])) matches.push(matchRecord(page, result.index, result.index + result[0].length, kind, label));
-    if (result[0].length === 0) regex.lastIndex += 1;
+  if (typeof regex.find !== 'function') {
+    regex.lastIndex = 0;
+    let result;
+    while ((result = regex.exec(page.text)) && matches.length < MAX_MATCHES) {
+      if (predicate(result[0])) matches.push(matchRecord(page, result.index, result.index + result[0].length, kind, label));
+      if (result[0].length === 0) regex.lastIndex += 1;
+    }
+    return matches;
+  }
+  let start = 0;
+  while (start < page.text.length && matches.length < MAX_MATCHES) {
+    const match = regex.find(page.text, start);
+    if (!match) break;
+    if (predicate(page.text.slice(match.start, match.end))) matches.push(matchRecord(page, match.start, match.end, kind, label));
+    start = match.end;
   }
   return matches;
 }

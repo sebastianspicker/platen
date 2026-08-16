@@ -56,6 +56,15 @@ test('deterministic extractors preserve OOXML, OpenDocument, and passive text co
   assert.equal(extractFallbackText(Buffer.from('<html><body><p>HTML LOCAL</p></body></html>'), '.html'), 'HTML LOCAL');
 });
 
+test('fixed OOXML tag extraction handles large text nodes without pattern construction', () => {
+  const payload = 'local '.repeat(175_000);
+  const archive = storedZip([[
+    'word/document.xml',
+    `<w:document><w:p><w:t>${payload}&amp;more</w:t></w:p></w:document>`,
+  ]]);
+  assert.equal(extractFallbackText(archive, '.docx'), `${payload}&more`);
+});
+
 test('legacy Office formats keep a typed local-engine requirement', () => {
   assert.throws(() => extractFallbackText(Buffer.from('legacy'), '.doc'), { code: 'LEGACY_OFFICE_FORMAT_REQUIRES_LIBREOFFICE', status: 422 });
 });

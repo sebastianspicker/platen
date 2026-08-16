@@ -17,6 +17,14 @@ const SOURCE_BOUND_METADATA_EDIT = Object.freeze(new Set(['document.metadata-edi
 const SOURCE_BOUND_PAGE_ORGANIZATION = Object.freeze(new Set(['pages.page-boxes', 'pages.insert-blank']));
 const SOURCE_BOUND_HEADER_FOOTER_EDIT = Object.freeze(new Set(['edit.headers-footers']));
 
+function normalizeSourceBoundAccessibility(capabilityId, value) {
+  if (!Object.hasOwn(SOURCE_BOUND_ACCESSIBILITY, capabilityId)) return null;
+  if (capabilityId === 'accessibility.form-semantics') return normalizePdfAccessibilityFormSemantics(value);
+  if (capabilityId === 'accessibility.table-semantics') return normalizePdfAccessibilityTableSemantics(value);
+  if (capabilityId === 'accessibility.links-bookmarks') return normalizePdfAccessibilityLinksBookmarks(value);
+  return null;
+}
+
 function sanitizeMetadataRequest(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return null;
@@ -121,7 +129,8 @@ async function runSourceBoundAccessibility(application, command, stdout, signal,
   });
   let request;
   try {
-    request = SOURCE_BOUND_ACCESSIBILITY[command.capabilityId](JSON.parse(selected.bytes.toString('utf8')));
+    request = normalizeSourceBoundAccessibility(command.capabilityId, JSON.parse(selected.bytes.toString('utf8')));
+    if (request === null) throw new TypeError('Unsupported source-bound accessibility capability');
   } catch {
     runtime.fail('CLI_INVALID_PROFESSIONAL_ACCESSIBILITY_REQUEST', 'The professional accessibility request file is invalid or outside the bounded contract.');
   } finally {
@@ -287,7 +296,7 @@ export async function runProfessionalCapabilityCommand(application, command, std
     throw error;
   }
   const context = command.context && typeof command.context === 'object' ? command.context : {};
-  if (SOURCE_BOUND_ACCESSIBILITY[capabilityId]) {
+  if (Object.hasOwn(SOURCE_BOUND_ACCESSIBILITY, capabilityId)) {
     await runSourceBoundAccessibility(application, command, stdout, signal, runtime);
     return;
   }

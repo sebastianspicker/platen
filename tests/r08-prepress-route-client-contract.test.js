@@ -175,3 +175,16 @@ test('R08 route rejects source, profile, and private-surface preflight drift', a
     }), { code: 'INVALID_PREPRESS_RESULT', status: 502 });
   }
 });
+
+test('R08 route rejects inherited prepress operation names before service work', async () => {
+  let calls = 0;
+  for (const operation of ['toString', 'constructor', '__proto__']) {
+    await assert.rejects(handlePrepressRoute({
+      request: {}, response: new EventEmitter(), documentId,
+      processing: { signal: new AbortController().signal }, store: {},
+      prepress: { runPreflight: async () => { calls += 1; } }, method: () => {},
+      readJson: async () => ({ operation }), json: () => {}, parsePositiveInteger: Number,
+    }), { code: 'INVALID_PREPRESS_OPERATION', status: 400 });
+  }
+  assert.equal(calls, 0);
+});

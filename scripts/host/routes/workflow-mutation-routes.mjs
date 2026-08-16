@@ -176,7 +176,7 @@ export async function handleRasterMutationRoute(context) {
   }
   method(request, 'POST');
   const body = await readJson(request, WORKSPACE_JSON_BODY_LIMIT);
-  if (typeof body.operation !== 'string' || !(body.operation in rasterOperations)) {
+  if (typeof body.operation !== 'string' || !Object.hasOwn(rasterOperations, body.operation)) {
     throw new HostError('INVALID_OPERATION', 'Choose a supported raster mutation operation.', 400);
   }
   if (body.parameters !== undefined
@@ -189,7 +189,8 @@ export async function handleRasterMutationRoute(context) {
   if (body.operation === 'redact' && body.parameters?.planBinding !== undefined) {
     throw new HostError('INVALID_PARAMETERS', 'Redaction plan binding is reserved for source-bound plan application.', 400);
   }
-  const artifact = await rasterMutations[rasterOperations[body.operation]](
+  const rasterOperation = rasterOperations[body.operation];
+  const artifact = await rasterMutations[rasterOperation](
     documentId,
     body.parameters ?? {},
     processing,
@@ -215,12 +216,13 @@ export async function handleComparisonRoute(context) {
     || requestBody.secondaryDocumentId === documentId) {
     invalidComparison('A distinct local UUID-like secondary document identifier is required.');
   }
-  if (typeof requestBody.mode !== 'string' || !(requestBody.mode in comparisonOperations)) {
+  if (typeof requestBody.mode !== 'string' || !Object.hasOwn(comparisonOperations, requestBody.mode)) {
     throw new HostError('UNSUPPORTED_COMPARISON_MODE', 'Choose a supported local comparison mode.', 400);
   }
   const options = validComparisonOptions(requestBody.mode, requestBody.options);
   if (!options) invalidComparisonOptions();
-  const report = await comparisons[comparisonOperations[requestBody.mode]](
+  const comparisonOperation = comparisonOperations[requestBody.mode];
+  const report = await comparisons[comparisonOperation](
     documentId,
     requestBody.secondaryDocumentId,
     { ...options, ...processing },

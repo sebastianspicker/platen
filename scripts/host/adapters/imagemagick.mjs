@@ -124,8 +124,8 @@ export class ImageMagickAdapter {
   }
 
   async execute(operation, parameters, runOptions = {}) {
+    if (!Object.hasOwn(IMAGEMAGICK_OPERATIONS, operation)) throw new TypeError(`Unknown ImageMagick operation ${operation}`);
     const builder = IMAGEMAGICK_OPERATIONS[operation];
-    if (!builder) throw new TypeError(`Unknown ImageMagick operation ${operation}`);
     const args = builder(parameters);
     const engine = await this.#registry.probe('magick');
     return this.#runner({ ...runOptions, cwd: absolutePath(parameters.workspace, 'workspace'), executable: engine.executable, args });

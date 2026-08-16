@@ -53,8 +53,18 @@ const sandboxReasonLabels = Object.freeze({
   PROBE_UNAVAILABLE: 'The local diagnostic probe is unavailable. Production containment is still unavailable.',
 });
 
+function ownDataValue(value, key) {
+  return value && typeof value === 'object'
+    ? Object.getOwnPropertyDescriptor(value, key)?.value
+    : undefined;
+}
+
+function skeletonFor(familyId) {
+  return ownDataValue(skeletonByFamily, familyId);
+}
+
 function prototypeTier(state, capabilityId) {
-  return state.prototypeCoverage?.[capabilityId]?.tier ?? 'blocked';
+  return ownDataValue(ownDataValue(state.prototypeCoverage, capabilityId), 'tier') ?? 'blocked';
 }
 
 function categoryList(state) {
@@ -75,7 +85,7 @@ function categoryList(state) {
 }
 
 function skeletonRow(state, family, capabilities, selected) {
-  const skeleton = skeletonByFamily[family.id];
+  const skeleton = skeletonFor(family.id);
   const id = skeleton ? `skeleton:${skeleton.slug}` : `family:${family.id}`;
   const implemented = capabilities.filter(({ delivery }) => delivery === 'implemented').length;
   const activePrototype = capabilities.filter(({ id }) => activePrototypeTiers.has(prototypeTier(state, id))).length;
@@ -92,10 +102,10 @@ function skeletonRow(state, family, capabilities, selected) {
 
 function sandboxEvidenceList(keys, labels, evidence, { missing = false } = {}) {
   return `<ul class="sandbox-evidence-list">${keys.map((key) => {
-    const observed = evidence?.[key] === true;
+    const observed = ownDataValue(evidence, key) === true;
     const stateClass = observed ? ' is-observed' : '';
     const stateLabel = missing ? 'Missing' : observed ? 'Observed' : 'Not observed';
-    return `<li><span>${escapeHtml(labels[key])}</span><span class="sandbox-evidence-state${stateClass}">${stateLabel}</span></li>`;
+    return `<li><span>${escapeHtml(ownDataValue(labels, key))}</span><span class="sandbox-evidence-state${stateClass}">${stateLabel}</span></li>`;
   }).join('')}</ul>`;
 }
 
@@ -103,14 +113,14 @@ function sandboxStatusPanel(state) {
   const status = state.pluginSandboxStatus;
   const checking = state.probeResult === 'checking';
   const observedCount = status
-    ? PLUGIN_SANDBOX_BEST_EFFORT_EVIDENCE.filter((key) => status.bestEffortEvidence[key]).length
+    ? PLUGIN_SANDBOX_BEST_EFFORT_EVIDENCE.filter((key) => ownDataValue(status.bestEffortEvidence, key) === true).length
     : 0;
   const message = state.host?.pluginSandboxProbeReady === false
     ? 'This host build does not expose the optional diagnostic probe. Production containment remains unavailable.'
     : checking
     ? 'The local host is running bounded diagnostic canaries. Plugin execution remains blocked.'
     : status
-      ? sandboxReasonLabels[status.reasonCode]
+      ? ownDataValue(sandboxReasonLabels, status.reasonCode) ?? 'Diagnostic reason unavailable. Production containment remains unavailable.'
       : state.probeResult === 'failed'
         ? 'The diagnostic request failed. Production plugin containment remains unavailable.'
         : 'Run the optional local diagnostic to inspect best-effort canaries. It cannot open the execution gate.';
@@ -139,7 +149,7 @@ function sandboxStatusPanel(state) {
 function detailPanel(state, rows) {
   const selected = rows.find(({ id }) => id === state.selectedPlugin) ?? rows[0];
   if (!selected) return '<aside class="plugin-detail" aria-label="Selected capability details"><div class="plugin-detail-empty"><h2>No capability selected</h2><p>No capability matches this filter. Adjust the family or search filter to inspect a delivery record.</p></div></aside>';
-  const skeleton = skeletonByFamily[selected.family.id];
+  const skeleton = skeletonFor(selected.family.id);
   const path = skeleton ? `plugins/skeletons/${skeleton.slug}/` : 'catalog/capabilities.json';
   const implementedCount = selected.capabilities.filter(({ delivery }) => delivery === 'implemented').length;
   const prototypeCount = selected.capabilities.filter(({ id }) => activePrototypeTiers.has(prototypeTier(state, id))).length;
@@ -165,7 +175,7 @@ function detailPanel(state, rows) {
     <ul class="capability-list">
       ${selected.capabilities.map((capability) => {
         const tier = prototypeTier(state, capability.id);
-        return `<li><span><strong>${escapeHtml(capability.title)}</strong><small>${escapeHtml(capability.description)}</small></span><span class="capability-state-stack"><span class="state-pill ${capability.delivery}">${escapeHtml(capability.delivery)}</span><span class="state-pill ${escapeHtml(tier)}">${escapeHtml(prototypeLabels[tier] ?? tier)}</span></span></li>`;
+        return `<li><span><strong>${escapeHtml(capability.title)}</strong><small>${escapeHtml(capability.description)}</small></span><span class="capability-state-stack"><span class="state-pill ${capability.delivery}">${escapeHtml(capability.delivery)}</span><span class="state-pill ${escapeHtml(tier)}">${escapeHtml(ownDataValue(prototypeLabels, tier) ?? tier)}</span></span></li>`;
       }).join('')}
     </ul>
     ${skeleton ? '<button class="button" disabled>Install unavailable</button>' : ''}
@@ -183,7 +193,7 @@ export function pluginsView(state) {
     return haystack.includes(query);
   });
   const rows = families.map((family) => ({
-    id: skeletonByFamily[family.id] ? `skeleton:${skeletonByFamily[family.id].slug}` : `family:${family.id}`,
+    id: skeletonFor(family.id) ? `skeleton:${skeletonFor(family.id).slug}` : `family:${family.id}`,
     family,
     capabilities: state.registry.capabilitiesForFamily(family.id),
   }));

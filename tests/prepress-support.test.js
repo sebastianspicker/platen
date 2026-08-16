@@ -10,12 +10,12 @@ import {
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 
 function crc32(bytes) {
-  let crc = 0xffffffff;
+  let crc = -1;
   for (const byte of bytes) {
     crc ^= byte;
-    for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
+    for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (-306674912 & -(crc & 1));
   }
-  return (crc ^ 0xffffffff) >>> 0;
+  return (crc ^ -1) >>> 0;
 }
 function uint32(value) { const bytes = Buffer.alloc(4); bytes.writeUInt32BE(value); return bytes; }
 function pngChunk(type, data = Buffer.alloc(0)) {

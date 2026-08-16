@@ -55,4 +55,8 @@ test('ImageMagick adapter pins magick, workspace cwd, and validated argv', async
     timeoutMs: 5_000, executable: '/engines/magick', cwd: workspace,
     args: ['-limit', 'memory', '128MiB', '-limit', 'map', '128MiB', '-limit', 'disk', '256MiB', '-limit', 'area', '32MP', '-limit', 'width', '8192', '-limit', 'height', '8192', '-limit', 'thread', '1', '-limit', 'time', '60', '-define', 'registry:temporary-path=/jobs/private', 'png:/documents/photo.png', '-strip', 'pdf:/jobs/private/out.pdf'],
   }]);
+  for (const operation of ['toString', 'constructor', '__proto__']) {
+    await assert.rejects(adapter.execute(operation, {}), /Unknown ImageMagick operation/);
+  }
+  assert.equal(calls.length, 1);
 });

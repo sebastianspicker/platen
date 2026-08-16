@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import { PlatenError } from './errors.js';
 import { OPAQUE_ID_PATTERN } from './pdfkit-client-contract-shared.js';
 
@@ -59,10 +60,6 @@ function canonicalTimestamp(value) {
   if (typeof value !== 'string') return false;
   const parsed = new Date(value);
   return !Number.isNaN(parsed.valueOf()) && parsed.toISOString() === value;
-}
-
-function sameJson(left, right) {
-  try { return JSON.stringify(left) === JSON.stringify(right); } catch { return false; }
 }
 
 function validOperation(operation, { documentId, sourceSha256, outputSha256, request }) {
@@ -179,7 +176,7 @@ export function createTextReflowEndpoints({ json }) {
       if (!OPAQUE_ID_PATTERN.test(documentId ?? '') || !SHA256.test(sourceSha256 ?? '')
         || !validRequest(candidate)
         || !exact(options, optionKeys)
-        || (signalDescriptor && options.signal !== undefined && !(options.signal instanceof AbortSignal))) {
+        || (signalDescriptor && options.signal !== undefined && !(options.signal instanceof globalThis.AbortSignal))) {
         throw new TypeError('Text-reflow options are invalid.');
       }
       const normalized = normalizeTextReflowRequest(candidate);

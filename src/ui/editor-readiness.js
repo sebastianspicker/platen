@@ -52,12 +52,12 @@ function deriveEditorReadinessSnapshot(state, analysis) {
 function derivePdfKitSelection(state, analysis, info, mutationReady) {
   const formKind = String(info?.form ?? 'unknown').toLowerCase();
   const legacyReady = mutationReady && formKind === 'none';
-  const binding = derivePdfKitBinding(state, analysis, formKind, legacyReady);
+  const binding = derivePdfKitBinding(state, analysis);
   const pageReadiness = derivePdfKitPageReadiness(state, binding.page, binding.boundPdfKitInspection, legacyReady);
   return { formKind, legacyReady, ...binding, ...pageReadiness };
 }
 
-function derivePdfKitBinding(state, analysis, formKind, legacyReady) {
+function derivePdfKitBinding(state, analysis) {
   const boundPdfKitInspection = state.pdfkitInspectionResult?.sourceDigest === analysis.sha256 ? state.pdfkitInspectionResult : null;
   const page = boundPdfKitInspection?.pages?.find(({ index }) => index === (state.selectedPage ?? 1));
   const widgets = (page?.widgets ?? []).filter((widget) => ['text', 'choice'].includes(widget.fieldType)
@@ -174,8 +174,7 @@ function deriveFullPageRedactionReadiness(state, snapshot) {
 
 function deriveEditorReadinessContext(state, analysis, snapshot) {
   const {
-    info, structure, ready, unsigned, formKind, boundPdfKitInspection, page,
-    pageCount, legacyReady,
+    ready, unsigned, page, pageCount, legacyReady,
   } = snapshot;
   const altTextReadiness = accessibilityAltTextReadiness({ state, analysis, ready });
   const outlineContext = { state, page, pageCount, legacyReady, unsigned };

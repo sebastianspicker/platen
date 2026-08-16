@@ -81,3 +81,24 @@ test('page-text state, form input, and document reset use bounded defaults', () 
   assert.deepEqual(state.pageTextRun, { x: 36, y: 36, size: 12, text: '' });
   assert.equal(state.pageTextResult, null);
 });
+
+test('AcroForm radio input accepts only explicit rectangle fields', () => {
+  const entry = { label: 'A', page: '1', rect: { x: '10', y: '20', width: '30', height: '40' } };
+  const state = { busyAction: null, acroFormRadioOptions: [entry], acroFormStatus: 'ready' };
+  const handleInput = createApplicationInputHandler({
+    state, ocr: {}, viewer: {}, documentApi: {}, render: () => {},
+  });
+  const radioTarget = (field, value) => ({
+    value,
+    dataset: { acroformRadioIndex: '0', acroformRadioField: field },
+    matches: (selector) => selector === '[data-acroform-radio-field]',
+  });
+
+  handleInput({ target: radioTarget('x', '12') });
+  assert.equal(entry.rect.x, '12');
+
+  const originalPrototype = Object.getPrototypeOf(entry.rect);
+  handleInput({ target: radioTarget('__proto__', 'polluted') });
+  assert.equal(Object.getPrototypeOf(entry.rect), originalPrototype);
+  assert.equal(Object.hasOwn(entry.rect, '__proto__'), false);
+});

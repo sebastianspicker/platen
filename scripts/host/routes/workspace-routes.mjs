@@ -9,6 +9,11 @@ import { bindSourceBoundCollaborationDomainRequest } from './source-bound-collab
 
 const WORKSPACE_JSON_BODY_LIMIT = 768 * 1024;
 const AEC_JSON_BODY_LIMIT = 8_192;
+const AEC_METHODS = Object.freeze({
+  'aec-calibration': 'calibrate',
+  'aec-measurement': 'measure',
+  'aec-materialization': 'materialize',
+});
 
 export async function handleDomainCatalogRoute(context) {
   const { pathname, request, response, domainFacade, method, json } = context;
@@ -71,8 +76,8 @@ export async function handleWorkspaceRoute(context) {
     json(response, 200, { result: await domainFacade.execute(documentId, bound) });
     return true;
   }
-  const aecMethod = { 'aec-calibration': 'calibrate', 'aec-measurement': 'measure', 'aec-materialization': 'materialize' }[operation];
-  if (aecMethod) {
+  if (Object.hasOwn(AEC_METHODS, operation)) {
+    const aecMethod = AEC_METHODS[operation];
     if (!aecArtifacts) throw new HostError('AEC_ARTIFACTS_UNAVAILABLE', 'Source-bound local AEC geometry is unavailable.', 503);
     method(request, 'POST');
     json(response, 201, { result: await aecArtifacts[aecMethod](documentId, await readJson(request, AEC_JSON_BODY_LIMIT), processing) });

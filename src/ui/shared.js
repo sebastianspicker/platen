@@ -23,6 +23,10 @@ const routeDetails = Object.freeze({
   },
 });
 
+function routeFor(id) {
+  return Object.getOwnPropertyDescriptor(routeDetails, id)?.value ?? routeDetails.editor;
+}
+
 export function escapeHtml(value) {
   return String(value ?? '')
     .replaceAll('&', '&amp;')
@@ -40,7 +44,7 @@ export function formatBytes(value) {
 }
 
 export function brandAndMenu(active, { context } = {}) {
-  const route = routeDetails[active] ?? routeDetails.editor;
+  const route = routeFor(active);
   const openAction = active === 'editor'
     ? `<button class="menu-open-action" type="button" data-action="open-file">${icon('folder')}<span>Open PDF</span></button>`
     : '';
@@ -65,7 +69,7 @@ export function brandAndMenu(active, { context } = {}) {
 
 export function rail(active) {
   const destination = (id, actionAttribute, actionLabel) => {
-    const route = routeDetails[id];
+    const route = routeFor(id);
     const current = active === id;
     return `<button class="rail-button ${current ? 'is-selected' : ''}" type="button" ${actionAttribute} ${current ? 'aria-current="page"' : ''} aria-label="${route.label}" title="${route.description}">${icon(route.icon)}<span>${actionLabel}</span></button>`;
   };

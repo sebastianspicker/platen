@@ -55,8 +55,8 @@ export class QpdfAdapter {
   }
 
   async execute(operation, parameters, runOptions = {}) {
+    if (!Object.hasOwn(QPDF_OPERATIONS, operation)) throw new TypeError(`Unknown qpdf operation ${operation}`);
     const builder = QPDF_OPERATIONS[operation];
-    if (!builder) throw new TypeError(`Unknown qpdf operation ${operation}`);
     const args = builder(parameters);
     const engine = await this.#registry.probe('qpdf');
     return this.#runner({

@@ -35,8 +35,8 @@ export async function handleWorkflowRoute(context) {
     bodyLimit: context.limits?.professionalPrintInspection,
   })) return true;
   if (await handleRedactionPlanRoute(context)) return true;
+  if (!Object.hasOwn(routeHandlers, context.operation)) return false;
   const handler = routeHandlers[context.operation];
-  if (!handler) return false;
   await handler(context);
   return true;
 }

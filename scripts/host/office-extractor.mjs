@@ -15,7 +15,16 @@ function xmlText(xml) {
 }
 
 function taggedText(xml, tag) {
-  return [...xml.matchAll(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'gi'))].map((match) => xmlText(match[1])).join('');
+  const matches = tag === 'w:t'
+    ? xml.matchAll(/<w:t\b[^>]*>([\s\S]*?)<\/w:t>/gi)
+    : tag === 'a:t'
+      ? xml.matchAll(/<a:t\b[^>]*>([\s\S]*?)<\/a:t>/gi)
+      : tag === 't'
+        ? xml.matchAll(/<t\b[^>]*>([\s\S]*?)<\/t>/gi)
+        : tag === 'v'
+          ? xml.matchAll(/<v\b[^>]*>([\s\S]*?)<\/v>/gi)
+          : [];
+  return [...matches].map((match) => xmlText(match[1])).join('');
 }
 
 function extractDocx(entries) {

@@ -5,10 +5,7 @@ function metadataAndBoxSections(state, context) {
     incrementalBleedBoxReady, incrementalMetadataReady, pdfkitLegacyReady,
     incrementalNamedDestinationEditorReady, incrementalNamedDestinationPageCount,
     incrementalNamedDestinationReady,
-    incrementalPageVectorReady, incrementalPageVectorEditorReady,
-    pageTextReady, pageTextEditorReady,
-    pdfkitPageBoxEditorReady, pdfkitPageBoxReady, pdfkitRotationReady,
-    pdfkitCurrentRotation,
+    pdfkitPageBoxEditorReady, pdfkitPageBoxReady,
   } = context;
   const metadataReady = incrementalMetadataReady || pdfkitLegacyReady;
   return `

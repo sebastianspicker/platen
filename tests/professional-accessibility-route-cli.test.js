@@ -123,3 +123,27 @@ test('professional accessibility CLI cancels after copy and still revokes the re
   }, {}, controller.signal, runtime), { code: 'JOB_CANCELLED' });
   assert.deepEqual(deleted, [artifactId]);
 });
+
+test('professional capability CLI does not route inherited capability keys through source-bound accessibility', async () => {
+  const delivered = [];
+  const application = {
+    professionalCapabilities: {
+      async deliver(capabilityId) {
+        delivered.push(capabilityId);
+        throw Object.assign(new Error('unknown capability'), { code: 'PROFESSIONAL_CAPABILITY_UNSUPPORTED' });
+      },
+    },
+  };
+  const runtime = {
+    cancelled() {},
+    uploadPdf: async () => assert.fail('inherited keys must not invoke the source-bound upload path'),
+    outputValue: async () => assert.fail('unknown capabilities must not produce output'),
+  };
+  for (const capabilityId of ['__proto__', 'constructor', 'toString']) {
+    await assert.rejects(
+      runProfessionalCapabilityCommand(application, { capabilityId }, {}, undefined, runtime),
+      { code: 'PROFESSIONAL_CAPABILITY_UNSUPPORTED' },
+    );
+  }
+  assert.deepEqual(delivered, ['__proto__', 'constructor', 'toString']);
+});

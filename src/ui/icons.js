@@ -35,9 +35,21 @@ const paths = {
   trash: '<path d="M3 5h14M8 2h4l1 3H7l1-3ZM5 5l1 13h8l1-13"/>',
 };
 
-export function icon(name, label = '') {
-  const path = paths[name] ?? paths.help;
-  const aria = label ? `role="img" aria-label="${label}"` : 'aria-hidden="true"';
-  return `<svg class="icon" viewBox="0 0 20 20" ${aria} fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+function ownPath(name) {
+  return Object.getOwnPropertyDescriptor(paths, name)?.value;
 }
 
+function escapeAttribute(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+export function icon(name, label = '') {
+  const path = ownPath(name) ?? paths.help;
+  const aria = label ? `role="img" aria-label="${escapeAttribute(label)}"` : 'aria-hidden="true"';
+  return `<svg class="icon" viewBox="0 0 20 20" ${aria} fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+}

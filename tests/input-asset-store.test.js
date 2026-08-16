@@ -13,11 +13,11 @@ const png = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0]);
 const odtContent = '<?xml version="1.0" encoding="UTF-8"?><office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" office:version="1.3"><office:body><office:text><text:p>Local ODT</text:p></office:text></office:body></office:document-content>';
 const odtManifest = '<?xml version="1.0" encoding="UTF-8"?><manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.3"><manifest:file-entry manifest:full-path="/" manifest:media-type="application/vnd.oasis.opendocument.text"/><manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/></manifest:manifest>';
 
-function odtBytes(mediaType = 'application/vnd.oasis.opendocument.text', extra = []) {
+function odtBytes(mediaType = 'application/vnd.oasis.opendocument.text', extra = [], content = odtContent, manifest = odtManifest) {
   return writeStoredZip([
     ['mimetype', mediaType],
-    ['content.xml', odtContent],
-    ['META-INF/manifest.xml', odtManifest],
+    ['content.xml', content],
+    ['META-INF/manifest.xml', manifest],
     ...extra,
   ]);
 }
@@ -104,4 +104,20 @@ test('ODT admission requires the exact bounded ODF text package identity', async
       mediaType: 'application/vnd.oasis.opendocument.text',
     }), { code: 'INVALID_INPUT_SIGNATURE', status: 415 });
   }
+});
+
+test('ODT admission handles a large bounded XML content entry with fixed root recognition', () => {
+  const content = `${odtContent.slice(0, -'</office:document-content>'.length)}${'local '.repeat(175_000)}</office:document-content>`;
+  assert.equal(isOdtPackage(odtBytes(undefined, [], content)), true);
+});
+
+test('ODT admission rejects unknown XML roots despite valid ODF namespace declarations', () => {
+  const unknownContentRoot = odtContent
+    .replace('<office:document-content', '<untrusted:document-content')
+    .replace('</office:document-content>', '</untrusted:document-content>');
+  const unknownManifestRoot = odtManifest
+    .replace('<manifest:manifest', '<untrusted:manifest')
+    .replace('</manifest:manifest>', '</untrusted:manifest>');
+  assert.equal(isOdtPackage(odtBytes(undefined, [], unknownContentRoot)), false);
+  assert.equal(isOdtPackage(odtBytes(undefined, [], odtContent, unknownManifestRoot)), false);
 });

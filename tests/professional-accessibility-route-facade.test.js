@@ -28,6 +28,25 @@ test('source-bound facade uses the immutable stored form source and retains the 
   await store.deleteArtifact(result.artifact.id);
 });
 
+test('source-bound facade rejects inherited accessibility service keys', async (t) => {
+  const store = await initializedStore(t, 'inherited-service');
+  const sourcePdf = makeButtonWidgetPdf();
+  const document = await addDocument(store, sourcePdf);
+  const inheritedServices = Object.create({
+    accessibilityFormSemantics: { repair: async () => assert.fail('inherited service must not be invoked') },
+  });
+  const facadeStore = {
+    verifySource: store.verifySource.bind(store),
+    getDocument: store.getDocument.bind(store),
+    getSourcePath: () => assert.fail('unavailable services must be rejected before source bytes are read'),
+  };
+  const professional = delivery(facadeStore, inheritedServices);
+  await assert.rejects(
+    professional.deliverSourceBound('accessibility.form-semantics', document.id, formRequest(sourcePdf)),
+    { code: 'PROFESSIONAL_ACCESSIBILITY_UNAVAILABLE', status: 503 },
+  );
+});
+
 test('local application composes the authoritative form service into source-bound delivery', async () => {
   const application = await createLocalApplication({ root: process.cwd(), token: 'c'.repeat(64) });
   try {

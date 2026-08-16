@@ -11,6 +11,16 @@ const groupDetails = Object.freeze({
   collaboration: { label: 'Collaboration', description: 'Offline project, review, and version records.' },
 });
 
+function ownDataValue(value, key) {
+  return value && typeof value === 'object'
+    ? Object.getOwnPropertyDescriptor(value, key)?.value
+    : undefined;
+}
+
+function groupDetail(id) {
+  return ownDataValue(groupDetails, id);
+}
+
 function humanize(value) {
   return String(value ?? '').replace(/([a-z])([A-Z])/g, '$1 $2').replaceAll('-', ' ').replace(/^./, (letter) => letter.toUpperCase());
 }
@@ -18,8 +28,8 @@ function humanize(value) {
 function groups(operations) {
   return Object.entries(operations ?? {}).map(([id, entries]) => ({
     id,
-    label: groupDetails[id]?.label ?? humanize(id),
-    description: groupDetails[id]?.description ?? 'Local prototype domain operations.',
+    label: groupDetail(id)?.label ?? humanize(id),
+    description: groupDetail(id)?.description ?? 'Local prototype domain operations.',
     entries: Object.entries(entries ?? {}).map(([name, details]) => ({ name, ...details })),
   }));
 }
@@ -125,7 +135,9 @@ export function workflowsView(state) {
   const operations = state.domainOperations;
   const selected = state.selectedDomainOperation;
   const hasDocument = Boolean(state.document?.isOpen && (state.analysis?.documentId || state.document?.id));
-  const selectedEntry = selected && operations?.[selected.group]?.[selected.operation];
+  const selectedGroupId = ownDataValue(selected, 'group');
+  const selectedOperationId = ownDataValue(selected, 'operation');
+  const selectedEntry = ownDataValue(ownDataValue(operations, selectedGroupId), selectedOperationId);
   const runnerMode = operations == null ? 'loading' : !hasDocument ? 'no-document' : selectedEntry?.supported ? 'ready' : 'unavailable';
   const runnerReady = runnerMode === 'ready';
   const runnerStatus = runnerMode === 'loading'
@@ -137,8 +149,8 @@ export function workflowsView(state) {
       : runnerMode === 'unavailable'
         ? { title: 'No available operation selected', detail: 'Choose a supported operation before editing or running a request.' }
         : null;
-  const selectedGroup = runnerReady ? escapeHtml(humanize(selected.group)) : escapeHtml(runnerStatus.title);
-  const selectedOperation = runnerReady ? escapeHtml(humanize(selected.operation)) : escapeHtml(runnerStatus.detail);
+  const selectedGroup = runnerReady ? escapeHtml(humanize(selectedGroupId)) : escapeHtml(runnerStatus.title);
+  const selectedOperation = runnerReady ? escapeHtml(humanize(selectedOperationId)) : escapeHtml(runnerStatus.detail);
   const canRun = Boolean(runnerReady && !state.domainBusy);
   const canUseProjectBundle = Boolean(hasDocument && state.host?.portableProjectBundlesReady && !state.domainBusy && !state.busyAction);
   const payload = state.domainPayload ?? '{}';

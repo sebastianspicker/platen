@@ -51,6 +51,20 @@ test('form detection and static conversion are deterministic', () => {
   assert.equal(state.namespaces.formFields.length, 3);
 });
 
+test('review-form patterns keep the simple persisted subset and reject nested repetition', () => {
+  const { domain } = setup();
+  let state = domain.createField(documentId, {
+    id: 'postal', name: 'postal', type: 'text', page: 1, rectangle: [0, 0, 1, 1], validation: { pattern: '\\d\\d' },
+  });
+  state = domain.setValue(documentId, 'postal', '12', { expectedRevision: state.revision });
+  assert.deepEqual(domain.validate(documentId), []);
+  state = domain.setValue(documentId, 'postal', 'x', { expectedRevision: state.revision });
+  assert.deepEqual(domain.validate(documentId), [{ fieldId: 'postal', code: 'pattern' }]);
+  assert.throws(() => domain.createField(documentId, {
+    name: 'redos', type: 'text', page: 1, rectangle: [0, 0, 1, 1], validation: { pattern: '(a+)+$' },
+  }, { expectedRevision: state.revision }), { code: 'UNSAFE_PATTERN' });
+});
+
 test('review and form CSV exports neutralize spreadsheet formula values', () => {
   const { domain } = setup();
   let state = domain.createAnnotation(documentId, {

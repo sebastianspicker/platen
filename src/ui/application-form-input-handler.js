@@ -192,7 +192,11 @@ function applyAcroFormInput(target, state) {
     const entry = state.acroFormRadioOptions?.[index];
     if (!entry) return false;
     if (key === 'label' || key === 'page') entry[key] = target.value;
-    else entry.rect[key] = target.value;
+    else if (key === 'x') entry.rect.x = target.value;
+    else if (key === 'y') entry.rect.y = target.value;
+    else if (key === 'width') entry.rect.width = target.value;
+    else if (key === 'height') entry.rect.height = target.value;
+    else return false;
   } else return false;
   state.acroFormStatus = 'idle';
   state.acroFormError = null;

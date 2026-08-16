@@ -13,6 +13,7 @@ export async function handleDocumentReadRoute(context) {
   if (operation === 'thumbnail') return sendThumbnail(context);
   if (operation === 'cropbox-raster') return sendCropBoxRaster(context);
   if (operation === 'cropbox-snapshot') return sendCropBoxSnapshot(context);
+  if (!Object.hasOwn(ASSET_METHODS, operation)) return false;
   return sendAssets(context);
 }
 
@@ -72,5 +73,6 @@ async function sendCropBoxSnapshot({ request, response, url, documentId, process
 
 async function sendAssets({ request, response, documentId, operation, processing, service, method, json }) {
   method(request, 'GET');
-  json(response, 200, { [operation === 'signatures' ? 'signatures' : operation]: await service[ASSET_METHODS[operation]](documentId, processing) });
+  const assetMethod = ASSET_METHODS[operation];
+  json(response, 200, { [operation === 'signatures' ? 'signatures' : operation]: await service[assetMethod](documentId, processing) });
 }

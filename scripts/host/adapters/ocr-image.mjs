@@ -37,5 +37,5 @@ const operations = Object.freeze({ cleanup: buildOcrImageCleanupArgs, crop: buil
 export class OcrImageAdapter {
   #registry; #runner;
   constructor({ registry, runner = runProcess } = {}) { if (!registry || typeof registry.probe !== 'function') throw new TypeError('registry must expose probe(name)'); if (typeof runner !== 'function') throw new TypeError('runner must be a function'); this.#registry = registry; this.#runner = runner; }
-  async execute(operation, parameters, runOptions = {}) { const builder = operations[operation]; if (!builder) throw new TypeError(`Unknown OCR image operation ${operation}`); const args = builder(parameters); const engine = await this.#registry.probe('magick'); return this.#runner({ ...runOptions, cwd: absolute(parameters.workspace, 'workspace'), executable: engine.executable, args }); }
+  async execute(operation, parameters, runOptions = {}) { if (!Object.hasOwn(operations, operation)) throw new TypeError(`Unknown OCR image operation ${operation}`); const builder = operations[operation]; const args = builder(parameters); const engine = await this.#registry.probe('magick'); return this.#runner({ ...runOptions, cwd: absolute(parameters.workspace, 'workspace'), executable: engine.executable, args }); }
 }

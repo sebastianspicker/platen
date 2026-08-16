@@ -117,11 +117,12 @@ async function publish(context, value, { multiple = false } = {}) {
 export async function handleDocumentMutationRoute(context) {
   queryFree(context.url);
   const { operation } = context;
-  if (PAGE_OPERATION_METHODS[operation]) return mutatePages(context);
+  if (Object.hasOwn(PAGE_OPERATION_METHODS, operation)) return mutatePages(context);
   if (operation === 'delete') return deletePages(context);
   if (operation === 'split') return splitDocument(context);
   if (operation === 'split-rule') return splitDocumentByRule(context);
   if (operation === 'reverse') return reverseDocument(context);
+  if (!Object.hasOwn(SECONDARY_OPERATION_ERRORS, operation)) return false;
   return combineDocuments(context);
 }
 
@@ -135,7 +136,8 @@ async function oneSourceRequest(context, keys) {
 async function mutatePages(context) {
   context.method(context.request, 'POST');
   const body = await oneSourceRequest(context, ['pages']);
-  const artifact = await context.service[PAGE_OPERATION_METHODS[context.operation]](
+  const pageOperation = PAGE_OPERATION_METHODS[context.operation];
+  const artifact = await context.service[pageOperation](
     context.documentId,
     body.pages,
     { ...context.processing, sourceSha256: body.sourceSha256 },

@@ -276,9 +276,11 @@ export class PopplerAdapter {
   }
 
   async execute(operation, parameters, runOptions = {}) {
+    if (!Object.hasOwn(builders, operation) || !Object.hasOwn(POPPLER_OPERATION_TOOLS, operation)) {
+      throw new TypeError(`Unknown Poppler operation ${operation}`);
+    }
     const builder = builders[operation];
     const tool = POPPLER_OPERATION_TOOLS[operation];
-    if (!builder || !tool) throw new TypeError(`Unknown Poppler operation ${operation}`);
     const args = builder(parameters);
     const engine = await this.#registry.probe(tool);
     return this.#runner({

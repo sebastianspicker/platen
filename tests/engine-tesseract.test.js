@@ -32,6 +32,9 @@ test('Tesseract builders reject paths and language injection', () => {
   assert.throws(() => buildTesseractPdfArgs({ input: '/jobs/page.png', outputBase: '/jobs/out', language: 'eng --psm 1' }), /language/);
   assert.throws(() => validateOcrLanguage('eng+deu+fra+ita+spa+por+nld+dan+nor'), /one to eight/);
   assert.throws(() => buildTesseractPdfArgs({ input: '/jobs/page.png', outputBase: '/jobs/out', language: 'eng', segmentation: '3 --user-words' }), /segmentation/);
+  assert.throws(() => buildTesseractPdfArgs({ input: '/jobs/page.png', outputBase: '/jobs/out', language: 'eng', segmentation: 'toString' }), /segmentation/);
+  assert.throws(() => buildTesseractPdfArgs({ input: '/jobs/page.png', outputBase: '/jobs/out', language: 'eng', segmentation: 'constructor' }), /segmentation/);
+  assert.throws(() => buildTesseractPdfArgs({ input: '/jobs/page.png', outputBase: '/jobs/out', language: 'eng', segmentation: '__proto__' }), /segmentation/);
   assert.throws(() => buildTesseractPdfArgs({ input: '/jobs/page.png', outputBase: '/jobs/out', language: 'eng', userWordsPath: 'words.txt' }), /absolute path/);
   assert.throws(() => buildTesseractLayoutArgs({ input: '/jobs/page.png', outputBase: '/jobs/out', language: 'eng', dpi: 1200 }), /dpi/);
   assert.throws(() => buildTesseractLayoutArgs({ input: '/jobs/page.png', outputBase: '/jobs/out', language: 'eng', detectTables: 'true' }), /detectTables/);
@@ -49,4 +52,17 @@ test('Tesseract adapter pins executable and validated argv', async () => {
     executable: '/engines/tesseract',
     args: ['/jobs/page.png', '/jobs/out', '-l', 'eng', '--psm', '3', '-c', 'preserve_interword_spaces=1', 'pdf', 'tsv'],
   }]);
+});
+
+test('Tesseract adapter rejects inherited operation names before probing or running', async () => {
+  let probes = 0; let runs = 0;
+  const adapter = new TesseractAdapter({
+    registry: { probe: async () => { probes += 1; return { executable: '/engines/tesseract' }; } },
+    runner: async () => { runs += 1; },
+  });
+  for (const operation of ['toString', 'constructor', '__proto__']) {
+    await assert.rejects(adapter.execute(operation), /Unknown Tesseract operation/);
+  }
+  assert.equal(probes, 0);
+  assert.equal(runs, 0);
 });

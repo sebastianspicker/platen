@@ -117,6 +117,19 @@ test('workflow screen renders explicit empty operation state without an interact
   assert.match(html, /class="workflow-state workflow-state-empty"/);
   assert.doesNotMatch(html, /class="workflow-state workflow-state-empty"[^>]*role="status"/);
 });
+
+test('workflow screen ignores inherited operation groups and uses unknown-group fallbacks', () => {
+  const operations = Object.create({ review: { inherited: { supported: true } } });
+  operations.constructor = { inspect: { supported: false, semantics: 'Unknown group fallback.' } };
+  const html = workflowsView(state({
+    domainOperations: operations,
+    selectedDomainOperation: { group: 'review', operation: 'inherited' },
+  }));
+  assert.match(html, /<h2 id="workflow-group-constructor">Constructor<\/h2>/);
+  assert.match(html, /Local prototype domain operations\./);
+  assert.match(html, /data-state="unavailable"/);
+  assert.doesNotMatch(html, /data-domain-group="review"/);
+});
 test('AEC workflow exposes current-revision legend export with explicit digest-only boundary', () => {
   const html = workflowsView(state({ document: { isOpen: true, name: 'x.pdf' }, analysis: { documentId: 'doc' }, host: { aecArtifactsReady: true, aecMeasurementLegendReady: true }, aecMeasurementIds: ['m-1'], aecLegendStatus: 'success', domainRevision: 2 }));
   assert.match(html, /generate-aec-measurement-legend/); assert.match(html, /Labels are represented only as digests/);

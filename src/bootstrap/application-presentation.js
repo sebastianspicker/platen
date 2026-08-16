@@ -13,6 +13,39 @@ const FOCUS_CANDIDATE_SELECTOR = [
   '[data-domain-operation]', '[data-page-direction]', '[data-page-number]', '[data-plugin-row]',
   '[data-family]', '[data-raster-operation]', '[data-rewrite-mode]',
 ].join(', ');
+const DISALLOWED_RENDERED_ELEMENTS = 'base, embed, iframe, meta, script, style';
+const URL_ATTRIBUTES = new Set(['action', 'data', 'formaction', 'href', 'poster', 'src', 'xlink:href']);
+const SAFE_IMAGE_DATA_URL = /^data:image\/(?:gif|jpe?g|png|webp);base64,[a-z0-9+/=]+$/iu;
+
+function isUnsafeRenderedUrl(element, attribute, value) {
+  const normalized = String(value).replaceAll(/\s/gu, '').replaceAll(String.fromCharCode(0), '');
+  if (/^(?:javascript|vbscript):/iu.test(normalized)) return true;
+  if (!normalized.toLowerCase().startsWith('data:')) return false;
+  return element.localName !== 'img' || attribute !== 'src' || !SAFE_IMAGE_DATA_URL.test(normalized);
+}
+
+/**
+ * View functions return HTML strings so their static application shell remains
+ * compact. Parse that markup in an inert document and remove executable
+ * elements, event handlers, and executable URLs before connecting it to the
+ * live DOM. This is a defense-in-depth boundary for state-derived view data.
+ */
+export function replaceRenderedMarkup(root, markup) {
+  const documentApi = root.ownerDocument ?? globalThis.document;
+  const DOMParserApi = documentApi?.defaultView?.DOMParser ?? globalThis.DOMParser;
+  if (!documentApi?.importNode || !DOMParserApi) throw new Error('Safe application rendering requires browser DOM APIs.');
+  const parsed = new DOMParserApi().parseFromString(markup, 'text/html');
+  for (const element of parsed.querySelectorAll(DISALLOWED_RENDERED_ELEMENTS)) element.remove();
+  for (const element of parsed.body.querySelectorAll('*')) {
+    for (const attribute of [...element.attributes]) {
+      const name = attribute.name.toLowerCase();
+      if (name.startsWith('on') || name === 'srcdoc' || (URL_ATTRIBUTES.has(name) && isUnsafeRenderedUrl(element, name, attribute.value))) {
+        element.removeAttribute(attribute.name);
+      }
+    }
+  }
+  root.replaceChildren(...[...parsed.body.childNodes].map((node) => documentApi.importNode(node, true)));
+}
 
 function focusIdentity(node) {
   if (node.dataset?.pageDirection) return { pageDirection: node.dataset.pageDirection };
@@ -139,13 +172,14 @@ export function createApplicationPresentation({ root, liveRegion, state, session
     const viewChanged = renderedView !== null && renderedView !== state.view;
     const hadError = Boolean(state.error);
     root.setAttribute('aria-busy', 'true');
-    root.innerHTML = state.view === 'plugins'
+    const markup = state.view === 'plugins'
       ? pluginsView(state)
       : state.view === 'workflows'
         ? workflowsView(state)
         : state.view === 'trust'
           ? trustView(state)
           : editorView(state);
+    replaceRenderedMarkup(root, markup);
     root.setAttribute('aria-busy', 'false');
     renderedView = state.view;
     if (!viewChanged) restoreScroll(root, scroll);

@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { isProxy } from 'node:util/types';
 import { pdfDictionary } from './pdf-classic-syntax.mjs';
 import { parsePdfStructure, resolvePdfObject } from './pdf-classic-structure.mjs';
+import { compileBoundedRegex } from './bounded-regex.mjs';
 
 const MAX_FIELDS = 100;
 const MAX_DEPTH = 2;
@@ -124,7 +125,7 @@ export function validateAcroFormValues(values, rules, { allowPattern = false } =
       if (rule.maxLength !== undefined && value.length > rule.maxLength) errors.push(Object.freeze({ field: name, code: 'MAX_LENGTH' }));
       if (allowPattern && rule.pattern !== undefined) {
         if (typeof rule.pattern !== 'string' || rule.pattern.length > 200) invalid(`pattern for ${name} is invalid.`);
-        let pattern; try { pattern = new RegExp(rule.pattern, 'u'); } catch { invalid(`pattern for ${name} is invalid.`); }
+        let pattern; try { pattern = compileBoundedRegex(rule.pattern, { maximum: 200, allowEmpty: true }); } catch { invalid(`pattern for ${name} is invalid.`); }
         if (!pattern.test(value)) errors.push(Object.freeze({ field: name, code: 'PATTERN' }));
       }
     }

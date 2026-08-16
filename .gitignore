@@ -33,7 +33,10 @@ DerivedData/
 *.xcodeproj/xcuserdata/
 *.xcworkspace/xcuserdata/
 xcuserdata/
-.codacy/
+/.codacy/*
+!/.codacy/codacy.config.json
+!/.codacy/codacy.yaml
+!/.codacy/codacy.yml
 
 # Local environment and credentials
 .env

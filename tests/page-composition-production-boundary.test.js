@@ -252,3 +252,11 @@ test('split fails closed when atomic rollback cannot revoke an earlier output', 
   const composition = new PdfOneDocumentComposition({ inspection: { async inspect() { return { pageCount: 2 }; } }, executor });
   await assert.rejects(composition.splitDocument(PRIMARY_ID), { code: 'SPLIT_ROLLBACK_FAILED', status: 500 });
 });
+
+test('composition routes reject inherited operation names without service work', async () => {
+  for (const operation of ['toString', 'constructor', '__proto__']) {
+    const fixture = routeFixture({ operation, body: {} });
+    assert.equal(await handleDocumentMutationRoute(fixture.context), false);
+    assert.equal(fixture.events.length, 0);
+  }
+});

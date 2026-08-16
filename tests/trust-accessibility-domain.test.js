@@ -20,6 +20,8 @@ test('redaction detection is deterministic and plans remain explicitly not appli
   assert.equal(plan.marks.length, 6);
   assert.equal(plan.report.byteRemovalClaim, false);
   assert.deepEqual(domain.applyRedactions(documentId, plan.id), { status: 'not-applied', code: 'RASTER_SEMANTIC_VERIFIER_REQUIRED', bytesRemoved: false, message: 'No PDF bytes were changed; a separate raster and semantic verifier is required.' });
+  const expressionMarks = domain.detectSensitiveText([{ pageNumber: 1, text: 'SSN 123-45-6789' }], { customPatterns: [{ label: 'SSN', pattern: '\\d{3}-\\d{2}-\\d{4}', regex: true }] });
+  assert.deepEqual(expressionMarks.filter(({ kind }) => kind === 'custom-regex').map(({ kind, textRange }) => ({ kind, textRange })), [{ kind: 'custom-regex', textRange: { start: 4, end: 15 } }]);
   assert.throws(() => domain.detectSensitiveText(pages, { customPatterns: [{ pattern: '(a+)+$', regex: true }] }), /restricted bounded syntax/);
 });
 

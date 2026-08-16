@@ -50,27 +50,70 @@ function validInventoryRequest(request) {
     && /^[0-9a-f]{64}$/u.test(request.sourceSha256 ?? '');
 }
 
+function sourceBoundAccessibilityDescriptor(capabilityId) {
+  if (!Object.hasOwn(SOURCE_BOUND_ACCESSIBILITY, capabilityId)) return null;
+  if (capabilityId === 'accessibility.form-semantics') return SOURCE_BOUND_ACCESSIBILITY['accessibility.form-semantics'];
+  if (capabilityId === 'accessibility.table-semantics') return SOURCE_BOUND_ACCESSIBILITY['accessibility.table-semantics'];
+  if (capabilityId === 'accessibility.links-bookmarks') return SOURCE_BOUND_ACCESSIBILITY['accessibility.links-bookmarks'];
+  return null;
+}
+
+function locatorInventory(capabilityId) {
+  if (!Object.hasOwn(LOCATOR_INVENTORIES, capabilityId)) return null;
+  if (capabilityId === 'accessibility.table-semantics') return inspectPdfAccessibilityTableSemanticsSource;
+  if (capabilityId === 'accessibility.links-bookmarks') return inspectPdfAccessibilityLinksBookmarksSource;
+  return null;
+}
+
+function sourceBoundAuthority(capabilityId, services, promoteArtifact) {
+  if (capabilityId === 'accessibility.form-semantics') {
+    if (!Object.hasOwn(services, 'accessibilityFormSemantics') || typeof services.accessibilityFormSemantics?.repair !== 'function') return null;
+    return Object.freeze({ repair: async (...args) => {
+      const receipt = await services.accessibilityFormSemantics.repair(...args);
+      if (receipt?.artifact?.id) promoteArtifact(receipt.artifact);
+      return receipt;
+    } });
+  }
+  if (capabilityId === 'accessibility.table-semantics') {
+    if (!Object.hasOwn(services, 'accessibilityTableSemantics') || typeof services.accessibilityTableSemantics?.repair !== 'function') return null;
+    return Object.freeze({ repair: async (...args) => {
+      const receipt = await services.accessibilityTableSemantics.repair(...args);
+      if (receipt?.artifact?.id) promoteArtifact(receipt.artifact);
+      return receipt;
+    } });
+  }
+  if (capabilityId === 'accessibility.links-bookmarks') {
+    if (!Object.hasOwn(services, 'accessibilityLinksBookmarks') || typeof services.accessibilityLinksBookmarks?.update !== 'function') return null;
+    return Object.freeze({ update: async (...args) => {
+      const receipt = await services.accessibilityLinksBookmarks.update(...args);
+      if (receipt?.artifact?.id) promoteArtifact(receipt.artifact);
+      return receipt;
+    } });
+  }
+  return null;
+}
+
 export function createProfessionalAccessibilityDelivery({ store, services, deliver, list }) {
   if (!store || !services || typeof deliver !== 'function' || typeof list !== 'function') {
     throw new TypeError('Professional accessibility delivery requires the document store, services, delivery entrypoint, and handler inventory.');
   }
   async function deliverSourceBound(capabilityId, documentId, request, options = {}) {
-    const descriptor = SOURCE_BOUND_ACCESSIBILITY[capabilityId];
+    const descriptor = sourceBoundAccessibilityDescriptor(capabilityId);
     if (!descriptor) throw new HostError('PROFESSIONAL_ACCESSIBILITY_CAPABILITY_UNSUPPORTED', 'The source-bound accessibility capability is unsupported.', 404);
     if (typeof documentId !== 'string' || documentId.length < 1 || !request || typeof request !== 'object'
       || Array.isArray(request) || !exactSignalOptions(options)) {
       throw new HostError('PROFESSIONAL_ACCESSIBILITY_OPTIONS_INVALID', 'Source-bound accessibility delivery requires a document, exact request, and optional AbortSignal.', 400);
     }
-    const service = services[descriptor.serviceKey];
-    if (!service || typeof service[descriptor.method] !== 'function') {
-      throw new HostError('PROFESSIONAL_ACCESSIBILITY_UNAVAILABLE', 'The source-bound accessibility service is unavailable.', 503);
-    }
     const { signal } = options;
     abort(signal);
     await store.verifySource(documentId);
     const source = store.getDocument(documentId);
-    const sourcePdf = await readFile(store.getSourcePath(documentId));
     let promotedArtifact = null;
+    const authority = sourceBoundAuthority(capabilityId, services, (artifact) => { promotedArtifact = artifact; });
+    if (!authority) {
+      throw new HostError('PROFESSIONAL_ACCESSIBILITY_UNAVAILABLE', 'The source-bound accessibility service is unavailable.', 503);
+    }
+    const sourcePdf = await readFile(store.getSourcePath(documentId));
     try {
       const sourceSha256 = createHash('sha256').update(sourcePdf).digest('hex');
       if (sourcePdf.length !== source.size || sourceSha256 !== source.sha256) {
@@ -81,13 +124,6 @@ export function createProfessionalAccessibilityDelivery({ store, services, deliv
         throw new HostError('SOURCE_INTEGRITY_FAILED', 'The authoritative professional accessibility source record changed during resolution.', 500);
       }
       abort(signal);
-      const authority = Object.freeze({
-        [descriptor.method]: async (...args) => {
-          const receipt = await service[descriptor.method](...args);
-          if (receipt?.artifact?.id) promotedArtifact = receipt.artifact;
-          return receipt;
-        },
-      });
       const readArtifact = async (artifact) => {
         if (!sameArtifact(artifact, promotedArtifact)) {
           throw new HostError('PROFESSIONAL_ACCESSIBILITY_RECEIPT_INVALID', 'The accessibility receipt requested an unbound artifact reread.', 502);
@@ -134,7 +170,7 @@ export function createProfessionalAccessibilityDelivery({ store, services, deliv
     }
   }
   async function inventorySourceBound(capabilityId, documentId, request, options = {}) {
-    const inspect = LOCATOR_INVENTORIES[capabilityId];
+    const inspect = locatorInventory(capabilityId);
     if (!inspect) throw new HostError('PROFESSIONAL_ACCESSIBILITY_CAPABILITY_UNSUPPORTED', 'The accessibility locator inventory capability is unsupported.', 404);
     if (typeof documentId !== 'string' || documentId.length < 1 || !validInventoryRequest(request) || !exactSignalOptions(options)) {
       throw new HostError('PROFESSIONAL_ACCESSIBILITY_OPTIONS_INVALID', 'Accessibility locator inventory requires an exact source digest and optional AbortSignal.', 400);

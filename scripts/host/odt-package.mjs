@@ -26,8 +26,13 @@ function hasExactFirstMimetypeEntry(bytes) {
 function exactXmlDocument(bytes, root, namespace) {
   if (!Buffer.isBuffer(bytes) || bytes.length === 0 || bytes.includes(0)) return false;
   const text = bytes.toString('utf8').replace(/^\uFEFF/u, '').trimStart();
+  const hasExpectedRoot = root === 'office:document-content'
+    ? /<office:document-content(?:\s|>)/u.test(text)
+    : root === 'manifest:manifest'
+      ? /<manifest:manifest(?:\s|>)/u.test(text)
+      : false;
   return text.startsWith('<?xml')
-    && new RegExp(`<${root}(?:\\s|>)`, 'u').test(text)
+    && hasExpectedRoot
     && text.includes(namespace);
 }
 

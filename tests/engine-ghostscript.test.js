@@ -104,4 +104,8 @@ test('Ghostscript adapter pins gs, workspace cwd, and builder argv', async () =>
     args: ['-dSAFER', '-dBATCH', '-dNOPAUSE', '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/ebook', '-sOutputFile=/jobs/private/out.pdf', '/documents/source.pdf'],
   }]);
   assert.deepEqual(await adapter.probe(), { name: 'Ghostscript', version: undefined });
+  for (const operation of ['toString', 'constructor', '__proto__']) {
+    await assert.rejects(adapter.execute(operation, {}), /Unknown Ghostscript operation/);
+  }
+  assert.equal(calls.length, 1);
 });

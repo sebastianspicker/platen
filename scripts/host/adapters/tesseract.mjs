@@ -29,8 +29,10 @@ function boundedDpi(value) {
 }
 
 function segmentationArgs(value = 'auto') {
+  if (!Object.hasOwn(SEGMENTATION_MODES, value)) {
+    throw new TypeError('segmentation must be auto, single-column, block, or sparse');
+  }
   const psm = SEGMENTATION_MODES[value];
-  if (!psm) throw new TypeError('segmentation must be auto, single-column, block, or sparse');
   return ['--psm', String(psm)];
 }
 
@@ -89,8 +91,8 @@ export class TesseractAdapter {
   }
 
   async execute(operation, parameters = {}, runOptions = {}) {
+    if (!Object.hasOwn(operations, operation)) throw new TypeError(`Unknown Tesseract operation ${operation}`);
     const builder = operations[operation];
-    if (!builder) throw new TypeError(`Unknown Tesseract operation ${operation}`);
     const args = builder(parameters);
     const engine = await this.#registry.probe('tesseract');
     return this.#runner({ ...runOptions, executable: engine.executable, args });

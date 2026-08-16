@@ -225,8 +225,8 @@ export class GhostscriptAdapter {
   }
 
   async execute(operation, parameters, runOptions = {}) {
+    if (!Object.hasOwn(GHOSTSCRIPT_OPERATIONS, operation)) throw new TypeError(`Unknown Ghostscript operation ${operation}`);
     const builder = GHOSTSCRIPT_OPERATIONS[operation];
-    if (!builder) throw new TypeError(`Unknown Ghostscript operation ${operation}`);
     const args = builder(parameters);
     const engine = await this.#registry.probe('gs');
     return this.#runner({ ...runOptions, cwd: absolutePath(parameters.workspace, 'workspace'), executable: engine.executable, args });

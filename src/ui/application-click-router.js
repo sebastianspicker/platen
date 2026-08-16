@@ -37,7 +37,9 @@ export function bindApplicationClickEvents({
     if (await routeApplicationClickTarget({ event, state, controllers, render })) return;
     const actionElement = event.target.closest('[data-action]');
     if (!actionElement) return;
-    await actions[actionElement.dataset.action]?.(actionElement);
+    const action = actionElement.dataset.action;
+    if (!Object.hasOwn(actions, action)) return;
+    await actions[action](actionElement);
   }
 
   root.addEventListener('click', handleClick);

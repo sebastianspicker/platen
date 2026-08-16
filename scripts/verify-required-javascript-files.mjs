@@ -197,7 +197,7 @@ export const REQUIRED_JAVASCRIPT_FILES = Object.freeze([
   'scripts/host/pdf-accessibility-links-bookmarks-validation.mjs',
   'scripts/host/pdf-accessibility-links-bookmarks-artifact.mjs',
   'scripts/host/pdf-accessibility-links-bookmarks-job.mjs', 'scripts/host/pdf-accessibility-links-bookmarks-service.mjs',
-  'scripts/host/pdf-acroform.mjs', 'scripts/host/pdf-acroform-text-field-job.mjs', 'scripts/host/pdf-acroform-text-field-service.mjs', 'scripts/host/pdf-acroform-fill-save-job.mjs', 'scripts/host/pdf-acroform-fill-save-service.mjs', 'scripts/host/pdf-acroform-fill-save-writer.mjs', 'scripts/host/pdf-acroform-validation-core.mjs', 'scripts/host/pdf-acroform-validation-job.mjs', 'scripts/host/pdf-acroform-validation-service.mjs',
+  'scripts/host/pdf-acroform.mjs', 'scripts/host/pdf-acroform-text-field-job.mjs', 'scripts/host/pdf-acroform-text-field-service.mjs', 'scripts/host/pdf-acroform-fill-save-job.mjs', 'scripts/host/pdf-acroform-fill-save-service.mjs', 'scripts/host/pdf-acroform-fill-save-writer.mjs', 'scripts/host/bounded-regex.mjs', 'scripts/host/pdf-acroform-validation-core.mjs', 'scripts/host/pdf-acroform-validation-job.mjs', 'scripts/host/pdf-acroform-validation-service.mjs',
   'scripts/host/pdf-acroform-data-export-contract.mjs', 'scripts/host/pdf-acroform-data-export-job.mjs', 'scripts/host/pdf-acroform-data-export-service.mjs',
   'scripts/host/pdf-acroform-text-field-writer.mjs', 'scripts/host/pdf-bates-numbering-contract.mjs', 'scripts/host/pdf-bates-numbering-job.mjs',
   'scripts/host/pdf-bates-numbering-service.mjs', 'scripts/host/pdf-bates-numbering-writer.mjs', 'scripts/host/pdf-printer-marks-contract.mjs',

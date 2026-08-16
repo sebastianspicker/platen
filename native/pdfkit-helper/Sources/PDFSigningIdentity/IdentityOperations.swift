@@ -15,7 +15,7 @@ func nonInteractiveIdentityQuery() -> [CFString: Any] {
         kSecClass: kSecClassIdentity,
         kSecMatchLimit: kSecMatchLimitAll,
         kSecReturnRef: true,
-        kSecUseAuthenticationContext: authenticationContext,
+        kSecUseAuthenticationContext: authenticationContext
     ]
 }
 
@@ -27,7 +27,7 @@ private func identityObjects() throws -> [SecIdentity] {
     guard status == errSecSuccess else { throw SigningFailure.platformDenied }
     if let identities = result as? [SecIdentity] { return identities }
     if let result, CFGetTypeID(result) == SecIdentityGetTypeID() {
-        return [result as! SecIdentity]
+        return [unsafeBitCast(result, to: SecIdentity.self)]
     }
     throw SigningFailure.platformDenied
 }
@@ -41,7 +41,11 @@ func usableSigningIdentities() throws -> [SigningIdentity] {
         else { continue }
         let bytes = SecCertificateCopyData(certificate) as Data
         guard !bytes.isEmpty, bytes.count <= 65_536 else { continue }
-        output.append(SigningIdentity(identity: identity, certificateSha256: sha256Hex(bytes), certificateBytes: bytes.count))
+        output.append(SigningIdentity(
+            identity: identity,
+            certificateSha256: sha256Hex(bytes),
+            certificateBytes: bytes.count
+        ))
     }
     return output.sorted { $0.certificateSha256 < $1.certificateSha256 }
 }
@@ -57,7 +61,7 @@ func createDetachedCMS(_ content: Data, identity: SigningIdentity) throws -> Dat
     let setupStatuses = [
         CMSEncoderSetSignerAlgorithm(encoder, kCMSEncoderDigestAlgorithmSHA256),
         CMSEncoderAddSigners(encoder, identity.identity),
-        CMSEncoderSetHasDetachedContent(encoder, true),
+        CMSEncoderSetHasDetachedContent(encoder, true)
     ]
     guard let setupFailure = setupStatuses.first(where: { $0 != errSecSuccess }) else {
         let updateStatus = content.withUnsafeBytes { rawBuffer -> OSStatus in

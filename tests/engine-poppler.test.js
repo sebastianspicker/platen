@@ -180,4 +180,9 @@ test('adapter resolves the fixed tool and forwards only a validated invocation',
     timeoutMs: 2_000,
   });
   await assert.rejects(() => adapter.execute('unknown', {}), /Unknown Poppler operation/);
+  for (const operation of ['toString', 'constructor', '__proto__']) {
+    await assert.rejects(() => adapter.execute(operation, {}), /Unknown Poppler operation/);
+  }
+  assert.deepEqual(probes, ['pdfsig', 'pdftocairo']);
+  assert.equal(calls.length, 2);
 });

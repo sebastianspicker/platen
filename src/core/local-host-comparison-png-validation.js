@@ -1,10 +1,10 @@
 const PNG_SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
 const CRC32_TABLE = Array.from({ length: 256 }, (_, value) => {
   let crc = value;
-  for (let bit = 0; bit < 8; bit += 1) crc = (crc & 1) ? (0xedb88320 ^ (crc >>> 1)) : (crc >>> 1);
+  for (let bit = 0; bit < 8; bit += 1) crc = (crc & 1) ? (-306674912 ^ (crc >>> 1)) : (crc >>> 1);
   return crc >>> 0;
 });
-function crc32(bytes) { let crc = 0xffffffff; for (const byte of bytes) crc = CRC32_TABLE[(crc ^ byte) & 255] ^ (crc >>> 8); return (crc ^ 0xffffffff) >>> 0; }
+function crc32(bytes) { let crc = -1; for (const byte of bytes) crc = CRC32_TABLE[(crc ^ byte) & 255] ^ (crc >>> 8); return (crc ^ -1) >>> 0; }
 function uint32(bytes, offset) { return (bytes[offset] * 2 ** 24) + (bytes[offset + 1] * 2 ** 16) + (bytes[offset + 2] * 256) + bytes[offset + 3]; }
 async function inflate(bytes, maximum) {
   if (typeof DecompressionStream !== 'function' || typeof Blob !== 'function') return null;

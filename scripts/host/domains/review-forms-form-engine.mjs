@@ -2,6 +2,7 @@ import {
   FIELD_TYPES, MAX_PAGE, MAX_RECORDS, MAX_RECT, MAX_TEXT, SAFE_REGEX,
   fail, id, integer, rect, string,
 } from './review-forms-validation.mjs';
+import { compileBoundedRegex } from '../bounded-regex.mjs';
 
 function calculation(expression) {
   const text = string(expression, 'calculation', { required: true, max: 512 });
@@ -21,8 +22,13 @@ function field(workspace, input) {
   if (['radio', 'select'].includes(type) && !normalizedOptions.length) fail('INVALID_OPTIONS', 'This field type requires options.');
   const validation = input.validation ?? {};
   if (!validation || typeof validation !== 'object' || Array.isArray(validation)) fail('INVALID_VALIDATION', 'validation must be an object.');
-  const unsafePattern = validation.pattern !== undefined && (typeof validation.pattern !== 'string' || (validation.pattern && !SAFE_REGEX.test(validation.pattern)));
-  if (unsafePattern) fail('UNSAFE_PATTERN', 'Only bounded simple validation patterns are supported.');
+  if (validation.pattern !== undefined && typeof validation.pattern !== 'string') fail('UNSAFE_PATTERN', 'Only bounded simple validation patterns are supported.');
+  if (validation.pattern) {
+    try {
+      if (!SAFE_REGEX.test(validation.pattern)) throw new TypeError('restricted syntax');
+      compileBoundedRegex(validation.pattern, { maximum: 120 });
+    } catch { fail('UNSAFE_PATTERN', 'Only bounded simple validation patterns are supported.'); }
+  }
   if (validation.min !== undefined) integer(validation.min, 'minimum', -MAX_RECT, MAX_RECT);
   if (validation.max !== undefined) integer(validation.max, 'maximum', -MAX_RECT, MAX_RECT);
   if (validation.min !== undefined && validation.max !== undefined && validation.min > validation.max) {
@@ -86,7 +92,7 @@ function validate(snapshot) {
     const value = values.get(record.id);
     const errors = [];
     if (record.required && (value === '' || value === undefined || value === false)) errors.push('required');
-    if (value !== '' && value !== undefined && record.validation.pattern && !new RegExp(record.validation.pattern, 'u').test(String(value))) errors.push('pattern');
+    if (value !== '' && value !== undefined && record.validation.pattern && !compileBoundedRegex(record.validation.pattern, { maximum: 120 }).test(String(value))) errors.push('pattern');
     if (record.type === 'number' && Number.isFinite(value)) {
       if (record.validation.min !== undefined && value < record.validation.min) errors.push('min');
       if (record.validation.max !== undefined && value > record.validation.max) errors.push('max');

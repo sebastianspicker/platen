@@ -174,7 +174,7 @@ export async function handlePrepressRoute(context) {
   method(request, 'POST');
   const body = await readJson(request);
   if (!body || typeof body !== 'object' || Array.isArray(body)
-    || typeof body.operation !== 'string' || !(body.operation in prepressOperations)) {
+    || typeof body.operation !== 'string' || !Object.hasOwn(prepressOperations, body.operation)) {
     throw new HostError('INVALID_PREPRESS_OPERATION', 'Choose a supported local prepress operation.', 400);
   }
   const allowed = allowedPrepressKeys(body.operation);
@@ -182,7 +182,8 @@ export async function handlePrepressRoute(context) {
     throw new HostError('INVALID_PREPRESS_OPTIONS', 'Prepress request contains unsupported options.', 400);
   }
   const options = prepressOptions(body, parsePositiveInteger);
-  const result = await prepress[prepressOperations[body.operation]](
+  const prepressOperation = prepressOperations[body.operation];
+  const result = await prepress[prepressOperation](
     documentId,
     { ...options, ...processing },
   );
