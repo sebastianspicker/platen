@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { chmod, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -8,7 +9,7 @@ import { PdfAccessibilityTableSemanticsService } from '../scripts/host/pdf-acces
 import { makeTablePdf, tableRequest } from './host-pdf-table-semantics-fixtures.mjs';
 
 async function setup(t) {
-  const root = await mkdtemp('/private/tmp/pdf-accessibility-table-semantics-'); const store = await new DocumentStore({ root }).initialize(); t.after(() => store.dispose());
+  const root = await mkdtemp(join(tmpdir(), 'pdf-accessibility-table-semantics-')); const store = await new DocumentStore({ root }).initialize(); t.after(() => store.dispose());
   const bytes = makeTablePdf(); const source = await store.createDocument({ stream: (async function* () { yield bytes; }()), displayName: 'source.pdf' });
   return { root, store, bytes, source, request: tableRequest(bytes), service: new PdfAccessibilityTableSemanticsService({ store }) };
 }

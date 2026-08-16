@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
 import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
 import { PdfXfaInspectionService } from '../scripts/host/pdf-xfa-inspection-service.mjs';
@@ -27,7 +29,7 @@ function context(body, service, signal = new AbortController().signal, documentI
 }
 
 async function setup(t) {
-  const root = await mkdtemp('/private/tmp/xfa-inspection-claim-');
+  const root = await mkdtemp(join(tmpdir(), 'xfa-inspection-claim-'));
   const store = await new DocumentStore({ root }).initialize();
   t.after(() => store.dispose());
   const sourceBytes = makeXfaInspectionPdf({ acroFormXfa: true });

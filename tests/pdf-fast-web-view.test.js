@@ -110,7 +110,7 @@ function linearizedFixture() {
 }
 
 async function cleanupFailureFixture(t, { revokeFails = false, workspaceFails = true } = {}) {
-  const root = await mkdtemp('/private/tmp/pdf-fast-web-view-cleanup-');
+  const root = await mkdtemp(join(tmpdir(), 'pdf-fast-web-view-cleanup-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const workspace = join(root, 'job');
   const sourceSha256 = 'a'.repeat(64);

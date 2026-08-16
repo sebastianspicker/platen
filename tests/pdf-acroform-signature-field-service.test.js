@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { chmod, lstat, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
@@ -22,7 +23,7 @@ function digest(bytes) { return createHash('sha256').update(bytes).digest('hex')
 }
 function request(bytes, extra = {}) { return { profile: 'local-pdf-acroform-signature-field-v1', sourceSha256: digest(bytes), page: 1, fieldName: 'Sign.Here', rect: { x: 72, y: 700, width: 180, height: 24 }, ...extra };
 }
-async function setup(t) { const root = await mkdtemp('/private/tmp/pdf-acroform-signature-field-service-');
+async function setup(t) { const root = await mkdtemp(join(tmpdir(), 'pdf-acroform-signature-field-service-'));
 const store = await new DocumentStore({ root }).initialize();
 t.after(() => store.dispose());
 const bytes = sourcePdf();

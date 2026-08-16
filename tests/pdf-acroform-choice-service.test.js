@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdtemp, readdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
@@ -13,7 +14,7 @@ function source() {
 }
 function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function request(bytes) { return { profile: 'local-pdf-acroform-choice-v1', sourceSha256: digest(bytes), page: 1, fieldName: 'Choice', rect: { x: 36, y: 700, width: 180, height: 20 }, options: [{ label: 'First' }, { label: 'Second' }] }; }
-async function setup(context) { const root = await mkdtemp('/private/tmp/pdf-acroform-choice-service-'); const store = await new DocumentStore({ root }).initialize(); context.after(() => store.dispose()); const bytes = source(); const document = await store.createDocument({ stream: (async function* () { yield bytes; }()), displayName: 'source.pdf' }); return { store, bytes, document, service: new PdfAcroFormChoiceService({ store }) }; }
+async function setup(context) { const root = await mkdtemp(join(tmpdir(), 'pdf-acroform-choice-service-')); const store = await new DocumentStore({ root }).initialize(); context.after(() => store.dispose()); const bytes = source(); const document = await store.createDocument({ stream: (async function* () { yield bytes; }()), displayName: 'source.pdf' }); return { store, bytes, document, service: new PdfAcroFormChoiceService({ store }) }; }
 
 test('choice service stages, verifies, promotes, and cleans', async (context) => { const value = await setup(context); const result = await value.service.add(value.document.id, request(value.bytes)); assert.equal(result.artifact.documentId, value.document.id); assert.match(result.artifact.sha256, /^[0-9a-f]{64}$/u); assert.ok(result.artifact.size > value.bytes.length); assert.notEqual(result.artifact.id, value.document.id); assert.equal(result.proof.options.length, 2); assert.deepEqual(await readdir(join(value.store.root, 'jobs')), []); });
 test('choice service maps source drift, hostile request descriptors, and cancellation', async (context) => { const value = await setup(context); await assert.rejects(value.service.add(value.document.id, { ...request(value.bytes), sourceSha256: '0'.repeat(64) }), { code: 'SOURCE_VERSION_MISMATCH' }); const hostile = request(value.bytes); Object.defineProperty(hostile.options[0], 'label', { enumerable: true, get: () => 'First' }); await assert.rejects(value.service.add(value.document.id, hostile), { code: 'INVALID_ACROFORM_CHOICE_OPTIONS' }); const controller = new AbortController(); controller.abort(); await assert.rejects(value.service.add(value.document.id, request(value.bytes), { signal: controller.signal }), { code: 'JOB_CANCELLED' }); });

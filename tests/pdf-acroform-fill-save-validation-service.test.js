@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdtemp, readdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
 import { preparePdfAcroFormTextField } from '../scripts/host/pdf-acroform-text-field-writer.mjs';
@@ -14,7 +16,7 @@ import { formFixture } from '../scripts/host/professional-capability/fixtures.mj
 
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
 function filledSource() { const source = formFixture(); return preparePdfAcroFormTextField(source, { profile: 'local-pdf-acroform-text-field-v1', sourceSha256: digest(source), page: 1, fieldName: 'Account.Name', rect: { x: 72, y: 700, width: 180, height: 24 } }).bytes; }
-async function setup(context) { const root = await mkdtemp('/private/tmp/pdf-acroform-fill-save-'); const store = await new DocumentStore({ root }).initialize(); context.after(() => store.dispose()); const bytes = filledSource(); const document = await store.createDocument({ stream: (async function* () { yield bytes; }()), displayName: 'form.pdf' }); return { store, bytes, document }; }
+async function setup(context) { const root = await mkdtemp(join(tmpdir(), 'pdf-acroform-fill-save-')); const store = await new DocumentStore({ root }).initialize(); context.after(() => store.dispose()); const bytes = filledSource(); const document = await store.createDocument({ stream: (async function* () { yield bytes; }()), displayName: 'form.pdf' }); return { store, bytes, document }; }
 function fillRequest(bytes) { return { profile: 'local-acroform-fill-save-v1', sourceSha256: digest(bytes), fieldName: 'Account.Name', value: 'Ada' }; }
 function validationRequest(bytes, values = { 'Account.Name': '' }, rules = { 'Account.Name': { minLength: 3 } }) { return { profile: PDF_ACROFORM_VALIDATION_PROFILE, sourceSha256: digest(bytes), values, rules }; }
 function authored(kind) {

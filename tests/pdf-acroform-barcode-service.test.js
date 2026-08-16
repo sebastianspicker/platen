@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { mkdtemp, readdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
 import { PdfAcroFormBarcodeService } from '../scripts/host/pdf-acroform-barcode-service.mjs';
 import { barcodeFieldRequest, makeBarcodeFieldPdf } from './host-pdf-acroform-barcode-fixtures.mjs';
 
-async function setup(t) { const root = await mkdtemp('/private/tmp/pdf-acroform-barcode-'); const store = await new DocumentStore({ root }).initialize(); t.after(() => store.dispose()); const bytes = makeBarcodeFieldPdf(); const source = await store.createDocument({ stream: (async function* () { yield bytes; }()), displayName: 'source.pdf' }); return { root, store, bytes, source, request: barcodeFieldRequest(bytes), service: new PdfAcroFormBarcodeService({ store }) }; }
+async function setup(t) { const root = await mkdtemp(join(tmpdir(), 'pdf-acroform-barcode-')); const store = await new DocumentStore({ root }).initialize(); t.after(() => store.dispose()); const bytes = makeBarcodeFieldPdf(); const source = await store.createDocument({ stream: (async function* () { yield bytes; }()), displayName: 'source.pdf' }); return { root, store, bytes, source, request: barcodeFieldRequest(bytes), service: new PdfAcroFormBarcodeService({ store }) }; }
 function wrapped(base, overrides = {}) { const store = {}; for (const method of ['getDocument', 'getSourcePath', 'verifySource', 'createJobWorkspace', 'cleanupJob', 'promotePdfArtifact', 'getArtifact', 'deleteArtifact']) store[method] = (overrides[method] ?? base[method]).bind(base); return store; }
 
 test('barcode service promotes a retained independently inspected artifact and cleans workspace', async (t) => { const state = await setup(t); const result = await state.service.add(state.source.id, state.request); assert.equal(result.kind, 'pdf-acroform-barcode'); assert.equal(result.artifact.displayName, 'barcode-field.pdf'); assert.equal(result.proof.readOnly, true); assert.equal(result.artifact.operation.expected.addedObjectCount, 3); assert.equal(result.artifact.operation.expected.changedObjectCount, 5); assert.deepEqual(await readdir(join(state.root, 'jobs')), []); await state.store.deleteArtifact(result.artifact.id); });

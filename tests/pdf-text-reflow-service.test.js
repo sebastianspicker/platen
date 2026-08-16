@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { chmod, mkdtemp, readdir, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -7,7 +8,7 @@ import { DocumentStore } from '../scripts/host/document-store.mjs';
 import { PdfTextReflowService } from '../scripts/host/pdf-text-reflow-service.mjs';
 import { makeTextReflowPdf, textReflowRequest } from './host-pdf-text-reflow-fixtures.mjs';
 
-async function setup(t) { const root = await mkdtemp('/private/tmp/pdf-text-reflow-'); const store = await new DocumentStore({ root }).initialize(); t.after(() => store.dispose()); const bytes = makeTextReflowPdf(); const source = await store.createDocument({ stream: (async function* () { yield bytes; }()), displayName: 'source.pdf' }); return { root, store, bytes, source, request: textReflowRequest(bytes), service: new PdfTextReflowService({ store }) }; }
+async function setup(t) { const root = await mkdtemp(join(tmpdir(), 'pdf-text-reflow-')); const store = await new DocumentStore({ root }).initialize(); t.after(() => store.dispose()); const bytes = makeTextReflowPdf(); const source = await store.createDocument({ stream: (async function* () { yield bytes; }()), displayName: 'source.pdf' }); return { root, store, bytes, source, request: textReflowRequest(bytes), service: new PdfTextReflowService({ store }) }; }
 function wrapped(base, overrides = {}) { const store = {}; for (const name of ['getDocument', 'getSourcePath', 'verifySource', 'createJobWorkspace', 'cleanupJob', 'promotePdfArtifact', 'getArtifact', 'deleteArtifact']) store[name] = (overrides[name] ?? base[name]).bind(base); return store; }
 
 test('text-reflow service promotes an independently inspected artifact and cleans its workspace', async (t) => { const state = await setup(t); const result = await state.service.reflow(state.source.id, state.request); assert.equal(result.kind, 'pdf-text-reflow'); assert.equal(result.artifact.mediaType, 'application/pdf'); assert.equal(result.proof.fixedSlotReflow, true); assert.deepEqual(await readdir(join(state.root, 'jobs')), []); await state.store.deleteArtifact(result.artifact.id); });

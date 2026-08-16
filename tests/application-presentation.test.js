@@ -25,7 +25,10 @@ function withFakeDomParser(t, parser) {
 
 function rootFor(nodes) {
   const root = {
-    ownerDocument: { importNode(node) { return node; } },
+    ownerDocument: {
+      defaultView: { DOMParser: globalThis.DOMParser },
+      importNode(node) { return node; },
+    },
     rendered: [],
     contains() { return false; },
     querySelectorAll() { return []; },

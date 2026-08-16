@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { EventEmitter } from 'node:events';
 import test from 'node:test';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
@@ -27,7 +29,7 @@ function context(body, service, signal = new AbortController().signal, documentI
 }
 
 async function setup(t) {
-  const root = await mkdtemp('/private/tmp/form-javascript-claim-');
+  const root = await mkdtemp(join(tmpdir(), 'form-javascript-claim-'));
   const store = await new DocumentStore({ root }).initialize();
   t.after(() => store.dispose());
   const sourceBytes = makeFormJavaScriptPdf({ actions: [

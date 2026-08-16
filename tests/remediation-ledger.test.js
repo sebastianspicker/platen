@@ -19,6 +19,8 @@ test("remediation ledger assigns every non-proven claim exactly once", async () 
     .filter(({ status }) => status === "partial" || status === "false")
     .map(({ capabilityId }) => capabilityId)
     .sort();
+  const partialCount = records.filter(({ status }) => status === "partial").length;
+  const falseCount = records.filter(({ status }) => status === "false").length;
   const assignmentSection = ledger.slice(
     ledger.indexOf("## R01 "),
     ledger.indexOf("## Recommended agent order"),
@@ -30,7 +32,10 @@ test("remediation ledger assigns every non-proven claim exactly once", async () 
   assert.equal(new Set(listedIds).size, listedIds.length, "duplicate capability ID");
   assert.deepEqual(listedIds.toSorted(), expectedIds);
   assert.equal((ledger.match(/^## R\d{2} /gm) ?? []).length, 12);
-  assert.match(ledger, /\| \*\*Total\*\* \|  \| \*\*19\*\* \| \*\*89\*\* \| \*\*108\*\*/);
+  assert.match(
+    ledger,
+    new RegExp(`\\| \\*\\*Total\\*\\* \\|  \\| \\*\\*${partialCount}\\*\\* \\| \\*\\*${falseCount}\\*\\* \\| \\*\\*${expectedIds.length}\\*\\*`),
+  );
   assert.match(ledger, /\| R10 AEC workflows \| P0 \| 0 \| 0 \| 0 \|/);
   const summarySection = ledger.slice(
     ledger.indexOf("## Program summary"),

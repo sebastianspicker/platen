@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { chmod, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
@@ -31,7 +32,7 @@ function request(source, extra = {}) {
 }
 
 async function setup(t, adapter) {
-  const root = await mkdtemp('/private/tmp/pdf-certificate-signature-');
+  const root = await mkdtemp(join(tmpdir(), 'pdf-certificate-signature-'));
   const store = await new DocumentStore({ root }).initialize();
   t.after(() => store.dispose());
   const sourceBytes = fixture();

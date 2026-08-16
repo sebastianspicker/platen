@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
@@ -16,7 +17,7 @@ function sourcePdf(hidden = true) {
 }
 
 async function setup(t, bytes = sourcePdf()) {
-  const root = await mkdtemp('/private/tmp/pdf-hidden-data-service-'); const store = await new DocumentStore({ root }).initialize(); t.after(() => store.dispose());
+  const root = await mkdtemp(join(tmpdir(), 'pdf-hidden-data-service-')); const store = await new DocumentStore({ root }).initialize(); t.after(() => store.dispose());
   const source = await store.createDocument({ stream: (async function* () { yield bytes; })(), displayName: 'source.pdf' });
   return { store, source, bytes, service: new PdfHiddenDataSanitizationService({ store }) };
 }

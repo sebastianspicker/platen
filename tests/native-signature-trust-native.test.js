@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { chmod, link, mkdir, mkdtemp, readFile, rm, stat, symlink, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -30,7 +31,7 @@ function record(index, cms, { byteRange = [0, 1, 2, 1], subFilter = 'adbe.pkcs7.
   return { byteRange, subFilter, cmsFilename: `dumps/input.pdf.sig${index}`, cmsSha256: digest(cms) };
 }
 async function workspace(t, pdf = unsignedPdf) {
-  const path = await mkdtemp('/private/tmp/pdf-signature-trust-native-');
+  const path = await mkdtemp(join(tmpdir(), 'pdf-signature-trust-native-'));
   t.after(() => rm(path, { recursive: true, force: true }));
   await chmod(path, 0o700);
   await writeFile(join(path, 'input.pdf'), pdf, { mode: 0o600 });

@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
 import { PdfTextReflowService } from '../scripts/host/pdf-text-reflow-service.mjs';
@@ -7,7 +9,7 @@ import { createTextReflowEndpoints } from '../src/core/local-host-text-reflow-en
 import { makeTextReflowPdf, textReflowRequest } from './host-pdf-text-reflow-fixtures.mjs';
 
 async function setup(t) {
-  const store = await new DocumentStore({ root: await mkdtemp('/private/tmp/text-reflow-client-') }).initialize();
+  const store = await new DocumentStore({ root: await mkdtemp(join(tmpdir(), 'text-reflow-client-')) }).initialize();
   t.after(() => store.dispose());
   const bytes = makeTextReflowPdf();
   const document = await store.createDocument({

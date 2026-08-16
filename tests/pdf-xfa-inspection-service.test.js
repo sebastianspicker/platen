@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { mkdtemp, readdir, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
@@ -8,7 +9,7 @@ import { PdfXfaInspectionService } from '../scripts/host/pdf-xfa-inspection-serv
 import { makeXfaInspectionPdf, xfaInspectionRequest } from './host-pdf-xfa-inspection-fixtures.mjs';
 
 async function setup(t, options = {}) {
-  const root = await mkdtemp('/private/tmp/pdf-xfa-inspection-');
+  const root = await mkdtemp(join(tmpdir(), 'pdf-xfa-inspection-'));
   const store = await new DocumentStore({ root }).initialize();
   t.after(() => store.dispose());
   const bytes = makeXfaInspectionPdf({ catalogXfa: true });

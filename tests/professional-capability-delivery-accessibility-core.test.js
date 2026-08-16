@@ -1,5 +1,7 @@
 import * as setup from './support/professional-capability-delivery-test-setup.js';
 import { mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
 import { PdfAccessibilityFormSemanticsService } from '../scripts/host/pdf-accessibility-form-semantics-service.mjs';
 import { makeButtonWidgetPdf } from './host-pdfkit-test-fixtures-b.js';
@@ -93,7 +95,7 @@ test('accessibility repair uses the supplied source and exact source-bound reque
 });
 
 test('form semantics professional boundary retains and validates a real production-service artifact', async (t) => {
-  const root = await mkdtemp('/private/tmp/professional-accessibility-form-');
+  const root = await mkdtemp(join(tmpdir(), 'professional-accessibility-form-'));
   const store = await new DocumentStore({ root }).initialize();
   t.after(() => store.dispose());
   const sourcePdf = makeButtonWidgetPdf();

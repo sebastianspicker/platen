@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { chmod, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
@@ -13,7 +14,7 @@ function sourcePdf() {
 }
 function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function request(source, extra = {}) { return { profile: 'local-pdf-acroform-checkbox-v1', sourceSha256: digest(source), page: 1, fieldName: 'Approval', rect: { x: 72, y: 700, width: 24, height: 24 }, ...extra }; }
-async function setup(t) { const root = await mkdtemp('/private/tmp/pdf-acroform-checkbox-service-'); const store = await new DocumentStore({ root }).initialize(); t.after(() => store.dispose()); const bytes = sourcePdf(); const source = await store.createDocument({ stream: (async function* () { yield bytes; })(), displayName: 'source.pdf' }); return { store, source, bytes, service: new PdfAcroFormCheckboxService({ store }) }; }
+async function setup(t) { const root = await mkdtemp(join(tmpdir(), 'pdf-acroform-checkbox-service-')); const store = await new DocumentStore({ root }).initialize(); t.after(() => store.dispose()); const bytes = sourcePdf(); const source = await store.createDocument({ stream: (async function* () { yield bytes; })(), displayName: 'source.pdf' }); return { store, source, bytes, service: new PdfAcroFormCheckboxService({ store }) }; }
 
 test('AcroForm checkbox service stages, independently reinspects, promotes, and cleans', async (t) => {
   const state = await setup(t); const result = await state.service.add(state.source.id, request(state.bytes));

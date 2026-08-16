@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { chmod, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
@@ -19,7 +20,7 @@ function request(bytes) {
   })) };
 }
 async function setup(t) {
-  const root = await mkdtemp('/private/tmp/pdf-accessibility-form-semantics-');
+  const root = await mkdtemp(join(tmpdir(), 'pdf-accessibility-form-semantics-'));
   const store = await new DocumentStore({ root }).initialize(); t.after(() => store.dispose());
   const bytes = makeButtonWidgetPdf();
   const source = await store.createDocument({ stream: (async function* () { yield bytes; }()), displayName: 'source.pdf' });

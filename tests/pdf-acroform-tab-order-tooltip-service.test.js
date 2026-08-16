@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { DocumentStore } from '../scripts/host/document-store.mjs';
@@ -13,7 +14,7 @@ function request(bytes, tooltip = 'Accessible name') {
   const sourceSha256 = digest(bytes); const fingerprint = digest(Buffer.from(['pdfkit-inspector:opaque-locator:v1', `source-sha256=${sourceSha256}`, 'page=1', 'annotation-index=0', 'subtype=widget', 'widget-type=button'].join('\n')));
   return { profile: PROFILE, sourceSha256, target: { page: 1, annotationIndex: 0, fingerprint }, tooltip };
 }
-async function setup(t) { const root = await mkdtemp('/private/tmp/pdf-acroform-tab-order-tooltip-service-'); const store = await new DocumentStore({ root }).initialize(); t.after(() => store.dispose()); const bytes = makeButtonWidgetPdf(); const source = await store.createDocument({ stream: (async function* () { yield bytes; }()), displayName: 'source.pdf' }); return { root, store, bytes, source, request: request(bytes), service: new PdfAcroFormTabOrderTooltipService({ store }) }; }
+async function setup(t) { const root = await mkdtemp(join(tmpdir(), 'pdf-acroform-tab-order-tooltip-service-')); const store = await new DocumentStore({ root }).initialize(); t.after(() => store.dispose()); const bytes = makeButtonWidgetPdf(); const source = await store.createDocument({ stream: (async function* () { yield bytes; }()), displayName: 'source.pdf' }); return { root, store, bytes, source, request: request(bytes), service: new PdfAcroFormTabOrderTooltipService({ store }) }; }
 
 test('tab-order and tooltip service promotes a verified separate artifact and cleans its workspace', async (t) => { const state = await setup(t); const result = await state.service.add(state.source.id, state.request); assert.equal(result.artifact.documentId, state.source.id); assert.equal(result.proof.tabOrder, 'S'); assert.equal(result.proof.sourcePrefixPreserved, true); assert.notEqual(result.artifact.sha256, state.source.sha256); assert.deepEqual(await readdir(join(state.root, 'jobs')), []); assert.deepEqual(await readFile(state.store.getSourcePath(state.source.id)), state.bytes); });
 

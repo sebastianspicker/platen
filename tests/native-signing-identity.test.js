@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { chmod, lstat, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -16,7 +17,7 @@ function digest(value) {
 }
 
 async function workspace(t) {
-  const path = await mkdtemp('/private/tmp/pdf-signing-identity-native-');
+  const path = await mkdtemp(join(tmpdir(), 'pdf-signing-identity-native-'));
   t.after(() => rm(path, { recursive: true, force: true }));
   await chmod(path, 0o700);
   return path;

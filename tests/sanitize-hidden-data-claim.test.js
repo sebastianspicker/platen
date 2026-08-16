@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { constants as fsConstants } from 'node:fs';
 import { copyFile, mkdtemp, readFile, readdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
 import test from 'node:test';
 import { createHash } from 'node:crypto';
@@ -43,7 +44,7 @@ function hiddenDataSource() {
 }
 
 async function setup(t) {
-  const root = await mkdtemp('/private/tmp/platen-sanitize-hidden-data-');
+  const root = await mkdtemp(join(tmpdir(), 'platen-sanitize-hidden-data-'));
   const store = await new DocumentStore({ root }).initialize();
   t.after(() => store.dispose());
   const sourceBytes = hiddenDataSource();
