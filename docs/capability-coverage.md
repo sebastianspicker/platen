@@ -3,17 +3,17 @@
 ## Reading the map
 
 The authoritative source is `catalog/capabilities.json`, reconciled from
-`catalog/capability-proofs/proofs.json`. `implemented` is reserved for the 205
-proven claims with retained evidence. `planned` covers the 20 audited partial
-claims and 93 false/unavailable broad claims; it does not mean the broad
+`catalog/capability-proofs/proofs.json`. `implemented` is reserved for the 210
+proven claims with retained evidence. `planned` covers the 19 audited partial
+claims and 89 false/unavailable broad claims; it does not mean the broad
 professional capability runs. No capability IDs are unaudited.
 
 The professional catalog contains 318 normalized records. Run `npm run report`
 for the live inventory. At the current candidate:
 
-- 205 records are proven and implemented with named test evidence;
-- 113 records remain planned, including 20 audited executable/limited partials
-  and 93 false/unavailable broad claims;
+- 210 records are proven and implemented with named test evidence;
+- 108 records remain planned, including 19 audited executable/limited partials
+  and 89 false/unavailable broad claims;
 - prototype coverage is a separate ledger over the same IDs and does not widen
   the professional claim. Planned records may have a narrower prototype
   subset, but that is not a professional implementation;

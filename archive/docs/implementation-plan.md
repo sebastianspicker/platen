@@ -11,9 +11,9 @@ The AI skeleton remains only so the research catalog records what commercial
 tools offer. Every `ai.*` capability stays `planned` and is excluded from this
 roadmap.
 
-The complete current-versus-missing inventory is generated in
-[feature-gap-report.md](feature-gap-report.md). The versioned source snapshot is
-`catalog/research-scope.json`.
+The generated current-versus-missing report is not retained in this archive. Its
+versioned source snapshot remains in
+[`catalog/research-scope.json`](../../../catalog/research-scope.json).
 
 Local release closure is a separate, narrower gate. It inventories every
 JavaScript and native Swift source file, proves the browser, host, and CLI production graph from

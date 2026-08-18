@@ -81,6 +81,7 @@ temp/
 Thumbs.db
 .idea/
 .vscode/
+/.mcp.json
 *.swp
 *.swo
 *~

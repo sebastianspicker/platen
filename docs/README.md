@@ -11,8 +11,6 @@ and the public-alpha scope.
   for an implemented capability and documents narrow alpha subsets.
 - [Feature-gap report](feature-gap-report.md) is generated from the capability
   catalogs. Regenerate it with `npm run report:write`.
-- [Agent-facing capability remediation ledger](remediation-ledger.md) assigns
-  every partial and false claim to an ordered, disjoint remediation program.
 - [Frontend](FRONTEND.md) records the browser application structure,
   accessibility contract, and manual QA still required.
 - [Workbench operations](workbench-notes.md) summarizes source, artifact, and

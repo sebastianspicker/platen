@@ -284,5 +284,5 @@ test('professional print route preserves cancellation and the document dispatche
 });
 
 function rootPathFragment() {
-  return '/Users/sebastian/Git/platen';
+  return '/Users/example/platen';
 }
