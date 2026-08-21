@@ -338,21 +338,13 @@ deprotection, and metadata sanitization live in separate Swift files. Native
 layout tests enforce that the entry point does not absorb those trust-sensitive
 implementations again.
 
-`tests/source-layout.test.js` guards the refactor across production code, tests,
-native sources, HTML, and styles. Each covered file must remain at or below 400
-physical lines and 32 KiB, and no covered source may hide a workflow on a logical
-line longer than 1,000 UTF-16 code units. A token-aware symbol guard independently
-limits production JavaScript and Swift functions or methods to 120 physical lines
-and classes or types to 300; scanner fixtures cover multiline declarations and
-ensure braces in comments, strings, templates, and regular expressions do not
-distort the measurement. The companion dependency-layout test resolves every
-relative JavaScript import, rejects production import cycles, and reserves the
-compatibility `PdfService` facade for the host composition root. A rendered-action
-contract also requires every literal `data-action` in the GUI to have exactly one
-delegated application handler. Large test suites and the stylesheet are split by
-behavior while retaining their public entry points. Both `npm test` and the
-verification gate recursively discover nested `*.test.js` suites, so moving tests
-into focused directories cannot silently remove them from the gate.
+Source-size, import-resolution, and dependency-cycle checks guard the refactor
+across production code, native sources, HTML, and styles. The maintained direct
+contracts cover manifest admission and PDF AcroForm validation; they do not depend
+on fixture trees or browser automation. The compatibility `PdfService` facade
+remains reserved for the host composition root. A rendered-action contract requires
+every literal `data-action` in the GUI to have exactly one delegated application
+handler.
 
 The browser keeps the original `File` for preview and unchanged download. It
 also streams the same bytes to the host. The host stores them under an opaque

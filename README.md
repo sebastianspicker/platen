@@ -126,7 +126,7 @@ report unavailable and leave other engines unaffected.
 ├── scripts/           Host, CLI, verification, and release tools
 ├── src/               Browser application (controllers, UI, host client)
 ├── styles/            CSS by surface
-├── tests/             Node test suite (*.test.js) and fixtures
+├── tests/             Focused Node unit contracts
 ├── archive/           Historical materials not required to build or run
 ├── index.html
 ├── package.json

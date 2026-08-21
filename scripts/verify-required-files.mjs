@@ -113,7 +113,6 @@ export const REQUIRED_FILES = Object.freeze([
   'scripts/test-files.mjs', 'scripts/run-tests.mjs', 'scripts/prepare-native-tests.mjs',
   'scripts/verify-capability-proofs.mjs',
   'scripts/verify-required-files.mjs',
-  'tests/support/host-router-fixture-base.js', 'tests/support/host-router-fixture-overlays.js',
   'scripts/source-symbol-lexer.mjs', 'scripts/source-symbol-metrics.mjs',
   'scripts/platen-cli.mjs', 'scripts/cli/parser.mjs',
   'scripts/cli/parser-foundation.mjs', 'scripts/cli/parser-prepress.mjs',

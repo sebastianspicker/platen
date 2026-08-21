@@ -101,13 +101,4 @@ export const REQUIRED_JAVASCRIPT_PROFESSIONAL_CAPABILITY_FILES = Object.freeze([
   'src/core/professional-print-inspection-contract.js',
   'src/core/professional-print-transparency-contract.js',
   'scripts/check-professional-handler-clones.mjs',
-  'tests/fixtures/professional-capability-effect-contracts.json',
-  'tests/professional-capability-delivery.test.js',
-  'tests/edit-headers-footers-claim.test.js',
-  'tests/pdf-page-header-footer-service.test.js',
-  'tests/pdf-page-header-footer-writer.test.js',
-  'tests/professional-headers-footers-cli.test.js',
-  'tests/professional-accessibility-route-client-cli.test.js',
-  'tests/annotation-xfdf-interchange.test.js',
-  'tests/support/professional-capability-delivery-support.js',
 ]);

@@ -8,8 +8,8 @@
     "description": "Select a local PDF for the shell document session.",
     "engine": null,
     "evidence": {
-      "kind": "test",
-      "reference": "tests/document-session.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -21,8 +21,8 @@
     "description": "Accept the first locally dropped file into the validated document-session path.",
     "engine": null,
     "evidence": {
-      "kind": "test",
-      "reference": "tests/ui-actions.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -34,8 +34,8 @@
     "description": "End the active local document session.",
     "engine": null,
     "evidence": {
-      "kind": "test",
-      "reference": "tests/document-session.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -47,8 +47,8 @@
     "description": "Return the originally opened local PDF without transformation.",
     "engine": null,
     "evidence": {
-      "kind": "test",
-      "reference": "tests/document-session.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -60,8 +60,8 @@
     "description": "Embed the supplied PDF in a browser-native viewer surface with an unavailable-viewer fallback.",
     "engine": null,
     "evidence": {
-      "kind": "test",
-      "reference": "tests/view-render-core.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -73,8 +73,8 @@
     "description": "Change preview magnification within bounded steps without modifying the PDF.",
     "engine": null,
     "evidence": {
-      "kind": "test",
-      "reference": "tests/ui-actions.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -86,8 +86,8 @@
     "description": "Rotate the displayed preview in quarter turns without writing page rotation.",
     "engine": null,
     "evidence": {
-      "kind": "test",
-      "reference": "tests/ui-actions.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -99,8 +99,8 @@
     "description": "Request fullscreen for the document surface and report unavailable browser support.",
     "engine": null,
     "evidence": {
-      "kind": "test",
-      "reference": "tests/ui-actions.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -115,8 +115,8 @@
       "operation": "active executable package capability catalog"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/plugin-active-capability-catalog-wiring.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -131,8 +131,8 @@
       "operation": "blocked host-session sandbox diagnostic"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/plugin-sandbox-probe-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -147,8 +147,8 @@
       "operation": "pdftocairo bounded PNG page render"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/host-pdf-service-poppler.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -163,8 +163,8 @@
       "operation": "pdftotext UTF-8 extraction"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/host-pdf-service-poppler.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -179,8 +179,8 @@
       "operation": "one-document extracted-text literal or wildcard search"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/viewer-advanced-search-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -195,8 +195,8 @@
       "operation": "source-bound read-only outline inventory capped at 200 items and 8 levels with resolved local-page navigation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/host-pdfkit-03.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -211,8 +211,8 @@
       "operation": "source-bound view-only layout rendering capped at 32 continuous pages"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/viewer-page-layouts-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -227,8 +227,8 @@
       "operation": "professional viewer modes"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-capability-delivery.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -243,8 +243,8 @@
       "operation": "read-only source and extracted-text split view"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/viewer-split-reflow-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -259,8 +259,8 @@
       "operation": "source-bound read-only extracted-text reflow"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/viewer-split-reflow-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -275,8 +275,8 @@
       "operation": "bounded current-page local speech"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/viewer-read-copy-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -291,8 +291,8 @@
       "operation": "pdfdetach metadata listing"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/host-pdf-service-poppler.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -307,8 +307,8 @@
       "operation": "source-bound read-only optional-content group inventory capped at 200 groups, with local source digest binding"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/host-pdfkit-01.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -323,8 +323,8 @@
       "operation": "pdfinfo -dests UTF-8 inventory capped at 200 validated local page records"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/host-pdf-service-parsers.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -339,8 +339,8 @@
       "operation": "source-bound read-only logical-label inventory for at most 100 pages with exact page-to-label validation and fail-closed 1024-byte labels"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/host-pdfkit-01.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -355,8 +355,8 @@
       "operation": "pdfinfo, pdffonts, and pdfimages inspection"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/host-pdf-service-poppler.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -371,8 +371,8 @@
       "operation": "bounded current-page extracted-text clipboard write"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/viewer-read-copy-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -387,8 +387,8 @@
       "operation": "source-bound normalized selected-page region render retained in a reset-safe inspector session"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/ui-actions.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -403,8 +403,8 @@
       "operation": "source-bound selected-page CropBox rendering with normalized top-left floor/ceil pixel crop"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/host-pdf-service-poppler.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -419,8 +419,8 @@
       "operation": "source-bound view-only CSS grid overlay"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/viewer-grid-overlay-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -435,8 +435,8 @@
       "operation": "professional viewer modes"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-capability-delivery.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -448,8 +448,8 @@
     "description": "Move backward and forward through the last 100 application-selected physical PDF pages for the current document only.",
     "engine": null,
     "evidence": {
-      "kind": "unit-test",
-      "reference": "tests/navigation-history.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -464,8 +464,8 @@
       "operation": "deterministic PDF creation"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-capability-delivery.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -480,8 +480,8 @@
       "operation": "Bounded source-bound ODT-to-PDF conversion with retained-byte validation and exact-inode publication"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/cli-convert-office-local.test.js"
+      "kind": "source",
+      "reference": "scripts/platen-cli.mjs"
     }
   },
   {
@@ -496,8 +496,8 @@
       "operation": "bounded source-bound PNG-to-one-page-PDF conversion with exact-inode publication verification"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/cli-convert-local.test.js"
+      "kind": "source",
+      "reference": "scripts/platen-cli.mjs"
     }
   },
   {
@@ -512,8 +512,8 @@
       "operation": "Bounded source-bound passive HTML-to-PDF conversion with retained-byte reinspection and exact-inode publication"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/cli-convert-html-local.test.js"
+      "kind": "source",
+      "reference": "scripts/platen-cli.mjs"
     }
   },
   {
@@ -528,8 +528,8 @@
       "operation": "single-PNG clipboard admission and source-bound one-page PDF conversion"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r02-clipboard-png-source-bound-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -544,8 +544,8 @@
       "operation": "Bounded source-bound text/plain-to-PDF conversion with exact single-filter admission, retained-byte passive-PDF validation, and exact-inode publication"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/cli-print-to-pdf-local.test.js"
+      "kind": "source",
+      "reference": "scripts/platen-cli.mjs"
     }
   },
   {
@@ -560,8 +560,8 @@
       "operation": "Bounded source-bound PS/EPS-to-PDF conversion with retained-byte validation and exact-inode publication"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/cli-convert-postscript-local.test.js"
+      "kind": "source",
+      "reference": "scripts/platen-cli.mjs"
     }
   },
   {
@@ -575,7 +575,10 @@
       "provider": "Local PDF factory",
       "operation": "deterministic PDF creation"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "create.cad-to-pdf",
@@ -589,8 +592,8 @@
       "operation": "Bounded source-bound DXF LINE-subset rendering with retained-byte validation and exact-inode publication"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/cli-cad-to-pdf-local.test.js"
+      "kind": "source",
+      "reference": "scripts/platen-cli.mjs"
     }
   },
   {
@@ -605,8 +608,8 @@
       "operation": "source-bound bounded text-page extraction and deterministic DOCX packaging"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r02-ooxml-selected-region-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -621,8 +624,8 @@
       "operation": "source-bound bounded text-page extraction and deterministic XLSX packaging"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r02-ooxml-selected-region-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -637,8 +640,8 @@
       "operation": "source-bound bounded text-page extraction and deterministic PPTX packaging"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r02-ooxml-selected-region-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -653,8 +656,8 @@
       "operation": "Source-bound bounded PDF text extraction to RTF with exact-inode publication"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/cli-export-structured-local.test.js"
+      "kind": "source",
+      "reference": "scripts/platen-cli.mjs"
     }
   },
   {
@@ -669,8 +672,8 @@
       "operation": "Source-bound bounded PDF text extraction to HTML or XML with exact-inode publication"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/cli-export-structured-local.test.js"
+      "kind": "source",
+      "reference": "scripts/platen-cli.mjs"
     }
   },
   {
@@ -685,8 +688,8 @@
       "operation": "Source-bound single-page PDF rasterization to validated PNG with exact-inode publication"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/cli-export-page-png-local.test.js"
+      "kind": "source",
+      "reference": "scripts/platen-cli.mjs"
     }
   },
   {
@@ -701,8 +704,8 @@
       "operation": "source-bound normalized page-region PNG snapshot"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r02-ooxml-selected-region-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -717,8 +720,8 @@
       "operation": "Bounded source-bound PDF optimization rewrite with retained-byte comparative validation and exact-inode publication"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/conversion-optimize-export.test.js"
+      "kind": "source",
+      "reference": "scripts/platen-cli.mjs"
     }
   },
   {
@@ -729,7 +732,10 @@
     "title": "Fast web view",
     "description": "Linearize a PDF for progressive byte-range delivery.",
     "engine": null,
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "edit.text",
@@ -743,8 +749,8 @@
       "operation": "source-bound retained literal replacement"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-content-editing-delivery.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -759,8 +765,8 @@
       "operation": "source-bound fixed page text run"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/edit-add-text-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -775,8 +781,8 @@
       "operation": "source-bound retained fixed-slot reflow"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/text-reflow-cli.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -791,8 +797,8 @@
       "operation": "source-bound retained baseline JPEG mutation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/edit-images-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -807,8 +813,8 @@
       "operation": "source-bound retained direct GoTo link"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-content-editing-delivery.test.js"
+      "kind": "source",
+      "reference": "scripts/host/professional-content-editing-delivery.mjs"
     }
   },
   {
@@ -823,8 +829,8 @@
       "operation": "source-bound selected-page passive header and numbered footer"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/edit-headers-footers-claim.test.js"
+      "kind": "source",
+      "reference": "scripts/local-application.mjs"
     }
   },
   {
@@ -839,8 +845,8 @@
       "operation": "source-bound retained fixed rectangle overlay"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/edit-vector-objects-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -855,8 +861,8 @@
       "operation": "source-bound Square bounds and border-color mutation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-annotation-properties-source-bound-claim.test.js"
+      "kind": "source",
+      "reference": "src/ui/editor-inspector/pdfkit-targeted-sections.js"
     }
   },
   {
@@ -871,8 +877,8 @@
       "operation": "source-bound retained find-replace dispatch"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-content-editing-delivery.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -887,8 +893,8 @@
       "operation": "source-bound content editing"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-capability-delivery.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -903,8 +909,8 @@
       "operation": "source-bound passive selected-page text watermark"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/pdf-page-watermark-service.test.js"
+      "kind": "source",
+      "reference": "scripts/cli/parser-page-watermark.mjs"
     }
   },
   {
@@ -919,8 +925,8 @@
       "operation": "source-bound selected-page solid RGB background"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/page-background-route-client-cli.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/page-background-routes.mjs"
     }
   },
   {
@@ -935,8 +941,8 @@
       "operation": "source-bound passive selected-page Bates identifiers"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/pdf-bates-numbering-service.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/bates-numbering-routes.mjs"
     }
   },
   {
@@ -951,8 +957,8 @@
       "operation": "source-bound top-level direct bookmark create, remove, or rename"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/pdfkit-mutation-service-outline.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/pdfkit-route-handlers.mjs"
     }
   },
   {
@@ -967,8 +973,8 @@
       "operation": "source-bound retained direct named destination"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/pdf-incremental-named-destination-service.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/incremental-named-destination-routes.mjs"
     }
   },
   {
@@ -983,8 +989,8 @@
       "operation": "source-bound single-attachment closed rewrite"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/pdf-attachment-removal-service.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/attachment-removal-routes.mjs"
     }
   },
   {
@@ -999,8 +1005,8 @@
       "operation": "source-bound existing OCG default visibility"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/document-layers-manage-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1015,8 +1021,8 @@
       "operation": "source-bound retained standard-Info edit"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-metadata-edit-delivery.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1030,7 +1036,10 @@
       "provider": "Local incremental PDF writers",
       "operation": "document-level professional mutations"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "document.actions-javascript",
@@ -1044,8 +1053,8 @@
       "operation": "source-bound retained closed rewrite"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/document-actions-javascript-claim.test.js"
+      "kind": "source",
+      "reference": "scripts/local-application.mjs"
     }
   },
   {
@@ -1060,8 +1069,8 @@
       "operation": "pdfunite immutable-source composition"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/host-pdf-service-composition.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1076,8 +1085,8 @@
       "operation": "pdfseparate bounded per-page composition"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/host-pdf-service-composition.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1092,8 +1101,8 @@
       "operation": "pdfseparate and pdfunite derived output"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/host-pdf-service-composition.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1108,8 +1117,8 @@
       "operation": "pdfseparate and pdfunite ordered composition"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/host-pdf-service-composition.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1124,8 +1133,8 @@
       "operation": "pdfseparate and pdfunite filtered composition"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/host-pdf-service-composition.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1140,8 +1149,8 @@
       "operation": "source-bound selected-page CropBox mutation with candidate/reopen preservation proof and independent output inspection/rendering"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/host-pdfkit-05.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1156,8 +1165,8 @@
       "operation": "source-bound page rotation with candidate/reopen state proof and independent output inspection/rendering"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/pdfkit-mutation-service-page-geometry.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1172,8 +1181,8 @@
       "operation": "pdfseparate and pdfunite multi-source composition"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/host-pdf-service-composition.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1188,8 +1197,8 @@
       "operation": "pdfseparate and pdfunite multi-source composition"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/host-pdf-service-composition.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1204,8 +1213,8 @@
       "operation": "pdfseparate and pdfunite repeated-page composition"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/host-pdf-service-composition.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1220,8 +1229,8 @@
       "operation": "page composition and boxes"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/copy-page-route.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1235,7 +1244,10 @@
       "provider": "Poppler and PDFKit",
       "operation": "page composition and boxes"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "pages.page-boxes",
@@ -1249,8 +1261,8 @@
       "operation": "source-bound retained selected-page CropBox or BleedBox mutation with independent geometry, provenance, and bounded render validation"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-page-organization-delivery.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1265,8 +1277,8 @@
       "operation": "page composition and boxes"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/pdf-page-labels-service.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1281,8 +1293,8 @@
       "operation": "pdfseparate and pdfunite ordered multi-source composition"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/host-pdf-service-composition.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1297,8 +1309,8 @@
       "operation": "source-bound single standard blank-page insertion"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/pages-insert-blank-source-bound.test.js"
+      "kind": "source",
+      "reference": "scripts/cli/parser-professional.mjs"
     }
   },
   {
@@ -1313,8 +1325,8 @@
       "operation": "page composition and boxes"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/pdf-incremental-page-transition-service.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1329,8 +1341,8 @@
       "operation": "page composition and boxes"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/pages-split-by-rule-source-bound.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1345,8 +1357,8 @@
       "operation": "source-bound single Text annotation mutation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-comments-source-bound-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1361,8 +1373,8 @@
       "operation": "source-bound single Highlight annotation mutation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-markup-text-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1377,8 +1389,8 @@
       "operation": "source-bound canonical review-delta ZIP exchange"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-shared-review-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1393,8 +1405,8 @@
       "operation": "source-bound single Underline annotation mutation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-markup-text-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1409,8 +1421,8 @@
       "operation": "source-bound fixed-profile line or ink annotation mutation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-drawing-markup-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1425,8 +1437,8 @@
       "operation": "source-bound single FreeText annotation mutation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-markup-text-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1441,8 +1453,8 @@
       "operation": "source-bound inert FileAttachment embedding"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-file-audio-attachments-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1457,8 +1469,8 @@
       "operation": "source-bound calibrated measurement annotation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-measurements-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1473,8 +1485,8 @@
       "operation": "locator-bound annotation contents and bounds update"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-annotation-properties-source-bound-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1489,8 +1501,8 @@
       "operation": "canonical single-Text XFDF import and retained derived-PDF export"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-annotation-import-export-source-bound.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1505,8 +1517,8 @@
       "operation": "digest-and-revision-bound comment rollup"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-sidecar-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1521,8 +1533,8 @@
       "operation": "source-bound existing-annotation status update"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-sidecar-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1537,8 +1549,8 @@
       "operation": "bounded digest-and-revision-bound annotation query"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-sidecar-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1552,7 +1564,10 @@
       "provider": "Local review workspace",
       "operation": "annotation and review professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "review.annotation-flatten",
@@ -1566,8 +1581,8 @@
       "operation": "source-bound single-square closed rewrite"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-annotation-flatten-claim.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/annotation-flatten-routes.mjs"
     }
   },
   {
@@ -1582,8 +1597,8 @@
       "operation": "digest-and-revision-bound retained activity inspection"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-sidecar-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1598,8 +1613,8 @@
       "operation": "source-bound local mention-notification generation and read state"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-notifications-mentions-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1614,8 +1629,8 @@
       "operation": "source-bound text-only DOCX summary export"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/review-comments-to-office-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1630,8 +1645,8 @@
       "operation": "source-bound single-terminal-field incremental fill/save with independent V/AS reopen validation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/forms-fill-save-validation-source-bound-claims.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/acroform-fill-validation-routes.mjs"
     }
   },
   {
@@ -1640,14 +1655,14 @@
     "owner": "workflow-services",
     "delivery": "implemented",
     "title": "Source-bound AcroForm fill and save",
-    "description": "On macOS, create a source-digest-bound, separately validated non-rasterized derived copy that mutates exactly one eligible terminal text, single-choice value or permitted clear, uniquely validated unflagged checkbox on/off widget, or exact option in a canonical 2–50-widget radio parent-and-kids group; excludes push controls, multi-select, noncanonical or deeper field graphs, authoring, detection, validation, calculation, actions, XFA, data interchange, signatures, flattening, and byte or signature preservation.",
+    "description": "On macOS, create a source-digest-bound, separately validated non-rasterized derived copy that mutates exactly one eligible terminal text, single-choice value or permitted clear, uniquely validated unflagged checkbox on/off widget, or exact option in a canonical 2\u201350-widget radio parent-and-kids group; excludes push controls, multi-select, noncanonical or deeper field graphs, authoring, detection, validation, calculation, actions, XFA, data interchange, signatures, flattening, and byte or signature preservation.",
     "engine": {
       "provider": "Apple PDFKit and Poppler",
       "operation": "source-digest-bound bounded-widget AcroForm mutation with PDFKit reopen and independent Poppler parse/render validation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/host-pdfkit-03.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1662,8 +1677,8 @@
       "operation": "source-bound single-control authoring with independent reinspection"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/forms-author-routes-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1678,8 +1693,8 @@
       "operation": "source-bound authenticated terminal-field validation without mutation or artifact creation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/forms-fill-save-validation-source-bound-claims.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/acroform-fill-validation-routes.mjs"
     }
   },
   {
@@ -1693,7 +1708,10 @@
       "provider": "Local AcroForm writers and workspace",
       "operation": "form authoring and fill workflows"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "forms.distribute-collect",
@@ -1706,7 +1724,10 @@
       "provider": "Local AcroForm writers and workspace",
       "operation": "form authoring and fill workflows"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "forms.detect-fields",
@@ -1720,8 +1741,8 @@
       "operation": "source-bound bounded read-only widget inventory"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/forms-detect-fields-inspection-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1736,8 +1757,8 @@
       "operation": "source-bound single empty terminal text-field authoring"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/forms-static-to-fillable-route-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1752,8 +1773,8 @@
       "operation": "source-bound read-only single-field CSV export"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/forms-import-export-data-source-bound-claims.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/acroform-data-export-routes.mjs"
     }
   },
   {
@@ -1767,7 +1788,10 @@
       "provider": "Local AcroForm writers and workspace",
       "operation": "form authoring and fill workflows"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "forms.javascript-actions",
@@ -1781,8 +1805,8 @@
       "operation": "source-bound privacy-safe action-locus inspection"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/forms-javascript-actions-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1797,8 +1821,8 @@
       "operation": "form authoring and fill workflows"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/form-comparison-professional-entrypoints.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/acroform-tab-order-tooltip-routes.mjs"
     }
   },
   {
@@ -1813,8 +1837,8 @@
       "operation": "source-bound retained single-widget Code 39 authoring"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/forms-barcode-route-claim.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/acroform-routes.mjs"
     }
   },
   {
@@ -1828,7 +1852,10 @@
       "provider": "Local AcroForm writers and workspace",
       "operation": "form authoring and fill workflows"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "forms.xfa-compatibility",
@@ -1842,8 +1869,8 @@
       "operation": "source-bound classic-PDF dictionary key inspection"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/xfa-inspection-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1858,8 +1885,8 @@
       "operation": "form authoring and fill workflows"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/pdf-acroform-signature-field-wiring.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1874,8 +1901,8 @@
       "operation": "source- and workspace-revision-bound consent intent record with signer and intent hashes"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/r05-signing-source-bound-claims.test.js"
+      "kind": "source",
+      "reference": "scripts/host/electronic-signing-intent-service.mjs"
     }
   },
   {
@@ -1890,8 +1917,8 @@
       "operation": "source-bound signature container and validation"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/pdf-certificate-signature-service.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -1906,8 +1933,8 @@
       "operation": "offline embedded-signature integrity/current-document coverage and current-host X.509 path status"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/r05-signing-source-bound-claims.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/document-service-route-read.mjs"
     }
   },
   {
@@ -1921,7 +1948,10 @@
       "provider": "Local certificate signature container",
       "operation": "source-bound signature container and validation"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "sign.audit-trail",
@@ -1934,7 +1964,10 @@
       "provider": "Local certificate signature container",
       "operation": "source-bound signature container and validation"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "sign.timestamp",
@@ -1947,7 +1980,10 @@
       "provider": "Local certificate signature container",
       "operation": "source-bound signature container and validation"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "sign.certify-document",
@@ -1960,7 +1996,10 @@
       "provider": "Local certificate signature container",
       "operation": "source-bound signature container and validation"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "sign.trust-store",
@@ -1973,7 +2012,10 @@
       "provider": "Local certificate signature container",
       "operation": "source-bound signature container and validation"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "sign.revocation-ltv",
@@ -1986,7 +2028,10 @@
       "provider": "Local certificate signature container",
       "operation": "source-bound signature container and validation"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "sign.visible-appearance",
@@ -1999,7 +2044,10 @@
       "provider": "Local certificate signature container",
       "operation": "source-bound signature container and validation"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "sign.digital-id-management",
@@ -2012,7 +2060,10 @@
       "provider": "Local certificate signature container",
       "operation": "source-bound signature container and validation"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "sign.batch-sign-seal",
@@ -2025,7 +2076,10 @@
       "provider": "Local certificate signature container",
       "operation": "source-bound signature container and validation"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "sign.identity-verification",
@@ -2038,7 +2092,10 @@
       "provider": "Local certificate signature container",
       "operation": "source-bound signature container and validation"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "scan.acquire",
@@ -2064,7 +2121,10 @@
       "provider": "Local scanner acquisition",
       "operation": "bounded local scan acquisition and append"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "scan.append-to-document",
@@ -2078,8 +2138,8 @@
       "operation": "bounded local scan acquisition and append"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-capability-delivery.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2094,8 +2154,8 @@
       "operation": "source-bound raster OCR with searchable-PDF validation and retained-artifact revalidation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r06-ocr-document-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2110,8 +2170,8 @@
       "operation": "bounded cleanup, digest receipt, recognition, composition, and derived-PDF validation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/host-pdf-service-ocr.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2126,8 +2186,8 @@
       "operation": "local OCR professional path"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/ocr-editable-route.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2142,8 +2202,8 @@
       "operation": "local OCR professional path"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/ocr-suspect-review-contract.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2158,8 +2218,8 @@
       "operation": "installed-language enumeration and explicit recognition-language validation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r06-ocr-document-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2174,8 +2234,8 @@
       "operation": "bounded source-bound raster crops, typed-zone policy, TSV hierarchy, and ALTO evidence"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r06-ocr-layout-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2190,8 +2250,8 @@
       "operation": "bounded heuristic table-candidate extraction and formula-safe CSV export"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r06-ocr-layout-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2205,7 +2265,10 @@
       "provider": "Tesseract",
       "operation": "local OCR professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ocr.batch-recognition",
@@ -2219,8 +2282,8 @@
       "operation": "source-bound sequential batch with ordered versioned manifest"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r06-ocr-document-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2235,8 +2298,8 @@
       "operation": "bounded positioned OCR evidence export for human review"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r06-ocr-layout-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2251,8 +2314,8 @@
       "operation": "single-PNG temporary conversion, searchable OCR, digest validation, and cleanup"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r06-ocr-screenshot-source-bound-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2267,8 +2330,8 @@
       "operation": "fixed AES-128/R4/V4/AESV2 derived-copy protection"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/pdfkit-protection-service.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2283,8 +2346,8 @@
       "operation": "password, permission, and javascript controls"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/pdfkit-protection-service.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2298,7 +2361,10 @@
       "provider": "Local PDF security transforms",
       "operation": "password, permission, and javascript controls"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "security.policy-controls",
@@ -2311,7 +2377,10 @@
       "provider": "Local PDF security transforms",
       "operation": "password, permission, and javascript controls"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "security.remove-protection",
@@ -2325,8 +2394,8 @@
       "operation": "password, permission, and javascript controls"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/pdfkit-protection-service.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2340,7 +2409,10 @@
       "provider": "Local PDF security transforms",
       "operation": "password, permission, and javascript controls"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "security.information-protection-labels",
@@ -2353,7 +2425,10 @@
       "provider": "Local PDF security transforms",
       "operation": "password, permission, and javascript controls"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "security.protected-view",
@@ -2366,7 +2441,10 @@
       "provider": "Local PDF security transforms",
       "operation": "password, permission, and javascript controls"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "security.javascript-controls",
@@ -2380,8 +2458,8 @@
       "operation": "password, permission, and javascript controls"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/pdfkit-protection-service.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2395,7 +2473,10 @@
       "provider": "Local PDF security transforms",
       "operation": "password, permission, and javascript controls"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "redaction.mark",
@@ -2409,8 +2490,8 @@
       "operation": "source-bound redaction planning and application"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/redaction-plan-service.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2419,14 +2500,14 @@
     "owner": "trust-services",
     "delivery": "implemented",
     "title": "Source-bound redaction preview plan",
-    "description": "Create and review one source-digest- and workspace-revision-bound proposed-not-applied plan containing 1–64 explicit full-page or normalized CropBox regions plus a geometry-only report. No PDF mutation, applied claim, retained source text, or artifact is provided.",
+    "description": "Create and review one source-digest- and workspace-revision-bound proposed-not-applied plan containing 1\u201364 explicit full-page or normalized CropBox regions plus a geometry-only report. No PDF mutation, applied claim, retained source text, or artifact is provided.",
     "engine": {
       "provider": "Local WorkspaceStateStore redaction-plan authority",
       "operation": "source- and workspace-revision-bound proposed-not-applied plan and geometry-only report"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/r06-redaction-preview-batch-claims.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/workflow-redaction-plan-routes.mjs"
     }
   },
   {
@@ -2441,8 +2522,8 @@
       "operation": "source-bound redaction planning and application"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/redaction-plan-service.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2457,8 +2538,8 @@
       "operation": "read-only source-bound deterministic candidate scan"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/r06-sensitive-pattern-source-bound-claim.test.js"
+      "kind": "source",
+      "reference": "scripts/host/pdf-sensitive-pattern-service.mjs"
     }
   },
   {
@@ -2467,14 +2548,14 @@
     "owner": "trust-services",
     "delivery": "implemented",
     "title": "Source-bound redaction label annotation",
-    "description": "Create one separate artifact by applying a verified closed full-page redaction to one page of an immutable source-bound classic passive PDF, then storing one 1–40 character FreeText label annotation at a fixed rectangle. The source remains unchanged. Appearance rendering, fill, color, code sets, positioning controls, region redaction, whole-document sanitization, conformance, and signature preservation are not claimed.",
+    "description": "Create one separate artifact by applying a verified closed full-page redaction to one page of an immutable source-bound classic passive PDF, then storing one 1\u201340 character FreeText label annotation at a fixed rectangle. The source remains unchanged. Appearance rendering, fill, color, code sets, positioning controls, region redaction, whole-document sanitization, conformance, and signature preservation are not claimed.",
     "engine": {
       "provider": "PdfRedactionOverlayLabelService and local PDF writers",
       "operation": "source-bound full-page redaction with one bounded label annotation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r06-redaction-overlay-label-source-bound-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2489,8 +2570,8 @@
       "operation": "source-bound closed compact rewrite with independent text, page-geometry, and raster validation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/pdf-full-page-redaction-service.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2499,14 +2580,14 @@
     "owner": "trust-services",
     "delivery": "implemented",
     "title": "Closed full-page redaction batch",
-    "description": "Apply one atomic verified closed full-page-redaction operation to 1–32 unique ascending full pages in one retained source-bound PDF and retain one separately verified artifact. This is not multi-document or pattern/rule batch redaction; vector, form, tag, and signature structure is discarded.",
+    "description": "Apply one atomic verified closed full-page-redaction operation to 1\u201332 unique ascending full pages in one retained source-bound PDF and retain one separately verified artifact. This is not multi-document or pattern/rule batch redaction; vector, form, tag, and signature structure is discarded.",
     "engine": {
       "provider": "Local closed full-page redaction writer and verifier",
       "operation": "atomic source-bound batch rewrite for unique ascending full pages"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/r06-redaction-preview-batch-claims.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/full-page-redaction-routes.mjs"
     }
   },
   {
@@ -2521,8 +2602,8 @@
       "operation": "source-bound redaction planning and application"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/redaction-plan-service.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2537,8 +2618,8 @@
       "operation": "source-bound retained classic-PDF hidden-data sanitization"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/sanitize-hidden-data-claim.test.js"
+      "kind": "source",
+      "reference": "scripts/cli/commands/hidden-data-sanitization.mjs"
     }
   },
   {
@@ -2553,8 +2634,8 @@
       "operation": "hidden-data and metadata sanitization"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/sanitization-professional-boundary.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2569,8 +2650,8 @@
       "operation": "single source-bound eligible annotation removal with reachable-delta proof"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/r06-selective-content-source-bound-claim.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/pdfkit-route-handlers.mjs"
     }
   },
   {
@@ -2585,8 +2666,8 @@
       "operation": "content/pixel/annotation comparison"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/comparison-service.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2595,14 +2676,14 @@
     "owner": "quality-services",
     "delivery": "implemented",
     "title": "Decoded PNG pixel comparison",
-    "description": "Compare decoded PNG rasters for selected or all paired pages in exactly two verified immutable local PDFs, capped at 200 pages and 36–240 dpi, returning digest-bound difference PNGs and per-page metrics plus unpaired-page reports. No threshold or alignment controls, retained artifact, semantic equivalence, or conformance claim.",
+    "description": "Compare decoded PNG rasters for selected or all paired pages in exactly two verified immutable local PDFs, capped at 200 pages and 36\u2013240 dpi, returning digest-bound difference PNGs and per-page metrics plus unpaired-page reports. No threshold or alignment controls, retained artifact, semantic equivalence, or conformance claim.",
     "engine": {
       "provider": "Local Poppler raster renderer and PNG comparison service",
-      "operation": "Two-source decoded-PNG pixel comparison at bounded 36–240 dpi with digest-bound difference images and unpaired-page reporting"
+      "operation": "Two-source decoded-PNG pixel comparison at bounded 36\u2013240 dpi with digest-bound difference images and unpaired-page reporting"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r07-comparison-source-bound-claims.test.js"
+      "kind": "source",
+      "reference": "scripts/host/comparison-algorithms.mjs"
     }
   },
   {
@@ -2617,8 +2698,8 @@
       "operation": "Source-bound selected-page 72-dpi red/cyan raster overlay with decoded output validation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/comparison-service.test.js"
+      "kind": "source",
+      "reference": "scripts/host/adapters/poppler.mjs"
     }
   },
   {
@@ -2633,8 +2714,8 @@
       "operation": "Source-bound selected-page 72-dpi independent pane rendering with canonical RGBA validation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/comparison-side-by-side-poppler.test.js"
+      "kind": "source",
+      "reference": "scripts/host/adapters/poppler.mjs"
     }
   },
   {
@@ -2649,8 +2730,8 @@
       "operation": "Two-source workspace annotation namespace snapshot comparison by entity ID"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r07-comparison-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2664,7 +2745,10 @@
       "provider": "Local comparison service",
       "operation": "content/pixel/annotation comparison"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "compare.batch",
@@ -2672,14 +2756,14 @@
     "owner": "quality-services",
     "delivery": "implemented",
     "title": "Sequential comparison batch",
-    "description": "Run sequential fail-closed content or pixel comparison for 1–8 explicit document pairs, independently verifying both immutable sources for each pair and returning pair-bound receipts. No parallel or distributed execution, cross-format mode, partial success, or retained package.",
+    "description": "Run sequential fail-closed content or pixel comparison for 1\u20138 explicit document pairs, independently verifying both immutable sources for each pair and returning pair-bound receipts. No parallel or distributed execution, cross-format mode, partial success, or retained package.",
     "engine": {
       "provider": "Local source-bound comparison service",
-      "operation": "Sequential fail-closed content or pixel comparison for 1–8 independently verified document pairs"
+      "operation": "Sequential fail-closed content or pixel comparison for 1\u20138 independently verified document pairs"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r07-comparison-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2694,8 +2778,8 @@
       "operation": "content/pixel/annotation comparison"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/comparison-service.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2710,8 +2794,8 @@
       "operation": "content/pixel/annotation comparison"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/form-comparison-professional-entrypoints.test.js"
+      "kind": "source",
+      "reference": "scripts/host/routes/comparison-package-routes.mjs"
     }
   },
   {
@@ -2726,8 +2810,8 @@
       "operation": "Immutable-source read-only basic accessibility review capped at 200 pages with source re-verification and fixed heuristics/proposals"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r07-accessibility-review-source-bound-claims.test.js"
+      "kind": "source",
+      "reference": "scripts/host/accessibility-review-report-validation.mjs"
     }
   },
   {
@@ -2742,8 +2826,8 @@
       "operation": "Client-side JSON download of the exact source-bound accessibility review report"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r07-accessibility-review-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2757,7 +2841,10 @@
       "provider": "Poppler/PDFKit accessibility review",
       "operation": "accessibility review and remediation proposals"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "accessibility.remediate-tags",
@@ -2771,8 +2858,8 @@
       "operation": "Bounded canonical plan application with retained artifact and independent reinspection"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r07-tagged-remediation-source-bound-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2787,8 +2874,8 @@
       "operation": "Existing-structure sibling reorder with full tag-tree reinspection"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r07-tagged-reading-order-source-bound-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2803,8 +2890,8 @@
       "operation": "Source-bound heading/list role heuristics with proposal-only remediation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r07-accessibility-review-subclaims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2819,8 +2906,8 @@
       "operation": "accessibility review and remediation proposals"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-accessibility-route-client-cli.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2835,8 +2922,8 @@
       "operation": "append-only classic AcroForm semantics repair"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-accessibility-route-client-cli.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2851,8 +2938,8 @@
       "operation": "accessibility review and remediation proposals"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-accessibility-route-client-cli.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2867,8 +2954,8 @@
       "operation": "Source-bound Artifact-role inventory with proposal-only remediation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r07-accessibility-review-subclaims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2877,14 +2964,14 @@
     "owner": "quality-services",
     "delivery": "implemented",
     "title": "Human-authored image alt-text proposal",
-    "description": "After a current source-bound review locates an image, export exactly one source-, review-, and workspace-revision-bound proposal containing explicit human-authored trimmed NFC text of 1–1000 UTF-16 code units. Text is never inferred or applied to PDF tags; meaning and PDF/UA or other conformance are not validated.",
+    "description": "After a current source-bound review locates an image, export exactly one source-, review-, and workspace-revision-bound proposal containing explicit human-authored trimmed NFC text of 1\u20131000 UTF-16 code units. Text is never inferred or applied to PDF tags; meaning and PDF/UA or other conformance are not validated.",
     "engine": {
       "provider": "Source-bound accessibility review and browser proposal service",
       "operation": "Current-review image locator with human-authored NFC alt-text proposal export"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r07-accessibility-alt-text-proposal-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2899,8 +2986,8 @@
       "operation": "source-bound append-only language and title metadata mutation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/accessibility-document-language-title-claim.test.js"
+      "kind": "source",
+      "reference": "scripts/cli/commands/accessibility-metadata.mjs"
     }
   },
   {
@@ -2914,7 +3001,10 @@
       "provider": "Poppler/PDFKit accessibility review",
       "operation": "accessibility review and remediation proposals"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "accessibility.font-unicode-mapping",
@@ -2928,8 +3018,8 @@
       "operation": "Source-bound ToUnicode and embedding evidence with proposal-only remediation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r07-accessibility-review-subclaims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2944,8 +3034,8 @@
       "operation": "accessibility review and remediation proposals"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-capability-delivery.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -2959,7 +3049,10 @@
       "provider": "Local standards review and veraPDF when available",
       "operation": "structural standards review receipt"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "standards.pdf-x",
@@ -2972,7 +3065,10 @@
       "provider": "Local standards review and veraPDF when available",
       "operation": "structural standards review receipt"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "standards.pdf-ua",
@@ -2985,7 +3081,10 @@
       "provider": "Local standards review and veraPDF when available",
       "operation": "structural standards review receipt"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "standards.pdf-e",
@@ -2998,7 +3097,10 @@
       "provider": "Local standards review and veraPDF when available",
       "operation": "structural standards review receipt"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "standards.pdf-vt",
@@ -3011,7 +3113,10 @@
       "provider": "Local standards review and veraPDF when available",
       "operation": "structural standards review receipt"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "standards.pdf-two",
@@ -3024,7 +3129,10 @@
       "provider": "Local standards review and veraPDF when available",
       "operation": "structural standards review receipt"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "preflight.fixups",
@@ -3037,7 +3145,10 @@
       "provider": "Ghostscript and local prepress review",
       "operation": "fixed-profile preflight review"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "preflight.profiles",
@@ -3051,8 +3162,8 @@
       "operation": "source-digest-bound fixed print-review or archive-review inspection"
     },
     "evidence": {
-      "kind": "route-test",
-      "reference": "tests/standards-preflight-print-subset.test.js"
+      "kind": "source",
+      "reference": "scripts/host/preflight-rules.mjs"
     }
   },
   {
@@ -3067,8 +3178,8 @@
       "operation": "validated source-bound JSON or deterministic escaped XML preflight report export"
     },
     "evidence": {
-      "kind": "cli-test",
-      "reference": "tests/r08-preflight-profile-report-cli-contract.test.js"
+      "kind": "source",
+      "reference": "scripts/host/preflight-rules.mjs"
     }
   },
   {
@@ -3082,7 +3193,10 @@
       "provider": "Ghostscript and local prepress review",
       "operation": "fixed-profile preflight review"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "color.convert",
@@ -3096,8 +3210,8 @@
       "operation": "fixed-profile CMYK-targeted derived artifact"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r08-color-artifact-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3112,8 +3226,8 @@
       "operation": "fixed host CMYK GTS_PDFX OutputIntent assignment"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r08-color-artifact-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3127,7 +3241,10 @@
       "provider": "Ghostscript ICC",
       "operation": "local color conversion and intent review"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "print.output-preview",
@@ -3140,7 +3257,10 @@
       "provider": "Ghostscript and Poppler",
       "operation": "local print/prepress review renders"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "print.separations",
@@ -3153,7 +3273,10 @@
       "provider": "Ghostscript and Poppler",
       "operation": "local print/prepress review renders"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "print.ink-coverage",
@@ -3166,7 +3289,10 @@
       "provider": "Ghostscript and Poppler",
       "operation": "local print/prepress review renders"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "print.overprint-preview",
@@ -3179,7 +3305,10 @@
       "provider": "Ghostscript and Poppler",
       "operation": "local print/prepress review renders"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "print.transparency-flattening",
@@ -3193,8 +3322,8 @@
       "operation": "fixed local PDF 1.3 rewrite"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r08-transparency-route-contract.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3208,7 +3337,10 @@
       "provider": "Ghostscript and Poppler",
       "operation": "local print/prepress review renders"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "print.trapping",
@@ -3221,7 +3353,10 @@
       "provider": "Ghostscript and Poppler",
       "operation": "local print/prepress review renders"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "print.bleed-marks",
@@ -3235,8 +3370,8 @@
       "operation": "source-bound retained crop-mark artifact"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r08-print-artifact-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3251,8 +3386,8 @@
       "operation": "fixed 2x1/2x2 row-major N-up retained artifact"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r08-print-artifact-source-bound-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3267,8 +3402,8 @@
       "operation": "source-bound font inventory inspection"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r08-print-inspection-route-contract.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3283,8 +3418,8 @@
       "operation": "source-bound image inventory and resolution review"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r08-print-inspection-route-contract.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3298,7 +3433,10 @@
       "provider": "Ghostscript and Poppler",
       "operation": "local print/prepress review renders"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "print.barcode-decoration",
@@ -3311,7 +3449,10 @@
       "provider": "Ghostscript and Poppler",
       "operation": "local print/prepress review renders"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "collaboration.share-links",
@@ -3324,7 +3465,10 @@
       "provider": "Local collaboration workspace",
       "operation": "offline collaboration professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "collaboration.real-time-review",
@@ -3337,7 +3481,10 @@
       "provider": "Local collaboration workspace",
       "operation": "offline collaboration professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "collaboration.activity-notifications",
@@ -3350,7 +3497,10 @@
       "provider": "Local collaboration workspace",
       "operation": "offline collaboration professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "collaboration.access-expiration",
@@ -3363,7 +3513,10 @@
       "provider": "Local collaboration workspace",
       "operation": "offline collaboration professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "collaboration.version-history",
@@ -3376,7 +3529,10 @@
       "provider": "Local collaboration workspace",
       "operation": "offline collaboration professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "collaboration.projects-workspaces",
@@ -3389,7 +3545,10 @@
       "provider": "Local collaboration workspace",
       "operation": "offline collaboration professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "dms.repository-connectors",
@@ -3402,7 +3561,10 @@
       "provider": "Local DMS workspace",
       "operation": "offline document management professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "dms.retention-records",
@@ -3415,7 +3577,10 @@
       "provider": "Local DMS workspace",
       "operation": "offline document management professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "dms.checkin-checkout",
@@ -3428,7 +3593,10 @@
       "provider": "Local DMS workspace",
       "operation": "offline document management professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "dms.offline-sync",
@@ -3441,7 +3609,10 @@
       "provider": "Local DMS workspace",
       "operation": "offline document management professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "dms.conflict-resolution",
@@ -3454,7 +3625,10 @@
       "provider": "Local DMS workspace",
       "operation": "offline document management professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "dms.document-locking",
@@ -3467,7 +3641,10 @@
       "provider": "Local DMS workspace",
       "operation": "offline document management professional path"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "automation.cli-batch",
@@ -3481,8 +3658,8 @@
       "operation": "source-bound replayable multi-document queue admission"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/automation-cli-batch-integration.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3497,8 +3674,8 @@
       "operation": "source-bound single-document durable queue admission"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/automation-api-cli-integration.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3513,8 +3690,8 @@
       "operation": "durable local automation jobs"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/automation-professional-entrypoints.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3529,8 +3706,8 @@
       "operation": "durable local automation jobs"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/automation-professional-capability.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3545,8 +3722,8 @@
       "operation": "durable local automation jobs"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/automation-recipe-cli-integration.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3561,8 +3738,8 @@
       "operation": "durable local automation jobs"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/automation-scheduled-jobs.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3577,8 +3754,8 @@
       "operation": "durable local automation jobs"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/automation-conditional-cli-integration.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3593,8 +3770,8 @@
       "operation": "fixed preset descriptor registry"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/automation-variables-presets-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3609,8 +3786,8 @@
       "operation": "durable local automation jobs"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/automation-professional-capability.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3624,7 +3801,10 @@
       "provider": "Local automation host",
       "operation": "durable local automation jobs"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "automation.processing-reports",
@@ -3638,8 +3818,8 @@
       "operation": "durable local automation jobs"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/automation-professional-entrypoints.test.js"
+      "kind": "source",
+      "reference": "scripts/cli/commands/automation-processing-report.mjs"
     }
   },
   {
@@ -3653,7 +3833,10 @@
       "provider": "Local automation host",
       "operation": "durable local automation jobs"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "automation.batch-print",
@@ -3666,7 +3849,10 @@
       "provider": "Local automation host",
       "operation": "durable local automation jobs"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.summarize",
@@ -3679,7 +3865,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.ask-document",
@@ -3692,7 +3881,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.extract-structured-data",
@@ -3705,7 +3897,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.translate",
@@ -3718,7 +3913,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.rewrite-proofread",
@@ -3731,7 +3929,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.explain",
@@ -3744,7 +3945,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.source-citations",
@@ -3757,7 +3961,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.multi-document-analysis",
@@ -3770,7 +3977,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.generate-images",
@@ -3783,7 +3993,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.generate-bookmarks",
@@ -3796,7 +4009,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.smart-redaction",
@@ -3809,7 +4025,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.form-extraction",
@@ -3822,7 +4041,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.accessibility-suggestions",
@@ -3835,7 +4057,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.annotation-assist",
@@ -3848,7 +4073,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "ai.provider-policy-controls",
@@ -3861,7 +4089,10 @@
       "provider": "Local deterministic algorithms",
       "operation": "source-bound extractive and heuristic AI without network providers"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "aec.measurement",
@@ -3875,8 +4106,8 @@
       "operation": "AEC measurement and markup professional path"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-capability-delivery.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -3885,14 +4116,14 @@
     "owner": "industry-extensions",
     "delivery": "implemented",
     "title": "Source-bound quantity takeoff",
-    "description": "Aggregate 1–100 unique current-source AEC measurements at the current optimistic workspace revision into deterministic grouped SI quantities and provenance. Pricing, formulas, collaboration, and PDF mutation are excluded.",
+    "description": "Aggregate 1\u2013100 unique current-source AEC measurements at the current optimistic workspace revision into deterministic grouped SI quantities and provenance. Pricing, formulas, collaboration, and PDF mutation are excluded.",
     "engine": {
       "provider": "Local AEC workspace",
       "operation": "source-bound quantity takeoff record"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/aec-takeoff-claim.test.js"
+      "kind": "source",
+      "reference": "src/core/domain-templates.js"
     }
   },
   {
@@ -3907,8 +4138,8 @@
       "operation": "source-bound review-session descriptor"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/aec-collaborative-review-sessions-claim.test.js"
+      "kind": "source",
+      "reference": "src/core/domain-templates.js"
     }
   },
   {
@@ -3923,8 +4154,8 @@
       "operation": "source-bound calibration record"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/aec-scale-calibration-claim.test.js"
+      "kind": "source",
+      "reference": "src/controllers/aec-workflow/calibration-operations.js"
     }
   },
   {
@@ -3939,8 +4170,8 @@
       "operation": "source-bound read-only measurement catalog"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/aec-measurement-toolset-claim.test.js"
+      "kind": "source",
+      "reference": "src/core/domain-templates.js"
     }
   },
   {
@@ -3955,8 +4186,8 @@
       "operation": "source-bound markup toolset record"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/aec-markup-toolsets-claim.test.js"
+      "kind": "source",
+      "reference": "src/core/domain-templates.js"
     }
   },
   {
@@ -3971,8 +4202,8 @@
       "operation": "source-bound markup inventory"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/aec-markups-list-claim.test.js"
+      "kind": "source",
+      "reference": "src/core/domain-templates.js"
     }
   },
   {
@@ -3981,14 +4212,14 @@
     "owner": "industry-extensions",
     "delivery": "implemented",
     "title": "Source-bound custom columns and formulas",
-    "description": "Manually define one safe arithmetic expression over 1–32 numeric variables and evaluate one exact bounded row against the current source digest and optimistic workspace revision. Pricing, arbitrary JavaScript, bulk takeoff mutation, inferred columns, PDF output, reports, and collaboration are excluded.",
+    "description": "Manually define one safe arithmetic expression over 1\u201332 numeric variables and evaluate one exact bounded row against the current source digest and optimistic workspace revision. Pricing, arbitrary JavaScript, bulk takeoff mutation, inferred columns, PDF output, reports, and collaboration are excluded.",
     "engine": {
       "provider": "Local AEC workspace",
       "operation": "source-bound safe arithmetic column evaluation"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/aec-custom-columns-formulas-claim.test.js"
+      "kind": "source",
+      "reference": "src/core/domain-templates.js"
     }
   },
   {
@@ -3997,14 +4228,14 @@
     "owner": "industry-extensions",
     "delivery": "implemented",
     "title": "Source-bound spaces and regions",
-    "description": "Create one named space or region from 3–200 finite, bounded, non-degenerate PDF-point coordinates on a declared page against the current source digest and optimistic workspace revision. The record stores deterministic area and perimeter metrics. Page-box inspection, PDF mutation, inferred geometry, reporting, and collaboration are excluded.",
+    "description": "Create one named space or region from 3\u2013200 finite, bounded, non-degenerate PDF-point coordinates on a declared page against the current source digest and optimistic workspace revision. The record stores deterministic area and perimeter metrics. Page-box inspection, PDF mutation, inferred geometry, reporting, and collaboration are excluded.",
     "engine": {
       "provider": "Local AEC workspace",
       "operation": "source-bound bounded polygon record"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/aec-spaces-regions-claim.test.js"
+      "kind": "source",
+      "reference": "src/core/domain-templates.js"
     }
   },
   {
@@ -4019,8 +4250,8 @@
       "operation": "source-bound drawing-set record"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/aec-sets-drawing-log-claim.test.js"
+      "kind": "source",
+      "reference": "src/core/domain-templates.js"
     }
   },
   {
@@ -4035,8 +4266,8 @@
       "operation": "source-bound sheet metadata record"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/aec-sheet-metadata-tags-claim.test.js"
+      "kind": "source",
+      "reference": "src/core/domain-templates.js"
     }
   },
   {
@@ -4051,8 +4282,8 @@
       "operation": "source-bound revision overlay descriptor"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/aec-revision-overlay-claim.test.js"
+      "kind": "source",
+      "reference": "src/core/domain-templates.js"
     }
   },
   {
@@ -4067,8 +4298,8 @@
       "operation": "source-bound slip-sheet plan record"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/aec-batch-slip-sheet-claim.test.js"
+      "kind": "source",
+      "reference": "src/core/domain-templates.js"
     }
   },
   {
@@ -4077,14 +4308,14 @@
     "owner": "industry-extensions",
     "delivery": "implemented",
     "title": "Batch link",
-    "description": "Append 1–50 same-document direct /Dest /Fit links in one append-only revision for strict unsigned/passive sources. External, cross-file, named, and action links plus authoritative AEC semantics are excluded; bounded indirect stream-Length admission is engine compatibility evidence only, not a separate professional claim.",
+    "description": "Append 1\u201350 same-document direct /Dest /Fit links in one append-only revision for strict unsigned/passive sources. External, cross-file, named, and action links plus authoritative AEC semantics are excluded; bounded indirect stream-Length admission is engine compatibility evidence only, not a separate professional claim.",
     "engine": {
       "provider": "Local AEC workspace and PDFKit measure",
       "operation": "AEC measurement and markup professional path"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/professional-capability-delivery.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -4093,14 +4324,14 @@
     "owner": "industry-extensions",
     "delivery": "implemented",
     "title": "Source-bound measurement legend",
-    "description": "Generate deterministic JSON or CSV for 1–500 current-revision source-bound AEC measurement records, grouped by tool, style, kind, calibration, and unit. Output exposes label digests rather than raw labels and does not create markup symbols or mutate the PDF.",
+    "description": "Generate deterministic JSON or CSV for 1\u2013500 current-revision source-bound AEC measurement records, grouped by tool, style, kind, calibration, and unit. Output exposes label digests rather than raw labels and does not create markup symbols or mutate the PDF.",
     "engine": {
       "provider": "Local AEC workspace",
       "operation": "source-bound measurement legend export"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/aec-legends-claim.test.js"
+      "kind": "source",
+      "reference": "src/controllers/aec-workflow-controller.js"
     }
   },
   {
@@ -4115,8 +4346,8 @@
       "operation": "authenticated portable project transfer"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/aec-offline-projects-claim.test.js"
+      "kind": "source",
+      "reference": "src/controllers/domain-workspace-controller.js"
     }
   },
   {
@@ -4131,8 +4362,8 @@
       "operation": "source-bound local revision state machine"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/aec-revision-status-workflows-claim.test.js"
+      "kind": "source",
+      "reference": "src/core/domain-templates.js"
     }
   },
   {
@@ -4147,8 +4378,8 @@
       "operation": "source-bound local affine page coordinates"
     },
     "evidence": {
-      "kind": "test",
-      "reference": "tests/aec-geospatial-documents-claim.test.js"
+      "kind": "source",
+      "reference": "src/core/domain-templates.js"
     }
   },
   {
@@ -4162,7 +4393,10 @@
       "provider": "Local specialist inventory",
       "operation": "rich media inventory"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "rich-media.playback-controls",
@@ -4175,7 +4409,10 @@
       "provider": "Local specialist inventory",
       "operation": "rich media inventory"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "three-d.import",
@@ -4188,7 +4425,10 @@
       "provider": "Local specialist inventory",
       "operation": "3D content inventory"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "three-d.saved-views-sections",
@@ -4201,7 +4441,10 @@
       "provider": "Local specialist inventory",
       "operation": "3D content inventory"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "three-d.measure-comment",
@@ -4214,7 +4457,10 @@
       "provider": "Local specialist inventory",
       "operation": "3D content inventory"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "portfolios.create",
@@ -4227,7 +4473,10 @@
       "provider": "Local PDF portfolio builder",
       "operation": "PDF collections and embedded files"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "portfolios.view-extract",
@@ -4240,7 +4489,10 @@
       "provider": "Local PDF portfolio builder",
       "operation": "PDF collections and embedded files"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "portfolios.metadata-search",
@@ -4253,7 +4505,10 @@
       "provider": "Local PDF portfolio builder",
       "operation": "PDF collections and embedded files"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "portfolios.custom-layout",
@@ -4266,7 +4521,10 @@
       "provider": "Local PDF portfolio builder",
       "operation": "PDF collections and embedded files"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "document.article-threads",
@@ -4279,7 +4537,10 @@
       "provider": "Local incremental PDF writers",
       "operation": "document-level professional mutations"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "document.embedded-files",
@@ -4293,8 +4554,8 @@
       "operation": "source-bound read-only embedded-file inventory with digest and privacy validation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r11-embedded-files-source-bound-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -4308,7 +4569,10 @@
       "provider": "Local incremental PDF writers",
       "operation": "document-level professional mutations"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "geospatial.inspect-measure-markup",
@@ -4321,7 +4585,10 @@
       "provider": "Local geospatial calibration",
       "operation": "geospatial inspect/measure"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "integrations.cloud-storage",
@@ -4334,7 +4601,10 @@
       "provider": "Local integration connectors",
       "operation": "local-only connector configuration"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "integrations.office-addins",
@@ -4347,7 +4617,10 @@
       "provider": "Local integration connectors",
       "operation": "local-only connector configuration"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "integrations.browser-capture",
@@ -4360,7 +4633,10 @@
       "provider": "Local integration connectors",
       "operation": "local-only connector configuration"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "integrations.email",
@@ -4373,7 +4649,10 @@
       "provider": "Local integration connectors",
       "operation": "local-only connector configuration"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "integrations.cad-bim",
@@ -4386,7 +4665,10 @@
       "provider": "Local integration connectors",
       "operation": "local-only connector configuration"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "integrations.esign-providers",
@@ -4399,7 +4681,10 @@
       "provider": "Local integration connectors",
       "operation": "local-only connector configuration"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "integrations.sensitivity-labels",
@@ -4412,7 +4697,10 @@
       "provider": "Local integration connectors",
       "operation": "local-only connector configuration"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "integrations.events-webhooks",
@@ -4425,7 +4713,10 @@
       "provider": "Local integration connectors",
       "operation": "local-only connector configuration"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "admin.identity-roles",
@@ -4438,7 +4729,10 @@
       "provider": "Local admin policy store",
       "operation": "local administration controls"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "admin.audit-telemetry",
@@ -4452,8 +4746,8 @@
       "operation": "local CLI administration mutation audit log"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/admin-audit-cli-integration.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -4467,7 +4761,10 @@
       "provider": "Local admin policy store",
       "operation": "local administration controls"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "admin.deployment-packaging",
@@ -4480,7 +4777,10 @@
       "provider": "Local admin policy store",
       "operation": "local administration controls"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "admin.update-management",
@@ -4493,7 +4793,10 @@
       "provider": "Local admin policy store",
       "operation": "local administration controls"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "admin.licensing",
@@ -4506,7 +4809,10 @@
       "provider": "Local admin policy store",
       "operation": "local administration controls"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "admin.policy-configuration",
@@ -4520,8 +4826,8 @@
       "operation": "local CLI plugin package administration policy"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/admin-policy-cli-integration.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -4535,7 +4841,10 @@
       "provider": "Local admin policy store",
       "operation": "local administration controls"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "admin.usage-reporting",
@@ -4548,7 +4857,10 @@
       "provider": "Local admin policy store",
       "operation": "local administration controls"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "admin.plugin-allowlist",
@@ -4562,8 +4874,8 @@
       "operation": "local CLI publisher trust-root management"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/admin-plugin-allowlist-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -4578,8 +4890,8 @@
       "operation": "digest-addressed signed-package installation with durable registry validation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r01-plugin-package-state-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -4593,7 +4905,10 @@
       "provider": "Local plugin package host",
       "operation": "plugin install lifecycle and registry"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "platform.plugins.lifecycle",
@@ -4607,8 +4922,8 @@
       "operation": "terminate-before-commit activation and rollback transitions"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r01-plugin-package-state-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -4622,7 +4937,10 @@
       "provider": "Local plugin package host",
       "operation": "plugin install lifecycle and registry"
     },
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "platform.plugins.dependency-resolution",
@@ -4636,8 +4954,8 @@
       "operation": "exact digest-pinned dependency DAG validation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r01-plugin-package-state-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -4652,8 +4970,8 @@
       "operation": "install-time version validation and activation dependency pin enforcement"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/plugin-version-compatibility-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -4668,8 +4986,8 @@
       "operation": "canonical signed-package installation and activation verification"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/plugin-package-verification-claim.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -4680,7 +4998,10 @@
     "title": "Runtime sandbox",
     "description": "Enforce a production runtime sandbox for executable plugins.",
     "engine": null,
-    "evidence": null
+    "evidence": {
+      "kind": "none",
+      "reference": null
+    }
   },
   {
     "id": "platform.plugins.capability-conflicts",
@@ -4694,8 +5015,8 @@
       "operation": "authenticated local active-plugin capability conflict recommendation"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/plugin-active-capability-catalog-wiring.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -4710,8 +5031,8 @@
       "operation": "verified activation transition with explicit prior-version rollback"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r01-plugin-package-state-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   },
   {
@@ -4726,8 +5047,8 @@
       "operation": "durable integrity-checked installed and activation inventory"
     },
     "evidence": {
-      "kind": "integration-test",
-      "reference": "tests/r01-plugin-package-state-claims.test.js"
+      "kind": "none",
+      "reference": null
     }
   }
 ]

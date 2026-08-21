@@ -20,7 +20,7 @@ npm run release:validate
 npm run report
 ```
 
-`npm test` runs every `tests/**/*.test.js` file discovered under `tests/`.
+`npm test` runs the focused Node contracts under `tests/`.
 `npm run verify` is the project-level gate: tests, production-module
 reachability, required-file inventory, strict catalogs, and zero npm
 dependencies. On macOS, build the PDFKit helper before the full suite when
@@ -40,8 +40,8 @@ before treating any tree as a release candidate.
 
 ## Capability and catalog rules
 
-- Do not mark a capability `implemented` without runtime behavior, deterministic
-  fixtures, and a failing-closed error path for rejected input.
+- Do not mark a capability `implemented` without runtime behavior and a
+  failing-closed error path for rejected input.
 - Keep prototype coverage separate from professional delivery claims.
 - Update `catalog/` and schemas under `contracts/` together with host or CLI
   code.
@@ -53,8 +53,8 @@ before treating any tree as a release candidate.
 - Browser UI and client code live under `src/`.
 - Host, CLI, engines, and PDF writers live under `scripts/`.
 - Optional Swift packages live under `native/`.
-- Tests are Node `*.test.js` files under `tests/`, with shared helpers in
-  `tests/support/` and fixtures in `tests/fixtures/` where present.
+- Tests are small Node `*.test.js` contracts under `tests/`; use inline data
+  and direct production imports rather than support or fixture trees.
 - Source layout and module-size limits are enforced by tests. Prefer splitting
   modules over growing monoliths.
 
