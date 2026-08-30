@@ -5,16 +5,15 @@
   "description": "The local-first PDF workbench.",
   "type": "module",
   "scripts": {
-    "cli": "node scripts/platen-cli.mjs",
-    "dev": "node scripts/serve.mjs",
-    "report": "node scripts/capability-report.mjs",
-    "report:write": "node scripts/capability-report.mjs --write",
-    "verify:capability-proofs": "node scripts/verify-capability-proofs.mjs",
-    "check:professional-clones": "node scripts/check-professional-handler-clones.mjs",
+    "cli": "node src/cli/main.mjs",
+    "dev": "node src/host/main.mjs",
+    "report": "node tools/reporting/capability-report.mjs",
+    "verify:capability-proofs": "node tools/verify/verify-capability-proofs.mjs",
+    "check:professional-clones": "node tools/quality/check-professional-handler-clones.mjs",
     "native:build:pdfkit": "swift build -c release --package-path native/pdfkit-helper",
-    "release:validate": "node scripts/release/validate-current-release.mjs",
-    "test": "node scripts/run-tests.mjs",
-    "verify": "node scripts/verify.mjs"
+    "release:validate": "node tools/release/validate-current-release.mjs",
+    "test": "node tools/testing/run-tests.mjs",
+    "verify": "node tools/verify/verify.mjs"
   },
   "engines": {
     "node": ">=20"

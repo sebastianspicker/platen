@@ -1,0 +1,44 @@
+import { AccessibilityRemediationService } from '../application/review/accessibility-remediation-service.mjs';
+import { AccessibilityReviewService } from '../application/review/accessibility-review-service.mjs';
+import { AecArtifactService } from '../application/review/aec-artifact-service.mjs';
+import { PdfReviewMeasurementService } from '../application/pdf/pdf-review-measurement-service.mjs';
+import { PdfReviewAnnotationImportExportService } from '../application/pdf/pdf-review-annotation-import-export-service.mjs';
+import { PdfReviewSharedExchangeService } from '../application/pdf/pdf-review-shared-exchange-service.mjs';
+import { PdfReviewNotificationsService } from '../application/pdf/pdf-review-notifications-service.mjs';
+import { createPdfReviewSidecarService } from '../application/pdf/pdf-review-sidecar-service.mjs';
+import { ConversionService } from '../application/documents/conversion-service.mjs';
+import { CupsPrintToPdfService } from '../application/documents/cups-print-to-pdf-service.mjs';
+import { DomainFacade } from '../application/domains/domain-operation-registry.mjs';
+import { GhostscriptIccProfileProvider } from '../application/prepress/icc-profile-provider.mjs';
+import { ElectronicSigningIntentService } from '../application/security/electronic-signing-intent-service.mjs';
+import { ComparisonPackageService } from '../application/review/comparison-package-service.mjs';
+import { CommentsToOfficeService } from '../application/review/comments-to-office-service.mjs';
+import { PrepressService } from '../application/prepress/prepress-service.mjs';
+import { ProjectBundleService } from '../platform/storage/project-bundle-service.mjs';
+import { RasterMutationService } from '../application/documents/raster-mutation-service.mjs';
+import { RedactionPlanService } from '../application/review/redaction-plan-service.mjs';
+import { RedactionPlanReportService } from '../application/review/redaction-plan-report-service.mjs';
+import { PdfFastWebViewService } from '../application/pdf/pdf-fast-web-view-service.mjs';
+
+export function createWorkflowServices({ store, inputs, service, adapter, ghostscript, qpdf, libreOffice, imageMagick, raster, cupsfilter, registry, pdfkitAdapter, workspaceState, pdfkitInspections, ComparisonServiceClass }) {
+  const conversion = new ConversionService({ documents: store, inputs, poppler: adapter, ghostscript, libreOffice, imageMagick });
+  const domainFacade = new DomainFacade(workspaceState);
+  const aecArtifacts = new AecArtifactService({ store, pdfService: service, workspaceState, poppler: adapter, pdfkit: pdfkitAdapter });
+  const reviewMeasurements = new PdfReviewMeasurementService({ store, pdfService: service, workspaceState, poppler: adapter, pdfkit: pdfkitAdapter });
+  const reviewAnnotationImportExport = new PdfReviewAnnotationImportExportService({ store, workspaceState });
+  const reviewSharedExchange = new PdfReviewSharedExchangeService({ documents: store, workspace: workspaceState });
+  const commentsToOffice = new CommentsToOfficeService({ documents: store, workspace: workspaceState });
+  const reviewNotifications = new PdfReviewNotificationsService({ documents: store, workspace: workspaceState });
+  const reviewSidecar = createPdfReviewSidecarService({ documents: store, workspace: workspaceState });
+  const projectBundles = new ProjectBundleService(store, workspaceState, { validateDocument: (documentId, options) => service.inspect(documentId, options) });
+  const rasterMutations = new RasterMutationService({ store, poppler: adapter, imageMagick, raster });
+  const redactionPlans = new RedactionPlanService({ documentStore: store, workspaceStateStore: workspaceState, poppler: adapter, rasterMutations });
+  const redactionPlanReports = new RedactionPlanReportService({ documentStore: store, workspaceStateStore: workspaceState });
+  const comparisons = new ComparisonServiceClass({ store, pdfService: service, workspaceState });
+  const comparisonPackages = new ComparisonPackageService({ store, comparison: comparisons });
+  const prepress = new PrepressService({ store, pdfService: service, poppler: adapter, ghostscript, imageMagick, iccProfileProvider: new GhostscriptIccProfileProvider({ registry }) });
+  const accessibilityReviews = new AccessibilityReviewService({ store, pdfService: service, pdfkitInspectionService: pdfkitInspections });
+  const accessibilityRemediations = new AccessibilityRemediationService({ documentStore: store, workspaceStateStore: workspaceState, reviewProvider: accessibilityReviews });
+  const electronicSigningIntent = new ElectronicSigningIntentService({ store, workspaceState });
+  return { conversion, cupsPrintToPdf: new CupsPrintToPdfService({ inputs, documents: store, poppler: adapter, cupsfilter }), domainFacade, aecArtifacts, reviewMeasurements, reviewAnnotationImportExport, reviewSharedExchange, commentsToOffice, reviewNotifications, reviewSidecar, projectBundles, rasterMutations, redactionPlans, redactionPlanReports, comparisons, comparisonPackages, prepress, accessibilityReviews, accessibilityRemediations, electronicSigningIntent, fastWebView: new PdfFastWebViewService({ store, qpdf }) };
+}

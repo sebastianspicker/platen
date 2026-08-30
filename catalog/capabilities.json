@@ -108,27 +108,11 @@
     "familyId": "plugin-platform",
     "owner": "plugin-platform",
     "delivery": "implemented",
-    "title": "Plugin catalog",
-    "description": "List capability metadata for active signed executable local plugin packages without executing plugin code.",
+    "title": "Signed extension metadata catalog",
+    "description": "List capability metadata for selected signed local extension records. Packages contain canonical signed JSON metadata only, with no runtime, payload files, dependencies, or permissions.",
     "engine": {
       "provider": "Local signed plugin package store",
-      "operation": "active executable package capability catalog"
-    },
-    "evidence": {
-      "kind": "none",
-      "reference": null
-    }
-  },
-  {
-    "id": "platform.plugins.sandbox-probe",
-    "familyId": "plugin-platform",
-    "owner": "plugin-platform",
-    "delivery": "implemented",
-    "title": "Local sandbox diagnostic",
-    "description": "Report a cached blocked status for bounded local sandbox canaries, including unavailable or incomplete evidence, without loading plugin packages or claiming runtime isolation.",
-    "engine": {
-      "provider": "Local macOS behavior and Node permission probes",
-      "operation": "blocked host-session sandbox diagnostic"
+      "operation": "selected extension metadata catalog"
     },
     "evidence": {
       "kind": "none",
@@ -481,7 +465,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/platen-cli.mjs"
+      "reference": "src/cli/main.mjs"
     }
   },
   {
@@ -497,7 +481,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/platen-cli.mjs"
+      "reference": "src/cli/main.mjs"
     }
   },
   {
@@ -513,7 +497,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/platen-cli.mjs"
+      "reference": "src/cli/main.mjs"
     }
   },
   {
@@ -545,7 +529,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/platen-cli.mjs"
+      "reference": "src/cli/main.mjs"
     }
   },
   {
@@ -561,7 +545,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/platen-cli.mjs"
+      "reference": "src/cli/main.mjs"
     }
   },
   {
@@ -593,7 +577,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/platen-cli.mjs"
+      "reference": "src/cli/main.mjs"
     }
   },
   {
@@ -657,7 +641,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/platen-cli.mjs"
+      "reference": "src/cli/main.mjs"
     }
   },
   {
@@ -673,7 +657,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/platen-cli.mjs"
+      "reference": "src/cli/main.mjs"
     }
   },
   {
@@ -689,7 +673,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/platen-cli.mjs"
+      "reference": "src/cli/main.mjs"
     }
   },
   {
@@ -721,7 +705,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/platen-cli.mjs"
+      "reference": "src/cli/main.mjs"
     }
   },
   {
@@ -814,7 +798,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/professional-content-editing-delivery.mjs"
+      "reference": "src/host/application/review/professional-content-editing-delivery.mjs"
     }
   },
   {
@@ -830,7 +814,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/local-application.mjs"
+      "reference": "src/host/bootstrap/local-application.mjs"
     }
   },
   {
@@ -862,7 +846,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/ui/editor-inspector/pdfkit-targeted-sections.js"
+      "reference": "src/browser/ui/editor-inspector/pdfkit-targeted-sections.js"
     }
   },
   {
@@ -910,7 +894,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/cli/parser-page-watermark.mjs"
+      "reference": "src/cli/parser-page-watermark.mjs"
     }
   },
   {
@@ -926,7 +910,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/page-background-routes.mjs"
+      "reference": "src/host/transport/http/routes/page-background-routes.mjs"
     }
   },
   {
@@ -942,7 +926,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/bates-numbering-routes.mjs"
+      "reference": "src/host/transport/http/routes/bates-numbering-routes.mjs"
     }
   },
   {
@@ -958,7 +942,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/pdfkit-route-handlers.mjs"
+      "reference": "src/host/transport/http/routes/pdfkit-route-handlers.mjs"
     }
   },
   {
@@ -974,7 +958,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/incremental-named-destination-routes.mjs"
+      "reference": "src/host/transport/http/routes/incremental-named-destination-routes.mjs"
     }
   },
   {
@@ -990,7 +974,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/attachment-removal-routes.mjs"
+      "reference": "src/host/transport/http/routes/attachment-removal-routes.mjs"
     }
   },
   {
@@ -1054,7 +1038,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/local-application.mjs"
+      "reference": "src/host/bootstrap/local-application.mjs"
     }
   },
   {
@@ -1310,7 +1294,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/cli/parser-professional.mjs"
+      "reference": "src/cli/parser-professional.mjs"
     }
   },
   {
@@ -1582,7 +1566,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/annotation-flatten-routes.mjs"
+      "reference": "src/host/transport/http/routes/annotation-flatten-routes.mjs"
     }
   },
   {
@@ -1646,7 +1630,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/acroform-fill-validation-routes.mjs"
+      "reference": "src/host/transport/http/routes/acroform-fill-validation-routes.mjs"
     }
   },
   {
@@ -1694,7 +1678,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/acroform-fill-validation-routes.mjs"
+      "reference": "src/host/transport/http/routes/acroform-fill-validation-routes.mjs"
     }
   },
   {
@@ -1774,7 +1758,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/acroform-data-export-routes.mjs"
+      "reference": "src/host/transport/http/routes/acroform-data-export-routes.mjs"
     }
   },
   {
@@ -1822,7 +1806,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/acroform-tab-order-tooltip-routes.mjs"
+      "reference": "src/host/transport/http/routes/acroform-tab-order-tooltip-routes.mjs"
     }
   },
   {
@@ -1838,7 +1822,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/acroform-routes.mjs"
+      "reference": "src/host/transport/http/routes/acroform-routes.mjs"
     }
   },
   {
@@ -1902,7 +1886,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/electronic-signing-intent-service.mjs"
+      "reference": "src/host/application/security/electronic-signing-intent-service.mjs"
     }
   },
   {
@@ -1934,7 +1918,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/document-service-route-read.mjs"
+      "reference": "src/host/transport/http/routes/document-service-route-read.mjs"
     }
   },
   {
@@ -2507,7 +2491,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/workflow-redaction-plan-routes.mjs"
+      "reference": "src/host/transport/http/routes/workflow-redaction-plan-routes.mjs"
     }
   },
   {
@@ -2539,7 +2523,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/pdf-sensitive-pattern-service.mjs"
+      "reference": "src/host/application/pdf/pdf-sensitive-pattern-service.mjs"
     }
   },
   {
@@ -2587,7 +2571,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/full-page-redaction-routes.mjs"
+      "reference": "src/host/transport/http/routes/full-page-redaction-routes.mjs"
     }
   },
   {
@@ -2619,7 +2603,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/cli/commands/hidden-data-sanitization.mjs"
+      "reference": "src/cli/commands/hidden-data-sanitization.mjs"
     }
   },
   {
@@ -2651,7 +2635,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/pdfkit-route-handlers.mjs"
+      "reference": "src/host/transport/http/routes/pdfkit-route-handlers.mjs"
     }
   },
   {
@@ -2683,7 +2667,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/comparison-algorithms.mjs"
+      "reference": "src/host/application/review/comparison-algorithms.mjs"
     }
   },
   {
@@ -2699,7 +2683,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/adapters/poppler.mjs"
+      "reference": "src/host/platform/adapters/poppler.mjs"
     }
   },
   {
@@ -2715,7 +2699,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/adapters/poppler.mjs"
+      "reference": "src/host/platform/adapters/poppler.mjs"
     }
   },
   {
@@ -2795,7 +2779,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/routes/comparison-package-routes.mjs"
+      "reference": "src/host/transport/http/routes/comparison-package-routes.mjs"
     }
   },
   {
@@ -2811,7 +2795,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/accessibility-review-report-validation.mjs"
+      "reference": "src/host/application/review/accessibility-review-report-validation.mjs"
     }
   },
   {
@@ -2987,7 +2971,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/cli/commands/accessibility-metadata.mjs"
+      "reference": "src/cli/commands/accessibility-metadata.mjs"
     }
   },
   {
@@ -3163,7 +3147,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/preflight-rules.mjs"
+      "reference": "src/host/application/prepress/preflight-rules.mjs"
     }
   },
   {
@@ -3179,7 +3163,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/host/preflight-rules.mjs"
+      "reference": "src/host/application/prepress/preflight-rules.mjs"
     }
   },
   {
@@ -3819,7 +3803,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "scripts/cli/commands/automation-processing-report.mjs"
+      "reference": "src/cli/commands/automation-processing-report.mjs"
     }
   },
   {
@@ -4123,7 +4107,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/core/domain-templates.js"
+      "reference": "src/browser/core/domain-templates.js"
     }
   },
   {
@@ -4139,7 +4123,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/core/domain-templates.js"
+      "reference": "src/browser/core/domain-templates.js"
     }
   },
   {
@@ -4155,7 +4139,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/controllers/aec-workflow/calibration-operations.js"
+      "reference": "src/browser/controllers/aec-workflow/calibration-operations.js"
     }
   },
   {
@@ -4171,7 +4155,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/core/domain-templates.js"
+      "reference": "src/browser/core/domain-templates.js"
     }
   },
   {
@@ -4187,7 +4171,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/core/domain-templates.js"
+      "reference": "src/browser/core/domain-templates.js"
     }
   },
   {
@@ -4203,7 +4187,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/core/domain-templates.js"
+      "reference": "src/browser/core/domain-templates.js"
     }
   },
   {
@@ -4219,7 +4203,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/core/domain-templates.js"
+      "reference": "src/browser/core/domain-templates.js"
     }
   },
   {
@@ -4235,7 +4219,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/core/domain-templates.js"
+      "reference": "src/browser/core/domain-templates.js"
     }
   },
   {
@@ -4251,7 +4235,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/core/domain-templates.js"
+      "reference": "src/browser/core/domain-templates.js"
     }
   },
   {
@@ -4267,7 +4251,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/core/domain-templates.js"
+      "reference": "src/browser/core/domain-templates.js"
     }
   },
   {
@@ -4283,7 +4267,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/core/domain-templates.js"
+      "reference": "src/browser/core/domain-templates.js"
     }
   },
   {
@@ -4299,7 +4283,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/core/domain-templates.js"
+      "reference": "src/browser/core/domain-templates.js"
     }
   },
   {
@@ -4331,7 +4315,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/controllers/aec-workflow-controller.js"
+      "reference": "src/browser/controllers/aec-workflow-controller.js"
     }
   },
   {
@@ -4347,7 +4331,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/controllers/domain-workspace-controller.js"
+      "reference": "src/browser/controllers/domain-workspace-controller.js"
     }
   },
   {
@@ -4363,7 +4347,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/core/domain-templates.js"
+      "reference": "src/browser/core/domain-templates.js"
     }
   },
   {
@@ -4379,7 +4363,7 @@
     },
     "evidence": {
       "kind": "source",
-      "reference": "src/core/domain-templates.js"
+      "reference": "src/browser/core/domain-templates.js"
     }
   },
   {
@@ -4740,7 +4724,7 @@
     "owner": "workflow-services",
     "delivery": "implemented",
     "title": "Local administration mutation audit log",
-    "description": "List up to 100 recent immutable records from a bounded OS-local hash-chain log of successful `admin.policy-configuration set` and `admin.plugin-package install`, `activate`, or `rollback` mutations under one explicit private policy root.",
+    "description": "List up to 100 recent immutable records from a bounded OS-local hash-chain log of successful `admin.policy-configuration set` and `admin.plugin-package install`, `select`, or `rollback` mutations under one explicit private policy root.",
     "engine": {
       "provider": "AdminAuditAuthority",
       "operation": "local CLI administration mutation audit log"
@@ -4820,7 +4804,7 @@
     "owner": "workflow-services",
     "delivery": "implemented",
     "title": "Local plugin package administration policy",
-    "description": "Configure one OS-local, explicit-private-root boolean that permits or denies plugin package install, activate, and rollback through the dedicated CLI. Plugin package listing remains read-only.",
+    "description": "Configure one OS-local, explicit-private-root boolean that permits or denies plugin package install, select, and rollback through the dedicated CLI. Plugin package listing remains read-only.",
     "engine": {
       "provider": "AdminPolicyAuthority",
       "operation": "local CLI plugin package administration policy"
@@ -4883,27 +4867,11 @@
     "familyId": "plugin-platform",
     "owner": "plugin-platform",
     "delivery": "implemented",
-    "title": "Install signed local plugin packages",
-    "description": "Install canonical bounded local plugin package bytes only after exact manifest, file-hash, publisher-scope, Ed25519 signature, and durable-content validation. Network marketplaces, remote registry discovery, and automatic dependency fetching are excluded.",
+    "title": "Install signed local extension metadata",
+    "description": "Install canonical bounded local signed JSON metadata after exact metadata-schema, publisher-scope, Ed25519 signature, and durable-record validation. Network marketplaces, remote registry discovery, payload files, runtime declarations, permissions, and dependencies are rejected.",
     "engine": {
       "provider": "Local trusted-publisher authority and plugin package store",
-      "operation": "digest-addressed signed-package installation with durable registry validation"
-    },
-    "evidence": {
-      "kind": "none",
-      "reference": null
-    }
-  },
-  {
-    "id": "platform.plugins.rpc",
-    "familyId": "plugin-platform",
-    "owner": "plugin-platform",
-    "delivery": "planned",
-    "title": "Plugin RPC",
-    "description": "Route versioned, permission-checked plugin RPC requests.",
-    "engine": {
-      "provider": "Local plugin package host",
-      "operation": "plugin install lifecycle and registry"
+      "operation": "digest-addressed signed-metadata installation with durable registry validation"
     },
     "evidence": {
       "kind": "none",
@@ -4915,43 +4883,11 @@
     "familyId": "plugin-platform",
     "owner": "plugin-platform",
     "delivery": "implemented",
-    "title": "Local plugin activation lifecycle",
-    "description": "Activate a verified local plugin version and terminate any registered prior runtime authority before the durable transition commits. Explicit rollback is supported; hot reload, distributed lifecycle control, and broad disablement or cleanup automation are excluded.",
+    "title": "Local extension metadata selection",
+    "description": "Select a verified local extension metadata version for catalog visibility and retain its previous selection for explicit rollback. This does not launch, load, dispatch, or grant authority to an extension.",
     "engine": {
-      "provider": "Local plugin package store and runtime authority registry",
-      "operation": "terminate-before-commit activation and rollback transitions"
-    },
-    "evidence": {
-      "kind": "none",
-      "reference": null
-    }
-  },
-  {
-    "id": "platform.plugins.permissions",
-    "familyId": "plugin-platform",
-    "owner": "plugin-platform",
-    "delivery": "planned",
-    "title": "Plugin permissions",
-    "description": "Request, grant, deny, scope, and revoke plugin permissions.",
-    "engine": {
-      "provider": "Local plugin package host",
-      "operation": "plugin install lifecycle and registry"
-    },
-    "evidence": {
-      "kind": "none",
-      "reference": null
-    }
-  },
-  {
-    "id": "platform.plugins.dependency-resolution",
-    "familyId": "plugin-platform",
-    "owner": "plugin-platform",
-    "delivery": "implemented",
-    "title": "Pinned local plugin dependency resolution",
-    "description": "Resolve an exact signed local dependency DAG by plugin ID, version, and package digest, rejecting missing, mismatched, or cyclic graphs. Remote fetching, semver range solving, and dependency execution are excluded.",
-    "engine": {
-      "provider": "Local signed plugin package store",
-      "operation": "exact digest-pinned dependency DAG validation"
+      "provider": "Local signed extension metadata store",
+      "operation": "durable selected and prior metadata selection"
     },
     "evidence": {
       "kind": "none",
@@ -4964,10 +4900,10 @@
     "owner": "plugin-platform",
     "delivery": "implemented",
     "title": "Version compatibility",
-    "description": "Validate signed local plugin packages against supported package, manifest, protocol, and executable runtime versions during installation, then require exact pinned dependency identities, versions, and digests before activation.",
+    "description": "Validate signed local extension metadata against the supported package and metadata-manifest versions during installation. Protocol versions and dependency pins are not part of the metadata catalog.",
     "engine": {
       "provider": "Local signed plugin package store",
-      "operation": "install-time version validation and activation dependency pin enforcement"
+      "operation": "install-time metadata version validation"
     },
     "evidence": {
       "kind": "none",
@@ -4980,24 +4916,11 @@
     "owner": "plugin-platform",
     "delivery": "implemented",
     "title": "Install-time package verification",
-    "description": "Verify canonical package bytes, exact manifests and files, trusted-publisher scope, Ed25519 signatures, and installed content integrity during local package installation and activation.",
+    "description": "Verify canonical metadata bytes, exact metadata manifests, trusted-publisher scope, Ed25519 signatures, and durable metadata-record integrity during local installation and selection.",
     "engine": {
       "provider": "Local trusted-publisher authority and package store",
-      "operation": "canonical signed-package installation and activation verification"
+      "operation": "canonical signed-metadata installation and selection verification"
     },
-    "evidence": {
-      "kind": "none",
-      "reference": null
-    }
-  },
-  {
-    "id": "platform.plugins.runtime-sandbox",
-    "familyId": "plugin-platform",
-    "owner": "plugin-platform",
-    "delivery": "planned",
-    "title": "Runtime sandbox",
-    "description": "Enforce a production runtime sandbox for executable plugins.",
-    "engine": null,
     "evidence": {
       "kind": "none",
       "reference": null
@@ -5008,11 +4931,11 @@
     "familyId": "plugin-platform",
     "owner": "plugin-platform",
     "delivery": "implemented",
-    "title": "Active executable-plugin capability conflicts",
-    "description": "Report duplicate capability declarations from a bounded collection snapshot of locally active signed executable plugin packages and recommend the lexicographically first provider ID; no runtime provider choice is enforced.",
+    "title": "Duplicate metadata capability declarations",
+    "description": "Report duplicate capability declarations from a bounded collection snapshot of locally selected signed metadata packages. The catalog reports every matching package ID and makes no runtime choice.",
     "engine": {
-      "provider": "ActivePluginCapabilityCatalog",
-      "operation": "authenticated local active-plugin capability conflict recommendation"
+      "provider": "SelectedExtensionMetadataCatalog",
+      "operation": "authenticated local selected metadata-package duplicate declaration report"
     },
     "evidence": {
       "kind": "none",
@@ -5025,10 +4948,10 @@
     "owner": "plugin-platform",
     "delivery": "implemented",
     "title": "Verified local plugin upgrade and rollback",
-    "description": "Move activation monotonically to a newer verified local package and explicitly roll back to the recorded prior verified version, terminating registered runtime authority before commit. Arbitrary downgrade, automatic recovery, and remote update delivery are excluded.",
+    "description": "Move the selected metadata record monotonically to a newer verified local metadata package and explicitly roll back to the recorded prior verified version. Package code remains disabled; arbitrary downgrade, automatic recovery, and remote update delivery are excluded.",
     "engine": {
-      "provider": "Local plugin package store and runtime authority registry",
-      "operation": "verified activation transition with explicit prior-version rollback"
+      "provider": "Local policy-gated plugin package store",
+      "operation": "verified metadata-package selection with explicit prior-version rollback"
     },
     "evidence": {
       "kind": "none",
@@ -5041,10 +4964,10 @@
     "owner": "plugin-platform",
     "delivery": "implemented",
     "title": "Durable local plugin registry",
-    "description": "Persist and reopen integrity-checked local installed, active, and previous plugin version state while exposing privacy-minimal summaries without package paths, manifests, or source. Remote discovery and marketplace catalog claims are excluded.",
+    "description": "Persist and reopen integrity-checked local installed, selected, and prior selected plugin version state while exposing privacy-minimal summaries without package paths, manifests, or source. Remote discovery and marketplace catalog claims are excluded.",
     "engine": {
       "provider": "Local plugin package store",
-      "operation": "durable integrity-checked installed and activation inventory"
+      "operation": "durable integrity-checked installed and selected-version inventory"
     },
     "evidence": {
       "kind": "none",

@@ -1,0 +1,49 @@
+// Public wire identifiers shared by more than one application boundary.
+//
+// Keep these values neutral: browser, CLI, HTTP, application, and platform
+// adapters may import them, but none of those areas owns their wire spelling.
+export const ACCESSIBILITY_REMEDIATION_MEDIA_TYPE = 'application/vnd.platen.accessibility-proposal+json';
+export const AUTOMATION_JS_PROFILE = 'local-automation-declarative-recipes-v1';
+export const CMYK_CONVERSION_PROFILE = 'ghostscript-default-cmyk';
+export const COMPARISON_PACKAGE_MEDIA_TYPE = 'application/vnd.platen.comparison-package+zip';
+export const COMPARISON_PACKAGE_PROFILE = 'local-comparison-package-v1';
+export const ELECTRONIC_SIGNING_INTENT_PROFILE = 'local-electronic-signing-intent-v1';
+export const INCREMENTAL_BATCH_LINK_PROFILE = 'local-aec-batch-link-v1';
+export const OOXML_EXPORT_PROFILE = 'local-pdf-ooxml-export-v1';
+export const OOXML_EXCEL_MEDIA_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+export const OOXML_POWERPOINT_MEDIA_TYPE = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+export const OOXML_WORD_MEDIA_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+export const OUTPUT_INTENT_PROFILE = 'local-ghostscript-default-cmyk-output-intent-v1';
+export const PDF_ACROFORM_CHECKBOX_PROFILE = 'local-pdf-acroform-checkbox-v1';
+export const PDF_ACCESSIBILITY_FORM_SEMANTICS_PROFILE = 'local-accessibility-form-semantics-v1';
+export const PDF_ACCESSIBILITY_LINKS_BOOKMARKS_PROFILE = 'local-classic-incremental-links-bookmarks-v1';
+export const PDF_ACCESSIBILITY_TABLE_SEMANTICS_PROFILE = 'local-accessibility-table-semantics-v1';
+export const PDF_ACROFORM_CHOICE_PROFILE = 'local-pdf-acroform-choice-v1';
+export const PDF_ACROFORM_DATA_EXPORT_KIND = 'pdf-acroform-data-export';
+export const PDF_ACROFORM_DATA_EXPORT_PROFILE = 'local-acroform-data-export-v1';
+export const PDF_ACROFORM_FILL_SAVE_PROFILE = 'local-acroform-fill-save-v1';
+export const PDF_ACROFORM_RADIO_PROFILE = 'local-pdf-acroform-radio-v1';
+export const PDF_ACROFORM_SIGNATURE_FIELD_PROFILE = 'local-pdf-acroform-signature-field-v1';
+export const PDF_ACROFORM_TAB_ORDER_TOOLTIP_PROFILE = 'local-pdf-acroform-tab-order-tooltip-v1';
+export const PDF_ACROFORM_TEXT_FIELD_PROFILE = 'local-pdf-acroform-text-field-v1';
+export const PDF_ACROFORM_VALIDATION_PROFILE = 'local-acroform-validation-v1';
+export const PDF_ADVANCED_SEARCH_PROFILE = 'local-pdf-advanced-search-v1';
+export const PDF_BATES_NUMBERING_PROFILE = 'local-pdf-bates-numbering-v1';
+export const PDF_FILE_AUDIO_ATTACHMENT_PROFILE = 'local-file-audio-attachment-v1';
+export const PDF_JPEG_IMAGE_PROFILE = 'local-pdf-jpeg-image-v1';
+export const PDF_JPEG_IMAGE_REPLACEMENT_PROFILE = 'local-pdf-jpeg-image-replacement-v1';
+export const PDF_HIDDEN_DATA_SANITIZER_PROFILE = 'local-pdf-hidden-data-sanitizer-v1';
+export const PDF_PAGE_LABELS_PROFILE = 'local-page-labels-v1';
+export const PDF_PAGE_WATERMARK_PROFILE = 'local-pdf-page-watermark-v1';
+export const PDF_REVIEW_ANNOTATION_IMPORT_EXPORT_PROFILE = 'local-review-annotation-import-export-v1';
+export const PDF_SPECIALIST_CONTENT_PROFILE = 'local-pdf-specialist-content-v1';
+export const PDF_TEXT_REFLOW_PROFILE = 'local-pdf-text-reflow-v1';
+export const PDFKIT_TEXT_FIELD_WIDGET_PROFILE = 'macos-pdfkit-acroform-text-field-widget-v1';
+export const PDFKIT_INSPECTION_PROFILE = 'macos-read-only-v1';
+export const PDFKIT_TOP_LEVEL_OUTLINE_SPLIT_PROFILE = 'macos-pdfkit-top-level-outline-split-v1';
+export const PORTABLE_PROJECT_BUNDLE_MEDIA_TYPE = 'application/vnd.platen.portable-project';
+export const PROJECT_BUNDLE_MEDIA_TYPE = 'application/vnd.platen.project+json';
+export const REVIEW_SIDECAR_INSPECTION_KIND = 'review-sidecar-inspection-v1';
+export const REVIEW_SIDECAR_STATUS_KIND = 'review-sidecar-status-v1';
+export const SCANNER_ACQUISITION_PROFILE = 'local-scan-acquire-v1';
+export const TAGGED_PDF_REMEDIATION_PROFILE = 'local-tagged-pdf-remediation-v1';

@@ -1,0 +1,47 @@
+import { randomBytes } from 'node:crypto';
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { DocumentStore } from '../platform/storage/document-store.mjs';
+import { InputAssetStore } from '../platform/storage/input-asset-store.mjs';
+import { createProcessLimiter } from '../platform/runtime/process-runner.mjs';
+import { WorkspaceStateStore } from '../platform/storage/workspace-state.mjs';
+import { validateOperationProvenance } from '../platform/storage/operation-provenance.mjs';
+import { createLocalApplicationAutomation } from './local-application-automation.mjs';
+import { PublisherTrustAuthority } from '../application/security/publisher-trust-authority.mjs';
+import { LocalAdminPolicyAuthority } from '../application/security/admin-policy-authority.mjs';
+import { LocalAdminAuditAuthority } from '../application/security/admin-audit-authority.mjs';
+import { PluginPackageStore } from '../application/plugins/plugin-package-store.mjs';
+import { PdfService } from '../application/pdf/pdf-service.mjs';
+import { ComparisonService } from '../application/review/comparison-service.mjs';
+import { createEngineRuntime } from './engine-runtime.mjs';
+import { createOptionalRuntime } from './optional-native-runtime.mjs';
+import { createDocumentServices } from './document-services.mjs';
+import { createWorkflowServices } from './workflow-review-services.mjs';
+import { createApplicationClose, createLocalApplicationHandler, createProfessionalCapabilities } from './application-lifecycle.mjs';
+import { createCliApplicationFacade } from './cli-application-facade.mjs';
+
+export async function createLocalApplication({ root, host = '127.0.0.1', port = 4173, token = randomBytes(32).toString('hex'), automationRoot = null, publisherTrustRoot = null, pluginPackageRoot = null, adminPolicyRoot = null, automationCapabilityAuthority = null, automationPrinterInventory = undefined, automationPrintAdapter = undefined, automationWebhookDestinationInventory = undefined, automationWebhookEventFactsResolver = undefined, automationWebhookDeliveryAdapter = undefined, automationPreflightEngine = undefined }, { PdfServiceClass = PdfService, ComparisonServiceClass = ComparisonService } = {}) {
+  const sessionRoot = await mkdtemp(join(tmpdir(), 'platen-session-'));
+  const trustedPublisherAuthority = await new PublisherTrustAuthority({ root: publisherTrustRoot ?? join(sessionRoot, 'publisher-trust') }).initialize();
+  const trustedPublishers = trustedPublisherAuthority.store;
+  const adminPolicy = adminPolicyRoot ? await new LocalAdminPolicyAuthority({ root: adminPolicyRoot }).initialize() : null;
+  const adminAudit = adminPolicyRoot ? new LocalAdminAuditAuthority({ root: adminPolicyRoot }) : null;
+  const pluginPackages = new PluginPackageStore({ root: pluginPackageRoot ?? join(sessionRoot, 'plugin-packages'), trustedPublishers, administrationPolicy: adminPolicy });
+  await pluginPackages.initialize();
+  const store = await new DocumentStore({ root: sessionRoot }).initialize();
+  const inputs = await new InputAssetStore({ root: sessionRoot }).initialize();
+  const runner = createProcessLimiter({ concurrency: 4, maximumQueued: 24 });
+  if (typeof PdfServiceClass !== 'function' || typeof ComparisonServiceClass !== 'function') throw new TypeError('createLocalApplication requires the composition-root service classes.');
+  const engine = await createEngineRuntime({ root, sessionRoot, runner, store, inputs, PdfServiceClass });
+  const optional = await createOptionalRuntime({ root, sessionRoot, runner, store, service: engine.service, adapter: engine.adapter });
+  const documents = createDocumentServices({ store, inputs, adapter: engine.adapter, service: engine.service, registry: engine.registry });
+  const workspaceState = new WorkspaceStateStore(store);
+  const workflows = createWorkflowServices({ ...engine, ...optional, ...documents, store, inputs, workspaceState, pdfkitAdapter: optional.pdfkitAdapter, pdfkitInspections: optional.pdfkitInspections, ComparisonServiceClass });
+  const { professionalCapabilities } = createProfessionalCapabilities({ store, documents, workflows: { ...documents, ...workflows, pdfkitMutations: optional.pdfkitMutations } });
+  const handler = createLocalApplicationHandler({ root, host, port, token, store, engine, inputs, workflows, workspaceState, optional, documents, pluginPackages, professionalCapabilities });
+  const automation = await createLocalApplicationAutomation({ automationRoot, store, service: engine.service, fullPageRedaction: documents.fullPageRedaction, outputIntentService: Object.freeze({ assign: (documentId, request, options) => workflows.prepress.assignOutputIntent(documentId, request, options) }), automationCapabilityAuthority, automationPrinterInventory, automationPrintAdapter, automationWebhookDestinationInventory, automationWebhookEventFactsResolver, automationWebhookDeliveryAdapter, automationPreflightEngine });
+  const close = createApplicationClose(automation, store);
+  const cli = createCliApplicationFacade({ store, inputs, automation, close, validateOperationProvenance });
+  return Object.freeze({ handler, store, service: engine.service, certificateSignature: engine.certificateSignature, signingIdentityDirectory: engine.signingIdentityDirectory, hiddenDataSanitization: documents.hiddenDataSanitization, taggedRemediation: documents.taggedRemediation, jpegImageInsertion: documents.jpegImageBroker, inputs, ...workflows, workspaceState, ...documents, ...optional, pluginPackages, scannerDiscovery: optional.scannerDiscovery, scannerDiscoveryReady: Boolean(optional.scannerDiscovery), scannerAcquisition: optional.scannerAcquisition, scannerAcquisitionReady: Boolean(optional.scannerAcquisition), pdfkitHelper: optional.pdfkitHelper, signatureTrustHelper: engine.signatureTrustHelper, signingIdentityAdapter: engine.signingIdentityAdapter, signingIdentityHelper: engine.signingIdentityHelper, signingIdentityReady: Boolean(engine.signingIdentityAdapter), trustedPublishers: trustedPublisherAuthority, adminPolicy, adminAudit, token, host, port, automation, professionalCapabilities, cli, close });
+}
