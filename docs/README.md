@@ -1,31 +1,29 @@
 # Documentation
 
-Start with the root [README](../README.md) for installation, supported engines,
-and the public-alpha scope.
+Start with the root [README](../README.md) for requirements, local startup, and
+the alpha boundary.
 
-## Product and engineering
+## Architecture and maintenance
 
-- [Architecture](architecture.md) describes runtime boundaries, data flow, and
-  the disabled third-party plugin boundary.
-- [Capability coverage](capability-coverage.md) defines the evidence required
-  for an implemented capability and documents narrow alpha subsets.
-- [Feature-gap report](feature-gap-report.md) is generated from the capability
-  catalogs. Regenerate it with `npm run report:write`.
-- [Frontend](FRONTEND.md) records the browser application structure,
-  accessibility contract, and manual QA still required.
-- [Workbench operations](workbench-notes.md) summarizes source, artifact, and
-  cancellation behavior for maintainers.
+- [Architecture](architecture.md) describes the physical host layers, dependency
+  direction, external adapters, and side-effect boundaries.
+- [ADR 0001](decisions/0001-modular-monolith-contracts-bootstrap.md) records the
+  modular-monolith, neutral-contract, and bootstrap decision.
+- [ADR 0002](decisions/0002-bounded-runtime-registries.md) bounds the two
+  closed allowlisted dispatch registries used by existing UI and CLI contracts.
+- [Workbench operations](operations.md) summarizes immutable sources,
+  derived artifacts, local engines, and cancellation expectations.
+- [Maintenance checks](maintenance-checks.md) lists the routine local commands.
 
-## Maintenance and release
+## Product and release
 
-- [Maintenance checks](maintenance-checks.md) lists routine deterministic
-  repository checks.
-- [Release checks](release-checks.md) defines the local candidate gate and its
-  limits.
-- [Releasing](RELEASING.md) contains the publication procedure.
-- [Release notes](release-notes.md) points to the authoritative versioned notes
-  and changelog.
-- [Operations follow-up](operations-followup.md) lists manual and external work
-  that local verification cannot close.
+- [Capability coverage](capability-coverage.md) defines evidence and limits for
+  implemented and constrained capability records.
+- [Frontend](FRONTEND.md) covers browser structure, accessibility, and manual
+  QA still required.
+- [Releasing](RELEASING.md) defines the local candidate gate and the separate
+  publication authority boundary.
+- [Research sources](research-sources.md) records catalog provenance.
 
-Historical material under `archive/` is not current product documentation.
+Root-level [SECURITY](../SECURITY.md), [CONTRIBUTING](../CONTRIBUTING.md), and
+[CHANGELOG](../CHANGELOG.md) cover reporting, contribution, and version history.

@@ -47,11 +47,6 @@
       "tier": "exact-alpha"
     },
     {
-      "id": "platform.plugins.sandbox-probe",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
-    },
-    {
       "id": "viewer.thumbnails",
       "delivery": "implemented",
       "tier": "exact-alpha"
@@ -1542,22 +1537,7 @@
       "tier": "exact-alpha"
     },
     {
-      "id": "platform.plugins.rpc",
-      "delivery": "planned",
-      "tier": "blocked"
-    },
-    {
       "id": "platform.plugins.lifecycle",
-      "delivery": "implemented",
-      "tier": "exact-alpha"
-    },
-    {
-      "id": "platform.plugins.permissions",
-      "delivery": "planned",
-      "tier": "blocked"
-    },
-    {
-      "id": "platform.plugins.dependency-resolution",
       "delivery": "implemented",
       "tier": "exact-alpha"
     },
@@ -1570,11 +1550,6 @@
       "id": "platform.plugins.package-verification",
       "delivery": "implemented",
       "tier": "exact-alpha"
-    },
-    {
-      "id": "platform.plugins.runtime-sandbox",
-      "delivery": "planned",
-      "tier": "blocked"
     },
     {
       "id": "platform.plugins.capability-conflicts",

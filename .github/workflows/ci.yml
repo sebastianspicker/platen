@@ -54,5 +54,3 @@ jobs:
         run: npm run verify
       - name: Test PDFKit helper
         run: swift test --package-path native/pdfkit-helper
-      - name: Test plugin worker
-        run: swift test --package-path native/plugin-worker

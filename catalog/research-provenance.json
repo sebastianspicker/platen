@@ -197,7 +197,7 @@
       "familyId": "plugin-platform",
       "sourceIds": ["bluebeam-revu", "foxit-pdf-editor"],
       "evidenceGranularity": "feature-family",
-      "locator": "Bluebeam subscription features > Plugins and Apps; Foxit Compare Features > Platform & Integrations (extension-ecosystem evidence only, not runtime sandbox or RPC proof)"
+      "locator": "Bluebeam subscription features > Plugins and Apps; Foxit Compare Features > Platform & Integrations (extension-ecosystem evidence only)"
     }
   ]
 }

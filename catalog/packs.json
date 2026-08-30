@@ -5,5 +5,5 @@
   {"id":"quality-services","title":"Quality services","description":"Planned OCR, accessibility, standards, and print services.","maintainer":"quality-services"},
   {"id":"workflow-services","title":"Workflow services","description":"Planned collaboration, automation, and administration services.","maintainer":"workflow-services"},
   {"id":"industry-extensions","title":"Industry extensions","description":"Planned AI, AEC, and rich-content extensions.","maintainer":"extensions"},
-  {"id":"plugin-platform","title":"Plugin platform","description":"Plugin discovery and sandbox-boundary ownership.","maintainer":"platform"}
+  {"id":"plugin-platform","title":"Extension metadata catalog","description":"Signed local extension metadata discovery and administration.","maintainer":"platform"}
 ]

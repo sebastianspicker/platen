@@ -39,5 +39,5 @@ generated two-page fixture; the catalog and mobile states use no document.
 The harness reported no browser console errors, page errors, or document-level
 horizontal overflow. Exact provenance is recorded in `manifest.json`.
 
-Images are evidence of the visible surface only. The accompanying frontend
-brief and test output are the source of truth for behavior and accessibility.
+Images document the visible surface only. Runtime behavior and accessibility
+still require the checks described in [the frontend guide](../FRONTEND.md).

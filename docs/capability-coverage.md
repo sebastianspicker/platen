@@ -2,34 +2,33 @@
 
 ## Reading the map
 
-The authoritative source is `catalog/capabilities.json`, reconciled from
-`catalog/capability-proofs/proofs.json`. `implemented` is reserved for the 210
-proven claims with retained evidence. `planned` covers the 19 audited partial
-claims and 89 false/unavailable broad claims; it does not mean the broad
-professional capability runs. No capability IDs are unaudited.
+The professional-delivery source is `catalog/capabilities.json`; independent
+proof status is recorded separately in `catalog/capability-proofs/proofs.json`.
+An `implemented` delivery record describes the bounded product claim, but it is
+not synonymous with a completed proof audit. A `planned` record may still have
+narrower prototype coverage without providing the broad professional behavior.
 
-The professional catalog contains 318 normalized records. Run `npm run report`
-for the live inventory. At the current candidate:
+The professional catalog contains 313 normalized records. Run `npm run report`
+for a current summary. At this candidate:
 
-- 210 records are proven and implemented with named test evidence;
-- 108 records remain planned, including 19 audited executable/limited partials
-  and 89 false/unavailable broad claims;
-- prototype coverage is a separate ledger over the same IDs and does not widen
+- 208 professional-delivery records are implemented and 105 are planned;
+- the proof catalog contains 59 proven records, 1 audited executable/limited
+  partial, 0 false/unavailable broad claims, and 253 unaudited records;
+- prototype coverage is a separate record set over the same IDs and does not widen
   the professional claim. Planned records may have a narrower prototype
   subset, but that is not a professional implementation;
-- catalog `ai.*` entries remain policy-excluded from implementation, and no
-  capability ID is unaudited.
+- catalog `ai.*` entries remain policy-excluded from implementation.
 
-The generated [feature-gap report](feature-gap-report.md) lists every ID.
+The machine-readable catalogs list every capability and its exact status.
 
 ## Proven and bounded surfaces
 
 The table below records the checked-in surfaces and their bounded scope. Some
-rows are planned professional claims with narrower prototype coverage. The
-generated [feature-gap report](feature-gap-report.md) is the authoritative
-per-ID status and tier map. A row can also retain research context for a false
-or unavailable broad claim; those IDs are blocked (or policy-excluded for
-`ai.*`) and do not run.
+rows are planned professional claims with narrower prototype coverage.
+`catalog/capabilities.json`, `catalog/prototype-coverage.json`, and
+`catalog/capability-proofs/proofs.json` are the authoritative per-ID records.
+A row can also retain research context for an unavailable broad claim; those
+IDs are blocked, or policy-excluded for `ai.*`, and do not run.
 
 | Area | Capability IDs | Exact scope |
 | --- | --- | --- |
@@ -52,7 +51,7 @@ or unavailable broad claim; those IDs are blocked (or policy-excluded for
 | Human-authored image alt-text proposal | `accessibility.alt-text` | After a current source-bound accessibility review reports a bounded image candidate, select exactly one opaque locator and export 1–1000 UTF-16 units of trimmed NFC human-authored text in a canonical revision-bound proposal. Missing, stale, duplicate, unknown, malformed, control/format-bearing, unpaired-surrogate, or leading path-like input fails closed. No image bytes are disclosed; the text is not inferred, applied to PDF tags, or validated for meaning, and no PDF/UA claim is made. |
 | Open-password encryption | `security.open-password` | Optional local macOS PDFKit derived copy using fixed AES-128/R4/V4/AESV2, a printable-ASCII 12–16 character open password, and a distinct 12–32 character owner password. The open-password ceiling avoids a measured PDFKit owner-classification defect for lengths 17–31; this is not general encryption administration. |
 | Permission-control subset | `security.permission-controls` | Four measured, closed advisory presets: deny all optional operations, accessibility extraction only, printing only, or copying plus accessibility extraction. Exact native masks, reopened public flags, and raw `/P` values are validated. Arbitrary combinations, edit/comment/form/assembly presets, and enforcement against non-conforming readers remain unavailable. |
-| Plugin metadata and verification | `platform.plugins.catalog`, `platform.plugins.sandbox-probe`, `platform.plugins.package-verification`, `platform.plugins.version-compatibility` | Active signed executable-package capability metadata, a blocked cached local sandbox diagnostic, install-time canonical signature and retained-integrity verification, exact supported package/manifest/protocol/runtime validation, and activation-time dependency identity pin enforcement. The policy evaluator is advisory only, and none of these paths claims runtime isolation. |
+| Extension metadata and verification | `platform.plugins.catalog`, `platform.plugins.package-verification`, `platform.plugins.version-compatibility`, `admin.plugin-package` | Selected signed extension metadata records use canonical JSON and Ed25519 publisher trust with retained-record integrity verification. Install, selection, and rollback require the explicit local administration policy. Entrypoints, runtime declarations, payload files, permissions, and dependencies are rejected; no extension dispatcher or sandbox exists. |
 | Source-bound AEC records and portable projects | `aec.scale-calibration`, `aec.legends`, `aec.takeoff`, `aec.markups-list`, `aec.markup-toolsets`, `aec.custom-columns-formulas`, `aec.sheet-metadata-tags`, `aec.spaces-regions`, `aec.revision-status-workflows`, `aec.revision-overlay`, `aec.batch-slip-sheet`, `aec.geospatial-documents`, `aec.offline-projects` | Record one selected-page scale, export deterministic measurement legends, aggregate bounded quantity takeoffs, create or list bounded workspace markups, persist source-bound markup toolsets, retain descriptor-only revision overlays, create source-bound slip-sheet plans, manually define and evaluate one safe arithmetic custom column, manually record one page's sheet metadata, store one bounded polygon with deterministic area and perimeter, progress a local current-source revision through draft, issued, and superseded, or manually calibrate one local affine page and convert one point at the optimistic workspace revision. Source-bound markup toolsets, revision overlay descriptors, and slip-sheet plans do not create markups, render or align overlays, replace pages, carry forward markup data, mutate PDFs, or provide remote collaboration. A separate authenticated portable-project path transfers exact PDF bytes with an integrity-checked workspace snapshot, rebasing imports to a fresh local revision. Automatic metadata extraction, pricing, inferred columns, arbitrary JavaScript, GeoPDF or CRS interpretation, geodesy, map layers, network collaboration, synchronization, remote repositories, PDF mutation, inferred geometry, multi-viewport calibration, and dynamic markup symbols remain excluded. |
 
 The GUI additionally exposes narrower prototype behaviors for creation and
@@ -323,7 +322,7 @@ requires unchanged page count, text, boxes, and fixed all-page renders plus an
 unsigned output. Multiple annotations, other subtypes, appearance states,
 filters/resources/groups, actions, popups, widgets, rotated pages, and general
 annotation or form flattening remain unsupported.
-Four additional R04 claims use dedicated authenticated local workflows.
+Four additional review capabilities use dedicated authenticated local workflows.
 `review.file-audio-attachments` embeds one bounded local text, binary, or
 validated PCM WAV asset as an inert FileAttachment on one eligible passive PDF
 page, excluding Sound, RichMedia, autoplay, and general attachment authoring.
@@ -429,7 +428,7 @@ recovery/cracking/bypass, arbitrary decryption, secure erasure,
 legal-ownership proof, signature-safe rewriting, sanitization, redaction, and
 byte/object preservation remain unavailable. A strict local CLI adds manifested sequential batch OCR,
 stability-gated watch OCR, and named no-clobber prepress artifact operations;
-the prototype ledger records 24 sidecar and one proposal surfaces across the
+the prototype catalog records 24 sidecar surfaces and one proposal across the
 bounded workflows. A separate
 durable automation executable subset stages private digest-bound sources and
 persists an exact versioned allowlist/limits policy plus bounded jobs with
@@ -492,121 +491,6 @@ perimeter, without page-box inspection or PDF output. Revision status records
 permit only draft to issued to superseded and survive portable local project
 transfer. This remains a bounded AEC subset, not a multi-document drawing set,
 network collaboration system, or synchronized review system.
-
-## Requested advanced skeletons
-
-| Skeleton | Catalog records | Runnable subset records | Other records |
-| --- | ---: | ---: | ---: |
-| OCR | 14 | 6 | 8 |
-| Signing | 13 | 3 | 10 |
-| Redaction | 11 | 11 | 0 |
-| Accessibility remediation | 15 | 15 | 0 |
-| AI research map | 15 | 0 | 15 |
-| AEC | 18 | 15 | 3 |
-| Prepress | 26 | 13 | 13 |
-
-The OCR skeleton stays non-executable. Two records are exact-alpha, three are
-executable subsets, one is service-only, and eight are blocked. Table output is
-review-required, not authoritative recognition. The signing skeleton now has
-three exact-alpha records and ten blocked records. `sign.validate-certificate` retains the
-independent offline Poppler integrity/coverage subset, run with a job-private
-host-owned NSS directory and fixed `-nocert`/`-no-ocsp` arguments. It returns
-strict no-raw/no-path evidence for embedded-signature cryptographic integrity
-and full versus prior-revision coverage. Only after Poppler reports valid
-integrity, a second fixed pass streams each CMS through an exact pre-created
-FIFO inventory in a mode-`0500` private directory. Host readers retain at most
-1 MiB each and 8 MiB total, aborting on the first excess byte while FIFO
-backpressure prevents regular-file growth. Only a successful bounded receipt is
-promoted for descriptor/digest postflight. The excluded direct PDF strings are
-also descriptor-read as defense in depth. On macOS, an optional digest-pinned native
-Foundation/Security/CryptoKit helper accepts bounded DER or BER, verifies that
-exact detached CMS against the ranges, and then evaluates its certificate path
-with `SecPolicyCreateBasicX509` against the current Mac trust configuration at
-one host-current time; certificate fetching is disabled and verified.
-Unsupported subfilters, malformed CMS/BER, signature mismatches, and bounded-resource cases fail closed.
-Poppler's result remains explicitly engine-scoped; the combined conclusion is
-indeterminate unless every exact-CMS prerequisite completes, and the UI shows
-negative records first with an omitted-record count.
-This does not establish trusted-signer identity, PDF-signing key usage, signing-time validity, revocation,
-OCSP/CRL/LTV, trusted timestamps, DocMDP/certification permissions, legal
-effect, or signing. Unsandboxed native parsing remains a residual risk. The
-redaction skeleton likewise remains bounded: ten records are exact-alpha and
-one is an executable subset. The existing
-`verified-raster-burn-v2` path binds declared source text
-transiently to an unrotated target region or the entire selected page whose
-CropBox matches its MediaBox; opaque-black target pixels and exact non-target
-equality are verified; and output must be passive, unsigned, textless,
-attachment-free, and object-URL-free. It is destructive image-only output, not
-object-level sanitization. A separate source-bound plan bridge stores reviewed
-geometry as a `proposed-not-applied` sidecar: host-derived page geometry and
-normalized region text become source/page/geometry-bound per-process HMAC
-evidence, while plaintext text, excerpts, and the key are neither retained nor
-returned. Its application request contains source digest and workspace revision
-plus only plan/mark IDs and plan digest; a workspace read lease, strict
-current-schema check (including legacy-plan rejection), source/page recheck,
-and digest binding gate the transient handoff to `verified-raster-burn-v2`.
-The preview remains proposed-not-applied and geometry-only. Application creates
-a separate derived artifact, and neither the immutable source nor proposal
-changes. Rotated pages, CropBox/MediaBox differences,
-object-level removal, hidden-data/prior-revision cleanup, and signature
-preservation remain unsupported. Separately, one exact source-bound inert
-annotation can be removed only when the reopened ordered reachable annotation
-graph equals the source snapshot minus that target; unreachable bytes and
-broader hidden data are not claimed removed. The metadata-only subset removes
-document Info, custom Info, and catalog XMP from a separately verified fresh
-copy while rejecting unsupported document graphs; it is not broad hidden-data
-sanitization or secure erasure. The prepress skeleton also remains
-disabled while thirteen built-in subsets cover fixed profiles and reports, font
-and image checks, output preview, separations, ink coverage, simulated
-overprint, transparency flattening, exact-profile CMYK-targeted normalization,
-fixed OutputIntent assignment, passive bleed/crop marks, and fixed 2-up/4-up
-N-up. Derived PDFs are source/profile-digest-bound,
-reparsed, geometry/text checked, fully rendered, and promoted only with the
-validated output digest. Existing DeviceCMYK is not retargeted,
-Separation/DeviceN is retained, no OutputIntent is assigned, imposition printer
-marks fail closed, and production/PDF/X certification is not claimed.
-All seven templates still describe the complete future extension surface. AI
-remains research-only and is excluded from the local implementation roadmap.
-
-The accessibility-remediation skeleton likewise stays non-executable. Its
-ledger has thirteen exact-alpha records, two executable subsets, no sidecar,
-proposal, or service-only record. Its fixed built-in review, report
-export, bounded heading/list heuristics, Artifact-role inventory,
-ToUnicode/embedding evidence, and human-authored alt-text proposal are
-source-bound exact-alpha records; all remain bounded review or proposal
-surfaces. Auto-tagging and color-contrast remain executable subsets; tagged-PDF
-remediation and existing-structure reading-order repair are exact-alpha,
-source-bound retained-artifact workflows.
-A fail-closed fixed-profile veraPDF 1.30.1
-loader, parser, authenticated route, client, and GUI state now exist for PDF/A
-and PDF/UA, but no transitively pinned bundle or native conformance-corpus
-fixture is shipped; those professional claims therefore remain blocked. PDF/X
-still has no authoritative engine.
-
-Nine plugin-platform records now have host-only service implementation evidence:
-signed installation and verification, registry inventory, exact dependency and
-version checks, scoped permissions, framed RPC, one-shot lifecycle cleanup,
-and controlled rollback. Manifest v3 plus a concrete native supervisor adapter
-also bind an exact classic-script entry to a signed release policy, strict
-static/live macOS identity checks, private two-phase pipes, bounded output/RPC,
-activation quarantine, and process-group cleanup. The false broad claims remain
-blocked in the prototype ledger because no production-signed package can
-execute. The
-macOS Seatbelt behavior probe observes
-fixed network, write, sensitive-read, and process-fork canary denials on the current OS, but
-its allow-default experimental profile reports `osSandbox: false`; CPU and hard
-memory ceilings are also absent. The unsigned SwiftPM native pair is rejected,
-and the current host reports `hardMemoryQuota: false` because a meaningful
-`RLIMIT_AS` returns `EINVAL`; the concrete adapter closes that process before
-issuing grants or handles. `platform.plugins.runtime-sandbox` therefore remains
-blocked.
-
-The GUI now consumes a host-derived, one-shot-per-session diagnostic status via
-an authenticated same-origin POST. It visibly reports 0/5 production hard
-controls and lists best-effort canaries independently; even an 8/8 diagnostic
-result remains blocked and states that no plugin code ran. This is evidence for
-the existing sandbox-probe prototype only. The professional claim is planned
-and the prototype tier of `platform.plugins.runtime-sandbox` is blocked.
 
 ## Material missing areas
 

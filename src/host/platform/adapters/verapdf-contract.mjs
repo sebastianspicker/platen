@@ -1,0 +1,1 @@
+export const VERAPDF_SUPPORTED_VERSION = '1.30.1';
