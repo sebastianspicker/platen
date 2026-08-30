@@ -12,12 +12,12 @@ cancellation where the operation contract supports cleanup. Output publication
 does not overwrite an existing path.
 
 Optional engines are independent. Use `npm run cli -- engines` to inspect local
-availability. Missing engines must return an explicit unavailable result; they
-must not trigger downloads or a lower-assurance fallback presented as the
-requested operation.
+availability. Missing engines return an explicit unavailable result; they do
+not trigger downloads or a lower-assurance fallback presented as the requested
+operation.
 
-Third-party plugin installation and execution remain disabled. Plugin
-manifests and skeletons are planning and diagnostics surfaces only.
+Signed extension metadata can be administered locally, but it cannot contain
+code, a runtime, payload files, permissions, or dependencies.
 
 For trust boundaries and residual risks, see [SECURITY](../SECURITY.md). For the
 component graph and operation-specific validation boundaries, see

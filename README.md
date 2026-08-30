@@ -1,214 +1,136 @@
 # Platen
 
-The local-first PDF workbench.
+Platen is a local-first PDF workbench with a browser UI, a CLI, and a
+token-authenticated loopback host. It keeps source documents immutable and
+produces separately validated derived artifacts. Processing uses fixed local
+adapters and optional native helpers; it does not upload documents or download
+engines at runtime.
 
-The static demo source is in [`demo/`](demo/). Its GitHub Pages workflow is
-staged but has not been pushed or run, so
-`https://sebastianspicker.github.io/platen/` is an expected future URL, not a
-verified live demo. The demo uses sanitized fixture data and marks every
-command-capable action as simulated.
+`0.3.0-alpha.1` is a public-alpha candidate, not a published release. Interfaces,
+output contracts, and capability classifications can change. Use independent
+review before relying on any output in unattended or production work.
 
-Platen is a local-first PDF inspection and editing tool with a browser
-GUI, a CLI, and a token-authenticated loopback host. Sources stay immutable.
-Operations write separately validated outputs. Engines are fixed local adapters
-(Poppler, optional Tesseract, ImageMagick, Ghostscript, LibreOffice, qpdf, and an
-optional macOS PDFKit helper).
+## Scope and limits
 
-Version `0.3.0-alpha.1` is a public-alpha candidate. Interfaces, output
-contracts, capability classifications, and file formats may change. The project
-is not suitable for unattended or production processing without independent
-review.
+The workbench supports bounded local inspection, page operations, OCR,
+conversion, comparison, review, and source-bound mutation profiles. Exact
+availability depends on the capability record and installed local engines.
+The catalog separates proven behavior from constrained, planned, and unavailable
+work. It is not a claim of commercial-suite parity.
 
-## Current scope
-
-- Open, view, search, thumbnail, navigate, inspect properties/resources, and
-  download the original file.
-- Page composition: split, merge, extract, reorder, crop, rotate, insert,
-  replace, duplicate, reverse/interleave, and related page-tree operations where
-  the catalog records a proven or partial bounded surface.
-- Bounded OCR, raster conversion, snapshots, text export, comparison,
-  accessibility review, and prepress review subsets. False broad claims remain
-  unavailable.
-- Source-bound metadata, annotation, form, navigation, redaction, encryption,
-  and PDFKit mutation profiles with operation-specific validation.
-- A strict CLI with no-clobber output publication.
-- A machine-readable capability catalog under `catalog/` with schema-checked
-  claims and test references.
-
-The catalog currently records 210 proven, test-backed professional claims and 108 planned claims out of 318 normalized records. The audit also identifies 19 audited executable/limited partials and 89 false/unavailable broad claims; no capability IDs are unaudited.
-Prototype coverage is a separate, narrower ledger: 210 exact-alpha records, 18 narrower executable subsets alongside 0 sidecars, 0 proposals, 1 host-only service, 0 descriptors, 74 blockers, and 15 excluded AI functions. A planned record can have a narrower prototype subset, but that is not a professional implementation.
-See [capability coverage](docs/capability-coverage.md) and the
-generated [feature-gap report](docs/feature-gap-report.md).
-
-## Alpha limitations
-
-- This is not a full commercial PDF suite. Many operations admit only narrow,
-  test-backed PDF subsets.
-- Third-party plugin installation and execution are disabled. Skeletons under
-  `plugins/skeletons/` are non-executable planning contracts.
-- Catalog `ai.*` entries are excluded from implementation.
-- Browser PDF preview behavior varies by browser. Safe raster views omit PDF
-  links, forms, tags, selectable text, layers, and object structure.
-- Accessibility review is heuristic and does not establish PDF/UA or WCAG
-  conformance.
-- Prepress output is review evidence, not press certification.
-- Signature inspection does not establish legal identity, revocation, LTV, or
-  trust on another system.
-- Some macOS PDFKit operations rewrite documents and can change unsupported
-  structures or invalidate signatures.
-- CLI publication uses exclusive temporary files and hard links; use an
-  access-controlled output directory.
-
-Trust boundaries and residual risk are documented in [SECURITY.md](SECURITY.md).
+Signed local extension metadata install, selection, and rollback remain
+available only behind the explicit local admin policy. Each package is canonical
+signed JSON metadata only: it cannot contain code, a runtime, payload files,
+permissions, or dependencies. Browser-native PDF preview varies by
+browser. Accessibility and prepress results are review evidence, not standards
+certification. Signature inspection does not establish identity, revocation,
+long-term validation, or trust on another system. See
+[capability coverage](docs/capability-coverage.md) and
+[SECURITY.md](SECURITY.md) for the declared boundaries.
 
 ## Requirements
 
 Required:
 
 - Node.js 20 or newer
-- Poppler CLI tools: `pdfinfo`, `pdftotext`, `pdftocairo`, `pdffonts`,
-  `pdfimages`, `pdfdetach`, `pdfsig`, `pdfseparate`, `pdfunite`
+- Poppler command-line tools: `pdfinfo`, `pdftotext`, `pdftocairo`, `pdffonts`,
+  `pdfimages`, `pdfdetach`, `pdfsig`, `pdfseparate`, and `pdfunite`
 
-Optional (enable extra operations; missing tools surface explicit unavailability):
+Optional engines enable additional operations and report explicit unavailability
+when absent:
 
-- Tesseract (OCR)
-- ImageMagick (raster conversion)
-- Ghostscript (PostScript/EPS, rewrites, prepress review)
-- LibreOffice (Office/OpenDocument conversion)
-- qpdf (validated fast-web-view linearization)
-- Swift and Xcode on macOS (PDFKit helper)
+- Tesseract for OCR
+- ImageMagick for raster conversion
+- Ghostscript for PostScript/EPS, rewrites, and prepress review
+- LibreOffice for Office/OpenDocument conversion
+- qpdf for validated fast-web-view linearization
+- Swift and Xcode on macOS for the PDFKit helper
 
-There are no npm runtime or development dependencies.
+The project declares no npm runtime or development dependencies.
 
-## Install and run
+## Run locally
 
 ```sh
-# From the repository root
 npm run dev
 ```
 
-Open the printed loopback URL (default port 4173). The host binds to
-`127.0.0.1` only and uses a session token.
+Open the printed URL. The host binds to `127.0.0.1` and uses a per-process
+session token. To choose a port:
 
 ```sh
-# Alternate port
 PLATEN_PORT=4180 npm run dev
 ```
 
-### CLI
+Use the CLI through the same application graph:
 
 ```sh
 npm run cli -- --help
 npm run cli -- engines
 ```
 
-Outputs are published without overwriting existing paths. Choose a new target
-if a path already exists.
+CLI output publication does not overwrite an existing path.
 
-### Optional PDFKit helper (macOS)
+On macOS, build the optional PDFKit helper with:
 
 ```sh
 npm run native:build:pdfkit
 ```
 
-Restart the host after building. Without the helper, PDFKit-only operations
-report unavailable and leave other engines unaffected.
+Restart the host after building it. PDFKit-only operations report unavailable
+when the helper is absent; other local adapters remain independent.
 
 ## Repository layout
 
 ```text
 .
-├── catalog/           Machine-readable capabilities and research scope
-├── contracts/         JSON schemas for catalog and operation records
-├── docs/              Architecture, coverage, frontend, release, screenshots
-├── native/            Optional Swift packages (PDFKit helper, plugin worker)
-├── plugins/skeletons/ Non-executable advanced-capability planning manifests
-├── scripts/           Host, CLI, verification, and release tools
-├── src/               Browser application (controllers, UI, host client)
-├── styles/            CSS by surface
-├── tests/             Focused Node unit contracts
-├── archive/           Historical materials not required to build or run
+├── catalog/       Machine-readable capability and research records
+├── schemas/       JSON Schemas for checked-in catalog data
+├── docs/          Architecture, decisions, capability, frontend, release, research
+├── native/        Optional Swift helper packages
+├── src/browser/   Browser API clients, bootstrap, controllers, UI, and styles
+├── src/cli/       CLI parser, commands, facade use, and output publication
+├── src/contracts/ Neutral runtime contracts and validation
+├── src/host/      Layered local host: root, bootstrap, transport, application, platform
+├── tests/         Contract and integration tests
+├── tools/         Test, verification, reporting, quality, and release utilities
 ├── index.html
-├── package.json
-├── README.md
-├── SECURITY.md
-├── CONTRIBUTING.md
-├── CHANGELOG.md
-├── RELEASE_STATUS.md
-└── LICENSE
+└── package.json
 ```
 
 ## Development and verification
 
 ```sh
-npm test                 # full Node test suite
-npm run verify           # tests, reachability, catalogs, zero dependencies
+npm test                 # discover and run tests under tests/
+npm run verify           # repository verification and full Node suite
 npm run check:professional-clones
-npm run report           # print feature-gap report
-npm run report:write     # write docs/feature-gap-report.md
-npm run release:validate # local inventory receipt (not distribution approval)
+npm run report           # summarize the capability catalogs
+npm run release:validate # produce a local inventory receipt
 ```
 
-There are no separate lint, format, or type-check scripts. Layout, module size,
-schema, and view contracts are enforced by the test and verification suites.
+A passing `release:validate` receipt is local evidence, not authorization to
+tag, publish, sign, notarize, or distribute a release.
 
-## Troubleshooting
-
-### Engine unavailable
-
-```sh
-npm run cli -- engines
-```
-
-Install missing system tools through the platform package manager. The
-application does not download engines.
-
-### Port already in use
-
-```sh
-PLATEN_PORT=4180 npm run dev
-```
-
-### CLI output path exists
-
-Choose a new path. Overwrite is intentionally unsupported.
-
-### Operation rejected
-
-Many writers admit only a narrow PDF subset. Read the typed error and the
-operation limits in [capability coverage](docs/capability-coverage.md) and
-[SECURITY.md](SECURITY.md). Do not weaken admission or postflight checks to
-force unsupported input.
-
-### PDFKit functions unavailable
-
-On macOS: `npm run native:build:pdfkit`, restart the host, recheck engines.
-
-## Documentation map
+## Documentation
 
 | Document | Purpose |
-|----------|---------|
-| [docs/architecture.md](docs/architecture.md) | System components and trust boundaries |
-| [docs/capability-coverage.md](docs/capability-coverage.md) | What “implemented” means per area |
-| [docs/feature-gap-report.md](docs/feature-gap-report.md) | Generated inventory of every capability ID |
-| [docs/FRONTEND.md](docs/FRONTEND.md) | UI structure, accessibility, and QA notes |
-| [docs/RELEASING.md](docs/RELEASING.md) | Local release process |
-| [docs/research-sources.md](docs/research-sources.md) | Catalog research provenance |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution rules |
-| [SECURITY.md](SECURITY.md) | Threat model and private reporting |
-| [RELEASE_STATUS.md](RELEASE_STATUS.md) | Candidate blockers and local evidence |
-| [docs/releases/0.3.0-alpha.1.md](docs/releases/0.3.0-alpha.1.md) | Candidate release note |
+| --- | --- |
+| [Architecture](docs/architecture.md) | Physical host layers and dependency directions |
+| [ADR 0001](docs/decisions/0001-modular-monolith-contracts-bootstrap.md) | Modular-monolith and composition rationale |
+| [ADR 0002](docs/decisions/0002-bounded-runtime-registries.md) | Closed allowlisted dispatch registries |
+| [Capability coverage](docs/capability-coverage.md) | Evidence and limits for capability records |
+| [Frontend](docs/FRONTEND.md) | Browser UI structure, accessibility, and manual QA |
+| [Operations](docs/operations.md) | Source, artifact, engine, and publication behavior |
+| [Maintenance checks](docs/maintenance-checks.md) | Routine local verification |
+| [Releasing](docs/RELEASING.md) | Candidate and publication procedure |
+| [Research sources](docs/research-sources.md) | Capability catalog provenance |
+| [Contributing](CONTRIBUTING.md) | Contribution rules |
+| [Security](SECURITY.md) | Trust boundaries and private reporting |
 
-## Contributing
+## Contributing and security
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Capability status changes require
-runtime behavior, bounded failures, fixtures, and validation evidence.
-
-## Security
-
-Use private reporting described in [SECURITY.md](SECURITY.md). Do not attach
-private PDFs, extracted text, credentials, certificates, or private keys to
-public issues.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Do not include private PDFs, extracted
+text, credentials, certificates, or private keys in public issues. Follow the
+private reporting process in [SECURITY.md](SECURITY.md) for vulnerabilities.
 
 ## License
 

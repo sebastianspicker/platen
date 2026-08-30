@@ -2,41 +2,33 @@
 node_modules/
 .npm/
 
-# Node test, coverage, and build output
-coverage/
-.nyc_output/
+# Build and generated output
 dist/
 build/
 .cache/
 *.tsbuildinfo
-*.lcov
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-coverage.xml
-htmlcov/
-test-results/
-playwright-report/
-blob-report/
-junit*.xml
 *.sarif
+
+# Test and coverage output
+coverage/
+.nyc_output/
+test-results/
+*.lcov
+junit*.xml
 
 # SwiftPM and Xcode output
 .build/
-target/
 .swiftpm/
 DerivedData/
 *.xcresult
 *.xcodeproj/xcuserdata/
 *.xcworkspace/xcuserdata/
 xcuserdata/
+
+# Codacy local state; keep the reviewed repository configuration
 /.codacy/*
 !/.codacy/codacy.config.json
 !/.codacy/codacy.yaml
-!/.codacy/codacy.yml
 
 # Local environment and credentials
 .env
@@ -58,9 +50,8 @@ credentials.local.*
 *.mobileprovision
 *.pem
 *.local.key
-!**/fixtures/**/*.pem
 
-# Local runtime state
+# Runtime state, logs, and temporary files
 *.log
 *.pid
 *.local.db
@@ -72,58 +63,69 @@ credentials.local.*
 *.sqlite-wal
 *.sqlite3-shm
 *.sqlite3-wal
-tmp/
-temp/
+/tmp/
+/temp/
 /var/
+*.swp
+*.swo
+*~
 
-# Editor, operating-system, and local tool state
+# Editor and operating-system state
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
 /.mcp.json
-*.swp
-*.swo
-*~
 
-# Local assistant, agent, and code-index caches (not part of the product)
-.serena/
-.agents/
-.codex/
+# Local code indexes and development assistants
+.repowise/
 .codegraph/
-.grok/
+.serena/
+.agent/
+.agents/
+.ai/
 .claude/
+.codex/
 .cursor/
 .continue/
 .windsurf/
-.aider*
+.grok/
 .kilo/
-.repowise/
-AGENTS.md
-CLAUDE.md
-/GEMINI.md
-/AUDIT_LEDGER.md
-/remediation-ledger.md
-/plan.md
-/progress.md
+.aider*
 .cursorignore
 .cursorrules
 
-# Ad hoc captures. Curated release images belong in docs/screenshots/.
+# Agent instructions and local development records
+/AGENT.md
+/AGENTS.md
+/agent.md
+/agents.md
+/CLAUDE.md
+/CODEX.md
+/GEMINI.md
+/.github/copilot-instructions.md
+/instructions-for-agent.*
+/agent-instructions.*
+/agent-context*
+/agent-memory*
+/agent-notes*
+/agent-output*
+/agent-report*
+/AI_NOTES*
+/AI_REPORT*
+/AI_AUDIT*
+/AI_SUMMARY*
+/*-ledger.md
+/*_ledger.md
+/docs/*-ledger.md
+/docs/*_ledger.md
+/scratchpad*
+/worklog*
+/devlog*
+/plan.md
+/progress.md
+
+# Ad hoc local captures; curated release images live in docs/screenshots
 /.screenshots/
 /screenshots-local/
 /recordings/
-/docs/remediation-ledger.md
-
-# Generated test and coverage output (local only)
-/coverage/
-/htmlcov/
-/.coverage
-/.coverage.*
-/.pytest_cache/
-/test-results/
-/playwright-report/
-/blob-report/
-/coverage.xml
-/junit.xml
-/junit-*.xml

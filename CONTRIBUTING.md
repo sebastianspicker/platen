@@ -31,32 +31,38 @@ local inventory receipt with a deterministic source-inventory SBOM. Signing,
 notarization, retained candidate attestation, and distribution trust remain
 unchecked, so `distributionStatus` stays `not-ready`.
 
-`npm run report` prints the feature-gap inventory.
-`npm run report:write` updates `docs/feature-gap-report.md` after intentional
-catalog changes.
+`npm run report` summarizes delivery, proof, and prototype status from the
+machine-readable catalogs.
 
-Review [RELEASE_STATUS.md](RELEASE_STATUS.md) and [docs/RELEASING.md](docs/RELEASING.md)
-before treating any tree as a release candidate.
+Review [docs/RELEASING.md](docs/RELEASING.md) before treating any tree as a
+release candidate.
 
 ## Capability and catalog rules
 
 - Do not mark a capability `implemented` without runtime behavior and a
   failing-closed error path for rejected input.
 - Keep prototype coverage separate from professional delivery claims.
-- Update `catalog/` and schemas under `contracts/` together with host or CLI
+- Update `catalog/` and JSON Schemas under `schemas/` together with host or CLI
   code.
-- Run `npm run report:write` only when the generated report must change with the
-  catalog.
 
 ## Code layout
 
-- Browser UI and client code live under `src/`.
-- Host, CLI, engines, and PDF writers live under `scripts/`.
+- Browser endpoint clients live under `src/browser/api/`; UI state and rendering
+  stay in the other browser areas.
+- Neutral runtime contracts live under `src/contracts/`.
+- The host is layered: root entrypoints, `bootstrap/`, `transport/http/`,
+  `application/`, and `platform/`. Compose concrete collaborators in bootstrap;
+  put feature behavior in application and runtime, storage, executable, and
+  native-helper work in platform.
+- Application areas may depend on each other and platform. Platform must not
+  import application. Browser and CLI remain separate adapters.
+- CLI parsing and command dispatch live under `src/cli/`; concrete storage and
+  provenance access must go through `application.cli`.
 - Optional Swift packages live under `native/`.
-- Tests are small Node `*.test.js` contracts under `tests/`; use inline data
-  and direct production imports rather than support or fixture trees.
-- Source layout and module-size limits are enforced by tests. Prefer splitting
-  modules over growing monoliths.
+- Tests are Node `*.test.js` files under `tests/contracts/` and
+  `tests/integration/`; use direct production imports and focused fixtures.
+- Source-symbol analysis enforces a generous per-function cohesion bound.
+  Prefer focused behaviors over growing monolithic functions.
 
 ## Pull request expectations
 

@@ -17,7 +17,7 @@ pre-existing failures, and environment blockers.
       added without approval.
 - [ ] No private PDF content, secret, credential, certificate, key, local path,
       internal URL, or generated local state is included.
-- [ ] Generated reports and screenshot manifests were updated only when their
+- [ ] Catalog records and screenshot manifests were updated only when their
       source data changed.
 
 ## Compatibility and release impact

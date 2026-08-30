@@ -92,13 +92,13 @@ or executable third-party plugin path.
   scripting interface, action-sequence engine, or arbitrary executor.
 - Local release validation reads only a fixed safe required-file policy through
   no-follow leaf descriptors and compares file plus root/ancestor identities
-  around each read. The policy inventories every JavaScript and native Swift source module and
-  separately proves reachability from the browser, host, and CLI entrypoints;
-  disconnected plugin foundations remain exact, reviewed, non-executable
-  classifications. Run it against a trusted, quiescent checkout. Node does not
+  around each read. The policy inventories every JavaScript and native Swift source module plus
+  every local runtime stylesheet reached from `index.html` through recursive CSS
+  imports; it separately proves JavaScript reachability from the browser, host,
+  and CLI entrypoints. Run it against a trusted, quiescent checkout. Node does not
   expose fully pinned `openat`-style traversal here, so a hostile same-user
   ancestor swap can cause a read before postflight rejects the receipt. The
-  receipt includes a deterministic local source-inventory SBOM, while signing,
+  receipt includes a deterministic local source-and-stylesheet-inventory SBOM, while signing,
   notarization, retained candidate attestation, publication, and distribution
   trust remain outside it. Its `distributionStatus` is always `not-ready`.
 - Engine adapters resolve fixed absolute executables, use argument arrays with
@@ -478,30 +478,14 @@ or executable third-party plugin path.
   signing credentials, execute plugins, or call cloud services. Link and
   active-content behavior within the browser-native viewer remains controlled
   by the browser, not this app.
-- Signed plugin packages use canonical Ed25519 verification, scoped publisher
-  trust, content-addressed installs, exact dependency pins, and controlled
-  rollback. Active launch descriptors rehash the signed inventory after
-  dependency resolution. Private RPC transport buffers at most one bounded
-  frame, caps cumulative input and output, honors backpressure, and revokes the
-  activation grant and document handle on EOF, truncation, cancellation, or
-  broker failure. The canonical worker-control codec accepts only four exact
-  bound message forms and forbids paths, document IDs, environment values,
-  executable names, and arbitrary arguments. These services are not exposed as
-  executable plugin routes. Every bounded document-range read opens the recorded
-  source with no-follow semantics, requires a private single-link regular file
-  owned by the host user, correlates path and descriptor identity, and verifies
-  stable descriptor metadata plus the recorded full-file SHA-256 before and
-  after returning bytes.
-- The macOS Seatbelt probe currently observes denied network, write,
-  sensitive-file-read, and process-fork attempts. Its allow-default profile is
-  diagnostic only. Separate fixed Node permission canaries observe denied
-  filesystem, child-process, worker-thread, and network APIs, but Node
-  permissions are not treated as a malicious-code sandbox. The combined probe
-  also observes a fixed inherited `RLIMIT_CPU` canary, without treating it as
-  aggregate descendant accounting. It explicitly reports `osSandbox: false`;
-  it does not prove
-  complete filesystem isolation, CPU containment, hard memory containment, or
-  a supported long-term sandbox interface.
+- Signed extension packages are canonical Ed25519-signed JSON metadata records.
+  Publisher trust, the canonical bytes, and the retained digest are verified
+  before installation and again before selection. Install, selection, and
+  rollback are explicitly local administration actions. Package manifests reject
+  entrypoints, runtimes, providers, loaders, dispatchers, RPC, sandbox,
+  permissions, dependencies, code, and payload files. A selected record only
+  contributes inert metadata to the local extension catalog; it never loads,
+  invokes, or receives a document, process, network, or filesystem authority.
 
 ## Threats and residual risk
 
@@ -533,7 +517,7 @@ or executable third-party plugin path.
 | Optional PDFKit inventory and mutation | Malformed-PDF parser compromise, helper replacement, resource exhaustion, source-path replacement, stale/forged locators, private-value disclosure, inherited or orphaned field semantics, retained active content, external-link injection, or misleading structure/edit claims | Private digest-pinned release staging, one descriptor-copied no-follow/single-link mode-`0400` source for every source-side native stage, exact-source fingerprints, fixed protocols, signed/active-input rejection for source-bound edits, timeout/output limits, exact workspace and digest checks, private requested-effect reopen, Poppler reparse/all-page render, and digest-bound artifact promotion. Read-only bookmark inventory is capped at 200 entries and eight levels; only PDFKit-resolved existing local pages become navigation buttons, while unresolved/unsupported actions remain inert and no authoring is claimed. Persistent CropBox and BleedBox each accept one changed selected-page resolved rectangle within its MediaBox; BleedBox must also contain the unchanged TrimBox. Persistent rotation accepts one selected page and an absolute 0/90/180/270-degree target. These paths reject signed and no-op inputs and require native candidate/reopen plus independent Poppler output-state evidence while preserving unrelated page boxes and rotations. Rotation compares annotation count/subtype order; Crop and Bleed also compare a private bounded ordered descriptor of subtype, geometry, flags, contents digest, and action/destination/relationship/appearance shape. For BleedBox, one fixed 256-pixel-long-edge Poppler validation render of every source/output page must match; this does not establish equality at other resolutions or in other renderers. Crop expansion can reveal previously cropped source content. Only resolved geometry is proved; explicit-versus-inherited box syntax is not preserved. Widget values, button states, export/on-state names, appearance data, annotation contents, and local-link rectangles are omitted from receipts/provenance; only non-sensitive control kinds and source/target page numbers are reported. Checkbox mutation accepts only an on/off intent and privately requires a unique root-terminal unflagged two-state appearance, matching raw and public state, and a changed reopened raster; radio and push controls remain inert inventory. The input widget must be the exact object exactly once in direct AcroForm `/Fields`; reopened postflight requires one semantically matching direct field record because PDFKit can rewrite object identity. Local-link authoring admits only one CropBox-contained annotation whose raw `/Dest` and exact redundant `/A /GoTo /D` resolve identically to an existing page; URI, remote, named, launch, submit, script, and additional actions fail closed. A bounded cycle-limited raw graph scan rejects catalog permissions, unsafe page/annotation/outline actions, non-destination name trees, active/signature AcroForm fields, and parent/kid target topology. `/Popup` and `/Parent` references must be reciprocal inert direct members of the page annotation array, preventing hidden related objects from bypassing the scan. Mutation is an explicit separate rewrite and can alter unsupported objects. This is not an App Sandbox/XPC boundary; native memory, filesystem, and network containment are not guaranteed. Developer release builds are not a signed/notarized distribution artifact. |
 | Local GoTo link removal | Forged or stale locator, deleting the wrong annotation, action-shape ambiguity, collateral annotation or page-geometry change, private-destination disclosure, or sanitization overclaim | `macos-pdfkit-local-goto-remove-v1` accepts exactly one page/index/fingerprint locator from the bound inspection and only an unsigned, unencrypted, form-free, JavaScript-free source. Native admission recomputes the fingerprint, requires document-global unique raw annotation identity, and privately proves the selected link has identical direct `/Dest` and exact redundant `/A /GoTo /D` local destinations. Candidate and private-file reopen checks require exactly that reachable annotation occurrence to disappear while every remaining ordered passive annotation descriptor, page box, and rotation matches the source snapshot. The digest-bound compact receipt omits the fingerprint and destination. The output is a PDFKit rewrite, not redaction, hidden-object cleanup, orphan-byte scrubbing, prior-revision removal, secure erasure, or byte/indirect-object preservation. |
 | Outline bookmark mutation | Private-label or destination disclosure, stale-locator deletion, active or ambiguous destination injection, PDFKit outline normalization, collateral tree/content changes, preservation overclaim, or source/output substitution | The inventory-only statement above applies only to read-only inspection. `macos-pdfkit-outline-v1` accepts exactly one existing page in a 1–100-page source and one NFC 1–1,024-byte label without edge whitespace or Unicode control, format, line-separator, or paragraph-separator characters. It requires a passive unsigned, unencrypted, form-free, JavaScript-free source and fewer than 200 prior direct-destination items (output at most 200) through eight levels; existing GoTo-action outlines fail closed because measured PDFKit serialization normalizes them. Candidate and private-file reopen checks prove one appended top-level direct CropBox destination, the unchanged prior hierarchy/order, page boxes, rotations, passive annotation inventory, and source/output digests. The public receipt retains the page and label SHA-256, not the label. `macos-pdfkit-outline-remove-v1` accepts only an opaque top-level-index/fingerprint locator emitted for a fully inspected raw-direct-destination `/XYZ` leaf, rederives it from the immutable source, and removes exactly that node. It rejects page labels, tags, layers, XMP, custom Info keys, catalog name trees/view preferences, and non-passive page dictionaries; bounded standard Info metadata must match. Candidate and reopen checks require the remaining semantic tree, every page box/rotation, ordered passive annotation inventory, per-page text hash, and fixed render hash to match; the receipt omits title, destination, point, and fingerprint. Nesting, reorder, replacement, non-leaf removal, target coordinates, named/remote/scripted actions, byte/object preservation, signature survival, and general structure editing are not claimed. |
-| Future plugins | Arbitrary execution, permission escalation, dependency confusion, helper substitution, PID spoofing, process-tree escape, unbounded output, or cleanup races | `PluginHost.activate()` fails closed. Signed canonical package verification, scoped trust, immutable installs, descriptor-based no-follow/single-link revalidation, manifest-v3 exact source binding, rollback, grants/handles, cumulative framed transport, and one-shot cleanup are host-only foundations. The concrete macOS adapter accepts only privately staged adjacent app-bundle helpers whose whole-file digests, Team ID, CDHashes, designated requirements, hardened runtime, and exact App Sandbox entitlements match a signed host policy. It corroborates static identity with live supervisor and worker PIDs, sends source/control only on anonymous inherited pipes, accepts exactly ready plus completion/failure frames, caps diagnostics/RPC, and owns TERM/KILL/reap of a dedicated process group. Activation transitions terminate prior authorities before commit and quarantine failed termination handles for retry. No production third-party code executes: unsigned SwiftPM artifacts fail identity, no signed/notarized pair is shipped, and a meaningful macOS `RLIMIT_AS` returns `EINVAL`, yielding `hardMemoryQuota: false` and pre-authority termination. Ancestor-directory replacement and supported hard-memory containment remain unresolved. |
+| Extension metadata | Metadata tampering, signer substitution, stale selection, or misleading capability declarations | Packages contain only canonical signed metadata. Ed25519 publisher trust, canonical bytes, digest-bound retained records, and selected-version state are rechecked before metadata is cataloged. Install, selection, and rollback require the explicit local administration policy. Entrypoints, runtime declarations, payload files, permissions, dependencies, and executable code are rejected. There is no extension loader, dispatcher, execution path, plugin sandbox, or document/process authority grant. |
 
 The fixed `macos-pdfkit-outline-rename-v1` profile inherits the outline-removal
 admission boundary and accepts only the same opaque, source-bound top-level leaf
@@ -544,18 +528,10 @@ only the new-label SHA-256; neither title, locator, destination, nor coordinates
 leave the helper. Nested or non-leaf rename, no-op rename, reordering, and
 destination editing fail closed.
 
-For the future plugin boundary, completion is rejected before invocation begins.
-Cleanup requires both the supervisor `close` event and bounded proof that its
-dedicated process group disappeared; surviving members receive `SIGKILL`.
-Production execution remains blocked by the absent signed/notarized helper pair
-and the failed hard-memory attestation.
-
 The general engine process runner kills the direct child on timeout,
 cancellation, or output overflow, but it does not provide a platform-neutral
 process-group sandbox, hard resource quota, seccomp/seatbelt profile, or network
-namespace. The separate macOS plugin adapter does own a dedicated process group
-and App-Sandbox identity checks, but its hard-memory bit remains false. Ghostscript,
-ImageMagick, and LibreOffice are enabled only behind fixed typed adapters;
+namespace. Ghostscript, ImageMagick, and LibreOffice are enabled only behind fixed typed adapters;
 external signing, key material, and arbitrary engines are not enabled.
 
 Explicit document close deletes its private host data. Tab/window close sends a
@@ -587,9 +563,7 @@ cleans its temporary directory.
 - Catalog entries outside the local implementation policy remain excluded and
   are not executable features.
 
-Do not enable third-party executable plugins until the delivered native boundary
-is packaged as a Developer-ID-signed, hardened-runtime, App-Sandbox, notarized
-pair; a supported hard-memory control replaces the failing meaningful
-`RLIMIT_AS`; and adversarial packaged end-to-end tests prove filesystem,
-network, process, CPU, memory, descriptor, IPC, output, rollback, crash, and
-recovery containment.
+No third-party executable-plugin facility is present. Any future proposal would
+require an explicit project decision, a new threat model, and independently
+verified containment before code, payloads, permissions, or runtime authority
+could be accepted.

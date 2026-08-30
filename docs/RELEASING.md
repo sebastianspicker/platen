@@ -8,9 +8,8 @@ GitHub release, or artifact publication.
 The current candidate is `0.3.0-alpha.1`. Keep these files aligned:
 
 - `package.json`
-- `scripts/release/validate-current-release.mjs`
+- `tools/release/validate-current-release.mjs`
 - `README.md`
-- `RELEASE_STATUS.md`
 - `CHANGELOG.md`
 - `docs/releases/0.3.0-alpha.1.md`
 
@@ -26,11 +25,19 @@ npm run release:validate
 npm run report
 ```
 
-A passing `release:validate` receipt includes a deterministic local
-source-inventory SBOM, but it remains local evidence only. `distributionStatus`
-stays `not-ready` until release authority selects source-only or packaged-macOS
-distribution and retains candidate provenance plus the applicable signing and
-notarization evidence or explicit not-applicable decision.
+A passing `release:validate` receipt requires a clean Git worktree and includes
+a deterministic local source and runtime-stylesheet inventory SBOM, but it remains local evidence
+only. This prevents untracked replacement files or tracked deletions from being
+mistaken for a reproducible candidate. `distributionStatus` stays `not-ready`
+until release authority selects source-only or packaged-macOS distribution and
+retains candidate provenance plus the applicable signing and notarization
+evidence or explicit not-applicable decision.
+
+The receipt also inventories the browser stylesheet graph from `index.html`
+through recursive local CSS imports, the complete checked-in GitHub Pages
+payload under `demo/`, and the PNG evidence recursively declared by
+`docs/screenshots/manifest.json`. The Pages workflow and this release inventory
+must name the same deployment roots.
 
 ## Publication checklist
 
@@ -43,5 +50,5 @@ notarization evidence or explicit not-applicable decision.
 ## After publication
 
 - Record the tag and commit in `CHANGELOG.md`.
-- Update [RELEASE_STATUS.md](../RELEASE_STATUS.md) with the published identity
-  and remaining distribution blockers.
+- Record release-specific limitations in the matching file under
+  `docs/releases/`.
