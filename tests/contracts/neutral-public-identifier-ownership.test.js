@@ -24,6 +24,17 @@ function sourceFiles(directory) {
   });
 }
 
+function groupBy(values, keyFor) {
+  const groups = new Map();
+  for (const value of values) {
+    const key = keyFor(value);
+    const group = groups.get(key);
+    if (group) group.push(value);
+    else groups.set(key, [value]);
+  }
+  return groups;
+}
+
 function productionArea(path) {
   const parts = relative(SOURCE_ROOT, path).split('/');
   if (parts[0] !== 'host') return parts[0];
@@ -64,7 +75,7 @@ function namedHostPublicIdentifierImports(path, source = readFileSync(path, 'utf
 }
 
 function inlinePublicWireLiterals(path, source, neutral) {
-  const neutralByValue = Map.groupBy(neutral, ({ value }) => String(value));
+  const neutralByValue = groupBy(neutral, ({ value }) => String(value));
   return [...source.matchAll(new RegExp(INLINE_PUBLIC_WIRE_PROPERTY.source, INLINE_PUBLIC_WIRE_PROPERTY.flags))].flatMap((match) => {
     const value = match[2] ?? match[3] ?? Number(match[4]);
     const authorities = neutralByValue.get(String(value)) ?? [];
@@ -104,8 +115,8 @@ function ownershipViolations(production, neutral) {
   // Numeric versions such as `1` are intentionally not global authorities:
   // unrelated versioned records commonly use that value. String wire spellings
   // remain globally identifiable, while direct named imports are checked below.
-  const neutralByValue = Map.groupBy(neutral.filter(({ value }) => typeof value === 'string'), ({ value }) => String(value));
-  const productionByValue = Map.groupBy(production.filter(({ value }) => typeof value === 'string'), ({ value }) => String(value));
+  const neutralByValue = groupBy(neutral.filter(({ value }) => typeof value === 'string'), ({ value }) => String(value));
+  const productionByValue = groupBy(production.filter(({ value }) => typeof value === 'string'), ({ value }) => String(value));
   const violations = [];
 
   for (const [value, entries] of productionByValue) {
