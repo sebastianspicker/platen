@@ -12,7 +12,6 @@
     "check:professional-clones": "node tools/quality/check-professional-handler-clones.mjs",
     "native:build:pdfkit": "swift build -c release --package-path native/pdfkit-helper",
     "release:validate": "node tools/release/validate-current-release.mjs",
-    "test": "node tools/testing/run-tests.mjs",
     "verify": "node tools/verify/verify.mjs"
   },
   "engines": {

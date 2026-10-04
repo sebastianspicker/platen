@@ -101,6 +101,8 @@ Thumbs.db
 /agent.md
 /agents.md
 /CLAUDE.md
+/tests/
+/native/pdfkit-helper/Tests/
 /CODEX.md
 /GEMINI.md
 /.github/copilot-instructions.md

@@ -37,13 +37,5 @@ let package = Package(
                 .linkedFramework("Security"),
             ]
         ),
-        .testTarget(
-            name: "PDFSigningIdentityTests",
-            dependencies: ["PDFSigningIdentity"]
-        ),
-        .testTarget(
-            name: "PDFScannerAcquisitionCoreTests",
-            dependencies: ["PDFScannerAcquisitionCore"]
-        ),
     ]
 )

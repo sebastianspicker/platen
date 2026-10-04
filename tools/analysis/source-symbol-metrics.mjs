@@ -138,10 +138,6 @@ export function collectProductionSources(root) {
   return collectProductionSourcePaths(root).map((path) => join(root, path));
 }
 
-export function collectTestSources(root) {
-  return collectSources(join(root, 'tests'));
-}
-
 export function sourceSymbolMetrics(path) {
   const language = extname(path) === '.swift' ? 'swift' : 'javascript';
   return measureSourceSymbols(readFileSync(path, 'utf8'), { language });

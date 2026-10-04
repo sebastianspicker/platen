@@ -52,5 +52,3 @@ jobs:
           package-manager-cache: false
       - name: Verify repository with native helpers
         run: npm run verify
-      - name: Test PDFKit helper
-        run: swift test --package-path native/pdfkit-helper

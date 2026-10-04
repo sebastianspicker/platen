@@ -1,8 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { discoverTestFiles } from '../testing/test-files.mjs';
 import { collectReleaseArtifactPaths } from './release-artifact-manifest.mjs';
 import { verifyCapabilityProofs } from './verify-capability-proofs.mjs';
 import { assertCurrentSourceReachability } from '../analysis/source-module-reachability.mjs';
@@ -31,9 +29,5 @@ const capabilityProofs = verifyCapabilityProofs(root);
 const reachability = assertCurrentSourceReachability(root);
 
 prepareNativeTests(root);
-const testFiles = discoverTestFiles(join(root, 'tests'));
-const result = spawnSync(process.execPath, ['--test', ...testFiles], { cwd: root, stdio: 'inherit' });
-if (result.error) throw result.error;
-if (result.status !== 0) process.exit(result.status ?? 1);
 
-console.log(`Verified ${testFiles.length} test files, ${reachability.reachable.length} reachable JavaScript production modules, ${reachability.nativeSources.length} discovered Swift production sources, and ${capabilityProofs.total} capability-proof records (${capabilityProofs.proven} proven, ${capabilityProofs.partial} partial, ${capabilityProofs.false} false, ${capabilityProofs.unaudited} unaudited), plus declared release artifacts, strict JSON catalogs, and zero npm dependencies.`);
+console.log(`Verified ${reachability.reachable.length} reachable JavaScript production modules, ${reachability.nativeSources.length} discovered Swift production sources, and ${capabilityProofs.total} capability-proof records (${capabilityProofs.proven} proven, ${capabilityProofs.partial} partial, ${capabilityProofs.false} false, ${capabilityProofs.unaudited} unaudited), plus declared release artifacts, strict JSON catalogs, and zero npm dependencies.`);

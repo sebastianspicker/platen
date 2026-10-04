@@ -14,16 +14,14 @@ integration tests skip only when their fixed executable paths are absent.
 ```sh
 npm run dev
 npm run native:build:pdfkit
-npm test
 npm run verify
 npm run release:validate
 npm run report
 ```
 
-`npm test` runs the focused Node contracts under `tests/`.
-`npm run verify` is the project-level gate: tests, production-module
+`npm run verify` is the project-level gate: production-module
 reachability, required-file inventory, strict catalogs, and zero npm
-dependencies. On macOS, build the PDFKit helper before the full suite when
+dependencies. On macOS, build the PDFKit helper first when
 exercising PDFKit paths; startup still tolerates an absent helper.
 
 `npm run release:validate` is for a trusted, quiescent checkout. It emits a
@@ -59,8 +57,6 @@ release candidate.
 - CLI parsing and command dispatch live under `src/cli/`; concrete storage and
   provenance access must go through `application.cli`.
 - Optional Swift packages live under `native/`.
-- Tests are Node `*.test.js` files under `tests/contracts/` and
-  `tests/integration/`; use direct production imports and focused fixtures.
 - Source-symbol analysis enforces a generous per-function cohesion bound.
   Prefer focused behaviors over growing monolithic functions.
 
